@@ -1,0 +1,24 @@
+---
+extends:
+  - eslint:recommended
+  - plugin:prettier/recommended
+  - plugin:jest/recommended
+plugins:
+  - import
+root: true
+env:
+  es6: true
+  node: true
+  jest: true
+rules:
+  import/no-extraneous-dependencies:
+    - error
+    - devDependencies: ["test*/**", "scripts/**"]
+  prefer-const: error
+  strict: error
+overrides:
+  - files: "tests/**/*.js"
+    rules:
+      strict: off
+    globals:
+      run_spec: true
