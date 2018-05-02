@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`update_expression.coffee 1`] = `
+(this.x++).toString()
+new (r++)
+(x++)()
+uuid = String(this._uuidCounter++)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(@x++).toString()
+new (r++)()
+(x++)()
+uuid = String @_uuidCounter++
+
+`;

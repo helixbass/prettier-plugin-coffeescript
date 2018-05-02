@@ -24,11 +24,7 @@ const { isEmpty, willBreak } = docUtils
 const util = require('util')
 
 function isStatement(node) {
-  return (
-    node.type === 'BlockStatement' ||
-    node.type === 'ExpressionStatement' ||
-    node.type === 'FunctionDeclaration'
-  )
+  return node.type === 'BlockStatement' || node.type === 'ExpressionStatement'
 }
 
 function pathNeedsParens(path) {
@@ -37,6 +33,7 @@ function pathNeedsParens(path) {
     return false
   }
 
+  const name = path.getName()
   const node = path.getNode()
 
   if (isStatement(node)) {
@@ -65,6 +62,12 @@ function pathNeedsParens(path) {
             (node.operator === '+' || node.operator === '-')
           )
 
+        case 'MemberExpression':
+          return name === 'object' && parent.object === node
+
+        case 'NewExpression':
+        case 'CallExpression':
+          return name === 'callee' && parent.callee === node
         default:
           return false
       }
@@ -272,7 +275,10 @@ function printPathNoParens(path, options, print) {
 
       return concat(parts)
     }
-    case 'CallExpression':
+    case 'NewExpression':
+    case 'CallExpression': {
+      const isNew = n.type === 'NewExpression'
+
       if (isTestCall(n, path.getParentNode())) {
         return concat([
           path.call(print, 'callee'),
@@ -280,14 +286,16 @@ function printPathNoParens(path, options, print) {
         ])
       }
 
-      if (isMemberish(n.callee)) {
+      if (!isNew && isMemberish(n.callee)) {
         return printMemberChain(path, options, print)
       }
 
       return concat([
+        isNew ? 'new ' : '',
         path.call(print, 'callee'),
         printArgumentsList(path, options, print),
       ])
+    }
     case 'NumericLiteral':
       return privateUtil.printNumber(n.extra.raw)
     case 'StringLiteral':
@@ -491,13 +499,13 @@ function printBinaryishExpressions(path, print) {
   return parts
 }
 
-function isBlockLevel(path) {
-  const parent = path.getParentNode()
+function isBlockLevel(node, parent) {
   return parent.type === 'ExpressionStatement'
 }
 
 function printArgumentsList(path, options, print) {
-  const args = path.getValue().arguments
+  const node = path.getValue()
+  const args = node.arguments
 
   const lastArgIndex = args.length - 1
   const printedArguments = path.map((argPath, index) => {
@@ -513,7 +521,13 @@ function printArgumentsList(path, options, print) {
     return concat(parts)
   }, 'arguments')
 
-  const parensOptional = isBlockLevel(path)
+  const parent = path.getParentNode()
+  const grandparent = path.getParentNode(1)
+  const parensOptional =
+    args.length &&
+    (isBlockLevel(node, parent) ||
+      (parent.type === 'AssignmentExpression' &&
+        isBlockLevel(parent, grandparent)))
 
   return group(
     concat([
