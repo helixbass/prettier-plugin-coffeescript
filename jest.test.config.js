@@ -1,6 +1,6 @@
 'use strict'
 
-const ENABLE_COVERAGE = false // !!process.env.CI;
+// const ENABLE_COVERAGE = false // !!process.env.CI;
 
 module.exports = {
   displayName: 'test',

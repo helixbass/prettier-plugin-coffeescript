@@ -1,10 +1,10 @@
 'use strict'
 
 const docBuilders = require('prettier').doc.builders
-const concat = docBuilders.concat
-const hardline = docBuilders.hardline
+const { concat } = docBuilders
 
-function embed(path, print, textToDoc, options) {
+// function embed(path, print, textToDoc, options) {
+function embed(path) {
   return concat([path])
 }
 

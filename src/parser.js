@@ -1,6 +1,7 @@
 'use strict'
 
-function parse(text, parsers, opts) {
+// function parse(text, parsers, opts) {
+function parse(text) {
   // Inline the require to avoid the module if we don't use it
   const coffeescript = require('coffeescript')
 
@@ -8,7 +9,7 @@ function parse(text, parsers, opts) {
     ast: true,
   }
 
-  let ast = coffeescript.compile(text, coffeescriptOptions)
+  const ast = coffeescript.compile(text, coffeescriptOptions)
 
   // TODO: Any cleanup of the AST?
 

@@ -3,10 +3,10 @@
 const fs = require('fs')
 const extname = require('path').extname
 const prettier = require('prettier')
-const massageAST = require('prettier/src/common/clean-ast').massageAST
-const normalizeOptions = require('prettier/src/main/options').normalize
+// const massageAST = require('prettier/src/common/clean-ast').massageAST
+// const normalizeOptions = require('prettier/src/main/options').normalize
 
-const AST_COMPARE = process.env['AST_COMPARE']
+// const AST_COMPARE = process.env['AST_COMPARE']
 
 function run_spec(dirname, parsers, options) {
   options = Object.assign({ plugins: ['.'] }, options)
@@ -47,9 +47,9 @@ function run_spec(dirname, parsers, options) {
 }
 global.run_spec = run_spec
 
-function parse(string, opts) {
-  return prettier.__debug.parse(string, opts)
-}
+// function parse(string, opts) {
+//   return prettier.__debug.parse(string, opts)
+// }
 
 function prettyprint(src, filename, options) {
   return prettier.format(src, Object.assign({ filepath: filename }, options))

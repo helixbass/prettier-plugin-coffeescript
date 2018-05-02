@@ -4,16 +4,25 @@
   "description": "Prettier Coffeescript Plugin",
   "main": "src",
   "repository": "https://github.com/helixbass/prettier-plugin-coffeescript",
-  "authors": ["Geoffrey Booth", "Julian Rosse <@helixbass>"],
+  "authors": [
+    "Geoffrey Booth",
+    "Julian Rosse <@helixbass>"
+  ],
   "license": "MIT",
-  "files": ["src"],
-  "keywords": ["coffeescript", "prettier", "prettier-plugin"],
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "coffeescript",
+    "prettier",
+    "prettier-plugin"
+  ],
   "engines": {
     "node": ">= 6"
   },
   "dependencies": {
-    "prettier": "prettier/prettier#d05a29da05b2084790491eaef85917ce584e4fbd",
-    "coffeescript": "../coffeescript_orig"
+    "coffeescript": "../coffeescript_orig",
+    "prettier": "prettier/prettier#d05a29da05b2084790491eaef85917ce584e4fbd"
   },
   "devDependencies": {
     "eslint": "^4.14.0",
@@ -30,6 +39,8 @@
     "prettier": "prettier --plugin=. --parser=coffeescript"
   },
   "jest": {
-    "projects": ["<rootDir>/jest.*.config.js"]
+    "projects": [
+      "<rootDir>/jest.*.config.js"
+    ]
   }
 }
