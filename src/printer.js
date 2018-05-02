@@ -204,8 +204,12 @@ function isStringLiteral(node) {
   return node.type === 'StringLiteral'
 }
 
-function printAssignmentRight(rightNode, printedRight, options) {
-  return indent(concat([line, printedRight]))
+function printAssignmentRight(rightNode, printedRight, options, canBreak) {
+  if (canBreak) {
+    return indent(concat([line, printedRight]))
+  }
+
+  return concat([' ', printedRight])
 }
 
 function printAssignment(
@@ -216,7 +220,14 @@ function printAssignment(
   printedRight,
   options
 ) {
-  const printed = printAssignmentRight(rightNode, printedRight, options)
+  const dontBreak = rightNode.type === 'ArrayExpression'
+
+  const printed = printAssignmentRight(
+    rightNode,
+    printedRight,
+    options,
+    !dontBreak
+  )
 
   return group(concat([printedLeft, operator, printed]))
 }
