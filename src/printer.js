@@ -2,6 +2,7 @@
 
 const privateUtil = require('prettier/src/common/util')
 const embed = require('./embed')
+const { IDENTIFIER } = require('coffeescript/lib/coffeescript/lexer')
 
 const { doc } = require('prettier')
 const docBuilders = doc.builders
@@ -18,12 +19,92 @@ const {
   softline,
 } = docBuilders
 const docUtils = doc.utils
-const { willBreak } = docUtils
+const { isEmpty, willBreak } = docUtils
 
-const util = require('util') // eslint-disable-line no-unused-vars
+const util = require('util')
+
+function isStatement(node) {
+  return (
+    node.type === 'BlockStatement' ||
+    node.type === 'ExpressionStatement' ||
+    node.type === 'FunctionDeclaration'
+  )
+}
+
+function pathNeedsParens(path) {
+  const parent = path.getParentNode()
+  if (!parent) {
+    return false
+  }
+
+  const node = path.getNode()
+
+  if (isStatement(node)) {
+    return false
+  }
+
+  if (node.type === 'Identifier') {
+    return false
+  }
+
+  switch (node.type) {
+    case 'UpdateExpression':
+      if (parent.type === 'UnaryExpression') {
+        return (
+          node.prefix &&
+          ((node.operator === '++' && parent.operator === '+') ||
+            (node.operator === '--' && parent.operator === '-'))
+        )
+      }
+    // else fallthrough
+    case 'UnaryExpression':
+      switch (parent.type) {
+        case 'UnaryExpression':
+          return (
+            node.operator === parent.operator &&
+            (node.operator === '+' || node.operator === '-')
+          )
+
+        default:
+          return false
+      }
+  }
+
+  return false
+}
 
 function genericPrint(path, options, print) {
-  // return console.log(util.inspect(path, { depth: 10 }))
+  const node = path.getValue()
+  const linesWithoutParens = printPathNoParens(path, options, print)
+
+  if (!node || isEmpty(linesWithoutParens)) {
+    return linesWithoutParens
+  }
+
+  const needsParens = pathNeedsParens(path)
+
+  const parts = []
+  if (needsParens) {
+    parts.unshift('(')
+  }
+
+  parts.push(linesWithoutParens)
+
+  if (needsParens) {
+    parts.push(')')
+  }
+
+  return concat(parts)
+}
+
+// eslint-disable-next-line no-unused-vars
+function dump(obj) {
+  // eslint-disable-next-line no-console
+  return console.log(util.inspect(obj, { depth: 30 }))
+}
+
+function printPathNoParens(path, options, print) {
+  // return dump(path)
   const n = path.getValue()
 
   if (!n) {
@@ -66,7 +147,70 @@ function genericPrint(path, options, print) {
       const parts = printBinaryishExpressions(path, print, options, false)
       return concat(parts)
     }
+    case 'AssignmentPattern':
+      return concat([
+        path.call(print, 'left'),
+        ' = ',
+        path.call(print, 'right'),
+      ])
+    case 'ObjectExpression':
+    case 'ObjectPattern': {
+      const props = []
+      path.each(childPath => {
+        const node = childPath.getValue()
+        props.push({
+          node,
+          printed: print(childPath),
+        })
+      }, 'properties')
+      let separatorParts = []
+      const joinedProps = props.map(prop => {
+        const result = concat(separatorParts.concat(group(prop.printed)))
+        separatorParts = [ifBreak('', ','), line]
+        return result
+      })
+
+      if (joinedProps.length === 0) {
+        return concat(['{', '}'])
+      }
+      const content = concat([
+        '{',
+        indent(
+          concat([
+            options.bracketSpacing ? line : softline,
+            concat(joinedProps),
+          ])
+        ),
+        concat([options.bracketSpacing ? line : softline, '}']),
+      ])
+
+      return group(content)
+    }
+    case 'ObjectProperty':
+      if (n.shorthand) {
+        parts.push(path.call(print, 'value'))
+      } else {
+        let printedLeft
+        if (n.computed) {
+          printedLeft = concat(['[', path.call(print, 'key'), ']'])
+        } else {
+          printedLeft = printPropertyKey(path, options, print)
+        }
+        parts.push(
+          printAssignment(
+            n.key,
+            printedLeft,
+            ':',
+            n.value,
+            path.call(print, 'value'),
+            options
+          )
+        )
+      }
+
+      return concat(parts)
     case 'ArrayExpression':
+    case 'ArrayPattern':
       parts.push(
         group(
           concat([
@@ -83,10 +227,14 @@ function genericPrint(path, options, print) {
         )
       )
       return concat(parts)
+    case 'ThisExpression':
+      return '@'
+    case 'NullLiteral':
+      return 'null'
     case 'Identifier':
       return concat([n.name])
     case 'MemberExpression': {
-      const shouldInline = n.computed
+      const shouldInline = n.computed || isThisLookup(n)
 
       return concat([
         path.call(print, 'object'),
@@ -99,6 +247,8 @@ function genericPrint(path, options, print) {
             ),
       ])
     }
+    case 'RestElement':
+      return concat([path.call(print, 'argument'), '...'])
     case 'FunctionExpression': {
       parts.push(group(printFunctionParams(path, print, options)))
 
@@ -142,13 +292,41 @@ function genericPrint(path, options, print) {
       return privateUtil.printNumber(n.extra.raw)
     case 'StringLiteral':
       return nodeStr(n, options)
-    case 'UnaryExpression':
-      parts.push(n.operator)
+    case 'UnaryExpression': {
+      let { operator } = n
+      if (isLogicalNotExpression(n)) {
+        if (
+          !(
+            isLogicalNotExpression(n.argument) ||
+            isLogicalNotExpression(path.getParentNode())
+          )
+        ) {
+          operator = 'not'
+        }
+      }
+      parts.push(operator)
+
+      if (/[a-z]$/.test(operator)) {
+        parts.push(' ')
+      }
 
       parts.push(path.call(print, 'argument'))
 
       return concat(parts)
+    }
+    case 'UpdateExpression':
+      parts.push(path.call(print, 'argument'), n.operator)
+
+      if (n.prefix) {
+        parts.reverse()
+      }
+
+      return concat(parts)
   }
+}
+
+function isLogicalNotExpression(node) {
+  return node.operator === '!'
 }
 
 function isMemberish(node) {
@@ -389,7 +567,12 @@ function printAssignment(
   printedRight,
   options
 ) {
-  const dontBreak = rightNode.type === 'ArrayExpression'
+  const dontBreak =
+    !(
+      leftNode.type === 'Identifier' ||
+      isStringLiteral(leftNode) ||
+      leftNode.type === 'MemberExpression'
+    ) || rightNode.type === 'ArrayExpression'
 
   const printed = printAssignmentRight(
     rightNode,
@@ -426,6 +609,12 @@ function printOptionalToken(path) {
   return '?'
 }
 
+function isThisLookup(node) {
+  return (
+    node.type === 'MemberExpression' && node.object.type === 'ThisExpression'
+  )
+}
+
 function isPrototypeLookup(node) {
   return (
     node.type === 'MemberExpression' &&
@@ -454,7 +643,7 @@ function printMemberLookup(path, options, print) {
     parts.push('::')
   } else {
     const precededByPrototype = isPrototypeLookup(n.object)
-    if (!precededByPrototype) {
+    if (!((precededByPrototype || isThisLookup(n)) && !optional)) {
       parts.push('.')
     }
     const property = path.call(print, 'property')
@@ -485,6 +674,20 @@ function printStatementSequence(path, options, print) {
   })
 
   return join(hardline, printed)
+}
+
+function printPropertyKey(path, options, print) {
+  const node = path.getValue()
+  const { key } = node
+
+  if (isStringLiteral(key) && isIdentifierName(key.value) && !node.computed) {
+    return key.value
+  }
+  return path.call(print, 'key')
+}
+
+function isIdentifierName(str) {
+  return IDENTIFIER.test(str)
 }
 
 function printArrayItems(path, options, printPath, print) {

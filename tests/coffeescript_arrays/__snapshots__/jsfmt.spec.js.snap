@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`list.coffee 1`] = `
+exports[`arrays.coffee 1`] = `
 a = [
   'a',
   'b'

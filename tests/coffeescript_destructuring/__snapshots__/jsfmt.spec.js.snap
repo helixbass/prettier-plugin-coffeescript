@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`destructuring.coffee 1`] = `
+[one, two = null, three = null] = arr
+a = ([s=1,]) -> 1
+{children, ...props} = this.props
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[one, two = null, three = null] = arr
+a = ([s = 1]) -> 1
+{ children, props... } = @props
+
+`;
