@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`binaryish.coffee 1`] = `
+computedDescriptionLines = (showConfirm && descriptionLinesConfirming) || (focused && !loading && descriptionLinesFocused) || descriptionLines
+
+computedDescriptionLines = focused and not loading and descriptionLinesFocused or descriptionLines
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+computedDescriptionLines =
+  (showConfirm and descriptionLinesConfirming) or
+  (focused and not loading and descriptionLinesFocused) or
+  descriptionLines
+computedDescriptionLines =
+  (focused and not loading and descriptionLinesFocused) or descriptionLines
+
+`;

@@ -214,8 +214,12 @@ function printPathNoParens(path, options, print) {
         return concat(parts)
       }
 
+      const shouldIndentIfInlining = parent.type === 'AssignmentExpression'
+
       // if (shouldInlineLogicalExpression(n) && !samePrecedenceSubExpression)
-      // return group(concat(parts))
+      if (!shouldInlineLogicalExpression(n) && shouldIndentIfInlining) {
+        return group(concat(parts))
+      }
 
       const rest = concat(parts.slice(1))
 
@@ -331,6 +335,89 @@ function printPathNoParens(path, options, print) {
       const body = path.call(bodyPath => print(bodyPath), 'body')
 
       return group(concat([concat(parts), ' ', body]))
+    }
+    case 'ImportSpecifier':
+      parts.push(path.call(print, 'imported'))
+
+      if (n.local && n.local.name !== n.imported.name) {
+        parts.push(' as ', path.call(print, 'local'))
+      }
+
+      return concat(parts)
+    case 'ImportNamespaceSpecifier':
+      parts.push('* as ')
+
+      parts.push(path.call(print, 'local'))
+
+      return concat(parts)
+    case 'ImportDefaultSpecifier':
+      return path.call(print, 'local')
+    case 'ImportDeclaration': {
+      parts.push('import ')
+
+      const standalones = []
+      const grouped = []
+      if (n.specifiers && n.specifiers.length > 0) {
+        path.each(specifierPath => {
+          const value = specifierPath.getValue()
+          if (
+            value.type === 'ImportDefaultSpecifier' ||
+            value.type === 'ImportNamespaceSpecifier'
+          ) {
+            standalones.push(print(specifierPath))
+          } else {
+            grouped.push(print(specifierPath))
+          }
+        }, 'specifiers')
+
+        if (standalones.length > 0) {
+          parts.push(join(', ', standalones))
+        }
+
+        if (standalones.length > 0 && grouped.length > 0) {
+          parts.push(', ')
+        }
+
+        if (grouped.length === 1 && standalones.length === 0 && n.specifiers) {
+          parts.push(
+            concat([
+              '{',
+              options.bracketSpacing ? ' ' : '',
+              concat(grouped),
+              options.bracketSpacing ? ' ' : '',
+              '}',
+            ])
+          )
+        } else if (grouped.length >= 1) {
+          parts.push(
+            group(
+              concat([
+                '{',
+                indent(
+                  concat([
+                    options.bracketSpacing ? line : softline,
+                    join(concat([ifBreak('', ','), line]), grouped),
+                  ])
+                ),
+                options.bracketSpacing ? line : softline,
+                '}',
+              ])
+            )
+          )
+        }
+
+        parts.push(' from ')
+      } else if (
+        /{\s*}/.test(
+          options.originalText.slice(locStart(n), locStart(n.source))
+        )
+      ) {
+        parts.push('{} from ')
+      }
+
+      parts.push(path.call(print, 'source'))
+
+      return concat(parts)
     }
     case 'BlockStatement': {
       const naked = path.call(bodyPath => {
@@ -534,13 +621,19 @@ function printPathNoParens(path, options, print) {
   }
 }
 
-// function shouldInlineLogicalExpression(node) {
-//   if (node.type !== 'LogicalExpression') {
-//     return false
-//   }
+function locStart(node) {
+  if (node.range) {
+    return node.range[0]
+  }
+}
 
-//   return false
-// }
+function shouldInlineLogicalExpression(node) {
+  if (node.type !== 'LogicalExpression') {
+    return false
+  }
+
+  return false
+}
 
 function printJSXElement(path, options, print) {
   // const n = path.getValue()
@@ -1016,6 +1109,12 @@ function getPrecedence(op) {
 function shouldFlatten(parentOp, nodeOp) {
   parentOp = getCanonicalOperator(parentOp)
   nodeOp = getCanonicalOperator(nodeOp)
+  // console.log({
+  //   parentOp,
+  //   nodeOp,
+  //   parentPrec: getPrecedence(parentOp),
+  //   nodePrec: getPrecedence(nodeOp),
+  // })
   if (getPrecedence(nodeOp) !== getPrecedence(parentOp)) {
     return false
   }
