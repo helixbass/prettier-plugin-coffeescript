@@ -347,7 +347,7 @@ function printPathNoParens(path, options, print) {
     case 'ExportSpecifier':
       parts.push(path.call(print, 'local'))
 
-      if (n.expoted && n.exported.name !== n.local.name) {
+      if (n.exported && n.exported.name !== n.local.name) {
         parts.push(' as ', path.call(print, 'exported'))
       }
 
@@ -363,6 +363,12 @@ function printPathNoParens(path, options, print) {
     case 'ExportDefaultDeclaration':
     case 'ExportNamedDeclaration':
       return printExportDeclaration(path, options, print)
+    case 'ExportAllDeclaration':
+      parts.push('export ')
+
+      parts.push('* from ', path.call(print, 'source'))
+
+      return concat(parts)
     case 'ImportDeclaration': {
       parts.push('import ')
 
