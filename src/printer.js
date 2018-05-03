@@ -344,6 +344,14 @@ function printPathNoParens(path, options, print) {
       }
 
       return concat(parts)
+    case 'ExportSpecifier':
+      parts.push(path.call(print, 'local'))
+
+      if (n.expoted && n.exported.name !== n.local.name) {
+        parts.push(' as ', path.call(print, 'exported'))
+      }
+
+      return concat(parts)
     case 'ImportNamespaceSpecifier':
       parts.push('* as ')
 
@@ -352,6 +360,9 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ImportDefaultSpecifier':
       return path.call(print, 'local')
+    case 'ExportDefaultDeclaration':
+    case 'ExportNamedDeclaration':
+      return printExportDeclaration(path, options, print)
     case 'ImportDeclaration': {
       parts.push('import ')
 
@@ -619,6 +630,72 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     }
   }
+}
+
+function printExportDeclaration(path, options, print) {
+  const decl = path.getValue()
+  const parts = ['export ']
+
+  if (decl['default'] || decl.type === 'ExportDefaultDeclaration') {
+    parts.push('default')
+  }
+
+  if (decl.declaration) {
+    parts.push(path.call(print, 'declaration'))
+  } else {
+    if (decl.specifiers && decl.specifiers.length > 0) {
+      const specifiers = []
+      const defaultSpecifiers = []
+      const namespaceSpecifiers = []
+      path.each(specifierPath => {
+        const specifierType = path.getValue().type
+        if (specifierType === 'ExportSpecifier') {
+          specifiers.push(print(specifierPath))
+        } else if (specifierType === 'ExportDefaultSpecifier') {
+          defaultSpecifiers.push(print(specifierPath))
+        } else if (specifierType === 'ExportDefaultSpecifier') {
+          namespaceSpecifiers.push(concat(['* as ', print(specifierPath)]))
+        }
+      }, 'specifiers')
+
+      const isNamespaceFollowed =
+        namespaceSpecifiers.length !== 0 && specifiers.length !== 0
+
+      const isDefaultFollowed =
+        defaultSpecifiers.length !== 0 &&
+        (namespaceSpecifiers.length !== 0 || specifiers.length !== 0)
+
+      parts.push(
+        concat(defaultSpecifiers),
+        concat([isDefaultFollowed ? ', ' : '']),
+        concat(namespaceSpecifiers),
+        concat([isNamespaceFollowed ? ', ' : '']),
+        specifiers.length !== 0
+          ? group(
+              concat([
+                '{',
+                indent(
+                  concat([
+                    options.bracketSpacing ? line : softline,
+                    join(concat([ifBreak('', ','), line]), specifiers),
+                  ])
+                ),
+                options.bracketSpacing ? line : softline,
+                '}',
+              ])
+            )
+          : ''
+      )
+    } else {
+      parts.push('{}')
+    }
+
+    if (decl.source) {
+      parts.push(' from ', path.call(print, 'source'))
+    }
+  }
+
+  return concat(parts)
 }
 
 function locStart(node) {

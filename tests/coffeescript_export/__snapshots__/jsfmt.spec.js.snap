@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`brackets.coffee 1`] = `
+export {
+  runTaskForChanged, description, someOtherLabel, thatMakes, itGo, multiLine, andMore, soWeCanGetItTo80Columns
+}
+export {fitsIn, oneLine}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export {
+  runTaskForChanged
+  description
+  someOtherLabel
+  thatMakes
+  itGo
+  multiLine
+  andMore
+  soWeCanGetItTo80Columns
+}
+export { fitsIn, oneLine }
+
+`;
+
+exports[`brackets.coffee 2`] = `
+export {
+  runTaskForChanged, description, someOtherLabel, thatMakes, itGo, multiLine, andMore, soWeCanGetItTo80Columns
+}
+export {fitsIn, oneLine}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export {
+  runTaskForChanged
+  description
+  someOtherLabel
+  thatMakes
+  itGo
+  multiLine
+  andMore
+  soWeCanGetItTo80Columns
+}
+export {fitsIn, oneLine}
+
+`;
+
+exports[`empty.coffee 1`] = `
+export {}
+export {} from '.'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export {}
+export {} from "."
+
+`;
+
+exports[`empty.coffee 2`] = `
+export {}
+export {} from '.'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export {}
+export {} from "."
+
+`;
