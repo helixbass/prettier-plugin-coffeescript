@@ -312,6 +312,14 @@ function printPathNoParens(path, options, print) {
 
       return concat(parts)
     }
+    case 'ReturnStatement':
+      parts.push('return')
+
+      if (n.argument) {
+        parts.push(' ', path.call(print, 'argument'))
+      }
+
+      return concat(parts)
     case 'NewExpression':
     case 'CallExpression': {
       const isNew = n.type === 'NewExpression'
@@ -369,12 +377,13 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ConditionalExpression':
     case 'IfStatement': {
-      // const isStatement = n.type === 'IfStatement'
+      const isStatement = n.type === 'IfStatement'
+      const shouldIndent = !isStatement
 
       const con = adjustClause(n.consequent, path.call(print, 'consequent'))
 
       const opening = concat([
-        softline,
+        shouldIndent ? softline : '',
         'if ',
         group(
           concat([
@@ -396,7 +405,12 @@ function printPathNoParens(path, options, print) {
 
       // const shouldBreak = isStatement
       const shouldBreak = !pathNeedsParens(path)
-      return group(concat([indent(concat(parts)), softline]), { shouldBreak })
+      return group(
+        shouldIndent
+          ? concat([indent(concat(parts)), softline])
+          : concat(parts),
+        { shouldBreak }
+      )
     }
   }
 }
@@ -670,7 +684,9 @@ function printAssignment(
       leftNode.type === 'Identifier' ||
       isStringLiteral(leftNode) ||
       leftNode.type === 'MemberExpression'
-    ) || rightNode.type === 'ArrayExpression'
+    ) ||
+    rightNode.type === 'ArrayExpression' ||
+    rightNode.type === 'FunctionExpression'
 
   const printed = printAssignmentRight(
     rightNode,
