@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`new-expression.coffee 1`] = `
+testConsole = new TestConsole(if config.useStderr then process.stderr else process.stdout)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+testConsole = new TestConsole(
+  if config.useStderr
+    process.stderr
+  else
+    process.stdout
+)
+
+`;

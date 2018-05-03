@@ -15,11 +15,12 @@ const {
   ifBreak,
   indent,
   join,
+  literalline,
   line,
   softline,
 } = docBuilders
 const docUtils = doc.utils
-const { isEmpty, willBreak } = docUtils
+const { isEmpty, rawText, willBreak } = docUtils
 
 const util = require('util')
 
@@ -99,6 +100,23 @@ function pathNeedsParens(path) {
         case 'CallExpression':
         case 'NewExpression':
           return name === 'callee' && parent.callee === node
+        case 'BinaryExpression':
+        case 'LogicalExpression': {
+          const po = getCanonicalOperator(parent.operator)
+          const pp = getPrecedence(po)
+          const no = getCanonicalOperator(node.operator)
+          const np = getPrecedence(no)
+
+          if (pp > np) {
+            return true
+          }
+
+          if (po === 'or' && no === 'and') {
+            return true
+          }
+
+          return false
+        }
         default:
           return false
       }
@@ -184,8 +202,24 @@ function printPathNoParens(path, options, print) {
       )
     case 'BinaryExpression':
     case 'LogicalExpression': {
+      const parent = path.getParentNode()
+      const isInsideParenthesis =
+        n !== parent.body &&
+        (parent.type === 'IfStatement' ||
+          parent.type === 'ConditionalExpression')
+
       const parts = printBinaryishExpressions(path, print, options, false)
-      return concat(parts)
+
+      if (isInsideParenthesis) {
+        return concat(parts)
+      }
+
+      // if (shouldInlineLogicalExpression(n) && !samePrecedenceSubExpression)
+      // return group(concat(parts))
+
+      const rest = concat(parts.slice(1))
+
+      return group(concat([parts.length > 0 ? parts[0] : '', indent(rest)]))
     }
     case 'AssignmentPattern':
       return concat([
@@ -377,8 +411,10 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ConditionalExpression':
     case 'IfStatement': {
-      const isStatement = n.type === 'IfStatement'
-      const shouldIndent = !isStatement
+      // const isStatement = n.type === 'IfStatement'
+      // const shouldBreak = isStatement
+      const shouldBreak = !pathNeedsParens(path)
+      const shouldIndent = !shouldBreak
 
       const con = adjustClause(n.consequent, path.call(print, 'consequent'))
 
@@ -403,8 +439,6 @@ function printPathNoParens(path, options, print) {
         parts.push(line, 'else', alt)
       }
 
-      // const shouldBreak = isStatement
-      const shouldBreak = !pathNeedsParens(path)
       return group(
         shouldIndent
           ? concat([indent(concat(parts)), softline])
@@ -412,7 +446,106 @@ function printPathNoParens(path, options, print) {
         { shouldBreak }
       )
     }
+    case 'JSXAttribute':
+      parts.push(path.call(print, 'name'))
+
+      if (n.value) {
+        let res
+        if (isStringLiteral(n.value)) {
+          const value = rawText(n.value)
+          res = '"' + value.slice(1, -1).replace(/"/g, '&quot;') + '"'
+        } else {
+          res = path.call(print, 'value')
+        }
+        parts.push('=', res)
+      }
+
+      return concat(parts)
+    case 'JSXIdentifier':
+      return '' + n.name
+    case 'JSXExpressionContainer': {
+      // const parent = path.getParentNode()
+
+      return group(concat(['{', path.call(print, 'expression'), '}']))
+    }
+    case 'JSXElement': {
+      const elem = printJSXElement(path, options, print)
+      return elem
+    }
+    case 'JSXOpeningElement': {
+      if (
+        n.attributes &&
+        n.attributes.length === 1 &&
+        n.attributes[0].value &&
+        isStringLiteral(n.attributes[0].value)
+      ) {
+        return group(
+          concat([
+            '<',
+            path.call(print, 'name'),
+            ' ',
+            concat(path.map(print, 'attributes')),
+            n.selfClosing ? ' />' : '>',
+          ])
+        )
+      }
+
+      const bracketSameLine = options.jsxBracketSameLine
+
+      return group(
+        concat([
+          '<',
+          path.call(print, 'name'),
+          concat([
+            indent(
+              concat(
+                path.map(attr => concat([line, print(attr)]), 'attributes')
+              )
+            ),
+            n.selfClosing ? line : bracketSameLine ? '>' : softline,
+          ]),
+          n.selfClosing ? '/>' : bracketSameLine ? '' : '>',
+        ])
+      )
+    }
+    case 'TemplateElement':
+      return join(literalline, n.value.raw.split(/\r?\n/g))
+    case 'TemplateLiteral': {
+      const expressions = path.map(print, 'expressions')
+
+      parts.push('"')
+
+      path.each(childPath => {
+        const i = childPath.getName()
+
+        parts.push(print(childPath))
+
+        if (i < expressions.length) {
+          const printed = expressions[i]
+
+          parts.push(group(concat(['#{', printed, '}'])))
+        }
+      }, 'quasis')
+
+      parts.push('"')
+
+      return concat(parts)
+    }
   }
+}
+
+// function shouldInlineLogicalExpression(node) {
+//   if (node.type !== 'LogicalExpression') {
+//     return false
+//   }
+
+//   return false
+// }
+
+function printJSXElement(path, options, print) {
+  // const n = path.getValue()
+
+  return path.call(print, 'openingElement')
 }
 
 function adjustClause(node, clause) {
@@ -575,24 +708,47 @@ function isNumericLiteral(node) {
   return node.type === 'NumericLiteral'
 }
 
+const operatorAliasMap = {
+  '||': 'or',
+  '&&': 'and',
+  '===': 'is',
+}
+function getCanonicalOperator(operator) {
+  return operatorAliasMap[operator] || operator
+}
+
+function isBinaryish(node) {
+  return node.type === 'BinaryExpression' || node.type === 'LogicalExpression'
+}
+
 // function printBinaryishExpressions(path, print, options, isNested) {
 function printBinaryishExpressions(path, print) {
-  const parts = []
+  let parts = []
   const node = path.getValue()
 
-  parts.push(path.call(print, 'left'))
+  if (isBinaryish(node)) {
+    if (shouldFlatten(node.operator, node.left.operator)) {
+      parts = parts.concat(
+        path.call(left => printBinaryishExpressions(left, print), 'left')
+      )
+    } else {
+      parts.push(path.call(print, 'left'))
+    }
 
-  let { operator } = node
-  const operatorAliasMap = {
-    '||': 'or',
-    '&&': 'and',
-    '===': 'is',
+    let { operator } = node
+    operator = getCanonicalOperator(operator)
+
+    const canBreak = operator === 'and' || operator === 'or'
+    const right = concat([
+      operator,
+      canBreak ? line : ' ',
+      path.call(print, 'right'),
+    ])
+
+    parts.push(' ', right)
+  } else {
+    parts.push(path.call(print))
   }
-  operator = operatorAliasMap[operator] || operator
-
-  const right = concat([operator, ' ', path.call(print, 'right')])
-
-  parts.push(' ', right)
 
   return parts
 }
@@ -604,6 +760,10 @@ function isBlockLevel(node, parent) {
 function printArgumentsList(path, options, print) {
   const node = path.getValue()
   const args = node.arguments
+
+  if (args.length === 0) {
+    return concat(['(', ')'])
+  }
 
   const lastArgIndex = args.length - 1
   const printedArguments = path.map((argPath, index) => {
@@ -627,14 +787,32 @@ function printArgumentsList(path, options, print) {
       (parent.type === 'AssignmentExpression' &&
         isBlockLevel(parent, grandparent)))
 
-  return group(
-    concat([
-      parensOptional ? ifBreak('(', ' ') : '(',
-      indent(concat([softline, concat(printedArguments)])),
-      softline,
-      parensOptional ? ifBreak(')') : ')',
-    ])
-  )
+  const shouldntBreak =
+    args.length === 1 && args[0].type === 'FunctionExpression'
+  const parensUnnecessary = shouldntBreak
+
+  const openingParen = parensUnnecessary
+    ? ' '
+    : parensOptional ? ifBreak('(', ' ') : '('
+  const closingParen = parensUnnecessary
+    ? ''
+    : parensOptional ? ifBreak(')') : ')'
+
+  return shouldntBreak
+    ? concat([
+        openingParen,
+        concat(printedArguments),
+        parensUnnecessary ? '' : softline,
+        closingParen,
+      ])
+    : group(
+        concat([
+          openingParen,
+          indent(concat([softline, concat(printedArguments)])),
+          softline,
+          closingParen,
+        ])
+      )
 }
 
 // function isTestCall(n, parent) {
@@ -686,7 +864,8 @@ function printAssignment(
       leftNode.type === 'MemberExpression'
     ) ||
     rightNode.type === 'ArrayExpression' ||
-    rightNode.type === 'FunctionExpression'
+    rightNode.type === 'FunctionExpression' ||
+    rightNode.type === 'NewExpression'
 
   const printed = printAssignmentRight(
     rightNode,
@@ -823,8 +1002,25 @@ function nodeStr(node, options) {
   return privateUtil.printString(raw, options)
 }
 
-function rawText(node) {
-  return node.extra ? node.extra.raw : node.raw
+const PRECEDENCE = {}
+;[['or'], ['and'], ['is']].forEach((tier, i) => {
+  tier.forEach(op => {
+    PRECEDENCE[op] = i
+  })
+})
+
+function getPrecedence(op) {
+  return PRECEDENCE[op]
+}
+
+function shouldFlatten(parentOp, nodeOp) {
+  parentOp = getCanonicalOperator(parentOp)
+  nodeOp = getCanonicalOperator(nodeOp)
+  if (getPrecedence(nodeOp) !== getPrecedence(parentOp)) {
+    return false
+  }
+
+  return true
 }
 
 // const clean = (ast, newObj) => {}
