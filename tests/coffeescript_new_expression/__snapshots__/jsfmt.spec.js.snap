@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`call.coffee 1`] = `
+new (factory())()
+new factory()()
+
+new (factory())(factory())
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+new (factory())()
+new factory()()
+new (factory()) factory()
+
+`;
+
+exports[`new_expression.coffee 1`] = `
+new (memoize.Cache || MapCache)
+new (if typeof this == 'function' then this else Dict())
+new (createObj()).prop(a())
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+new (memoize.Cache or MapCache)()
+new (if typeof @ is "function" then @ else Dict())()
+new (createObj()).prop a()
+
+`;

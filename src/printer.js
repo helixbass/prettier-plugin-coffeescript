@@ -24,7 +24,11 @@ const { isEmpty, willBreak } = docUtils
 const util = require('util')
 
 function isStatement(node) {
-  return node.type === 'BlockStatement' || node.type === 'ExpressionStatement'
+  return (
+    node.type === 'BlockStatement' ||
+    node.type === 'ExpressionStatement' ||
+    node.type === 'IfStatement'
+  )
 }
 
 function pathNeedsParens(path) {
@@ -45,6 +49,24 @@ function pathNeedsParens(path) {
   }
 
   switch (node.type) {
+    case 'CallExpression': {
+      let firstParentNotMemberExpression = parent
+      let i = 0
+      while (
+        firstParentNotMemberExpression &&
+        firstParentNotMemberExpression.type === 'MemberExpression'
+      ) {
+        firstParentNotMemberExpression = path.getParentNode(++i)
+      }
+
+      if (
+        firstParentNotMemberExpression.type === 'NewExpression' &&
+        firstParentNotMemberExpression.callee === path.getParentNode(i - 1)
+      ) {
+        return true
+      }
+      return false
+    }
     case 'UpdateExpression':
       if (parent.type === 'UnaryExpression') {
         return (
@@ -70,6 +92,21 @@ function pathNeedsParens(path) {
           return name === 'callee' && parent.callee === node
         default:
           return false
+      }
+    case 'BinaryExpression':
+    case 'LogicalExpression':
+      switch (parent.type) {
+        case 'CallExpression':
+        case 'NewExpression':
+          return name === 'callee' && parent.callee === node
+        default:
+          return false
+      }
+    case 'ConditionalExpression':
+      switch (parent.type) {
+        case 'NewExpression':
+        case 'CallExpression':
+          return name === 'callee' && parent.callee === node
       }
   }
 
@@ -330,7 +367,46 @@ function printPathNoParens(path, options, print) {
       }
 
       return concat(parts)
+    case 'ConditionalExpression':
+    case 'IfStatement': {
+      // const isStatement = n.type === 'IfStatement'
+
+      const con = adjustClause(n.consequent, path.call(print, 'consequent'))
+
+      const opening = concat([
+        softline,
+        'if ',
+        group(
+          concat([
+            ifBreak('('),
+            indent(concat([softline, path.call(print, 'test')])),
+            softline,
+            ifBreak(')'),
+          ])
+        ),
+        ifBreak('', ' then'),
+        con,
+      ])
+      parts.push(opening)
+
+      if (n.alternate) {
+        const alt = adjustClause(n.alternate, path.call(print, 'alternate'))
+        parts.push(line, 'else', alt)
+      }
+
+      // const shouldBreak = isStatement
+      const shouldBreak = !pathNeedsParens(path)
+      return group(concat([indent(concat(parts)), softline]), { shouldBreak })
+    }
   }
+}
+
+function adjustClause(node, clause) {
+  if (node.type === 'BlockStatement') {
+    return clause
+  }
+
+  return indent(concat([line, clause]))
 }
 
 function isLogicalNotExpression(node) {
@@ -492,7 +568,15 @@ function printBinaryishExpressions(path, print) {
 
   parts.push(path.call(print, 'left'))
 
-  const right = concat([node.operator, ' ', path.call(print, 'right')])
+  let { operator } = node
+  const operatorAliasMap = {
+    '||': 'or',
+    '&&': 'and',
+    '===': 'is',
+  }
+  operator = operatorAliasMap[operator] || operator
+
+  const right = concat([operator, ' ', path.call(print, 'right')])
 
   parts.push(' ', right)
 
