@@ -111,7 +111,11 @@ function pathNeedsParens(path) {
             return true
           }
 
-          if (po === 'or' && no === 'and') {
+          if ((po === 'or' || po === '?') && no === 'and') {
+            return true
+          }
+
+          if (pp === np && name === 'right') {
             return true
           }
 
@@ -1036,7 +1040,7 @@ function printBinaryishExpressions(path, print) {
     let { operator } = node
     operator = getCanonicalOperator(operator)
 
-    const canBreak = operator === 'and' || operator === 'or'
+    const canBreak = operator === 'and' || operator === 'or' || operator === '?'
     const right = concat([
       operator,
       canBreak ? line : ' ',
@@ -1331,7 +1335,7 @@ function nodeStr(node, options) {
 }
 
 const PRECEDENCE = {}
-;[['or'], ['and'], ['is']].forEach((tier, i) => {
+;[['?'], ['or'], ['and'], ['is']].forEach((tier, i) => {
   tier.forEach(op => {
     PRECEDENCE[op] = i
   })
