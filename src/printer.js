@@ -515,6 +515,13 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ConditionalExpression':
     case 'IfStatement': {
+      if (n.postfix) {
+        parts.push(path.call(print, 'consequent'), ' ')
+        parts.push(n.inverted ? 'unless ' : 'if ')
+        parts.push(path.call(print, 'test'))
+        return concat(parts)
+      }
+
       // const isStatement = n.type === 'IfStatement'
       // const shouldBreak = isStatement
       const shouldBreak = !pathNeedsParens(path)
@@ -524,7 +531,7 @@ function printPathNoParens(path, options, print) {
 
       const opening = concat([
         shouldIndent ? softline : '',
-        'if ',
+        n.inverted ? 'unless ' : 'if ',
         group(
           concat([
             ifBreak('('),

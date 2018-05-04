@@ -17,3 +17,37 @@ f = ->
     }
 
 `;
+
+exports[`postfix.coffee 1`] = `
+a if b
+a unless b
+
+->
+  return a if b
+->
+  doSomething()
+  return a unless b
+
+f() if b
+
+->
+  return unless some(veryVeryVeryVeryVeryLong, condition, isActuallyFalsyCausingThisToReturn)
+
+  otherwise()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a if b
+a unless b
+-> return a if b
+->
+  doSomething()
+  return a unless b
+f() if b
+->
+  return unless some(
+    veryVeryVeryVeryVeryLong
+    condition
+    isActuallyFalsyCausingThisToReturn
+  )
+  otherwise()
+
+`;
