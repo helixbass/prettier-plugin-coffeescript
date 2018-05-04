@@ -356,6 +356,7 @@ function printPathNoParens(path, options, print) {
             ),
       ])
     }
+    case 'SpreadElement':
     case 'RestElement':
       return concat([path.call(print, 'argument'), '...'])
     case 'FunctionExpression': {
@@ -495,9 +496,12 @@ function printPathNoParens(path, options, print) {
     case 'CallExpression': {
       const isNew = n.type === 'NewExpression'
 
+      const optional = printOptionalToken(path)
+
       if (isTestCall(n, path.getParentNode())) {
         return concat([
           path.call(print, 'callee'),
+          optional,
           concat([' ', join(', ', path.map(print, 'arguments'))]),
         ])
       }
@@ -509,6 +513,7 @@ function printPathNoParens(path, options, print) {
       return concat([
         isNew ? 'new ' : '',
         path.call(print, 'callee'),
+        optional,
         printArgumentsList(path, options, print),
       ])
     }
@@ -863,7 +868,10 @@ function printMemberChain(path, options, print) {
     ) {
       printedNodes.unshift({
         node,
-        printed: concat([printArgumentsList(path, options, print)]),
+        printed: concat([
+          printOptionalToken(path),
+          printArgumentsList(path, options, print),
+        ]),
       })
       path.call(callee => rec(callee), 'callee')
     } else if (isMemberish(node)) {
@@ -883,7 +891,10 @@ function printMemberChain(path, options, print) {
   const node = path.getValue()
   printedNodes.unshift({
     node,
-    printed: concat([printArgumentsList(path, options, print)]),
+    printed: concat([
+      printOptionalToken(path),
+      printArgumentsList(path, options, print),
+    ]),
   })
   path.call(callee => rec(callee), 'callee')
 
@@ -1044,6 +1055,17 @@ function isBlockLevel(node, parent) {
   return parent.type === 'ExpressionStatement'
 }
 
+function callParensOptional(node, parent, grandparent) {
+  const args = node.arguments
+
+  return (
+    args.length &&
+    (isBlockLevel(node, parent) ||
+      (parent.type === 'AssignmentExpression' &&
+        isBlockLevel(parent, grandparent)))
+  )
+}
+
 function printArgumentsList(path, options, print) {
   const node = path.getValue()
   const args = node.arguments
@@ -1068,11 +1090,12 @@ function printArgumentsList(path, options, print) {
 
   const parent = path.getParentNode()
   const grandparent = path.getParentNode(1)
+  const greatgrandparent = path.getParentNode(2)
   const parensOptional =
-    args.length &&
-    (isBlockLevel(node, parent) ||
-      (parent.type === 'AssignmentExpression' &&
-        isBlockLevel(parent, grandparent)))
+    callParensOptional(node, parent, grandparent) ||
+    (parent.type === 'CallExpression' &&
+      node === parent.arguments[parent.arguments.length - 1] &&
+      callParensOptional(parent, grandparent, greatgrandparent))
 
   const shouldntBreak =
     args.length === 1 && args[0].type === 'FunctionExpression'
