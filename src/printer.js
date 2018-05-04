@@ -177,7 +177,7 @@ function printPathNoParens(path, options, print) {
     return n
   }
 
-  const parts = []
+  let parts = []
   switch (n.type) {
     case 'File':
       return path.call(print, 'program')
@@ -237,6 +237,7 @@ function printPathNoParens(path, options, print) {
       ])
     case 'ObjectExpression':
     case 'ObjectPattern': {
+      const parent = path.getParentNode()
       const props = []
       path.each(childPath => {
         const node = childPath.getValue()
@@ -255,18 +256,24 @@ function printPathNoParens(path, options, print) {
       if (joinedProps.length === 0) {
         return concat(['{', '}'])
       }
+      const shouldOmitBraces = parent.type === 'ClassBody'
+      const shouldBreak = parent.type === 'ClassBody'
       const content = concat([
-        '{',
-        indent(
-          concat([
-            options.bracketSpacing ? line : softline,
-            concat(joinedProps),
-          ])
-        ),
-        concat([options.bracketSpacing ? line : softline, '}']),
+        shouldOmitBraces ? '' : '{',
+        shouldOmitBraces
+          ? concat(joinedProps)
+          : indent(
+              concat([
+                options.bracketSpacing ? line : softline,
+                concat(joinedProps),
+              ])
+            ),
+        shouldOmitBraces
+          ? ''
+          : concat([options.bracketSpacing ? line : softline, '}']),
       ])
 
-      return group(content)
+      return group(content, { shouldBreak })
     }
     case 'ObjectProperty':
       if (n.shorthand) {
@@ -291,6 +298,14 @@ function printPathNoParens(path, options, print) {
       }
 
       return concat(parts)
+    case 'ClassMethod':
+      if (n.static) {
+        parts.push('@')
+      }
+
+      parts = parts.concat(printObjectMethod(path, options, print))
+
+      return concat(parts)
     case 'ArrayExpression':
     case 'ArrayPattern':
       parts.push(
@@ -311,6 +326,8 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ThisExpression':
       return '@'
+    case 'Super':
+      return 'super'
     case 'NullLiteral':
       return 'null'
     case 'Identifier':
@@ -639,7 +656,7 @@ function printPathNoParens(path, options, print) {
             }, 'body'),
           ])
         ),
-        hardline,
+        // hardline,
       ])
     case 'ClassDeclaration':
     case 'ClassExpression':
@@ -671,6 +688,28 @@ function printPathNoParens(path, options, print) {
   }
 }
 
+function printObjectMethod(path, options, print) {
+  const objMethod = path.getValue()
+  const parts = []
+
+  const key = printPropertyKey(path, options, print)
+
+  if (objMethod.computed) {
+    parts.push('[', key, ']')
+  } else {
+    parts.push(key)
+  }
+
+  parts.push(
+    ': ',
+    group(printFunctionParams(path, print, options)),
+    objMethod.bound ? '=>' : '->',
+    isEmptyBlock(objMethod.body) ? '' : concat([' ', path.call(print, 'body')])
+  )
+
+  return concat(parts)
+}
+
 function printClass(path, options, print) {
   const n = path.getValue()
   const parts = []
@@ -679,6 +718,10 @@ function printClass(path, options, print) {
 
   if (n.id) {
     parts.push(' ', path.call(print, 'id'))
+  }
+
+  if (n.superClass) {
+    parts.push(' extends ', path.call(print, 'superClass'))
   }
 
   parts.push(path.call(print, 'body'))
