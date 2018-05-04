@@ -125,7 +125,11 @@ function pathNeedsParens(path) {
         case 'NewExpression':
         case 'CallExpression':
           return name === 'callee' && parent.callee === node
+        default:
+          return false
       }
+    case 'ClassExpression':
+      return parent.type === 'ExportDefaultDeclaration'
   }
 
   return false
@@ -332,9 +336,11 @@ function printPathNoParens(path, options, print) {
 
       parts.push(n.bound ? '=>' : '->')
 
-      const body = path.call(bodyPath => print(bodyPath), 'body')
+      const body = isEmptyBlock(n.body)
+        ? ''
+        : concat([' ', path.call(bodyPath => print(bodyPath), 'body')])
 
-      return group(concat([concat(parts), ' ', body]))
+      return group(concat([concat(parts), body]))
     }
     case 'ImportSpecifier':
       parts.push(path.call(print, 'imported'))
@@ -619,6 +625,26 @@ function printPathNoParens(path, options, print) {
         ])
       )
     }
+    case 'ClassBody':
+      if (n.body.length === 0) {
+        return ''
+      }
+
+      return concat([
+        indent(
+          concat([
+            hardline,
+            path.call(bodyPath => {
+              return printStatementSequence(bodyPath, options, print)
+            }, 'body'),
+          ])
+        ),
+        hardline,
+      ])
+    case 'ClassDeclaration':
+    case 'ClassExpression':
+      parts.push(concat(printClass(path, options, print)))
+      return concat(parts)
     case 'TemplateElement':
       return join(literalline, n.value.raw.split(/\r?\n/g))
     case 'TemplateLiteral': {
@@ -645,12 +671,31 @@ function printPathNoParens(path, options, print) {
   }
 }
 
+function printClass(path, options, print) {
+  const n = path.getValue()
+  const parts = []
+
+  parts.push('class')
+
+  if (n.id) {
+    parts.push(' ', path.call(print, 'id'))
+  }
+
+  parts.push(path.call(print, 'body'))
+
+  return parts
+}
+
+function isEmptyBlock(node) {
+  return node.type === 'BlockStatement' && !node.body.length
+}
+
 function printExportDeclaration(path, options, print) {
   const decl = path.getValue()
   const parts = ['export ']
 
   if (decl['default'] || decl.type === 'ExportDefaultDeclaration') {
-    parts.push('default')
+    parts.push('default ')
   }
 
   if (decl.declaration) {

@@ -12,4 +12,6 @@ f() if b
 ->
   return unless some(veryVeryVeryVeryVeryLong, condition, isActuallyFalsyCausingThisToReturn)
 
+  return some(veryVeryVeryVeryVeryLong, returnValue, thatIsLongEnoughToBreakLineItself) unless someCondition
+
   otherwise()
