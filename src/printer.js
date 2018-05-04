@@ -717,6 +717,12 @@ function locStart(node) {
   }
 }
 
+function locEnd(node) {
+  if (node.range) {
+    return node.range[1]
+  }
+}
+
 function shouldInlineLogicalExpression(node) {
   if (node.type !== 'LogicalExpression') {
     return false
@@ -1133,6 +1139,7 @@ function printStatementSequence(path, options, print) {
   const printed = []
 
   // const bodyNode = path.getNode()
+  const text = options.originalText
 
   path.map(stmtPath => {
     const stmt = stmtPath.getValue()
@@ -1146,10 +1153,27 @@ function printStatementSequence(path, options, print) {
 
     parts.push(stmtPrinted)
 
+    if (
+      privateUtil.isNextLineEmpty(text, stmt, locEnd) &&
+      !isLastStatement(stmtPath)
+    ) {
+      parts.push(hardline)
+    }
+
     printed.push(concat(parts))
   })
 
   return join(hardline, printed)
+}
+
+function isLastStatement(path) {
+  const parent = path.getParentNode()
+  if (!parent) {
+    return true
+  }
+  const node = path.getValue()
+  const body = parent.body || parent.consequent
+  return body && body[body.length - 1] === node
 }
 
 function printPropertyKey(path, options, print) {

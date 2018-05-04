@@ -23,6 +23,7 @@ funnelSnapshotCard =
     <ReportMetricsFunnelSnapshotCard metrics={metrics} />
   else
     null
+
 room =
   room.map (row, rowIndex) ->
     row.map (col, colIndex) ->

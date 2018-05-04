@@ -9,6 +9,7 @@ computedDescriptionLines =
   (showConfirm and descriptionLinesConfirming) or
   (focused and not loading and descriptionLinesFocused) or
   descriptionLines
+
 computedDescriptionLines =
   (focused and not loading and descriptionLinesFocused) or descriptionLines
 
