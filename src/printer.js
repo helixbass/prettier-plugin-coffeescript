@@ -129,7 +129,17 @@ function pathNeedsParens(path) {
           return false
       }
     case 'ClassExpression':
-      return parent.type === 'ExportDefaultDeclaration'
+      return (
+        parent.type === 'ExportDefaultDeclaration' ||
+        (parent.type === 'BinaryExpression' &&
+          parent.left === node &&
+          node.superClass) ||
+        (parent.type === 'CallExpression' && parent.callee === node) ||
+        (parent.type === 'MemberExpression' && parent.object === node) ||
+        ((parent.type === 'IfStatement' ||
+          parent.type === 'ConditionalExpression') &&
+          parent.test === node)
+      )
   }
 
   return false

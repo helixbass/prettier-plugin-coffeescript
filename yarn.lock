@@ -654,7 +654,7 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
 coffeescript@../coffeescript_orig:
-  version "2.2.4"
+  version "2.3.0"
   dependencies:
     babel-eslint "^7.2.2"
     babylon "^7.0.0-beta.44"
