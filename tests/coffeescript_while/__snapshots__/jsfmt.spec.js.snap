@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`indent.coffee 1`] = `
+if someVeryLongStringA and someVeryLongStringB and someVeryLongStringC and someVeryLongStringD then ;
+while someVeryLongStringA and someVeryLongStringB and someVeryLongStringC and someVeryLongStringD then ;
+until someVeryLongStringA and someVeryLongStringB and someVeryLongStringC and someVeryLongStringD when someCondition
+  doSomething()
+doSomething() while someVeryLongStringA and someVeryLongStringB and someVeryLongStringC and someVeryLongStringD
+doSomething() until someVeryLongStringA and someVeryLongStringB and someVeryLongStringC and someVeryLongStringD when someCondition
+
+if (someVeryLongFunc(someVeryLongArgA, someVeryLongArgB, someVeryLongArgC, someVeryLongArgD)) then ;
+doSomething() if (someVeryLongFunc(someVeryLongArgA, someVeryLongArgB, someVeryLongArgC, someVeryLongArgD))
+while someVeryLongFunc someVeryLongArgA, someVeryLongArgB, someVeryLongArgC, someVeryLongArgD then ;
+doSomething() while someVeryLongFunc someVeryLongArgA, someVeryLongArgB, someVeryLongArgC, someVeryLongArgD
+
+while 0 then 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if (
+  someVeryLongStringA and
+  someVeryLongStringB and
+  someVeryLongStringC and
+  someVeryLongStringD
+)
+  ;
+while (
+  someVeryLongStringA and
+  someVeryLongStringB and
+  someVeryLongStringC and
+  someVeryLongStringD
+)
+  ;
+until (
+  someVeryLongStringA and
+  someVeryLongStringB and
+  someVeryLongStringC and
+  someVeryLongStringD
+) when someCondition
+  doSomething()
+doSomething() while (
+  someVeryLongStringA and
+  someVeryLongStringB and
+  someVeryLongStringC and
+  someVeryLongStringD
+)
+doSomething() until (
+  someVeryLongStringA and
+  someVeryLongStringB and
+  someVeryLongStringC and
+  someVeryLongStringD
+) when someCondition
+
+if someVeryLongFunc(
+  someVeryLongArgA
+  someVeryLongArgB
+  someVeryLongArgC
+  someVeryLongArgD
+)
+  ;
+doSomething() if someVeryLongFunc(
+  someVeryLongArgA
+  someVeryLongArgB
+  someVeryLongArgC
+  someVeryLongArgD
+)
+while someVeryLongFunc(
+  someVeryLongArgA
+  someVeryLongArgB
+  someVeryLongArgC
+  someVeryLongArgD
+)
+  ;
+doSomething() while someVeryLongFunc(
+  someVeryLongArgA
+  someVeryLongArgB
+  someVeryLongArgC
+  someVeryLongArgD
+)
+
+while 0
+  1
+
+`;

@@ -28,6 +28,7 @@ function isStatement(node) {
   return (
     node.type === 'BlockStatement' ||
     node.type === 'ExpressionStatement' ||
+    // node.type === 'WhileStatement' ||
     node.type === 'IfStatement'
   )
 }
@@ -224,7 +225,8 @@ function printPathNoParens(path, options, print) {
       const isInsideParenthesis =
         n !== parent.body &&
         (parent.type === 'IfStatement' ||
-          parent.type === 'ConditionalExpression')
+          parent.type === 'ConditionalExpression' ||
+          parent.type === 'WhileStatement')
 
       const parts = printBinaryishExpressions(path, print, options, false)
 
@@ -370,7 +372,10 @@ function printPathNoParens(path, options, print) {
 
       const body = isEmptyBlock(n.body)
         ? ''
-        : concat([' ', path.call(bodyPath => print(bodyPath), 'body')])
+        : concat([
+            ifBreak('', ' '),
+            path.call(bodyPath => print(bodyPath), 'body'),
+          ])
 
       return group(concat([concat(parts), body]))
     }
@@ -479,6 +484,17 @@ function printPathNoParens(path, options, print) {
         return printStatementSequence(bodyPath, options, print)
       }, 'body')
 
+      const hasContent = n.body.length > 0
+
+      const parent = path.getParentNode()
+      if (
+        !hasContent &&
+        ((parent.type === 'IfStatement' && n === parent.consequent) ||
+          (parent.type === 'WhileStatement' && n === parent.body))
+      ) {
+        return indent(concat([hardline, ';']))
+      }
+
       const shouldInline = n.body.length === 1
       if (shouldInline) {
         parts.push(indent(concat([softline, naked])))
@@ -557,10 +573,22 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ConditionalExpression':
     case 'IfStatement': {
+      const simpleTest = path.call(print, 'test')
+      const breakingTest = group(
+        concat([
+          ifBreak('('),
+          indent(concat([softline, simpleTest])),
+          softline,
+          ifBreak(')'),
+        ])
+      )
+      const dontBreakTest = n.test.type === 'CallExpression'
+      const test = dontBreakTest ? simpleTest : breakingTest
+
       if (n.postfix) {
         parts.push(path.call(print, 'consequent'), ' ')
         parts.push(n.inverted ? 'unless ' : 'if ')
-        parts.push(path.call(print, 'test'))
+        parts.push(test)
         return concat(parts)
       }
 
@@ -574,14 +602,7 @@ function printPathNoParens(path, options, print) {
       const opening = concat([
         shouldIndent ? softline : '',
         n.inverted ? 'unless ' : 'if ',
-        group(
-          concat([
-            ifBreak('('),
-            indent(concat([softline, path.call(print, 'test')])),
-            softline,
-            ifBreak(')'),
-          ])
-        ),
+        test,
         ifBreak('', ' then'),
         con,
       ])
@@ -591,6 +612,50 @@ function printPathNoParens(path, options, print) {
         const alt = adjustClause(n.alternate, path.call(print, 'alternate'))
         parts.push(line, 'else', alt)
       }
+
+      return group(
+        shouldIndent
+          ? concat([indent(concat(parts)), softline])
+          : concat(parts),
+        { shouldBreak }
+      )
+    }
+    case 'WhileStatement': {
+      const simpleTest = path.call(print, 'test')
+      const breakingTest = group(
+        concat([
+          ifBreak('('),
+          indent(concat([softline, simpleTest])),
+          softline,
+          ifBreak(')'),
+        ])
+      )
+      const dontBreakTest = n.test.type === 'CallExpression'
+      const test = dontBreakTest ? simpleTest : breakingTest
+      const guard = n.guard ? concat([' when ', path.call(print, 'guard')]) : ''
+      const keyword = n.inverted ? 'until ' : 'while '
+
+      if (n.postfix) {
+        parts.push(path.call(print, 'body', 'body', 0), ' ')
+        parts.push(keyword, test, guard)
+        return concat(parts)
+      }
+
+      const shouldBreak = true
+      const shouldIndent = !shouldBreak
+
+      const body = adjustClause(n.body, path.call(print, 'body'))
+
+      parts.push(
+        concat([
+          shouldIndent ? softline : '',
+          keyword,
+          test,
+          guard,
+          ifBreak('', ' then'),
+          body,
+        ])
+      )
 
       return group(
         shouldIndent
