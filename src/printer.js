@@ -1,6 +1,6 @@
 'use strict'
 
-const privateUtil = require('prettier/src/common/util')
+const util = require('prettier/src/common/util')
 const embed = require('./embed')
 const { IDENTIFIER } = require('coffeescript/lib/coffeescript/lexer')
 
@@ -10,6 +10,7 @@ const {
   breakParent,
   concat,
   conditionalGroup,
+  fill,
   group,
   hardline,
   ifBreak,
@@ -20,9 +21,9 @@ const {
   softline,
 } = docBuilders
 const docUtils = doc.utils
-const { isEmpty, rawText, willBreak } = docUtils
+const { isEmpty, isLineNext, rawText, willBreak } = docUtils
 
-const util = require('util')
+const sysUtil = require('util')
 
 function isStatement(node) {
   return (
@@ -130,6 +131,9 @@ function pathNeedsParens(path) {
         case 'NewExpression':
         case 'CallExpression':
           return name === 'callee' && parent.callee === node
+        case 'BinaryExpression':
+        case 'LogicalExpression':
+          return name === 'right' && parent.right === node
         default:
           return false
       }
@@ -141,9 +145,7 @@ function pathNeedsParens(path) {
           node.superClass) ||
         (parent.type === 'CallExpression' && parent.callee === node) ||
         (parent.type === 'MemberExpression' && parent.object === node) ||
-        ((parent.type === 'IfStatement' ||
-          parent.type === 'ConditionalExpression') &&
-          parent.test === node)
+        (isIf(parent) && parent.test === node)
       )
   }
 
@@ -177,7 +179,7 @@ function genericPrint(path, options, print) {
 // eslint-disable-next-line no-unused-vars
 function dump(obj) {
   // eslint-disable-next-line no-console
-  return console.log(util.inspect(obj, { depth: 30 }))
+  return console.log(sysUtil.inspect(obj, { depth: 30 }))
 }
 
 function printPathNoParens(path, options, print) {
@@ -223,12 +225,14 @@ function printPathNoParens(path, options, print) {
     case 'LogicalExpression': {
       const parent = path.getParentNode()
       const isInsideParenthesis =
-        n !== parent.body &&
-        (parent.type === 'IfStatement' ||
-          parent.type === 'ConditionalExpression' ||
-          parent.type === 'WhileStatement')
+        n !== parent.body && (isIf(parent) || parent.type === 'WhileStatement')
 
-      const parts = printBinaryishExpressions(path, print, options, false)
+      const { parts, breaks } = printBinaryishExpressions(
+        path,
+        print,
+        options,
+        false
+      )
 
       if (isInsideParenthesis) {
         return concat(parts)
@@ -243,7 +247,9 @@ function printPathNoParens(path, options, print) {
 
       const rest = concat(parts.slice(1))
 
-      return group(concat([parts.length > 0 ? parts[0] : '', indent(rest)]))
+      return group(
+        concat([parts.length > 0 ? parts[0] : '', breaks ? indent(rest) : rest])
+      )
     }
     case 'AssignmentPattern':
       return concat([
@@ -538,7 +544,7 @@ function printPathNoParens(path, options, print) {
       ])
     }
     case 'NumericLiteral':
-      return privateUtil.printNumber(n.extra.raw)
+      return util.printNumber(n.extra.raw)
     case 'StringLiteral':
       return nodeStr(n, options)
     case 'UnaryExpression': {
@@ -563,6 +569,10 @@ function printPathNoParens(path, options, print) {
 
       return concat(parts)
     }
+    case 'Existence':
+      parts.push(path.call(print, 'argument'), '?')
+
+      return concat(parts)
     case 'UpdateExpression':
       parts.push(path.call(print, 'argument'), n.operator)
 
@@ -582,13 +592,13 @@ function printPathNoParens(path, options, print) {
           ifBreak(')'),
         ])
       )
+      const keyword = n.inverted ? 'unless ' : 'if '
       const dontBreakTest = n.test.type === 'CallExpression'
       const test = dontBreakTest ? simpleTest : breakingTest
 
       if (n.postfix) {
         parts.push(path.call(print, 'consequent'), ' ')
-        parts.push(n.inverted ? 'unless ' : 'if ')
-        parts.push(test)
+        parts.push(keyword, test)
         return concat(parts)
       }
 
@@ -601,7 +611,7 @@ function printPathNoParens(path, options, print) {
 
       const opening = concat([
         shouldIndent ? softline : '',
-        n.inverted ? 'unless ' : 'if ',
+        keyword,
         test,
         ifBreak('', ' then'),
         con,
@@ -609,7 +619,11 @@ function printPathNoParens(path, options, print) {
       parts.push(opening)
 
       if (n.alternate) {
-        const alt = adjustClause(n.alternate, path.call(print, 'alternate'))
+        const alternate = path.call(print, 'alternate')
+        const isChainedElseIf = isIf(n.alternate)
+        const alt = isChainedElseIf
+          ? concat([' ', alternate])
+          : adjustClause(n.alternate, alternate)
         parts.push(line, 'else', alt)
       }
 
@@ -726,6 +740,8 @@ function printPathNoParens(path, options, print) {
         ])
       )
     }
+    case 'JSXClosingElement':
+      return concat(['</', path.call(print, 'name'), '>'])
     case 'ClassBody':
       if (n.body.length === 0) {
         return ''
@@ -770,6 +786,10 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     }
   }
+}
+
+function isIf(node) {
+  return node.type === 'IfStatement' || node.type === 'ConditionalExpression'
 }
 
 function printObjectMethod(path, options, print) {
@@ -904,9 +924,257 @@ function shouldInlineLogicalExpression(node) {
 }
 
 function printJSXElement(path, options, print) {
-  // const n = path.getValue()
+  const n = path.getValue()
 
-  return path.call(print, 'openingElement')
+  if (n.type === 'JSXElement' && isEmptyJSXElement(n)) {
+    n.openingElement.selfClosing = true
+    return path.call(print, 'openingElement')
+  }
+
+  const openingLines = path.call(print, 'openingElement')
+  const closingLines = path.call(print, 'closingElement')
+
+  n.children = n.children.map(child => {
+    if (isJSXWhitespaceExpression(child)) {
+      return { type: 'JSXText', value: ' ', raw: ' ' }
+    }
+    return child
+  })
+
+  const containsTag = n.children.filter(isJSXNode).length > 0
+  const containsMultipleExpressions =
+    n.children.filter(child => child.type === 'JSXExpressionContainer').length >
+    1
+  const containsMultipleAttributes =
+    n.type === 'JSXElement' && n.openingElement.attributes.length > 1
+
+  let forcedBreak =
+    willBreak(openingLines) ||
+    containsTag ||
+    containsMultipleAttributes ||
+    containsMultipleExpressions
+
+  const rawJsxWhitespace = options.singleQuote ? "{' '}" : '{" "}'
+  const jsxWhitespace = ifBreak(concat([rawJsxWhitespace, softline]), ' ')
+
+  const children = printJSXChildren(path, options, print, jsxWhitespace)
+
+  const containsText =
+    n.children.filter(child => isMeaningfulJSXText(child)).length > 0
+
+  for (let i = children.length - 2; i >= 0; i--) {
+    const isPairOfEmptyStrings = children[i] === '' && children[i + 1] === ''
+    const isPairOfHardlines =
+      children[i] === hardline &&
+      children[i + 1] === '' &&
+      children[i + 2] === hardline
+    const isLineFollowedByJSXWhitespace =
+      (children[i] === softline || children[i] === hardline) &&
+      children[i + 1] === '' &&
+      children[i + 2] === jsxWhitespace
+    const isJSXWhitespaceFollowedByLine =
+      children[i] === jsxWhitespace &&
+      children[i + 1] === '' &&
+      (children[1 + 2] === softline || children[i + 2] === hardline)
+    const isDoubleJSXWhitespace =
+      children[i] === jsxWhitespace &&
+      children[i + 1] === '' &&
+      children[i + 2] === jsxWhitespace
+
+    if (
+      (isPairOfHardlines && containsText) ||
+      isPairOfEmptyStrings ||
+      isLineFollowedByJSXWhitespace ||
+      isDoubleJSXWhitespace
+    ) {
+      children.splice(i, 2)
+    } else if (isJSXWhitespaceFollowedByLine) {
+      children.splice(i + 1, 2)
+    }
+  }
+
+  while (
+    children.length &&
+    (isLineNext(util.getLast(children)) || isEmpty(util.getLast(children)))
+  ) {
+    children.pop()
+  }
+
+  while (
+    children.length &&
+    (isLineNext(children[0]) || isEmpty(children[0])) &&
+    (isLineNext(children[1]) || isEmpty(children[1]))
+  ) {
+    children.shift()
+    children.shift()
+  }
+
+  const multilineChildren = []
+  children.forEach((child, i) => {
+    if (child === jsxWhitespace) {
+      if (i === 1 && children[i - 1] === '') {
+        if (children.length === 2) {
+          multilineChildren.push(rawJsxWhitespace)
+          return
+        }
+        multilineChildren.push(concat([rawJsxWhitespace, hardline]))
+        return
+      } else if (i === children.length - 1) {
+        multilineChildren.push(rawJsxWhitespace)
+        return
+      } else if (children[i - 1] === '' && children[i - 2] === hardline) {
+        multilineChildren.push(rawJsxWhitespace)
+        return
+      }
+    }
+
+    multilineChildren.push(child)
+
+    if (willBreak(child)) {
+      forcedBreak = true
+    }
+  })
+
+  const content = containsText
+    ? fill(multilineChildren)
+    : group(concat(multilineChildren), { shouldBreak: true })
+
+  const multiLineElem = group(
+    concat([
+      openingLines,
+      indent(concat([hardline, content])),
+      hardline,
+      closingLines,
+    ])
+  )
+
+  if (forcedBreak) {
+    return multiLineElem
+  }
+
+  return conditionalGroup([
+    group(concat([openingLines, concat(children), closingLines])),
+    multiLineElem,
+  ])
+}
+
+function isJSXWhitespaceExpression(node) {
+  return (
+    node.type === 'JSXExpressionContainer' &&
+    isLiteral(node.expression) &&
+    node.expression.value === ' '
+  )
+}
+
+function printJSXChildren(path, options, print, jsxWhitespace) {
+  const n = path.getValue()
+  const children = []
+
+  path.map((childPath, i) => {
+    const child = childPath.getValue()
+    if (isLiteral(child)) {
+      const text = rawText(child)
+
+      if (isMeaningfulJSXText(child)) {
+        const words = text.split(matchJsxWhitespaceRegex)
+
+        if (words[0] === '') {
+          children.push('')
+          words.shift()
+          if (/\n/.test(words[0])) {
+            children.push(hardline)
+          } else {
+            children.push(jsxWhitespace)
+          }
+          words.shift()
+        }
+
+        let endWhitespace
+        if (util.getLast(words) === '') {
+          words.pop()
+          endWhitespace = words.pop()
+        }
+
+        if (words.length === 0) {
+          return
+        }
+
+        words.forEach((word, i) => {
+          if (i % 2 === 1) {
+            children.push(line)
+          } else {
+            children.push(word)
+          }
+        })
+
+        if (endWhitespace !== undefined) {
+          if (/\n/.test(endWhitespace)) {
+            children.push(hardline)
+          } else {
+            children.push(jsxWhitespace)
+          }
+        } else {
+          children.push('')
+        }
+      } else if (/\n/.test(text)) {
+        if (text.match(/\n/g).length > 1) {
+          children.push('')
+          children.push(hardline)
+        }
+      } else {
+        children.push('')
+        children.push(jsxWhitespace)
+      }
+    } else {
+      const printedChild = print(childPath)
+      children.push(printedChild)
+
+      const next = n.children[i + 1]
+      const directlyFollowedByMeaningfulText =
+        next && isMeaningfulJSXText(next) && !/^[ \n\r\t]/.test(rawText(next))
+      if (directlyFollowedByMeaningfulText) {
+        children.push('')
+      } else {
+        children.push(hardline)
+      }
+    }
+  }, 'children')
+
+  return children
+}
+
+const jsxWhitespaceChars = ' \n\r\t'
+const containsNonJsxWhitespaceRegex = new RegExp(
+  '[^' + jsxWhitespaceChars + ']'
+)
+const matchJsxWhitespaceRegex = new RegExp('([' + jsxWhitespaceChars + ']+)')
+
+function isMeaningfulJSXText(node) {
+  return (
+    isLiteral(node) &&
+    (containsNonJsxWhitespaceRegex.test(rawText(node)) ||
+      !/\n/.test(rawText(node)))
+  )
+}
+
+function isLiteral(node) {
+  return (
+    node.type === 'BooleanLiteral' ||
+    node.type === 'NullLiteral' ||
+    node.type === 'NumericLiteral' ||
+    node.type === 'RegExpLiteral' ||
+    node.type === 'StringLiteral' ||
+    node.type === 'TemplateLiteral' ||
+    node.type === 'JSXText'
+  )
+}
+
+function isJSXNode(node) {
+  return node.type === 'JSXElement'
+}
+
+function isEmptyJSXElement(node) {
+  return node.children.length === 0
 }
 
 function adjustClause(node, clause) {
@@ -1093,10 +1361,21 @@ function printBinaryishExpressions(path, print) {
   let parts = []
   const node = path.getValue()
 
+  let flattenedBreaks = false
+  let canBreak = false
   if (isBinaryish(node)) {
     if (shouldFlatten(node.operator, node.left.operator)) {
       parts = parts.concat(
-        path.call(left => printBinaryishExpressions(left, print), 'left')
+        path.call(left => {
+          const { parts: flattenedParts, breaks } = printBinaryishExpressions(
+            left,
+            print
+          )
+          if (breaks) {
+            flattenedBreaks = true
+          }
+          return flattenedParts
+        }, 'left')
       )
     } else {
       parts.push(path.call(print, 'left'))
@@ -1105,7 +1384,9 @@ function printBinaryishExpressions(path, print) {
     let { operator } = node
     operator = getCanonicalOperator(operator)
 
-    const canBreak = operator === 'and' || operator === 'or' || operator === '?'
+    canBreak =
+      (operator === 'and' || operator === 'or' || operator === '?') &&
+      !isIf(node.right)
     const right = concat([
       operator,
       canBreak ? line : ' ',
@@ -1117,7 +1398,7 @@ function printBinaryishExpressions(path, print) {
     parts.push(path.call(print))
   }
 
-  return parts
+  return { parts, breaks: canBreak || flattenedBreaks }
 }
 
 function isBlockLevel(node, parent) {
@@ -1344,7 +1625,7 @@ function printStatementSequence(path, options, print) {
     parts.push(stmtPrinted)
 
     if (
-      privateUtil.isNextLineEmpty(text, stmt, locEnd) &&
+      util.isNextLineEmpty(text, stmt, locEnd) &&
       !isLastStatement(stmtPath)
     ) {
       parts.push(hardline)
@@ -1396,7 +1677,7 @@ function printArrayItems(path, options, printPath, print) {
 
 function nodeStr(node, options) {
   const raw = rawText(node)
-  return privateUtil.printString(raw, options)
+  return util.printString(raw, options)
 }
 
 const PRECEDENCE = {}

@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "coffeescript": "../coffeescript_orig",
-    "prettier": "prettier/prettier#d05a29da05b2084790491eaef85917ce584e4fbd"
+    "prettier": "prettier/prettier#5e2e7a2881d07ff0aa4b4673becc9cb4ce2f6cae"
   },
   "devDependencies": {
     "eslint": "^4.14.0",

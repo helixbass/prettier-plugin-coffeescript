@@ -14,7 +14,9 @@ export {
   value4 as value4_renamed
   value5
 } from "exports"
+
 export { b } from "./baz"
+
 export * from "mod"
 
 `;
@@ -33,7 +35,9 @@ export {
   value4 as value4_renamed
   value5
 } from "exports"
+
 export {b} from "./baz"
+
 export * from "mod"
 
 `;
