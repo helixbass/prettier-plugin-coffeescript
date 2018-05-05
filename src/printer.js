@@ -224,6 +224,7 @@ function printPathNoParens(path, options, print) {
     case 'BinaryExpression':
     case 'LogicalExpression': {
       const parent = path.getParentNode()
+      const parentParent = path.getParentNode(1)
       const isInsideParenthesis =
         n !== parent.body && (isIf(parent) || parent.type === 'WhileStatement')
 
@@ -238,10 +239,16 @@ function printPathNoParens(path, options, print) {
         return concat(parts)
       }
 
+      const shouldNotIndent =
+        parent.type === 'JSXExpressionContainer' &&
+        parentParent.type === 'JSXAttribute'
       const shouldIndentIfInlining = parent.type === 'AssignmentExpression'
 
       // if (shouldInlineLogicalExpression(n) && !samePrecedenceSubExpression)
-      if (!shouldInlineLogicalExpression(n) && shouldIndentIfInlining) {
+      if (
+        shouldNotIndent ||
+        (!shouldInlineLogicalExpression(n) && shouldIndentIfInlining)
+      ) {
         return group(concat(parts))
       }
 
@@ -278,21 +285,31 @@ function printPathNoParens(path, options, print) {
       if (joinedProps.length === 0) {
         return concat(['{', '}'])
       }
-      const shouldOmitBraces = parent.type === 'ClassBody'
+
+      const shouldOmitBraces = shouldOmitObjectBraces(path)
+      let shouldOmitBracesButNotIndent = false
+      if (shouldOmitBraces && !shouldOmitBraces.indent) {
+        shouldOmitBracesButNotIndent = true
+      }
       const shouldBreak = parent.type === 'ClassBody'
+      const dontIndent =
+        shouldOmitBracesButNotIndent || parent.type === 'ClassBody'
       const content = concat([
         shouldOmitBraces ? '' : '{',
-        shouldOmitBraces
+        dontIndent
           ? concat(joinedProps)
           : indent(
               concat([
-                options.bracketSpacing ? line : softline,
+                options.bracketSpacing && !shouldOmitBraces ? line : softline,
                 concat(joinedProps),
               ])
             ),
-        shouldOmitBraces
-          ? ''
-          : concat([options.bracketSpacing ? line : softline, '}']),
+        concat([
+          dontIndent
+            ? ''
+            : options.bracketSpacing && !shouldOmitBraces ? line : softline,
+          shouldOmitBraces ? '' : '}',
+        ]),
       ])
 
       return group(content, { shouldBreak })
@@ -696,9 +713,27 @@ function printPathNoParens(path, options, print) {
     case 'JSXIdentifier':
       return '' + n.name
     case 'JSXExpressionContainer': {
-      // const parent = path.getParentNode()
+      const parent = path.getParentNode()
 
-      return group(concat(['{', path.call(print, 'expression'), '}']))
+      const shouldInline =
+        n.expression.type === 'ArrayExpression' ||
+        n.expression.type === 'ObjectExpression' ||
+        n.expression.type === 'FunctionExpression' ||
+        n.expression.type === 'CallExpression' ||
+        (isJSXNode(parent) && (isIf(n.expression) || isBinaryish(n.expression)))
+
+      if (shouldInline) {
+        return group(concat(['{', path.call(print, 'expression'), '}']))
+      }
+
+      return group(
+        concat([
+          '{',
+          indent(concat([softline, path.call(print, 'expression')])),
+          softline,
+          '}',
+        ])
+      )
     }
     case 'JSXElement': {
       const elem = printJSXElement(path, options, print)
@@ -786,6 +821,30 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     }
   }
+}
+
+function shouldOmitObjectBraces(path, { stackOffset = 0 } = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
+  if (node.type === 'ObjectPattern') {
+    return false
+  }
+
+  const shouldOmitBracesButStillIndent =
+    parent.type === 'JSXExpressionContainer' ||
+    (parent.type === 'CallExpression' &&
+      parent.arguments.length === 1 &&
+      callParensOptional(path, { stackOffset: stackOffset + 1 }))
+  if (shouldOmitBracesButStillIndent) {
+    return { indent: true }
+  }
+  const shouldOmitBracesButNotIndent =
+    parent.type === 'ClassBody' ||
+    (parent.type === 'ArrayExpression' && parent.elements.length === 1)
+  if (shouldOmitBracesButNotIndent) {
+    return { indent: false }
+  }
+  return false
 }
 
 function isIf(node) {
@@ -1402,17 +1461,24 @@ function printBinaryishExpressions(path, print) {
 }
 
 function isBlockLevel(node, parent) {
-  return parent.type === 'ExpressionStatement'
+  return (
+    parent.type === 'ExpressionStatement' || parent.type === 'BlockStatement'
+  )
 }
 
-function callParensOptional(node, parent, grandparent) {
-  const args = node.arguments
+function callParensOptional(path, { stackOffset = 0 } = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
 
   return (
-    args.length &&
-    (isBlockLevel(node, parent) ||
-      (parent.type === 'AssignmentExpression' &&
-        isBlockLevel(parent, grandparent)))
+    isBlockLevel(node, parent) ||
+    (parent.type === 'AssignmentExpression' &&
+      isBlockLevel(parent, grandparent)) ||
+    parent.type === 'JSXExpressionContainer' ||
+    (parent.type === 'ObjectProperty' &&
+      node === parent.value &&
+      shouldOmitObjectBraces(path, { stackOffset: stackOffset + 2 }))
   )
 }
 
@@ -1439,13 +1505,15 @@ function printArgumentsList(path, options, print) {
   }, 'arguments')
 
   const parent = path.getParentNode()
-  const grandparent = path.getParentNode(1)
-  const greatgrandparent = path.getParentNode(2)
   const parensOptional =
-    callParensOptional(node, parent, grandparent) ||
-    (parent.type === 'CallExpression' &&
-      node === parent.arguments[parent.arguments.length - 1] &&
-      callParensOptional(parent, grandparent, greatgrandparent))
+    node.arguments.length &&
+    (callParensOptional(path) ||
+      (parent.type === 'CallExpression' &&
+        node === parent.arguments[parent.arguments.length - 1] &&
+        callParensOptional(path, { stackOffset: 1 })) ||
+      (isBinaryish(parent) &&
+        node === parent.right &&
+        callParensOptional(path, { stackOffset: 1 })))
 
   const shouldntBreak =
     args.length === 1 && args[0].type === 'FunctionExpression'
