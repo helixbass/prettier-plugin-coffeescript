@@ -93,7 +93,8 @@ else
   else if b
     "b"
   else
-    "c"}
+    "c"
+  }
 </div>
 
 if cable
@@ -250,7 +251,8 @@ exports[`expression.coffee 1`] = `
   {->
     <SomethingElse>
       <span />
-    </SomethingElse>}
+    </SomethingElse>
+  }
 </Something>
 
 <Something>
@@ -264,7 +266,8 @@ exports[`expression.coffee 1`] = `
   {->
     <SomethingElse>
       <span />
-    </SomethingElse>}
+    </SomethingElse>
+  }
 </Something>
 
 <RadioListItem
@@ -292,12 +295,14 @@ exports[`expression.coffee 1`] = `
       "long_name_long_name_long_name"
       "long_name_long_name_long_name"
       data
-    )}
+    )
+  }
 />
 
 <Component
   onChange={(key, value) ->
-    @setState updatedTask: @state.updatedTask.set key, value}
+    @setState updatedTask: @state.updatedTask.set key, value
+  }
 />
 
 <BookingIntroPanel>
@@ -306,7 +311,8 @@ exports[`expression.coffee 1`] = `
       "long_name_long_name_long_name"
       "long_name_long_name_long_name"
       data
-    )}
+    )
+  }
 </BookingIntroPanel>
 
 <Component>
@@ -377,7 +383,8 @@ exports[`hug.coffee 1`] = `
           exactly={route.to is "/"}
           getComponent={routeES6Modules[route.value]}
         />}
-    </div>}
+    </div>
+  }
 </div>
 
 <div>
@@ -390,7 +397,8 @@ exports[`hug.coffee 1`] = `
           exactly={route.to is "/"}
           getComponent={routeES6Modules[route.value]}
         />}
-    </div>}
+    </div>
+  }
 </div>
 
 <div>
@@ -471,14 +479,16 @@ exports[`logical-expression.coffee 1`] = `
 
 <div>
   {if a
-    <span />}
+    <span />
+  }
 </div>
 
 <div>{<span /> if a}</div>
 
 <div>
   {unless a
-    <span />}
+    <span />
+  }
 </div>
 
 <div>{<span /> unless a}</div>
@@ -487,14 +497,16 @@ exports[`logical-expression.coffee 1`] = `
   {a and
     <span>
       make this text just so long enough to break this to the next line
-    </span>}
+    </span>
+  }
 </div>
 
 <div>
   {if a
     <span>
       make this text just so long enough to break this to the next line
-    </span>}
+    </span>
+  }
 </div>
 
 <div>
@@ -508,7 +520,8 @@ exports[`logical-expression.coffee 1`] = `
     b and
     <span>
       make this text just so long enough to break this to the next line
-    </span>}
+    </span>
+  }
 </div>
 
 <div>
@@ -517,7 +530,8 @@ exports[`logical-expression.coffee 1`] = `
       <div>
         <div />
       </div>
-    </span>}
+    </span>
+  }
 </div>
 
 `;
@@ -568,7 +582,8 @@ exports[`open-break.coffee 1`] = `
 <td
   onClick={->
     a
-    b}
+    b
+  }
 >
   {header}
   <showSort attr="long long long long long long long long long long long long" />

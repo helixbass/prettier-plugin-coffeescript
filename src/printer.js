@@ -736,15 +736,28 @@ function printPathNoParens(path, options, print) {
     case 'JSXExpressionContainer': {
       const parent = path.getParentNode()
 
+      const shouldInlineButStillClosingLinebreak =
+        n.expression.type === 'FunctionExpression' ||
+        (isJSXNode(parent) &&
+          ((isIf(n.expression) && !n.expression.postfix) ||
+            (isBinaryish(n.expression) &&
+              !path.call(pathNeedsParens, 'expression', 'right'))))
       const shouldInline =
+        shouldInlineButStillClosingLinebreak ||
         n.expression.type === 'ArrayExpression' ||
         n.expression.type === 'ObjectExpression' ||
-        n.expression.type === 'FunctionExpression' ||
         n.expression.type === 'CallExpression' ||
         (isJSXNode(parent) && (isIf(n.expression) || isBinaryish(n.expression)))
 
       if (shouldInline) {
-        return group(concat(['{', path.call(print, 'expression'), '}']))
+        return group(
+          concat([
+            '{',
+            path.call(print, 'expression'),
+            shouldInlineButStillClosingLinebreak ? softline : '',
+            '}',
+          ])
+        )
       }
 
       return group(
