@@ -134,6 +134,8 @@ function pathNeedsParens(path) {
         case 'BinaryExpression':
         case 'LogicalExpression':
           return name === 'right' && parent.right === node
+        case 'JSXSpreadAttribute':
+          return true
         default:
           return false
       }
@@ -279,6 +281,9 @@ function printPathNoParens(path, options, print) {
       const joinedProps = props.map(prop => {
         const result = concat(separatorParts.concat(group(prop.printed)))
         separatorParts = [ifBreak('', ','), line]
+        if (util.isNextLineEmpty(options.originalText, prop.node)) {
+          separatorParts.push(hardline)
+        }
         return result
       })
 
@@ -531,7 +536,21 @@ function printPathNoParens(path, options, print) {
       parts.push('return')
 
       if (n.argument) {
-        parts.push(' ', path.call(print, 'argument'))
+        const shouldBreak = n.argument.type === 'JSXElement'
+        if (shouldBreak) {
+          parts.push(
+            group(
+              concat([
+                ifBreak(' (', ' '),
+                indent(concat([softline, path.call(print, 'argument')])),
+                softline,
+                ifBreak(')'),
+              ])
+            )
+          )
+        } else {
+          parts.push(' ', path.call(print, 'argument'))
+        }
       }
 
       return concat(parts)
@@ -712,6 +731,8 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'JSXIdentifier':
       return '' + n.name
+    case 'JSXSpreadAttribute':
+      return concat(['{...', path.call(print, 'argument'), '}'])
     case 'JSXExpressionContainer': {
       const parent = path.getParentNode()
 
@@ -826,6 +847,7 @@ function printPathNoParens(path, options, print) {
 function shouldOmitObjectBraces(path, { stackOffset = 0 } = {}) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
   if (node.type === 'ObjectPattern') {
     return false
   }
@@ -840,7 +862,10 @@ function shouldOmitObjectBraces(path, { stackOffset = 0 } = {}) {
   }
   const shouldOmitBracesButNotIndent =
     parent.type === 'ClassBody' ||
-    (parent.type === 'ArrayExpression' && parent.elements.length === 1)
+    (parent.type === 'ArrayExpression' && parent.elements.length === 1) ||
+    (parent.type === 'AssignmentExpression' &&
+      node === parent.right &&
+      isBlockLevel(parent, grandparent))
   if (shouldOmitBracesButNotIndent) {
     return { indent: false }
   }
