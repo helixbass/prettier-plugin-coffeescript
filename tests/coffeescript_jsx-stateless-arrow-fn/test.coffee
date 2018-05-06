@@ -1,0 +1,67 @@
+render1 = ({ styles }) ->
+  <div style={styles} key="something">
+    Keep the indentation. Put each key on its own line.
+  </div>
+
+render2 = ({ styles }) -> <div style={styles} key="something">
+  Create indentation.
+</div>
+
+render3 = ({ styles }) -> <div style={styles} key="something">Create indentation.</div>
+
+render4 = ({ styles }) -> <div style={styles} key="something">Create indentation and indent <strong>all the things</strong>.</div>
+
+render5 = ({ styles }) -> <div>Keep it on one line.</div>
+
+render6 = ({ styles }) ->
+  <div attr1="aaaaaaaaaaaaaaaa" attr2="bbbbbbbbbbbb" attr3="cccccccccccc">
+    <div attr1="aaaaaaaaaaaaaaaa" attr2="bbbbbbbbbbbb" attr3="cccccccccccc" attr4>dddd dd d d dddd dddd <strong>hello</strong></div>
+    <div attr1="aaaaaaaaaaaaaaaa" attr2="bbbbbbbbbbbb" attr3="cccccccccccc" attr4>dddd dd d d dddd dddd <strong>hello</strong></div>
+    <div attr1="aaaaaaaaaaaaaaaa" attr2="bbbbbbbbbbbb" attr3="cccccccccccc" attr4>
+      <div attr1="aaaaaaaaaaaaaaaa" attr2="bbbbbbbbbbbb" attr3="cccccccccccc" attr4>dddd dd d d dddd dddd <strong>hello</strong></div> <strong>hello</strong></div>
+  </div>
+
+render7 = ->
+  <div>
+    <span /><span>Dont break each elem onto its own line.</span> <span />
+    <div /> <div />
+  </div>
+
+render7A = ->
+  <div>
+    <div /><div /><div />
+  </div>
+
+render7B = ->
+  <div>
+    <span> <span/> Dont break plz</span>
+    <span><span/>Dont break plz</span>
+    <span>Dont break plz<span/></span>
+  </div>
+
+render8 = (props) -> <div>{props.text}</div>
+render9 = (props) -> <div>{props.looooooooooooooooooooooooooooooong_text}</div>
+render10 = (props) -> <div>{props.even_looooooooooooooooooooooooooooooooooooooooooonger_contents}</div>
+
+notJSX = (aaaaaaaaaaaaaaaa, bbbbbbbbbbb) -> this.someLongCallWithParams(aaaaaa, bbbbbbb).anotherLongCallWithParams(ccccccccccc, dddddddddddddddddddddddd)
+
+React.render(
+  <BaseForm url="/auth/google" method="GET" colour="blue" size="large" submitLabel="Sign in with Google" />
+  document.querySelector('#react-root')
+)
+
+renderTernary = (props) ->
+  <BaseForm url="/auth/google" method="GET" colour="blue" size="large" submitLabel="Sign in with Google">
+    {if props.showTheThing
+      <BaseForm url="/auth/google" method="GET" colour="blue" size="large" submitLabel="Sign in with Google">Hello world!</BaseForm>
+    else 'hello ' + 'howdy! '}
+    {if props.showTheThing
+      <BaseForm url="/auth/google" method="GET" colour="blue" size="large" submitLabel="Sign in with Google">Hello world!</BaseForm>
+    else null}
+    {if props.showTheThing
+      null
+    else
+      <BaseForm url="/auth/google" method="GET" colour="blue" size="large" submitLabel="Sign in with Google">Hello world!</BaseForm>}
+    {if props.showTheOtherThing then <div>I am here</div> else <div attr="blah" />}
+    {if props.showTheOtherThing then <div>I am here!!</div> else null}
+  </BaseForm>

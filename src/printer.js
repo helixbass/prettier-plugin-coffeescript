@@ -581,7 +581,11 @@ function printPathNoParens(path, options, print) {
     }
     case 'NumericLiteral':
       return util.printNumber(n.extra.raw)
+    case 'BooleanLiteral':
     case 'StringLiteral':
+      if (typeof n.value !== 'string') {
+        return '' + n.value
+      }
       return nodeStr(n, options)
     case 'UnaryExpression': {
       let { operator } = n
@@ -747,6 +751,8 @@ function printPathNoParens(path, options, print) {
         n.expression.type === 'ArrayExpression' ||
         n.expression.type === 'ObjectExpression' ||
         n.expression.type === 'CallExpression' ||
+        n.expression.type === 'TemplateLiteral' ||
+        n.expression.type === 'TaggedTemplateExpression' ||
         (isJSXNode(parent) && (isIf(n.expression) || isBinaryish(n.expression)))
 
       if (shouldInline) {
@@ -769,11 +775,16 @@ function printPathNoParens(path, options, print) {
         ])
       )
     }
+    case 'JSXFragment':
     case 'JSXElement': {
       const elem = printJSXElement(path, options, print)
       return elem
     }
     case 'JSXOpeningElement': {
+      if (n.selfClosing && !n.attributes.length) {
+        return concat(['<', path.call(print, 'name'), ' />'])
+      }
+
       if (
         n.attributes &&
         n.attributes.length === 1 &&
@@ -811,6 +822,16 @@ function printPathNoParens(path, options, print) {
     }
     case 'JSXClosingElement':
       return concat(['</', path.call(print, 'name'), '>'])
+    case 'JSXOpeningFragment':
+    case 'JSXClosingFragment': {
+      const isOpeningFragment = n.type === 'JSXOpeningFragment'
+
+      if (isOpeningFragment) {
+        return '<>'
+      }
+
+      return '</>'
+    }
     case 'ClassBody':
       if (n.body.length === 0) {
         return ''
@@ -844,7 +865,11 @@ function printPathNoParens(path, options, print) {
         parts.push(print(childPath))
 
         if (i < expressions.length) {
-          const printed = expressions[i]
+          let printed = expressions[i]
+
+          if (n.expressions[i].type === 'MemberExpression') {
+            printed = concat([indent(concat([softline, printed])), softline])
+          }
 
           parts.push(group(concat(['#{', printed, '}'])))
         }
@@ -854,6 +879,8 @@ function printPathNoParens(path, options, print) {
 
       return concat(parts)
     }
+    case 'TaggedTemplateExpression':
+      return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
   }
 }
 
@@ -1028,8 +1055,27 @@ function printJSXElement(path, options, print) {
     return path.call(print, 'openingElement')
   }
 
-  const openingLines = path.call(print, 'openingElement')
-  const closingLines = path.call(print, 'closingElement')
+  const openingLines =
+    n.type === 'JSXElement'
+      ? path.call(print, 'openingElement')
+      : path.call(print, 'openingFragment')
+  const closingLines =
+    n.type === 'JSXElement'
+      ? path.call(print, 'closingElement')
+      : path.call(print, 'closingFragment')
+
+  if (
+    n.children.length === 1 &&
+    n.children[0].type === 'JSXExpressionContainer' &&
+    (n.children[0].expression.type === 'TemplateLiteral' ||
+      n.children[0].expression.type === 'TaggedTemplateExpression')
+  ) {
+    return concat([
+      openingLines,
+      concat(path.map(print, 'children')),
+      closingLines,
+    ])
+  }
 
   n.children = n.children.map(child => {
     if (isJSXWhitespaceExpression(child)) {
@@ -1271,7 +1317,16 @@ function isJSXNode(node) {
 }
 
 function isEmptyJSXElement(node) {
-  return node.children.length === 0
+  if (node.children.length === 0) {
+    return true
+  }
+
+  if (node.children.length > 1) {
+    return false
+  }
+
+  const child = node.children[0]
+  return isLiteral(child) && !isMeaningfulJSXText(child)
 }
 
 function adjustClause(node, clause) {
@@ -1392,6 +1447,9 @@ function printMemberChain(path, options, print) {
   //   return name.match(/(^[A-Z])|^[_$]+$/)
   // }
 
+  const shouldMerge =
+    groups.length >= 2 &&
+    (groups[0].length === 1 && groups[0][0].node.type === 'ThisExpression')
   function printGroup(printedGroup) {
     return concat(printedGroup.map(tuple => tuple.printed))
   }
@@ -1408,7 +1466,7 @@ function printMemberChain(path, options, print) {
   const printedGroups = groups.map(printGroup)
   const oneLine = concat(printedGroups)
 
-  const cutoff = 2
+  const cutoff = shouldMerge ? 3 : 2
   // const flatGroups = groups
   //   .slice(0, cutoff)
   //   .reduce((res, group) => res.concat(group), [])
@@ -1419,7 +1477,8 @@ function printMemberChain(path, options, print) {
 
   const expanded = concat([
     printGroup(groups[0]),
-    printIndentedGroup(groups.slice(1)),
+    shouldMerge ? concat(groups.slice(1, 2).map(printGroup)) : '',
+    printIndentedGroup(groups.slice(shouldMerge ? 2 : 1)),
   ])
 
   const callExpressionCount = printedNodes.filter(
