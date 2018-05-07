@@ -1,0 +1,172 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`arrow.coffee 1`] = `
+() -> a'''
+	a
+'''
+
+-> "
+	a
+"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-> a'''
+	a
+'''
+
+-> "
+	a
+"
+
+`;
+
+exports[`call.coffee 1`] = `
+insertRule """*, *:before, *:after {
+  box-sizing: inherit;
+}"""
+
+insertRule'*, *:before, *:after {
+  box-sizing: inherit;
+}'
+
+new Error formatErrorMessage'''
+  This a really bad error.
+  Which has more than one line.
+'''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+insertRule """*, *:before, *:after {
+  box-sizing: inherit;
+}"""
+
+insertRule'*, *:before, *:after {
+  box-sizing: inherit;
+}'
+
+new Error formatErrorMessage'''
+  This a really bad error.
+  Which has more than one line.
+'''
+
+`;
+
+exports[`inline.coffee 1`] = `
+this._pipe.write("\\n\\n Pattern matches #{total} #{pluralizeTest}")
+this._pipe.write(
+  "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+)
+this._pipe
+  .write(
+    "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+  )
+
+this._pipe.write("\\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong")
+
+this._pipe.write(
+  "\\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong"
+)
+
+this._pipe.write("
+  \\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong
+")
+
+
+-> "
+  a
+"
+
+() ->
+  "
+    a
+  "
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@_pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+@_pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+@_pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+
+@_pipe.write(
+  "\\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong"
+)
+
+@_pipe.write(
+  "\\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong"
+)
+
+@_pipe.write "
+  \\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong
+"
+
+-> "
+  a
+"
+
+-> "
+    a
+  "
+
+`;
+
+exports[`parenthesis.coffee 1`] = `
+(->)""
+
+(b = c)""
+
+f = ->
+  (await b)""
+
+(b + c)""
+
+b()""
+
+(class)""
+
+(if b then c else d)""
+
+(b || c)""
+
+b.c""
+
+(new B())""
+
+({})""
+
+(b; c)""
+
+("")""
+("#{b}")""
+
+(++b)""
+
+->
+  (yield 1)""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(->)""
+
+(b = c)""
+
+f = -> (await b)""
+
+(b + c)""
+
+b()""
+
+(class)""
+
+(if b then c else d)""
+
+(b or c)""
+
+b.c""
+
+new B()""
+
+({})""
+
+(b; c)""
+
+("")""
+("#{b}")""
+
+(++b)""
+
+-> (yield 1)""
+
+`;
