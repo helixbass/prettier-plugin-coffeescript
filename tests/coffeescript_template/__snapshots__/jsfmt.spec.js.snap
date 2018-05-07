@@ -152,7 +152,7 @@ b()""
 
 (if b then c else d)""
 
-(b or c)""
+(b || c)""
 
 b.c""
 

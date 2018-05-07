@@ -273,7 +273,7 @@ exports[`expression.coffee 1`] = `
 <RadioListItem
   key={option}
   imageSource={
-    @props.veryBigItemImageSourceFunc and
+    @props.veryBigItemImageSourceFunc &&
     @props.veryBigItemImageSourceFunc option
   }
   imageSize={@props.veryBigItemImageSize}
@@ -388,7 +388,7 @@ exports[`hug.coffee 1`] = `
 </div>
 
 <div>
-  {__DEV__ and
+  {__DEV__ &&
     <div>
       {routes.map (route) ->
         <MatchAsync
@@ -469,11 +469,11 @@ exports[`logical-expression.coffee 1`] = `
   </span>}
 </div>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<div>{a or "b"}</div>
+<div>{a || "b"}</div>
 
-<div>{a and "b"}</div>
+<div>{a && "b"}</div>
 
-<div>{a or <span />}</div>
+<div>{a || <span />}</div>
 
 <div>{a and <span />}</div>
 

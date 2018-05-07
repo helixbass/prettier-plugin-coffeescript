@@ -25,9 +25,9 @@ else
 
 foo ? (bar ? baz)
 
-foo ? baz or baz
+foo ? baz || baz
 
-(foo and baz) ? baz
+(foo && baz) ? baz
 foo and (baz ? baz)
 
 `;

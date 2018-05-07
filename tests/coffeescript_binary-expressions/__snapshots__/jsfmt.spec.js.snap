@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`arrow.coffee 1`] = `
+f = ->
+  appEntitys = getAppEntitys(loadObject).filter(
+    (entity) -> entity && entity.isInstallAvailable() && !entity.isQueue() && entity.isDisabled()
+  )
+
+f = ->
+  appEntitys = getAppEntitys(loadObject).map(
+    entity -> entity && entity.isInstallAvailable() && !entity.isQueue() && entity.isDisabled() && {
+      id: entity.id
+    }
+  )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = ->
+  appEntitys =
+    getAppEntitys(loadObject).filter (entity) ->
+      entity &&
+      entity.isInstallAvailable() &&
+      not entity.isQueue() &&
+      entity.isDisabled()
+
+f = ->
+  appEntitys =
+    getAppEntitys(loadObject).map(
+      entity ->
+        entity &&
+        entity.isInstallAvailable() &&
+        not entity.isQueue() &&
+        entity.isDisabled() &&
+        { id: entity.id }
+    )
+
+`;
+
+exports[`bitwise-flags.coffee 1`] = `
+FLAG_A = 1 << 0
+FLAG_B = 1 << 1
+FLAG_C = 1 << 2
+
+all = FLAG_A | FLAG_B | FLAG_C
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FLAG_A = 1 << 0
+FLAG_B = 1 << 1
+FLAG_C = 1 << 2
+
+all = FLAG_A | FLAG_B | FLAG_C
+
+`;
+
+exports[`equality.coffee 1`] = `
+x == y == z
+x != y == z
+x == y != z
+x != y != z
+
+x is y is z
+x isnt y is z
+x is y isnt z
+x isnt y isnt z
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(x == y) == z
+(x != y) == z
+(x == y) != z
+(x != y) != z
+
+(x is y) is z
+(x isnt y) is z
+(x is y) isnt z
+(x isnt y) isnt z
+
+`;

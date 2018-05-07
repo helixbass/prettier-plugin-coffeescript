@@ -119,11 +119,15 @@ function pathNeedsParens(path) {
             return true
           }
 
-          if ((po === 'or' || po === '?') && no === 'and') {
+          if ((po === '||' || po === '?') && no === '&&') {
             return true
           }
 
           if (pp === np && name === 'right') {
+            return true
+          }
+
+          if (pp === np && !util.shouldFlatten(po, no)) {
             return true
           }
 
@@ -288,8 +292,9 @@ function printPathNoParens(path, options, print) {
       }
 
       const shouldNotIndent =
-        parent.type === 'JSXExpressionContainer' &&
-        parentParent.type === 'JSXAttribute'
+        (parent.type === 'JSXExpressionContainer' &&
+          parentParent.type === 'JSXAttribute') ||
+        isOnlyExpressionInFunctionBody(path)
       const shouldIndentIfInlining = parent.type === 'AssignmentExpression'
 
       // if (shouldInlineLogicalExpression(n) && !samePrecedenceSubExpression)
@@ -643,6 +648,10 @@ function printPathNoParens(path, options, print) {
     case 'NumericLiteral':
       return util.printNumber(n.extra.raw)
     case 'BooleanLiteral':
+      if (n.name) {
+        return n.name
+      }
+    // else fallthrough
     case 'StringLiteral':
       if (typeof n.value !== 'string') {
         return '' + n.value
@@ -956,6 +965,21 @@ function printPathNoParens(path, options, print) {
     case 'TaggedTemplateExpression':
       return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
   }
+}
+
+function isOnlyExpressionInFunctionBody(path) {
+  // const node = path.getValue()
+  const parent = path.getParentNode()
+  const grandparent = path.getParentNode(1)
+  const greatgrandparent = path.getParentNode(2)
+
+  return (
+    parent.type === 'ExpressionStatement' &&
+    grandparent.type === 'BlockStatement' &&
+    grandparent.body.length === 1 &&
+    greatgrandparent.type === 'FunctionExpression' &&
+    grandparent === greatgrandparent.body
+  )
 }
 
 function templateLiteralHasNewLines(template) {
@@ -1592,9 +1616,12 @@ function isNumericLiteral(node) {
 }
 
 const operatorAliasMap = {
-  '||': 'or',
-  '&&': 'and',
-  '===': 'is',
+  or: '||',
+  and: '&&',
+  '==': '===',
+  '!=': '!==',
+  is: '===',
+  isnt: '!==',
 }
 function getCanonicalOperator(operator) {
   return operatorAliasMap[operator] || operator
@@ -1612,7 +1639,12 @@ function printBinaryishExpressions(path, print) {
   let flattenedBreaks = false
   let canBreak = false
   if (isBinaryish(node)) {
-    if (shouldFlatten(node.operator, node.left.operator)) {
+    if (
+      util.shouldFlatten(
+        getCanonicalOperator(node.operator),
+        getCanonicalOperator(node.left.operator)
+      )
+    ) {
       parts = parts.concat(
         path.call(left => {
           const { parts: flattenedParts, breaks } = printBinaryishExpressions(
@@ -1629,11 +1661,13 @@ function printBinaryishExpressions(path, print) {
       parts.push(path.call(print, 'left'))
     }
 
-    let { operator } = node
-    operator = getCanonicalOperator(operator)
+    const { operator } = node
+    const canonicalOperator = getCanonicalOperator(operator)
 
     canBreak =
-      (operator === 'and' || operator === 'or' || operator === '?') &&
+      (canonicalOperator === '&&' ||
+        canonicalOperator === '||' ||
+        canonicalOperator === '?') &&
       !isIf(node.right)
     const right = concat([
       operator,
@@ -1939,7 +1973,7 @@ function nodeStr(node, options) {
 }
 
 const PRECEDENCE = {}
-;[['?'], ['or'], ['and'], ['is']].forEach((tier, i) => {
+;[['?'], ['||'], ['&&'], ['===', '!==']].forEach((tier, i) => {
   tier.forEach(op => {
     PRECEDENCE[op] = i
   })
@@ -1949,21 +1983,21 @@ function getPrecedence(op) {
   return PRECEDENCE[op]
 }
 
-function shouldFlatten(parentOp, nodeOp) {
-  parentOp = getCanonicalOperator(parentOp)
-  nodeOp = getCanonicalOperator(nodeOp)
-  // console.log({
-  //   parentOp,
-  //   nodeOp,
-  //   parentPrec: getPrecedence(parentOp),
-  //   nodePrec: getPrecedence(nodeOp),
-  // })
-  if (getPrecedence(nodeOp) !== getPrecedence(parentOp)) {
-    return false
-  }
+// function shouldFlatten(parentOp, nodeOp) {
+//   parentOp = getCanonicalOperator(parentOp)
+//   nodeOp = getCanonicalOperator(nodeOp)
+//   // console.log({
+//   //   parentOp,
+//   //   nodeOp,
+//   //   parentPrec: getPrecedence(parentOp),
+//   //   nodePrec: getPrecedence(nodeOp),
+//   // })
+//   if (getPrecedence(nodeOp) !== getPrecedence(parentOp)) {
+//     return false
+//   }
 
-  return true
-}
+//   return true
+// }
 
 // const clean = (ast, newObj) => {}
 const clean = () => {}
