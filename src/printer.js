@@ -35,14 +35,13 @@ function isStatement(node) {
   )
 }
 
-function pathNeedsParens(path) {
-  const parent = path.getParentNode()
+function pathNeedsParens(path, { stackOffset = 0 } = {}) {
+  const parent = path.getParentNode(stackOffset)
   if (!parent) {
     return false
   }
 
-  const name = path.getName()
-  const node = path.getNode()
+  const node = path.getParentNode(stackOffset - 1)
 
   if (isStatement(node)) {
     return false
@@ -60,12 +59,13 @@ function pathNeedsParens(path) {
         firstParentNotMemberExpression &&
         firstParentNotMemberExpression.type === 'MemberExpression'
       ) {
-        firstParentNotMemberExpression = path.getParentNode(++i)
+        firstParentNotMemberExpression = path.getParentNode(++i + stackOffset)
       }
 
       if (
         firstParentNotMemberExpression.type === 'NewExpression' &&
-        firstParentNotMemberExpression.callee === path.getParentNode(i - 1)
+        firstParentNotMemberExpression.callee ===
+          path.getParentNode(i - 1 + stackOffset)
       ) {
         return true
       }
@@ -89,13 +89,17 @@ function pathNeedsParens(path) {
           )
 
         case 'MemberExpression':
-          return name === 'object' && parent.object === node
+          return parent.object === node
 
         case 'TaggedTemplateExpression':
           return true
         case 'NewExpression':
         case 'CallExpression':
-          return name === 'callee' && parent.callee === node
+          return parent.callee === node
+
+        case 'BinaryExpression':
+          return parent.operator === '**' && parent.left === node
+
         default:
           return false
       }
@@ -104,30 +108,31 @@ function pathNeedsParens(path) {
       switch (parent.type) {
         case 'CallExpression':
         case 'NewExpression':
-          return name === 'callee' && parent.callee === node
+          return parent.callee === node
 
         case 'TaggedTemplateExpression':
+        case 'UnaryExpression':
           return true
         case 'BinaryExpression':
         case 'LogicalExpression': {
-          const po = getCanonicalOperator(parent.operator)
+          const po = getCanonicalOperator(parent)
           const pp = getPrecedence(po)
-          const no = getCanonicalOperator(node.operator)
+          const no = getCanonicalOperator(node)
           const np = getPrecedence(no)
 
           if (pp > np) {
             return true
           }
 
-          if ((po === '||' || po === '?') && no === '&&') {
+          if ((po === '||' || po === 'BIN?') && no === '&&') {
             return true
           }
 
-          if (pp === np && name === 'right') {
+          if (pp === np && parent.right === node) {
             return true
           }
 
-          if (pp === np && !util.shouldFlatten(po, no)) {
+          if (pp === np && !shouldFlatten(parent, node)) {
             return true
           }
 
@@ -165,10 +170,10 @@ function pathNeedsParens(path) {
 
         case 'NewExpression':
         case 'CallExpression':
-          return name === 'callee' && parent.callee === node
+          return parent.callee === node
         case 'BinaryExpression':
         case 'LogicalExpression':
-          return name === 'right' && parent.right === node
+          return parent.right === node
         case 'JSXSpreadAttribute':
           return true
         default:
@@ -292,14 +297,21 @@ function printPathNoParens(path, options, print) {
       }
 
       const shouldNotIndent =
+        parent.type === 'ReturnStatement' ||
         (parent.type === 'JSXExpressionContainer' &&
           parentParent.type === 'JSXAttribute') ||
         isOnlyExpressionInFunctionBody(path)
-      const shouldIndentIfInlining = parent.type === 'AssignmentExpression'
+      const shouldIndentIfInlining =
+        parent.type === 'AssignmentExpression' ||
+        parent.type === 'ObjectProperty'
 
-      // if (shouldInlineLogicalExpression(n) && !samePrecedenceSubExpression)
+      const samePrecedenceSubExpression =
+        isBinaryish(n.left) && shouldFlatten(n, n.left)
+
       if (
         shouldNotIndent ||
+        (shouldInlineLogicalExpression(n, { notJSX: true }) &&
+          !samePrecedenceSubExpression) ||
         (!shouldInlineLogicalExpression(n) && shouldIndentIfInlining)
       ) {
         return group(concat(parts))
@@ -344,15 +356,22 @@ function printPathNoParens(path, options, print) {
       }
 
       const shouldOmitBraces = shouldOmitObjectBraces(path)
-      let shouldOmitBracesButNotIndent = false
+      let dontIndent = false
+      let trailingLine = true
       if (shouldOmitBraces && !shouldOmitBraces.indent) {
-        shouldOmitBracesButNotIndent = true
+        dontIndent = true
+      }
+      if (shouldOmitBraces && shouldOmitBraces.trailingLine === false) {
+        trailingLine = false
       }
       const isClassBody =
         parent.type === 'ExpressionStatement' &&
         grandparent.type === 'ClassBody'
-      const shouldBreak = isClassBody
-      const dontIndent = shouldOmitBracesButNotIndent || isClassBody
+      const shouldBreak =
+        isClassBody || (shouldOmitBraces && n.properties.length > 1)
+      if (isClassBody) {
+        dontIndent = true
+      }
       const content = concat([
         shouldOmitBraces ? '' : '{',
         dontIndent
@@ -364,7 +383,7 @@ function printPathNoParens(path, options, print) {
               ])
             ),
         concat([
-          dontIndent
+          dontIndent || !trailingLine
             ? ''
             : options.bracketSpacing && !shouldOmitBraces ? line : softline,
           shouldOmitBraces ? '' : '}',
@@ -597,7 +616,8 @@ function printPathNoParens(path, options, print) {
       parts.push('return')
 
       if (n.argument) {
-        const shouldBreak = n.argument.type === 'JSXElement'
+        const shouldBreak =
+          n.argument.type === 'JSXElement' || isBinaryish(n.argument)
         if (shouldBreak) {
           parts.push(
             group(
@@ -1002,26 +1022,73 @@ function shouldOmitObjectBraces(path, { stackOffset = 0 } = {}) {
   if (node.type === 'ObjectPattern') {
     return false
   }
+  if (!node.properties.length) {
+    return false
+  }
+  if (
+    node.properties.find(
+      ({ shorthand, type }) => shorthand || type === 'SpreadElement'
+    )
+  ) {
+    return false
+  }
 
-  const shouldOmitBracesButStillIndent =
-    parent.type === 'JSXExpressionContainer' ||
-    (parent.type === 'CallExpression' &&
-      parent.arguments.length === 1 &&
-      callParensOptional(path, { stackOffset: stackOffset + 1 }))
-  if (shouldOmitBracesButStillIndent) {
-    return { indent: true }
+  let isRightmost
+  if ((isRightmost = isRightmostInStatement(path, { stackOffset }))) {
+    return isRightmost
+  }
+
+  if (parent.type === 'JSXExpressionContainer') {
+    return { indent: true, trailingLine: true }
+  }
+  if (
+    parent.type === 'CallExpression' &&
+    parent.arguments.length === 1 &&
+    callParensOptional(path, { stackOffset: stackOffset + 1 })
+  ) {
+    return { indent: true, trailingLine: false }
   }
   const shouldOmitBracesButNotIndent =
     (parent.type === 'ExpressionStatement' &&
       grandparent.type === 'ClassBody') ||
-    (parent.type === 'ArrayExpression' && parent.elements.length === 1) ||
-    (parent.type === 'AssignmentExpression' &&
-      node === parent.right &&
-      isBlockLevel(parent, grandparent))
+    (parent.type === 'ArrayExpression' && parent.elements.length === 1)
   if (shouldOmitBracesButNotIndent) {
     return { indent: false }
   }
   return false
+}
+
+function isRightmostInStatement(path, { stackOffset = 0 } = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  let prevParent = node
+  let parentLevel = 0
+  let parent
+  let indent = false
+  let trailingLine
+  while ((parent = path.getParentNode(stackOffset + parentLevel))) {
+    if (isBlockLevel(prevParent, parent)) {
+      return { indent, trailingLine }
+    }
+    if (parent.type === 'AssignmentExpression' || isBinaryish(parent)) {
+      if (prevParent !== parent.right) {
+        return false
+      }
+      if (parent.type !== 'AssignmentExpression') {
+        indent = true
+        if (pathNeedsParens(path, { stackOffset: stackOffset + parentLevel }))
+          trailingLine = true
+        else if (!trailingLine) {
+          trailingLine = false
+        }
+      }
+    } else if (parent.type === 'ReturnStatement') {
+      indent = true
+    } else {
+      return false
+    }
+    prevParent = parent
+    parentLevel++
+  }
 }
 
 function isIf(node) {
@@ -1151,9 +1218,27 @@ function locEnd(node) {
   }
 }
 
-function shouldInlineLogicalExpression(node) {
+function shouldInlineLogicalExpression(node, { notJSX } = {}) {
   if (node.type !== 'LogicalExpression') {
     return false
+  }
+
+  if (
+    node.right.type === 'ObjectExpression' &&
+    node.right.properties.length !== 0
+  ) {
+    return true
+  }
+
+  if (
+    node.right.type === 'ArrayExpression' &&
+    node.right.elements.length !== 0
+  ) {
+    return true
+  }
+
+  if (!notJSX && isJSXNode(node.right)) {
+    return true
   }
 
   return false
@@ -1623,7 +1708,11 @@ const operatorAliasMap = {
   is: '===',
   isnt: '!==',
 }
-function getCanonicalOperator(operator) {
+function getCanonicalOperator(node) {
+  const { operator } = node
+  if (operator === '?' && node.type === 'BinaryExpression') {
+    return 'BIN?'
+  }
   return operatorAliasMap[operator] || operator
 }
 
@@ -1639,12 +1728,7 @@ function printBinaryishExpressions(path, print) {
   let flattenedBreaks = false
   let canBreak = false
   if (isBinaryish(node)) {
-    if (
-      util.shouldFlatten(
-        getCanonicalOperator(node.operator),
-        getCanonicalOperator(node.left.operator)
-      )
-    ) {
+    if (shouldFlatten(node, node.left)) {
       parts = parts.concat(
         path.call(left => {
           const { parts: flattenedParts, breaks } = printBinaryishExpressions(
@@ -1662,13 +1746,14 @@ function printBinaryishExpressions(path, print) {
     }
 
     const { operator } = node
-    const canonicalOperator = getCanonicalOperator(operator)
+    const canonicalOperator = getCanonicalOperator(node)
 
     canBreak =
       (canonicalOperator === '&&' ||
         canonicalOperator === '||' ||
-        canonicalOperator === '?') &&
-      !isIf(node.right)
+        canonicalOperator === 'BIN?') &&
+      !isIf(node.right) &&
+      !shouldInlineLogicalExpression(node, { notJSX: true })
     const right = concat([
       operator,
       canBreak ? line : ' ',
@@ -1740,7 +1825,9 @@ function printArgumentsList(path, options, print) {
         callParensOptional(path, { stackOffset: 1 })))
 
   const shouldntBreak =
-    args.length === 1 && args[0].type === 'FunctionExpression'
+    args.length === 1 &&
+    (args[0].type === 'FunctionExpression' ||
+      args[0].type === 'ObjectExpression')
   const parensUnnecessary = shouldntBreak
 
   const openingParen = parensUnnecessary
@@ -1814,6 +1901,7 @@ function printAssignment(
       isStringLiteral(leftNode) ||
       leftNode.type === 'MemberExpression'
     ) ||
+    shouldInlineLogicalExpression(rightNode) ||
     rightNode.type === 'ArrayExpression' ||
     rightNode.type === 'TemplateLiteral' ||
     rightNode.type === 'FunctionExpression' ||
@@ -1973,7 +2061,20 @@ function nodeStr(node, options) {
 }
 
 const PRECEDENCE = {}
-;[['?'], ['||'], ['&&'], ['===', '!==']].forEach((tier, i) => {
+;[
+  ['BIN?'],
+  ['||'],
+  ['&&'],
+  ['|'],
+  ['^'],
+  ['&'],
+  ['===', '!=='],
+  ['<', '>', '<=', '>=', 'in', 'instanceof', 'of'],
+  ['>>', '<<', '>>>'],
+  ['+', '-'],
+  ['*', '/', '%'],
+  ['**'],
+].forEach((tier, i) => {
   tier.forEach(op => {
     PRECEDENCE[op] = i
   })
@@ -1983,6 +2084,12 @@ function getPrecedence(op) {
   return PRECEDENCE[op]
 }
 
+function shouldFlatten(parent, node) {
+  return util.shouldFlatten(
+    getCanonicalOperator(parent),
+    getCanonicalOperator(node)
+  )
+}
 // function shouldFlatten(parentOp, nodeOp) {
 //   parentOp = getCanonicalOperator(parentOp)
 //   nodeOp = getCanonicalOperator(nodeOp)

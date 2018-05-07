@@ -200,7 +200,7 @@ long_string_with_extra_param =
 
 long_obj =
   <div
-    style={
+    style={{
       i: "dont"
       use: "bootstrap"
       and: "instead"
@@ -208,7 +208,7 @@ long_obj =
       objects
       like
       thisOne
-    }
+    }}
   >
     hello world
   </div>

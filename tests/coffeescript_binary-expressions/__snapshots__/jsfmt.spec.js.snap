@@ -28,8 +28,7 @@ f = ->
         entity &&
         entity.isInstallAvailable() &&
         not entity.isQueue() &&
-        entity.isDisabled() &&
-        { id: entity.id }
+        entity.isDisabled() && id: entity.id
     )
 
 `;
@@ -69,5 +68,242 @@ x isnt y isnt z
 (x isnt y) is z
 (x is y) isnt z
 (x isnt y) isnt z
+
+`;
+
+exports[`exp.coffee 1`] = `
+a ** b ** c
+(a ** b) ** c
+a.b ** c
+(-a) ** b
+a ** -b
+-(a**b)
+(a * b) ** c
+a ** (b * c)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a ** (b ** c)
+(a ** b) ** c
+a.b ** c
+(-a) ** b
+a ** -b
+-(a ** b)
+(a * b) ** c
+a ** (b * c)
+
+`;
+
+exports[`if.coffee 1`] = `
+if this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong then ;
+
+if @hasPlugin("dynamicImportsLonger") and @lookahead().typeLonger is tt.parenLeft then ;
+
+if (this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong == tt.parenLeft.right) then ;
+
+if (VeryVeryVeryVeryVeryVeryVeryVeryLong is VeryVeryVeryVeryVeryVeryVeryVeryVeryLong) then ;
+
+if (VeryVeryVeryVeryVeryVeryVeryVeryLong == VeryVeryVeryVeryVeryVeryVeryVeryVeryLong) then ;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if @hasPlugin("dynamicImportsLong") && @lookahead().typeLong
+  ;
+if (
+  @hasPlugin("dynamicImportsLonger") and
+  @lookahead().typeLonger is tt.parenLeft
+)
+  ;
+if (
+  @hasPlugin("dynamicImportsLong") &&
+  @lookahead().typeLong == tt.parenLeft.right
+)
+  ;
+if (
+  VeryVeryVeryVeryVeryVeryVeryVeryLong is VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
+)
+  ;
+if (
+  VeryVeryVeryVeryVeryVeryVeryVeryLong == VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
+)
+  ;
+
+`;
+
+exports[`inline-jsx.coffee 1`] = `
+user = renderedUser or <div><User name={@state.user.name} age={@state.user.age} /></div>
+
+user = renderedUser || shouldRenderUser && <div><User name={this.state.user.name} age={this.state.user.age} /></div>
+
+avatar = hasAvatar and <Gravatar user={author} size={size} />
+
+avatar = (hasAvatar || showPlaceholder) && <Gravatar user={author} size={size} />
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+user = renderedUser or
+  <div>
+    <User name={@state.user.name} age={@state.user.age} />
+  </div>
+
+user =
+  renderedUser ||
+  (shouldRenderUser &&
+    <div>
+      <User name={@state.user.name} age={@state.user.age} />
+    </div>)
+
+avatar = hasAvatar and <Gravatar user={author} size={size} />
+
+avatar = (hasAvatar || showPlaceholder) &&
+  <Gravatar user={author} size={size} />
+
+`;
+
+exports[`inline-object-array.coffee 1`] = `
+prevState = prevState || {
+  catalogs: [],
+  loadState: LOADED,
+  opened: false,
+  searchQuery: '',
+  selectedCatalog: null,
+}
+
+prevState = prevState or
+  defaultState or
+    catalogs: []
+    loadState: LOADED
+    opened: no
+    searchQuery: ''
+    selectedCatalog: null
+
+prevState = prevState ||
+  defaultState && {
+    catalogs: [],
+    loadState: LOADED,
+    opened: false,
+    searchQuery: '',
+    selectedCatalog: null,
+  }
+
+prevState = prevState || useDefault && defaultState || {
+    catalogs: [],
+    loadState: LOADED,
+    opened: false,
+    searchQuery: '',
+    selectedCatalog: null,
+  }
+
+this.steps = steps || [
+  {
+    name: 'mock-module',
+    path: '/nux/mock-module',
+  },
+]
+
+@steps = steps || checkStep && [
+  name: 'mock-module'
+  path: '/nux/mock-module'
+]
+
+this.steps = steps && checkStep || [
+  {
+    name: 'mock-module',
+    path: '/nux/mock-module',
+  },
+]
+
+create = ->
+  result = doSomething()
+  shouldReturn &&
+  result.ok && {
+    status: "ok",
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt
+  }
+
+create = ->
+  result = doSomething()
+  shouldReturn && result.ok && result || {
+    status: "ok",
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt
+  }
+
+obj = {
+  state: shouldHaveState &&
+    stateIsOK && {
+      loadState: LOADED,
+      opened: no
+    },
+  loadNext: stateIsOK && hasNext || {
+      skipNext: yes
+    },
+  loaded: yes
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+prevState = prevState ||
+  catalogs: []
+  loadState: LOADED
+  opened: false
+  searchQuery: ""
+  selectedCatalog: null
+
+prevState = prevState or
+  defaultState or
+    catalogs: []
+    loadState: LOADED
+    opened: no
+    searchQuery: ""
+    selectedCatalog: null
+
+prevState =
+  prevState ||
+  (defaultState &&
+    catalogs: []
+    loadState: LOADED
+    opened: false
+    searchQuery: ""
+    selectedCatalog: null
+  )
+
+prevState = prevState ||
+  (useDefault && defaultState) ||
+    catalogs: []
+    loadState: LOADED
+    opened: false
+    searchQuery: ""
+    selectedCatalog: null
+
+@steps = steps || [
+  name: "mock-module"
+  path: "/nux/mock-module"
+]
+
+@steps =
+  steps ||
+  (checkStep && [
+    name: "mock-module"
+    path: "/nux/mock-module"
+  ])
+
+@steps = (steps && checkStep) || [
+  name: "mock-module"
+  path: "/nux/mock-module"
+]
+
+create = ->
+  result = doSomething()
+  shouldReturn &&
+    result.ok &&
+      status: "ok"
+      createdAt: result.createdAt
+      updatedAt: result.updatedAt
+
+create = ->
+  result = doSomething()
+  (shouldReturn && result.ok && result) ||
+    status: "ok"
+    createdAt: result.createdAt
+    updatedAt: result.updatedAt
+
+obj =
+  state: shouldHaveState && stateIsOK && { loadState: LOADED, opened: no }
+  loadNext: (stateIsOK && hasNext) || { skipNext: yes }
+  loaded: yes
 
 `;
