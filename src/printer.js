@@ -98,6 +98,9 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
           return parent.callee === node
 
         case 'BinaryExpression':
+          if (node.operator === 'do') {
+            return true
+          }
           return parent.operator === '**' && parent.left === node
 
         default:
@@ -112,6 +115,7 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
 
         case 'TaggedTemplateExpression':
         case 'UnaryExpression':
+        case 'Existence':
           return true
         case 'BinaryExpression':
         case 'LogicalExpression': {
@@ -159,7 +163,10 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
     case 'TemplateLiteral':
       return parent.type === 'TaggedTemplateExpression' && node === parent.tag
     case 'AssignmentExpression':
-      if (parent.type === 'ExpressionStatement') {
+      if (
+        parent.type === 'ExpressionStatement' ||
+        parent.type === 'AssignmentExpression'
+      ) {
         return false
       }
       return true
@@ -170,12 +177,19 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
 
         case 'NewExpression':
         case 'CallExpression':
-          return parent.callee === node
+          return parent.callee === node || node.postfix
         case 'BinaryExpression':
         case 'LogicalExpression':
           return parent.right === node
         case 'JSXSpreadAttribute':
           return true
+        default:
+          return false
+      }
+    case 'For':
+      switch (parent.type) {
+        case 'CallExpression':
+          return parent.callee === node || node.postfix
         default:
           return false
       }
@@ -678,17 +692,7 @@ function printPathNoParens(path, options, print) {
       }
       return nodeStr(n, options)
     case 'UnaryExpression': {
-      let { operator } = n
-      if (isLogicalNotExpression(n)) {
-        if (
-          !(
-            isLogicalNotExpression(n.argument) ||
-            isLogicalNotExpression(path.getParentNode())
-          )
-        ) {
-          operator = 'not'
-        }
-      }
+      const { operator } = n
       parts.push(operator)
 
       if (/[a-z]$/.test(operator)) {
@@ -764,6 +768,35 @@ function printPathNoParens(path, options, print) {
         { shouldBreak }
       )
     }
+    case 'For': {
+      const opening = concat([
+        'for ',
+        n.name ? concat([path.call(print, 'name'), ' ', n.style, ' ']) : '',
+        path.call(print, 'source'),
+        n.step ? concat([' by ', path.call(print, 'step')]) : '',
+      ])
+
+      if (n.postfix) {
+        parts.push(path.call(print, 'body'), ' ')
+        parts.push(opening)
+        return concat(parts)
+      }
+      parts.push(opening)
+      const body = adjustClause(n.body, path.call(print, 'body'))
+      parts.push(body)
+
+      const shouldBreak = true
+      return group(concat(parts), { shouldBreak })
+    }
+    case 'Range':
+      parts.push(
+        '[',
+        n.from ? path.call(print, 'from') : '',
+        n.exclusive ? '...' : '..',
+        n.to ? path.call(print, 'to') : '',
+        ']'
+      )
+      return concat(parts)
     case 'WhileStatement': {
       const simpleTest = path.call(print, 'test')
       const breakingTest = group(
@@ -1082,6 +1115,12 @@ function isRightmostInStatement(path, { stackOffset = 0 } = {}) {
         }
       }
     } else if (parent.type === 'ReturnStatement') {
+      indent = true
+    } else if (
+      parent.type === 'CallExpression' &&
+      parent.arguments &&
+      prevParent === parent.arguments[parent.arguments.length - 1]
+    ) {
       indent = true
     } else {
       return false
@@ -1534,10 +1573,6 @@ function adjustClause(node, clause) {
   return indent(concat([line, clause]))
 }
 
-function isLogicalNotExpression(node) {
-  return node.operator === '!'
-}
-
 function isMemberish(node) {
   return node.type === 'MemberExpression'
 }
@@ -1905,6 +1940,8 @@ function printAssignment(
     rightNode.type === 'ArrayExpression' ||
     rightNode.type === 'TemplateLiteral' ||
     rightNode.type === 'FunctionExpression' ||
+    rightNode.type === 'ClassExpression' ||
+    (rightNode.type === 'UnaryExpression' && rightNode.operator === 'do') ||
     rightNode.type === 'NewExpression'
 
   const printed = printAssignmentRight(
@@ -2084,11 +2121,17 @@ function getPrecedence(op) {
   return PRECEDENCE[op]
 }
 
+function isEqualityOperator(op) {
+  return op === '===' || op === '!=='
+}
+
 function shouldFlatten(parent, node) {
-  return util.shouldFlatten(
-    getCanonicalOperator(parent),
-    getCanonicalOperator(node)
-  )
+  const parentOp = getCanonicalOperator(parent)
+  const nodeOp = getCanonicalOperator(node)
+  if (isEqualityOperator(parentOp) && isEqualityOperator(nodeOp)) {
+    return true
+  }
+  return util.shouldFlatten(parentOp, nodeOp)
 }
 // function shouldFlatten(parentOp, nodeOp) {
 //   parentOp = getCanonicalOperator(parentOp)

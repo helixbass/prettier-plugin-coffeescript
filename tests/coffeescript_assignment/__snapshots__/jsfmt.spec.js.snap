@@ -7,7 +7,7 @@ computedDescriptionLines = focused and not loading and descriptionLinesFocused o
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 computedDescriptionLines =
   (showConfirm && descriptionLinesConfirming) ||
-  (focused && not loading && descriptionLinesFocused) ||
+  (focused && !loading && descriptionLinesFocused) ||
   descriptionLines
 
 computedDescriptionLines =

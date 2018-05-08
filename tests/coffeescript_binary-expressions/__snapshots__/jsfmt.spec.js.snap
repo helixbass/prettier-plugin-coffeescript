@@ -18,7 +18,7 @@ f = ->
     getAppEntitys(loadObject).filter (entity) ->
       entity &&
       entity.isInstallAvailable() &&
-      not entity.isQueue() &&
+      !entity.isQueue() &&
       entity.isDisabled()
 
 f = ->
@@ -27,7 +27,7 @@ f = ->
       entity ->
         entity &&
         entity.isInstallAvailable() &&
-        not entity.isQueue() &&
+        !entity.isQueue() &&
         entity.isDisabled() && id: entity.id
     )
 
@@ -59,15 +59,15 @@ x isnt y is z
 x is y isnt z
 x isnt y isnt z
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(x == y) == z
-(x != y) == z
-(x == y) != z
-(x != y) != z
+x == y == z
+x != y == z
+x == y != z
+x != y != z
 
-(x is y) is z
-(x isnt y) is z
-(x is y) isnt z
-(x isnt y) isnt z
+x is y is z
+x isnt y is z
+x is y isnt z
+x isnt y isnt z
 
 `;
 
