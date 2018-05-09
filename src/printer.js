@@ -69,7 +69,12 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
       ) {
         return true
       }
-      return false
+      switch (parent.type) {
+        case 'Range':
+          return node.arguments && node.arguments.length > 0
+        default:
+          return false
+      }
     }
     case 'UpdateExpression':
       if (parent.type === 'UnaryExpression') {
@@ -116,6 +121,7 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
         case 'TaggedTemplateExpression':
         case 'UnaryExpression':
         case 'Existence':
+        case 'Range':
           return true
         case 'BinaryExpression':
         case 'LogicalExpression': {
@@ -161,7 +167,11 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
       }
     case 'StringLiteral':
     case 'TemplateLiteral':
-      return parent.type === 'TaggedTemplateExpression' && node === parent.tag
+    case 'NumericLiteral':
+      return (
+        (parent.type === 'TaggedTemplateExpression' && node === parent.tag) ||
+        (parent.type === 'CallExpression' && node === parent.callee)
+      )
     case 'AssignmentExpression':
       if (
         parent.type === 'ExpressionStatement' ||
@@ -169,10 +179,18 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
       ) {
         return false
       }
+      if (
+        node.operator !== '=' &&
+        parent.type === 'CallExpression' &&
+        node !== parent.callee
+      ) {
+        return false
+      }
       return true
     case 'ConditionalExpression':
       switch (parent.type) {
         case 'TaggedTemplateExpression':
+        case 'Range':
           return true
 
         case 'NewExpression':
@@ -190,13 +208,21 @@ function pathNeedsParens(path, { stackOffset = 0 } = {}) {
       switch (parent.type) {
         case 'CallExpression':
           return parent.callee === node || node.postfix
+        case 'AssignmentExpression':
+          return node.postfix
+        case 'ReturnStatement':
+        case 'MemberExpression':
+          return true
         default:
           return false
       }
     case 'FunctionExpression':
       switch (parent.type) {
         case 'TaggedTemplateExpression':
+        case 'MemberExpression':
           return true
+        case 'CallExpression':
+          return node === parent.callee
         default:
           return false
       }
@@ -465,6 +491,11 @@ function printPathNoParens(path, options, print) {
       return 'super'
     case 'NullLiteral':
       return 'null'
+    case 'PassthroughLiteral': {
+      const quote = n.here ? '```' : '`'
+      parts.push(quote, n.value, quote)
+      return concat(parts)
+    }
     case 'Identifier':
       return concat([n.name])
     case 'MemberExpression': {
@@ -483,23 +514,32 @@ function printPathNoParens(path, options, print) {
     }
     case 'SpreadElement':
     case 'RestElement':
-      return concat([path.call(print, 'argument'), '...'])
+      return concat([n.argument ? path.call(print, 'argument') : '', '...'])
     case 'FunctionExpression': {
+      const parent = path.getParentNode()
       parts.push(group(printFunctionParams(path, print, options)))
 
       parts.push(n.bound ? '=>' : '->')
 
+      const { expr: singleExpr, path: singleExprPath } = singleExpressionBlock(
+        n.body,
+        { withPath: true }
+      )
       const body = isEmptyBlock(n.body)
         ? ''
-        : n.body.type === 'BlockStatement' &&
-          n.body.body.length === 1 &&
-          n.body.body[0].type === 'ExpressionStatement' &&
-          (n.body.body[0].expression.type === 'TaggedTemplateExpression' ||
-            n.body.body[0].expression.type === 'TemplateLiteral')
-          ? concat([' ', path.call(print, 'body', 'body', '0', 'expression')])
+        : singleExpr &&
+          (singleExpr.type === 'TaggedTemplateExpression' ||
+            singleExpr.type === 'TemplateLiteral')
+          ? concat([' ', path.call(print, 'body', ...singleExprPath)])
           : concat([ifBreak('', ' '), path.call(print, 'body')])
 
-      return group(concat([concat(parts), body]))
+      const shouldBreak =
+        singleExpr &&
+        parent.type === 'UnaryExpression' &&
+        parent.operator === 'do'
+      // singleExpr.type === 'FunctionExpression' ||
+      // grandparent.type === 'For'
+      return group(concat([concat(parts), body]), { shouldBreak })
     }
     case 'ImportSpecifier':
       parts.push(path.call(print, 'imported'))
@@ -771,9 +811,28 @@ function printPathNoParens(path, options, print) {
     case 'For': {
       const opening = concat([
         'for ',
-        n.name ? concat([path.call(print, 'name'), ' ', n.style, ' ']) : '',
+        n.own ? 'own ' : '',
+        n.name || n.index
+          ? concat([
+              n.style === 'of'
+                ? concat([
+                    n.index ? path.call(print, 'index') : '',
+                    n.name && n.index ? ', ' : '',
+                    n.name ? path.call(print, 'name') : '',
+                  ])
+                : concat([
+                    n.name ? path.call(print, 'name') : '',
+                    n.name && n.index ? ', ' : '',
+                    n.index ? path.call(print, 'index') : '',
+                  ]),
+              ' ',
+              n.style,
+              ' ',
+            ])
+          : '',
         path.call(print, 'source'),
         n.step ? concat([' by ', path.call(print, 'step')]) : '',
+        n.guard ? concat([' when ', path.call(print, 'guard')]) : '',
       ])
 
       if (n.postfix) {
@@ -782,10 +841,23 @@ function printPathNoParens(path, options, print) {
         return concat(parts)
       }
       parts.push(opening)
-      const body = adjustClause(n.body, path.call(print, 'body'))
+
+      const { expr: singleExpr, path: singleExprPath } = singleExpressionBlock(
+        n.body,
+        { withPath: true }
+      )
+      const shouldBreak = !(
+        singleExpr &&
+        singleExpr.type === 'UnaryExpression' &&
+        singleExpr.operator === 'do' &&
+        singleExpr.argument.type === 'FunctionExpression'
+      )
+      const body = shouldBreak
+        ? adjustClause(n.body, path.call(print, 'body'))
+        : path.call(print, 'body', ...singleExprPath)
+      parts.push(shouldBreak ? '' : ' then ')
       parts.push(body)
 
-      const shouldBreak = true
       return group(concat(parts), { shouldBreak })
     }
     case 'Range':
@@ -841,8 +913,85 @@ function printPathNoParens(path, options, print) {
         { shouldBreak }
       )
     }
+    case 'BreakStatement':
+      return 'break'
+    case 'ContinueStatement':
+      return 'continue'
+    case 'TryStatement':
+      return concat([
+        'try',
+        path.call(print, 'block'),
+        n.handler ? path.call(print, 'handler') : '',
+        n.finalizer ? path.call(print, 'finalizer') : '',
+      ])
     case 'ThrowStatement':
       return concat(['throw ', path.call(print, 'argument')])
+    case 'SwitchStatement': {
+      parts.push('switch')
+      if (n.discriminant) {
+        parts.push(
+          ' ',
+          group(
+            concat([
+              ifBreak('('),
+              indent(concat([softline, path.call(print, 'discriminant')])),
+              softline,
+              ifBreak(')'),
+            ])
+          )
+        )
+      }
+      const groupedCases = []
+      let currentGroup = []
+      const printConsequent = casePath =>
+        indent(
+          concat([
+            hardline,
+            casePath.call(
+              consequentPath =>
+                printStatementSequence(consequentPath, options, print),
+              'consequent'
+            ),
+          ])
+        )
+      path.map(casePath => {
+        const kase = casePath.getValue()
+        if (kase.test) {
+          currentGroup.push(casePath.call(print, 'test'))
+          if (kase.consequent && kase.consequent.length) {
+            groupedCases.push({
+              cases: currentGroup,
+              // consequent: adjustClause(
+              //   kase.consequent,
+              //   casePath.call(print, 'consequent')
+              // ),
+              consequent: printConsequent(casePath),
+            })
+            currentGroup = []
+          }
+        } else {
+          // default should be last case
+          groupedCases.push({
+            consequent: printConsequent(casePath),
+          })
+        }
+      }, 'cases')
+      const body = []
+      const lastIndex = groupedCases.length - 1
+      groupedCases.map((groupedCase, i) => {
+        if (groupedCase.cases) {
+          body.push('when ')
+          body.push(join(', ', groupedCase.cases))
+        } else {
+          body.push('else')
+        }
+        body.push(
+          concat([groupedCase.consequent, i !== lastIndex ? hardline : ''])
+        )
+      })
+      parts.push(group(indent(concat([hardline, ...body]))))
+      return concat(parts)
+    }
     case 'JSXAttribute':
       parts.push(path.call(print, 'name'))
 
@@ -1020,6 +1169,30 @@ function printPathNoParens(path, options, print) {
   }
 }
 
+function singleExpressionBlock(node, { withPath } = {}) {
+  if (!(node.type === 'BlockStatement' && node.body.length === 1)) {
+    return false
+  }
+  const singleStatement = node.body[0]
+  if (singleStatement.type === 'ExpressionStatement') {
+    const expr = singleStatement.expression
+    return withPath
+      ? {
+          expr,
+          path: ['body', '0', 'expression'],
+        }
+      : expr
+  } else {
+    const expr = singleStatement
+    return withPath
+      ? {
+          expr,
+          path: ['body', '0'],
+        }
+      : expr
+  }
+}
+
 function isOnlyExpressionInFunctionBody(path) {
   // const node = path.getValue()
   const parent = path.getParentNode()
@@ -1084,7 +1257,8 @@ function shouldOmitObjectBraces(path, { stackOffset = 0 } = {}) {
   const shouldOmitBracesButNotIndent =
     (parent.type === 'ExpressionStatement' &&
       grandparent.type === 'ClassBody') ||
-    (parent.type === 'ArrayExpression' && parent.elements.length === 1)
+    (parent.type === 'ArrayExpression' && parent.elements.length === 1) ||
+    parent.type === 'ObjectProperty' // && grandparent.properties.length === 1
   if (shouldOmitBracesButNotIndent) {
     return { indent: false }
   }
@@ -1815,11 +1989,16 @@ function callParensOptional(path, { stackOffset = 0 } = {}) {
   const grandparent = path.getParentNode(stackOffset + 1)
 
   return (
+    pathNeedsParens(path) ||
     isBlockLevel(node, parent) ||
+    isRightmostInStatement(path, { stackOffset }) ||
     (parent.type === 'AssignmentExpression' &&
       isBlockLevel(parent, grandparent)) ||
     parent.type === 'JSXExpressionContainer' ||
     parent.type === 'TemplateLiteral' ||
+    (parent.type === 'ConditionalExpression' &&
+      parent.postfix &&
+      parent.consequent === node) ||
     (parent.type === 'ObjectProperty' &&
       node === parent.value &&
       shouldOmitObjectBraces(path, { stackOffset: stackOffset + 2 }))
@@ -2002,10 +2181,14 @@ function printMemberLookup(path, options, print) {
   parts.push(optional)
 
   if (n.computed) {
-    parts.push('[')
+    if (n.property.type !== 'Range') {
+      parts.push('[')
+    }
     const property = path.call(print, 'property')
     parts.push(property)
-    parts.push(']')
+    if (n.property.type !== 'Range') {
+      parts.push(']')
+    }
     return concat(parts)
   }
 
@@ -2083,10 +2266,14 @@ function printArrayItems(path, options, printPath, print) {
   let separatorParts = []
 
   path.each(childPath => {
+    const child = childPath.getValue()
     printedElements.push(concat(separatorParts))
     printedElements.push(print(childPath))
 
     separatorParts = [ifBreak('', ','), line]
+    if (util.isNextLineEmpty(options.originalText, child)) {
+      separatorParts.push(line)
+    }
   }, printPath)
 
   return concat(printedElements)

@@ -1,5 +1,1273 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`comprehensions.coffee 1`] = `
+# Comprehensions
+# --------------
+
+# * Array Comprehensions
+# * Range Comprehensions
+# * Object Comprehensions
+# * Implicit Destructuring Assignment
+# * Comprehensions with Nonstandard Step
+
+# TODO: refactor comprehension tests
+
+test "Basic array comprehensions.", ->
+
+  nums    = (n * n for n in [1, 2, 3] when n & 1)
+  results = (n * 2 for n in nums)
+
+  ok results.join(',') is '2,18'
+
+
+test "Basic object comprehensions.", ->
+
+  obj   = {one: 1, two: 2, three: 3}
+  names = (prop + '!' for prop of obj)
+  odds  = (prop + '!' for prop, value of obj when value & 1)
+
+  ok names.join(' ') is "one! two! three!"
+  ok odds.join(' ')  is "one! three!"
+
+
+test "Basic range comprehensions.", ->
+
+  nums = (i * 3 for i in [1..3])
+
+  negs = (x for x in [-20..-5*2])
+  negs = negs[0..2]
+
+  result = nums.concat(negs).join(', ')
+
+  ok result is '3, 6, 9, -20, -19, -18'
+
+
+test "With range comprehensions, you can loop in steps.", ->
+
+  results = (x for x in [0...15] by 5)
+  ok results.join(' ') is '0 5 10'
+
+  results = (x for x in [0..100] by 10)
+  ok results.join(' ') is '0 10 20 30 40 50 60 70 80 90 100'
+
+
+test "And can loop downwards, with a negative step.", ->
+
+  results = (x for x in [5..1])
+
+  ok results.join(' ') is '5 4 3 2 1'
+  ok results.join(' ') is [(10-5)..(-2+3)].join(' ')
+
+  results = (x for x in [10..1])
+  ok results.join(' ') is [10..1].join(' ')
+
+  results = (x for x in [10...0] by -2)
+  ok results.join(' ') is [10, 8, 6, 4, 2].join(' ')
+
+
+test "Range comprehension gymnastics.", ->
+
+  eq "#{i for i in [5..1]}", '5,4,3,2,1'
+  eq "#{i for i in [5..-5] by -5}", '5,0,-5'
+
+  a = 6
+  b = 0
+  c = -2
+
+  eq "#{i for i in [a..b]}", '6,5,4,3,2,1,0'
+  eq "#{i for i in [a..b] by c}", '6,4,2,0'
+
+
+test "Multiline array comprehension with filter.", ->
+
+  evens = for num in [1, 2, 3, 4, 5, 6] when not (num & 1)
+             num *= -1
+             num -= 2
+             num * -1
+  eq evens + '', '4,6,8'
+
+
+  test "The in operator still works, standalone.", ->
+
+    ok 2 of evens
+
+
+test "all isn't reserved.", ->
+
+  all = 1
+
+
+test "Ensure that the closure wrapper preserves local variables.", ->
+
+  obj = {}
+
+  for method in ['one', 'two', 'three'] then do (method) ->
+    obj[method] = ->
+      "I'm " + method
+
+  ok obj.one()   is "I'm one"
+  ok obj.two()   is "I'm two"
+  ok obj.three() is "I'm three"
+
+
+test "Index values at the end of a loop.", ->
+
+  i = 0
+  for i in [1..3]
+    -> 'func'
+    break if false
+  ok i is 4
+
+
+test "Ensure that local variables are closed over for range comprehensions.", ->
+
+  funcs = for i in [1..3]
+    do (i) ->
+      -> -i
+
+  eq (func() for func in funcs).join(' '), '-1 -2 -3'
+  ok i is 4
+
+
+test "Even when referenced in the filter.", ->
+
+  list = ['one', 'two', 'three']
+
+  methods = for num, i in list when num isnt 'two' and i isnt 1
+    do (num, i) ->
+      -> num + ' ' + i
+
+  ok methods.length is 2
+  ok methods[0]() is 'one 0'
+  ok methods[1]() is 'three 2'
+
+
+test "Even a convoluted one.", ->
+
+  funcs = []
+
+  for i in [1..3]
+    do (i) ->
+      x = i * 2
+      ((z)->
+        funcs.push -> z + ' ' + i
+      )(x)
+
+  ok (func() for func in funcs).join(', ') is '2 1, 4 2, 6 3'
+
+  funcs = []
+
+  results = for i in [1..3]
+    do (i) ->
+      z = (x * 3 for x in [1..i])
+      ((a, b, c) -> [a, b, c].join(' ')).apply this, z
+
+  ok results.join(', ') is '3  , 3 6 , 3 6 9'
+
+
+test "Naked ranges are expanded into arrays.", ->
+
+  array = [0..10]
+  ok(num % 2 is 0 for num in array by 2)
+
+
+test "Nested shared scopes.", ->
+
+  foo = ->
+    for i in [0..7]
+      do (i) ->
+        for j in [0..7]
+          do (j) ->
+            -> i + j
+
+  eq foo()[3][4](), 7
+
+
+test "Scoped loop pattern matching.", ->
+
+  a = [[0], [1]]
+  funcs = []
+
+  for [v] in a
+    do (v) ->
+      funcs.push -> v
+
+  eq funcs[0](), 0
+  eq funcs[1](), 1
+
+
+test "Nested comprehensions.", ->
+
+  multiLiner =
+    for x in [3..5]
+      for y in [3..5]
+        [x, y]
+
+  singleLiner =
+    (([x, y] for y in [3..5]) for x in [3..5])
+
+  ok multiLiner.length is singleLiner.length
+  ok 5 is multiLiner[2][2][1]
+  ok 5 is singleLiner[2][2][1]
+
+
+test "Comprehensions within parentheses.", ->
+
+  result = null
+  store = (obj) -> result = obj
+  store (x * 2 for x in [3, 2, 1])
+
+  ok result.join(' ') is '6 4 2'
+
+
+test "Closure-wrapped comprehensions that refer to the 'arguments' object.", ->
+
+  expr = ->
+    result = (item * item for item in arguments)
+
+  ok expr(2, 4, 8).join(' ') is '4 16 64'
+
+
+test "Fast object comprehensions over all properties, including prototypal ones.", ->
+
+  class Cat
+    constructor: -> @name = 'Whiskers'
+    breed: 'tabby'
+    hair:  'cream'
+
+  whiskers = new Cat
+  own = (value for own key, value of whiskers)
+  all = (value for key, value of whiskers)
+
+  ok own.join(' ') is 'Whiskers'
+  ok all.sort().join(' ') is 'Whiskers cream tabby'
+
+
+test "Optimized range comprehensions.", ->
+
+  exxes = ('x' for [0...10])
+  ok exxes.join(' ') is 'x x x x x x x x x x'
+
+
+test "#3671: Allow step in optimized range comprehensions.", ->
+
+  exxes = ('x' for [0...10] by 2)
+  eq exxes.join(' ') , 'x x x x x'
+
+
+test "#3671: Disallow guard in optimized range comprehensions.", ->
+
+  throws -> CoffeeScript.compile "exxes = ('x' for [0...10] when a)"
+
+
+test "Loop variables should be able to reference outer variables", ->
+  outer = 1
+  do ->
+    null for outer in [1, 2, 3]
+  eq outer, 3
+
+
+test "Lenient on pure statements not trying to reach out of the closure", ->
+
+  val = for i in [1]
+    for j in [] then break
+    i
+  ok val[0] is i
+
+
+test "Comprehensions only wrap their last line in a closure, allowing other lines
+  to have pure expressions in them.", ->
+
+  func = -> for i in [1]
+    break if i is 2
+    j for j in [1]
+
+  ok func()[0][0] is 1
+
+  i = 6
+  odds = while i--
+    continue unless i & 1
+    i
+
+  ok odds.join(', ') is '5, 3, 1'
+
+
+test "Issue #897: Ensure that plucked function variables aren't leaked.", ->
+
+  facets = {}
+  list = ['one', 'two']
+
+  (->
+    for entity in list
+      facets[entity] = -> entity
+  )()
+
+  eq typeof entity, 'undefined'
+  eq facets['two'](), 'two'
+
+
+test "Issue #905. Soaks as the for loop subject.", ->
+
+  a = {b: {c: [1, 2, 3]}}
+  for d in a.b?.c
+    e = d
+
+  eq e, 3
+
+
+test "Issue #948. Capturing loop variables.", ->
+
+  funcs = []
+  list  = ->
+    [1, 2, 3]
+
+  for y in list()
+    do (y) ->
+      z = y
+      funcs.push -> "y is #{y} and z is #{z}"
+
+  eq funcs[1](), "y is 2 and z is 2"
+
+
+test "Cancel the comprehension if there's a jump inside the loop.", ->
+
+  result = try
+    for i in [0...10]
+      continue if i < 5
+    i
+
+  eq result, 10
+
+
+test "Comprehensions over break.", ->
+
+  arrayEq (break for [1..10]), []
+
+
+test "Comprehensions over continue.", ->
+
+  arrayEq (continue for [1..10]), []
+
+
+test "Comprehensions over function literals.", ->
+
+  a = 0
+  for f in [-> a = 1]
+    do (f) ->
+      do f
+
+  eq a, 1
+
+
+test "Comprehensions that mention arguments.", ->
+
+  list = [arguments: 10]
+  args = for f in list
+    do (f) ->
+      f.arguments
+  eq args[0], 10
+
+
+test "expression conversion under explicit returns", ->
+  nonce = {}
+  fn = ->
+    return (nonce for x in [1,2,3])
+  arrayEq [nonce,nonce,nonce], fn()
+  fn = ->
+    return [nonce for x in [1,2,3]][0]
+  arrayEq [nonce,nonce,nonce], fn()
+  fn = ->
+    return [(nonce for x in [1..3])][0]
+  arrayEq [nonce,nonce,nonce], fn()
+
+
+test "implicit destructuring assignment in object of objects", ->
+  a={}; b={}; c={}
+  obj = {
+    a: { d: a },
+    b: { d: b }
+    c: { d: c }
+  }
+  result = ([y,z] for y, { d: z } of obj)
+  arrayEq [['a',a],['b',b],['c',c]], result
+
+
+test "implicit destructuring assignment in array of objects", ->
+  a={}; b={}; c={}; d={}; e={}; f={}
+  arr = [
+    { a: a, b: { c: b } },
+    { a: c, b: { c: d } },
+    { a: e, b: { c: f } }
+  ]
+  result = ([y,z] for { a: y, b: { c: z } } in arr)
+  arrayEq [[a,b],[c,d],[e,f]], result
+
+
+test "implicit destructuring assignment in array of arrays", ->
+  a={}; b={}; c={}; d={}; e={}; f={}
+  arr = [[a, [b]], [c, [d]], [e, [f]]]
+  result = ([y,z] for [y, [z]] in arr)
+  arrayEq [[a,b],[c,d],[e,f]], result
+
+test "issue #1124: don't assign a variable in two scopes", ->
+  lista = [1, 2, 3, 4, 5]
+  listb = (_i + 1 for _i in lista)
+  arrayEq [2, 3, 4, 5, 6], listb
+
+test "#1326: \`by\` value is uncached", ->
+  a = [0,1,2]
+  fi = gi = hi = 0
+  f = -> ++fi
+  g = -> ++gi
+  h = -> ++hi
+
+  forCompile = []
+  rangeCompileSimple = []
+
+  #exercises For.compile
+  for v, i in a by f()
+    forCompile.push i
+
+  #exercises Range.compileSimple
+  rangeCompileSimple = (i for i in [0..2] by g())
+
+  arrayEq a, forCompile
+  arrayEq a, rangeCompileSimple
+  #exercises Range.compile
+  eq "#{i for i in [0..2] by h()}", '0,1,2'
+
+test "#1669: break/continue should skip the result only for that branch", ->
+  ns = for n in [0..99]
+    if n > 9
+      break
+    else if n & 1
+      continue
+    else
+      n
+  eq "#{ns}", '0,2,4,6,8'
+
+  # \`else undefined\` is implied.
+  ns = for n in [1..9]
+    if n % 2
+      continue unless n % 5
+      n
+  eq "#{ns}", "1,,3,,,7,,9"
+
+  # Ditto.
+  ns = for n in [1..9]
+    switch
+      when n % 2
+        continue unless n % 5
+        n
+  eq "#{ns}", "1,,3,,,7,,9"
+
+test "#1850: inner \`for\` should not be expression-ized if \`return\`ing", ->
+  eq '3,4,5', do ->
+    for a in [1..9] then \\
+    for b in [1..9]
+      c = Math.sqrt a*a + b*b
+      return String [a, b, c] unless c % 1
+
+test "#1910: loop index should be mutable within a loop iteration and immutable between loop iterations", ->
+  n = 1
+  iterations = 0
+  arr = [0..n]
+  for v, k in arr
+    ++iterations
+    v = k = 5
+    eq 5, k
+  eq 2, k
+  eq 2, iterations
+
+  iterations = 0
+  for v in [0..n]
+    ++iterations
+  eq 2, k
+  eq 2, iterations
+
+  arr = ([v, v + 1] for v in [0..5])
+  iterations = 0
+  for [v0, v1], k in arr when v0
+    k += 3
+    ++iterations
+  eq 6, k
+  eq 5, iterations
+
+test "#2007: Return object literal from comprehension", ->
+  y = for x in [1, 2]
+    foo: "foo" + x
+  eq 2, y.length
+  eq "foo1", y[0].foo
+  eq "foo2", y[1].foo
+
+  x = 2
+  y = while x
+    x: --x
+  eq 2, y.length
+  eq 1, y[0].x
+  eq 0, y[1].x
+
+test "#2274: Allow @values as loop variables", ->
+  obj = {
+    item: null
+    method: ->
+      for @item in [1, 2, 3]
+        null
+  }
+  eq obj.item, null
+  obj.method()
+  eq obj.item, 3
+
+test "#4411: Allow @values as loop indices", ->
+  obj =
+    index: null
+    get: -> @index
+    method: ->
+      @get() for _, @index in [1, 2, 3]
+  eq obj.index, null
+  arrayEq obj.method(), [0, 1, 2]
+  eq obj.index, 3
+
+test "#2525, #1187, #1208, #1758, looping over an array forwards", ->
+  list = [0, 1, 2, 3, 4]
+
+  ident = (x) -> x
+
+  arrayEq (i for i in list), list
+
+  arrayEq (index for i, index in list), list
+
+  arrayEq (i for i in list by 1), list
+
+  arrayEq (i for i in list by ident 1), list
+
+  arrayEq (i for i in list by ident(1) * 2), [0, 2, 4]
+
+  arrayEq (index for i, index in list by ident(1) * 2), [0, 2, 4]
+
+test "#2525, #1187, #1208, #1758, looping over an array backwards", ->
+  list = [0, 1, 2, 3, 4]
+  backwards = [4, 3, 2, 1, 0]
+
+  ident = (x) -> x
+
+  arrayEq (i for i in list by -1), backwards
+
+  arrayEq (index for i, index in list by -1), backwards
+
+  arrayEq (i for i in list by ident -1), backwards
+
+  arrayEq (i for i in list by ident(-1) * 2), [4, 2, 0]
+
+  arrayEq (index for i, index in list by ident(-1) * 2), [4, 2, 0]
+
+test "splats in destructuring in comprehensions", ->
+  list = [[0, 1, 2], [2, 3, 4], [4, 5, 6]]
+  arrayEq (seq for [rep, seq...] in list), [[1, 2], [3, 4], [5, 6]]
+
+test "#156: expansion in destructuring in comprehensions", ->
+  list = [[0, 1, 2], [2, 3, 4], [4, 5, 6]]
+  arrayEq (last for [..., last] in list), [2, 4, 6]
+
+test "#3778: Consistently always cache for loop range boundaries and steps, even
+      if they are simple identifiers", ->
+  a = 1; arrayEq [1, 2, 3], (for n in [1, 2, 3] by  a then a = 4; n)
+  a = 1; arrayEq [1, 2, 3], (for n in [1, 2, 3] by +a then a = 4; n)
+  a = 1; arrayEq [1, 2, 3], (for n in [a..3]          then a = 4; n)
+  a = 1; arrayEq [1, 2, 3], (for n in [+a..3]         then a = 4; n)
+  a = 3; arrayEq [1, 2, 3], (for n in [1..a]          then a = 4; n)
+  a = 3; arrayEq [1, 2, 3], (for n in [1..+a]         then a = 4; n)
+  a = 1; arrayEq [1, 2, 3], (for n in [1..3] by  a    then a = 4; n)
+  a = 1; arrayEq [1, 2, 3], (for n in [1..3] by +a    then a = 4; n)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test "Basic array comprehensions.", ->
+  nums = (n * n for n in [1, 2, 3] when n & 1)
+  results = (n * 2 for n in nums)
+
+  ok results.join(",") is "2,18"
+
+test "Basic object comprehensions.", ->
+  obj =
+    one: 1
+    two: 2
+    three: 3
+  names = (prop + "!" for prop of obj)
+  odds = (prop + "!" for prop, value of obj when value & 1)
+
+  ok names.join(" ") is "one! two! three!"
+  ok odds.join(" ") is "one! three!"
+
+test "Basic range comprehensions.", ->
+  nums = (i * 3 for i in [1..3])
+
+  negs = (x for x in [-20..(-5 * 2)])
+  negs = negs[0..2]
+
+  result = nums.concat(negs).join ", "
+
+  ok result is "3, 6, 9, -20, -19, -18"
+
+test "With range comprehensions, you can loop in steps.", ->
+  results = (x for x in [0...15] by 5)
+  ok results.join(" ") is "0 5 10"
+
+  results = (x for x in [0..100] by 10)
+  ok results.join(" ") is "0 10 20 30 40 50 60 70 80 90 100"
+
+test "And can loop downwards, with a negative step.", ->
+  results = (x for x in [5..1])
+
+  ok results.join(" ") is "5 4 3 2 1"
+  ok results.join(" ") is [(10 - 5)..(-2 + 3)].join " "
+
+  results = (x for x in [10..1])
+  ok results.join(" ") is [10..1].join " "
+
+  results = (x for x in [10...0] by -2)
+  ok results.join(" ") is [10, 8, 6, 4, 2].join " "
+
+test "Range comprehension gymnastics.", ->
+  eq "#{i for i in [5..1]}", "5,4,3,2,1"
+  eq "#{i for i in [5..-5] by -5}", "5,0,-5"
+
+  a = 6
+  b = 0
+  c = -2
+
+  eq "#{i for i in [a..b]}", "6,5,4,3,2,1,0"
+  eq "#{i for i in [a..b] by c}", "6,4,2,0"
+
+test "Multiline array comprehension with filter.", ->
+  evens =
+    for num in [1, 2, 3, 4, 5, 6] when not (num & 1)
+      num *= -1
+      num -= 2
+      num * -1
+  eq evens + "", "4,6,8"
+
+  test "The in operator still works, standalone.", -> ok 2 of evens
+
+test "all isn't reserved.", -> all = 1
+
+test "Ensure that the closure wrapper preserves local variables.", ->
+  obj = {}
+
+  for method in ["one", "two", "three"] then do (method) ->
+    obj[method] = -> "I'm " + method
+
+  ok obj.one() is "I'm one"
+  ok obj.two() is "I'm two"
+  ok obj.three() is "I'm three"
+
+test "Index values at the end of a loop.", ->
+  i = 0
+  for i in [1..3]
+    -> "func"
+    break if false
+  ok i is 4
+
+test "Ensure that local variables are closed over for range comprehensions.", ->
+  funcs =
+    for i in [1..3] then do (i) ->
+      -> -i
+
+  eq (func() for func in funcs).join(" "), "-1 -2 -3"
+  ok i is 4
+
+test "Even when referenced in the filter.", ->
+  list = ["one", "two", "three"]
+
+  methods =
+    for num, i in list when num isnt "two" and i isnt 1 then do (num, i) ->
+      -> num + " " + i
+
+  ok methods.length is 2
+  ok methods[0]() is "one 0"
+  ok methods[1]() is "three 2"
+
+test "Even a convoluted one.", ->
+  funcs = []
+
+  for i in [1..3] then do (i) ->
+    x = i * 2
+    ((z) -> funcs.push -> z + " " + i) x
+
+  ok (func() for func in funcs).join(", ") is "2 1, 4 2, 6 3"
+
+  funcs = []
+
+  results =
+    for i in [1..3] then do (i) ->
+      z = (x * 3 for x in [1..i])
+      ((a, b, c) -> [a, b, c].join " ").apply @, z
+
+  ok results.join(", ") is "3  , 3 6 , 3 6 9"
+
+test "Naked ranges are expanded into arrays.", ->
+  array = [0..10]
+  ok (num % 2 is 0 for num in array by 2)
+
+test "Nested shared scopes.", ->
+  foo = ->
+    for i in [0..7] then do (i) ->
+      for j in [0..7] then do (j) ->
+        -> i + j
+
+  eq foo()[3][4](), 7
+
+test "Scoped loop pattern matching.", ->
+  a = [[0], [1]]
+  funcs = []
+
+  for [v] in a then do (v) ->
+    funcs.push -> v
+
+  eq funcs[0](), 0
+  eq funcs[1](), 1
+
+test "Nested comprehensions.", ->
+  multiLiner =
+    for x in [3..5]
+      for y in [3..5]
+        [x, y]
+
+  singleLiner = ([x, y] for y in [3..5] for x in [3..5])
+
+  ok multiLiner.length is singleLiner.length
+  ok 5 is multiLiner[2][2][1]
+  ok 5 is singleLiner[2][2][1]
+
+test "Comprehensions within parentheses.", ->
+  result = null
+  store = (obj) -> result = obj
+  store (x * 2 for x in [3, 2, 1])
+
+  ok result.join(" ") is "6 4 2"
+
+test "Closure-wrapped comprehensions that refer to the 'arguments' object.", ->
+  expr = -> result = (item * item for item in arguments)
+
+  ok expr(2, 4, 8).join(" ") is "4 16 64"
+
+test "Fast object comprehensions over all properties, including prototypal ones.", ->
+  class Cat
+    constructor: ->
+      @name = "Whiskers"
+    breed: "tabby"
+    hair: "cream"
+
+  whiskers = new Cat()
+  own = (value for own key, value of whiskers)
+  all = (value for key, value of whiskers)
+
+  ok own.join(" ") is "Whiskers"
+  ok all.sort().join(" ") is "Whiskers cream tabby"
+
+test "Optimized range comprehensions.", ->
+  exxes = ("x" for [0...10])
+  ok exxes.join(" ") is "x x x x x x x x x x"
+
+test "#3671: Allow step in optimized range comprehensions.", ->
+  exxes = ("x" for [0...10] by 2)
+  eq exxes.join(" "), "x x x x x"
+
+test "#3671: Disallow guard in optimized range comprehensions.", ->
+  throws -> CoffeeScript.compile "exxes = ('x' for [0...10] when a)"
+
+test "Loop variables should be able to reference outer variables", ->
+  outer = 1
+  do ->
+    null for outer in [1, 2, 3]
+  eq outer, 3
+
+test "Lenient on pure statements not trying to reach out of the closure", ->
+  val =
+    for i in [1]
+      for j in []
+        break
+      i
+  ok val[0] is i
+
+test(
+  "Comprehensions only wrap their last line in a closure, allowing other lines
+  to have pure expressions in them."
+  ->
+    func = ->
+      for i in [1]
+        break if i is 2
+        j for j in [1]
+
+    ok func()[0][0] is 1
+
+    i = 6
+    odds =
+      while i--
+        continue unless i & 1
+        i
+
+    ok odds.join(", ") is "5, 3, 1"
+)
+
+test "Issue #897: Ensure that plucked function variables aren't leaked.", ->
+  facets = {}
+  list = ["one", "two"]
+
+  (->
+    for entity in list
+      facets[entity] = -> entity)()
+
+  eq typeof entity, "undefined"
+  eq facets["two"](), "two"
+
+test "Issue #905. Soaks as the for loop subject.", ->
+  a = b: c: [1, 2, 3]
+  for d in a.b?.c
+    e = d
+
+  eq e, 3
+
+test "Issue #948. Capturing loop variables.", ->
+  funcs = []
+  list = -> [1, 2, 3]
+
+  for y in list() then do (y) ->
+    z = y
+    funcs.push -> "y is #{y} and z is #{z}"
+
+  eq funcs[1](), "y is 2 and z is 2"
+
+test "Cancel the comprehension if there's a jump inside the loop.", ->
+  result =
+    try
+      for i in [0...10]
+        continue if i < 5
+      i
+
+  eq result, 10
+
+test "Comprehensions over break.", -> arrayEq (break for [1..10]), []
+
+test "Comprehensions over continue.", -> arrayEq (continue for [1..10]), []
+
+test "Comprehensions over function literals.", ->
+  a = 0
+  for f in [-> a = 1] then do (f) ->
+    do f
+
+  eq a, 1
+
+test "Comprehensions that mention arguments.", ->
+  list = [arguments: 10]
+  args =
+    for f in list then do (f) ->
+      f.arguments
+  eq args[0], 10
+
+test "expression conversion under explicit returns", ->
+  nonce = {}
+  fn = -> return (nonce for x in [1, 2, 3])
+  arrayEq [nonce, nonce, nonce], fn()
+  fn = -> return [nonce for x in [1, 2, 3]][0]
+  arrayEq [nonce, nonce, nonce], fn()
+  fn = -> return [nonce for x in [1..3]][0]
+  arrayEq [nonce, nonce, nonce], fn()
+
+test "implicit destructuring assignment in object of objects", ->
+  a = {}
+  b = {}
+  c = {}
+  obj =
+    a: d: a
+    b: d: b
+    c: d: c
+  result = ([y, z] for y, { d: z } of obj)
+  arrayEq [["a", a], ["b", b], ["c", c]], result
+
+test "implicit destructuring assignment in array of objects", ->
+  a = {}
+  b = {}
+  c = {}
+  d = {}
+  e = {}
+  f = {}
+  arr = [{ a: a, b: c: b }, { a: c, b: c: d }, { a: e, b: c: f }]
+  result = ([y, z] for { a: y, b: c: z } in arr)
+  arrayEq [[a, b], [c, d], [e, f]], result
+
+test "implicit destructuring assignment in array of arrays", ->
+  a = {}
+  b = {}
+  c = {}
+  d = {}
+  e = {}
+  f = {}
+  arr = [[a, [b]], [c, [d]], [e, [f]]]
+  result = ([y, z] for [y, [z]] in arr)
+  arrayEq [[a, b], [c, d], [e, f]], result
+
+test "issue #1124: don't assign a variable in two scopes", ->
+  lista = [1, 2, 3, 4, 5]
+  listb = (_i + 1 for _i in lista)
+  arrayEq [2, 3, 4, 5, 6], listb
+
+test "#1326: \`by\` value is uncached", ->
+  a = [0, 1, 2]
+  fi = gi = hi = 0
+  f = -> ++fi
+  g = -> ++gi
+  h = -> ++hi
+
+  forCompile = []
+  rangeCompileSimple = []
+
+  for v, i in a by f()
+    forCompile.push i
+
+  rangeCompileSimple = (i for i in [0..2] by g())
+
+  arrayEq a, forCompile
+  arrayEq a, rangeCompileSimple
+  eq "#{i for i in [0..2] by h()}", "0,1,2"
+
+test "#1669: break/continue should skip the result only for that branch", ->
+  ns =
+    for n in [0..99]
+      if n > 9
+        break
+      else if n & 1
+        continue
+      else
+        n
+  eq "#{ns}", "0,2,4,6,8"
+
+  ns =
+    for n in [1..9]
+      if n % 2
+        continue unless n % 5
+        n
+  eq "#{ns}", "1,,3,,,7,,9"
+
+  ns =
+    for n in [1..9]
+      switch
+        when n % 2
+          continue unless n % 5
+          n
+  eq "#{ns}", "1,,3,,,7,,9"
+
+test "#1850: inner \`for\` should not be expression-ized if \`return\`ing", ->
+  eq(
+    "3,4,5"
+    do ->
+      for a in [1..9]
+        for b in [1..9]
+          c = Math.sqrt a * a + b * b
+          return String([a, b, c]) unless c % 1
+  )
+
+test "#1910: loop index should be mutable within a loop iteration and immutable between loop iterations", ->
+  n = 1
+  iterations = 0
+  arr = [0..n]
+  for v, k in arr
+    ++iterations
+    v = k = 5
+    eq 5, k
+  eq 2, k
+  eq 2, iterations
+
+  iterations = 0
+  for v in [0..n]
+    ++iterations
+  eq 2, k
+  eq 2, iterations
+
+  arr = ([v, v + 1] for v in [0..5])
+  iterations = 0
+  for [v0, v1], k in arr when v0
+    k += 3
+    ++iterations
+  eq 6, k
+  eq 5, iterations
+
+test "#2007: Return object literal from comprehension", ->
+  y =
+    for x in [1, 2]
+      foo: "foo" + x
+  eq 2, y.length
+  eq "foo1", y[0].foo
+  eq "foo2", y[1].foo
+
+  x = 2
+  y =
+    while x
+      x: --x
+  eq 2, y.length
+  eq 1, y[0].x
+  eq 0, y[1].x
+
+test "#2274: Allow @values as loop variables", ->
+  obj =
+    item: null
+    method: ->
+      for @item in [1, 2, 3]
+        null
+  eq obj.item, null
+  obj.method()
+  eq obj.item, 3
+
+test "#4411: Allow @values as loop indices", ->
+  obj =
+    index: null
+    get: -> @index
+    method: -> @get() for _, @index in [1, 2, 3]
+  eq obj.index, null
+  arrayEq obj.method(), [0, 1, 2]
+  eq obj.index, 3
+
+test "#2525, #1187, #1208, #1758, looping over an array forwards", ->
+  list = [0, 1, 2, 3, 4]
+
+  ident = (x) -> x
+
+  arrayEq (i for i in list), list
+
+  arrayEq (index for i, index in list), list
+
+  arrayEq (i for i in list by 1), list
+
+  arrayEq (i for i in list by ident(1)), list
+
+  arrayEq (i for i in list by ident(1) * 2), [0, 2, 4]
+
+  arrayEq (index for i, index in list by ident(1) * 2), [0, 2, 4]
+
+test "#2525, #1187, #1208, #1758, looping over an array backwards", ->
+  list = [0, 1, 2, 3, 4]
+  backwards = [4, 3, 2, 1, 0]
+
+  ident = (x) -> x
+
+  arrayEq (i for i in list by -1), backwards
+
+  arrayEq (index for i, index in list by -1), backwards
+
+  arrayEq (i for i in list by ident(-1)), backwards
+
+  arrayEq (i for i in list by ident(-1) * 2), [4, 2, 0]
+
+  arrayEq (index for i, index in list by ident(-1) * 2), [4, 2, 0]
+
+test "splats in destructuring in comprehensions", ->
+  list = [[0, 1, 2], [2, 3, 4], [4, 5, 6]]
+  arrayEq (seq for [rep, seq...] in list), [[1, 2], [3, 4], [5, 6]]
+
+test "#156: expansion in destructuring in comprehensions", ->
+  list = [[0, 1, 2], [2, 3, 4], [4, 5, 6]]
+  arrayEq (last for [..., last] in list), [2, 4, 6]
+
+test(
+  "#3778: Consistently always cache for loop range boundaries and steps, even
+      if they are simple identifiers"
+  ->
+    a = 1
+    arrayEq(
+      [1, 2, 3]
+      for n in [1, 2, 3] by a
+        a = 4
+        n
+    )
+    a = 1
+    arrayEq(
+      [1, 2, 3]
+      for n in [1, 2, 3] by +a
+        a = 4
+        n
+    )
+    a = 1
+    arrayEq(
+      [1, 2, 3]
+      for n in [a..3]
+        a = 4
+        n
+    )
+    a = 1
+    arrayEq(
+      [1, 2, 3]
+      for n in [+a..3]
+        a = 4
+        n
+    )
+    a = 3
+    arrayEq(
+      [1, 2, 3]
+      for n in [1..a]
+        a = 4
+        n
+    )
+    a = 3
+    arrayEq(
+      [1, 2, 3]
+      for n in [1..+a]
+        a = 4
+        n
+    )
+    a = 1
+    arrayEq(
+      [1, 2, 3]
+      for n in [1..3] by a
+        a = 4
+        n
+    )
+    a = 1
+    arrayEq(
+      [1, 2, 3]
+      for n in [1..3] by +a
+        a = 4
+        n
+    )
+)
+
+`;
+
+exports[`javascript_literals.coffee 1`] = `
+# JavaScript Literals
+# -------------------
+
+test "inline JavaScript is evaluated", ->
+  eq '\\\\\`', \`
+    // Inline JS
+    "\\\\\\\\\\\`"
+  \`
+
+test "escaped backticks are output correctly", ->
+  \`var a = \\\`2 + 2 = \${4}\\\`\`
+  eq a, '2 + 2 = 4'
+
+test "backslashes before a newline don’t break JavaScript blocks", ->
+  \`var a = \\\`To be, or not\\\\
+  to be.\\\`\`
+  eq a, '''
+  To be, or not\\\\
+    to be.'''
+
+test "block inline JavaScript is evaluated", ->
+  \`\`\`
+  var a = 1;
+  var b = 2;
+  \`\`\`
+  c = 3
+  \`\`\`var d = 4;\`\`\`
+  eq a + b + c + d, 10
+
+test "block inline JavaScript containing backticks", ->
+  \`\`\`
+  // This is a comment with \`backticks\`
+  var a = 42;
+  var b = \`foo \${'bar'}\`;
+  var c = 3;
+  var d = 'foo\`bar\`';
+  \`\`\`
+  eq a + c, 45
+  eq b, 'foo bar'
+  eq d, 'foo\`bar\`'
+
+test "block JavaScript can end with an escaped backtick character", ->
+  \`\`\`var a = \\\`hello\\\`\`\`\`
+  \`\`\`
+  var b = \\\`world\${'!'}\\\`\`\`\`
+  eq a, 'hello'
+  eq b, 'world!'
+
+test "JavaScript block only escapes backslashes followed by backticks", ->
+  eq \`'\\\\\\n'\`, '\\\\\\n'
+
+test "escaped JavaScript blocks speed round", ->
+  # The following has escaped backslashes because they’re required in strings, but the intent is this:
+  # \`hello\`                                       → hello;
+  # \`\\\`hello\\\`\`                                   → \`hello\`;
+  # \`\\\`Escaping backticks in JS: \\\\\\\`hello\\\\\\\`\\\`\` → \`Escaping backticks in JS: \\\`hello\\\`\`;
+  # \`Single backslash: \\ \`                        → Single backslash: \\ ;
+  # \`Double backslash: \\\\ \`                       → Double backslash: \\\\ ;
+  # \`Single backslash at EOS: \\\\\`                 → Single backslash at EOS: \\;
+  # \`Double backslash at EOS: \\\\\\\\\`               → Double backslash at EOS: \\\\;
+  for [input, output] in [
+    ['\`hello\`',                                               'hello;']
+    ['\`\\\\\`hello\\\\\`\`',                                         '\`hello\`;']
+    ['\`\\\\\`Escaping backticks in JS: \\\\\\\\\\\\\`hello\\\\\\\\\\\\\`\\\\\`\`', '\`Escaping backticks in JS: \\\\\`hello\\\\\`\`;']
+    ['\`"Single backslash: \\\\ "\`',                             '"Single backslash: \\\\ ";']
+    ['\`"Double backslash: \\\\\\\\ "\`',                           '"Double backslash: \\\\\\\\ ";']
+    # ['\`Single backslash at EOS: \\\\\\\\\`',                       'Single backslash at EOS: \\\\;']
+    # ['\`Double backslash at EOS: \\\\\\\\\\\\\\\\\`',                   'Double backslash at EOS: \\\\\\\\;']
+  ]
+    eqJS input, output
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test "inline JavaScript is evaluated", ->
+  eq "\\\\\`", \`
+    // Inline JS
+    "\\\\\\\\\\\`"
+  \`
+
+test "escaped backticks are output correctly", ->
+  \`var a = \\\`2 + 2 = \${4}\\\`\`
+  eq a, "2 + 2 = 4"
+
+test "backslashes before a newline don’t break JavaScript blocks", ->
+  \`var a = \\\`To be, or not\\\\
+  to be.\\\`\`
+  eq(
+    a
+    '''
+  To be, or not\\\\
+    to be.'''
+  )
+
+test "block inline JavaScript is evaluated", ->
+  \`\`\`
+  var a = 1;
+  var b = 2;
+  \`\`\`
+  c = 3
+  \`\`\`var d = 4;\`\`\`
+  eq a + b + c + d, 10
+
+test "block inline JavaScript containing backticks", ->
+  \`\`\`
+  // This is a comment with \`backticks\`
+  var a = 42;
+  var b = \`foo \${'bar'}\`;
+  var c = 3;
+  var d = 'foo\`bar\`';
+  \`\`\`
+  eq a + c, 45
+  eq b, "foo bar"
+  eq d, "foo\`bar\`"
+
+test "block JavaScript can end with an escaped backtick character", ->
+  \`\`\`var a = \\\`hello\\\`\`\`\`
+  \`\`\`
+  var b = \\\`world\${'!'}\\\`\`\`\`
+  eq a, "hello"
+  eq b, "world!"
+
+test "JavaScript block only escapes backslashes followed by backticks", ->
+  eq \`'\\\\\\n'\`, "\\\\\\n"
+
+test "escaped JavaScript blocks speed round", ->
+  for [input, output] in [
+    ["\`hello\`", "hello;"]
+    ["\`\\\\\`hello\\\\\`\`", "\`hello\`;"]
+    [
+      "\`\\\\\`Escaping backticks in JS: \\\\\\\\\\\\\`hello\\\\\\\\\\\\\`\\\\\`\`"
+      "\`Escaping backticks in JS: \\\\\`hello\\\\\`\`;"
+    ]
+    ['\`"Single backslash: \\\\ "\`', '"Single backslash: \\\\ ";']
+    ['\`"Double backslash: \\\\\\\\ "\`', '"Double backslash: \\\\\\\\ ";']
+  ]
+    eqJS input, output
+
+`;
+
 exports[`operators.coffee 1`] = `
 # Operators
 # ---------
@@ -476,17 +1744,17 @@ test "bitwise operators", ->
   eq 1, 10 >> 3
   eq 1, 10 >>> 3
   num = 10
-  eq 2, (num &= 3)
+  eq 2, num &= 3
   num = 10
-  eq 11, (num |= 3)
+  eq 11, num |= 3
   num = 10
-  eq 9, (num ^= 3)
+  eq 9, num ^= 3
   num = 10
-  eq 80, (num <<= 3)
+  eq 80, num <<= 3
   num = 10
-  eq 1, (num >>= 3)
+  eq 1, num >>= 3
   num = 10
-  eq 1, (num >>>= 3)
+  eq 1, num >>>= 3
 
 test "\`instanceof\`", ->
   ok new String() instanceof String
@@ -547,7 +1815,7 @@ test "postfix existential operator", ->
 test "postfix existential operator only evaluates its operand once", ->
   semaphore = 0
   fn = ->
-    ok(false) if semaphore
+    ok false if semaphore
     ++semaphore
   ok(
     if fn()?
@@ -622,7 +1890,11 @@ test "#768: \`in\` should preserve evaluation order", ->
 
 test "#1099: empty array after \`in\` should compile to \`false\`", ->
   eq 1, [5 in []].length
-  eq false, do -> return 0 in []
+  eq(
+    false
+    do ->
+      return 0 in []
+  )
 
 test "#1354: optimized \`in\` checks should not happen when splats are present", ->
   a = [6, 9]
@@ -654,7 +1926,8 @@ test "#1099: statically determined \`not in []\` reporting incorrect result", ->
 
 test "#1099: make sure expression tested gets evaluted when array is empty", ->
   a = 0
-  (do -> a = 1) in []
+  (do ->
+    a = 1) in []
   eq a, 1
 
 test "chainable operators", ->
@@ -847,5 +2120,1095 @@ test "'new' target", ->
   ok new (get())() instanceof ctor
 
   throws -> new get()()
+
+`;
+
+exports[`ranges.coffee 1`] = `
+# Range Literals
+# --------------
+
+# TODO: add indexing and method invocation tests: [1..4][0] is 1, [0...3].toString()
+
+# shared array
+shared = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+test "basic inclusive ranges", ->
+  arrayEq [1, 2, 3] , [1..3]
+  arrayEq [0, 1, 2] , [0..2]
+  arrayEq [0, 1]    , [0..1]
+  arrayEq [0]       , [0..0]
+  arrayEq [-1]      , [-1..-1]
+  arrayEq [-1, 0]   , [-1..0]
+  arrayEq [-1, 0, 1], [-1..1]
+
+test "basic exclusive ranges", ->
+  arrayEq [1, 2, 3] , [1...4]
+  arrayEq [0, 1, 2] , [0...3]
+  arrayEq [0, 1]    , [0...2]
+  arrayEq [0]       , [0...1]
+  arrayEq [-1]      , [-1...0]
+  arrayEq [-1, 0]   , [-1...1]
+  arrayEq [-1, 0, 1], [-1...2]
+
+  arrayEq [], [1...1]
+  arrayEq [], [0...0]
+  arrayEq [], [-1...-1]
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  arrayEq [1, 2, 3] , [1 ... 4]
+  arrayEq [0, 1, 2] , [0 ... 3]
+  arrayEq [0, 1]    , [0 ... 2]
+  arrayEq [0]       , [0 ... 1]
+  arrayEq [-1]      , [-1 ... 0]
+  arrayEq [-1, 0]   , [-1 ... 1]
+  arrayEq [-1, 0, 1], [-1 ... 2]
+
+  arrayEq [], [1 ... 1]
+  arrayEq [], [0 ... 0]
+  arrayEq [], [-1 ... -1]
+
+test "downward ranges", ->
+  arrayEq shared, [9..0].reverse()
+  arrayEq [5, 4, 3, 2] , [5..2]
+  arrayEq [2, 1, 0, -1], [2..-1]
+
+  arrayEq [3, 2, 1]  , [3..1]
+  arrayEq [2, 1, 0]  , [2..0]
+  arrayEq [1, 0]     , [1..0]
+  arrayEq [0]        , [0..0]
+  arrayEq [-1]       , [-1..-1]
+  arrayEq [0, -1]    , [0..-1]
+  arrayEq [1, 0, -1] , [1..-1]
+  arrayEq [0, -1, -2], [0..-2]
+
+  arrayEq [4, 3, 2], [4...1]
+  arrayEq [3, 2, 1], [3...0]
+  arrayEq [2, 1]   , [2...0]
+  arrayEq [1]      , [1...0]
+  arrayEq []       , [0...0]
+  arrayEq []       , [-1...-1]
+  arrayEq [0]      , [0...-1]
+  arrayEq [0, -1]  , [0...-2]
+  arrayEq [1, 0]   , [1...-1]
+  arrayEq [2, 1, 0], [2...-1]
+
+test "ranges with variables as enpoints", ->
+  [a, b] = [1, 3]
+  arrayEq [1, 2, 3], [a..b]
+  arrayEq [1, 2]   , [a...b]
+  b = -2
+  arrayEq [1, 0, -1, -2], [a..b]
+  arrayEq [1, 0, -1]    , [a...b]
+
+test "ranges with expressions as endpoints", ->
+  [a, b] = [1, 3]
+  arrayEq [2, 3, 4, 5, 6], [(a+1)..2*b]
+  arrayEq [2, 3, 4, 5]   , [(a+1)...2*b]
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  arrayEq [2, 3, 4, 5]   , [(a+1) ... 2*b]
+
+test "large ranges are generated with looping constructs", ->
+  down = [99..0]
+  eq 100, (len = down.length)
+  eq   0, down[len - 1]
+
+  up = [0...100]
+  eq 100, (len = up.length)
+  eq  99, up[len - 1]
+
+test "for-from loops over ranges", ->
+  array1 = []
+  for x from [20..30]
+    array1.push(x)
+    break if x is 25
+  arrayEq array1, [20, 21, 22, 23, 24, 25]
+
+test "for-from comprehensions over ranges", ->
+  array1 = (x + 10 for x from [20..25])
+  ok array1.join(' ') is '30 31 32 33 34 35'
+
+  array2 = (x for x from [20..30] when x %% 2 == 0)
+  ok array2.join(' ') is '20 22 24 26 28 30'
+
+test "#1012 slices with arguments object", ->
+  expected = [0..9]
+  argsAtStart = (-> [arguments[0]..9]) 0
+  arrayEq expected, argsAtStart
+  argsAtEnd = (-> [0..arguments[0]]) 9
+  arrayEq expected, argsAtEnd
+  argsAtBoth = (-> [arguments[0]..arguments[1]]) 0, 9
+  arrayEq expected, argsAtBoth
+
+test "#1409: creating large ranges outside of a function body", ->
+  CoffeeScript.eval '[0..100]'
+
+test "#2047: Infinite loop possible when \`for\` loop with \`range\` uses variables", ->
+  up = 1
+  down = -1
+  a = 1
+  b = 5
+
+  testRange = (arg) ->
+    [from, to, step, expectedResult] = arg
+    r = (x for x in [from..to] by step)
+    arrayEq r, expectedResult
+
+  testData = [
+    [1, 5, 1, [1..5]]
+    [1, 5, -1, []]
+    [1, 5, up, [1..5]]
+    [1, 5, down, []]
+
+    [a, 5, 1, [1..5]]
+    [a, 5, -1, []]
+    [a, 5, up, [1..5]]
+    [a, 5, down, []]
+
+    [1, b, 1, [1..5]]
+    [1, b, -1, []]
+    [1, b, up, [1..5]]
+    [1, b, down, []]
+
+    [a, b, 1, [1..5]]
+    [a, b, -1, []]
+    [a, b, up, [1..5]]
+    [a, b, down, []]
+
+    [5, 1, 1, []]
+    [5, 1, -1, [5..1]]
+    [5, 1, up, []]
+    [5, 1, down,  [5..1]]
+
+    [5, a, 1, []]
+    [5, a, -1, [5..1]]
+    [5, a, up, []]
+    [5, a, down, [5..1]]
+
+    [b, 1, 1, []]
+    [b, 1, -1, [5..1]]
+    [b, 1, up, []]
+    [b, 1, down, [5..1]]
+
+    [b, a, 1, []]
+    [b, a, -1, [5..1]]
+    [b, a, up, []]
+    [b, a, down, [5..1]]
+  ]
+
+  testRange d for d in testData
+
+test "#2047: from, to and step as variables", ->
+  up = 1
+  down = -1
+  a = 1
+  b = 5
+
+  r = (x for x in [a..b] by up)
+  arrayEq r, [1..5]
+
+  r = (x for x in [a..b] by down)
+  arrayEq r, []
+
+  r = (x for x in [b..a] by up)
+  arrayEq r, []
+
+  r = (x for x in [b..a] by down)
+  arrayEq r, [5..1]
+
+  a = 1
+  b = -1
+  step = 0
+  r = (x for x in [b..a] by step)
+  arrayEq r, []
+
+test "#4884: Range not declaring var for the 'i'", ->
+  'use strict'
+  [0..21].forEach (idx) ->
+    idx + 1
+
+  eq global.i, undefined
+
+test "#4889: \`for\` loop unexpected behavior", ->
+  n = 1
+  result = []
+  for i in [0..n]
+    result.push i
+    for j in [(i+1)..n]
+      result.push j
+
+  arrayEq result, [0,1,1,2,1]
+
+test "#4889: \`for\` loop unexpected behavior with \`by 1\` on second loop", ->
+  n = 1
+  result = []
+  for i in [0..n]
+    result.push i
+    for j in [(i+1)..n] by 1
+      result.push j
+
+  arrayEq result, [0,1,1]
+
+test "countdown example from docs", ->
+  countdown = (num for num in [10..1])
+  arrayEq countdown, [10,9,8,7,6,5,4,3,2,1]
+
+test "counting up when the range goes down returns an empty array", ->
+  countdown = (num for num in [10..1] by 1)
+  arrayEq countdown, []
+
+test "counting down when the range goes up returns an empty array", ->
+  countup = (num for num in [1..10] by -1)
+  arrayEq countup, []
+
+test "counting down by too much returns just the first value", ->
+  countdown = (num for num in [10..1] by -100)
+  arrayEq countdown, [10]
+
+test "counting up by too much returns just the first value", ->
+  countup = (num for num in [1..10] by 100)
+  arrayEq countup, [1]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+shared = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+test "basic inclusive ranges", ->
+  arrayEq [1, 2, 3], [1..3]
+  arrayEq [0, 1, 2], [0..2]
+  arrayEq [0, 1], [0..1]
+  arrayEq [0], [0..0]
+  arrayEq [-1], [-1..-1]
+  arrayEq [-1, 0], [-1..0]
+  arrayEq [-1, 0, 1], [-1..1]
+
+test "basic exclusive ranges", ->
+  arrayEq [1, 2, 3], [1...4]
+  arrayEq [0, 1, 2], [0...3]
+  arrayEq [0, 1], [0...2]
+  arrayEq [0], [0...1]
+  arrayEq [-1], [-1...0]
+  arrayEq [-1, 0], [-1...1]
+  arrayEq [-1, 0, 1], [-1...2]
+
+  arrayEq [], [1...1]
+  arrayEq [], [0...0]
+  arrayEq [], [-1...-1]
+
+  arrayEq [1, 2, 3], [1...4]
+  arrayEq [0, 1, 2], [0...3]
+  arrayEq [0, 1], [0...2]
+  arrayEq [0], [0...1]
+  arrayEq [-1], [-1...0]
+  arrayEq [-1, 0], [-1...1]
+  arrayEq [-1, 0, 1], [-1...2]
+
+  arrayEq [], [1...1]
+  arrayEq [], [0...0]
+  arrayEq [], [-1...-1]
+
+test "downward ranges", ->
+  arrayEq shared, [9..0].reverse()
+  arrayEq [5, 4, 3, 2], [5..2]
+  arrayEq [2, 1, 0, -1], [2..-1]
+
+  arrayEq [3, 2, 1], [3..1]
+  arrayEq [2, 1, 0], [2..0]
+  arrayEq [1, 0], [1..0]
+  arrayEq [0], [0..0]
+  arrayEq [-1], [-1..-1]
+  arrayEq [0, -1], [0..-1]
+  arrayEq [1, 0, -1], [1..-1]
+  arrayEq [0, -1, -2], [0..-2]
+
+  arrayEq [4, 3, 2], [4...1]
+  arrayEq [3, 2, 1], [3...0]
+  arrayEq [2, 1], [2...0]
+  arrayEq [1], [1...0]
+  arrayEq [], [0...0]
+  arrayEq [], [-1...-1]
+  arrayEq [0], [0...-1]
+  arrayEq [0, -1], [0...-2]
+  arrayEq [1, 0], [1...-1]
+  arrayEq [2, 1, 0], [2...-1]
+
+test "ranges with variables as enpoints", ->
+  [a, b] = [1, 3]
+  arrayEq [1, 2, 3], [a..b]
+  arrayEq [1, 2], [a...b]
+  b = -2
+  arrayEq [1, 0, -1, -2], [a..b]
+  arrayEq [1, 0, -1], [a...b]
+
+test "ranges with expressions as endpoints", ->
+  [a, b] = [1, 3]
+  arrayEq [2, 3, 4, 5, 6], [(a + 1)..(2 * b)]
+  arrayEq [2, 3, 4, 5], [(a + 1)...(2 * b)]
+
+  arrayEq [2, 3, 4, 5], [(a + 1)...(2 * b)]
+
+test "large ranges are generated with looping constructs", ->
+  down = [99..0]
+  eq 100, (len = down.length)
+  eq 0, down[len - 1]
+
+  up = [0...100]
+  eq 100, (len = up.length)
+  eq 99, up[len - 1]
+
+test "for-from loops over ranges", ->
+  array1 = []
+  for x from [20..30]
+    array1.push x
+    break if x is 25
+  arrayEq array1, [20, 21, 22, 23, 24, 25]
+
+test "for-from comprehensions over ranges", ->
+  array1 = (x + 10 for x from [20..25])
+  ok array1.join(" ") is "30 31 32 33 34 35"
+
+  array2 = (x for x from [20..30] when x %% 2 == 0)
+  ok array2.join(" ") is "20 22 24 26 28 30"
+
+test "#1012 slices with arguments object", ->
+  expected = [0..9]
+  argsAtStart = (-> [arguments[0]..9]) 0
+  arrayEq expected, argsAtStart
+  argsAtEnd = (-> [0..arguments[0]]) 9
+  arrayEq expected, argsAtEnd
+  argsAtBoth = (-> [arguments[0]..arguments[1]]) 0, 9
+  arrayEq expected, argsAtBoth
+
+test "#1409: creating large ranges outside of a function body", ->
+  CoffeeScript.eval "[0..100]"
+
+test "#2047: Infinite loop possible when \`for\` loop with \`range\` uses variables", ->
+  up = 1
+  down = -1
+  a = 1
+  b = 5
+
+  testRange = (arg) ->
+    [from, to, step, expectedResult] = arg
+    r = (x for x in [from..to] by step)
+    arrayEq r, expectedResult
+
+  testData = [
+    [1, 5, 1, [1..5]]
+    [1, 5, -1, []]
+    [1, 5, up, [1..5]]
+    [1, 5, down, []]
+
+    [a, 5, 1, [1..5]]
+    [a, 5, -1, []]
+    [a, 5, up, [1..5]]
+    [a, 5, down, []]
+
+    [1, b, 1, [1..5]]
+    [1, b, -1, []]
+    [1, b, up, [1..5]]
+    [1, b, down, []]
+
+    [a, b, 1, [1..5]]
+    [a, b, -1, []]
+    [a, b, up, [1..5]]
+    [a, b, down, []]
+
+    [5, 1, 1, []]
+    [5, 1, -1, [5..1]]
+    [5, 1, up, []]
+    [5, 1, down, [5..1]]
+
+    [5, a, 1, []]
+    [5, a, -1, [5..1]]
+    [5, a, up, []]
+    [5, a, down, [5..1]]
+
+    [b, 1, 1, []]
+    [b, 1, -1, [5..1]]
+    [b, 1, up, []]
+    [b, 1, down, [5..1]]
+
+    [b, a, 1, []]
+    [b, a, -1, [5..1]]
+    [b, a, up, []]
+    [b, a, down, [5..1]]
+  ]
+
+  testRange(d) for d in testData
+
+test "#2047: from, to and step as variables", ->
+  up = 1
+  down = -1
+  a = 1
+  b = 5
+
+  r = (x for x in [a..b] by up)
+  arrayEq r, [1..5]
+
+  r = (x for x in [a..b] by down)
+  arrayEq r, []
+
+  r = (x for x in [b..a] by up)
+  arrayEq r, []
+
+  r = (x for x in [b..a] by down)
+  arrayEq r, [5..1]
+
+  a = 1
+  b = -1
+  step = 0
+  r = (x for x in [b..a] by step)
+  arrayEq r, []
+
+test "#4884: Range not declaring var for the 'i'", ->
+  "use strict"
+  [0..21].forEach (idx) -> idx + 1
+
+  eq global.i, undefined
+
+test "#4889: \`for\` loop unexpected behavior", ->
+  n = 1
+  result = []
+  for i in [0..n]
+    result.push i
+    for j in [(i + 1)..n]
+      result.push j
+
+  arrayEq result, [0, 1, 1, 2, 1]
+
+test "#4889: \`for\` loop unexpected behavior with \`by 1\` on second loop", ->
+  n = 1
+  result = []
+  for i in [0..n]
+    result.push i
+    for j in [(i + 1)..n] by 1
+      result.push j
+
+  arrayEq result, [0, 1, 1]
+
+test "countdown example from docs", ->
+  countdown = (num for num in [10..1])
+  arrayEq countdown, [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+test "counting up when the range goes down returns an empty array", ->
+  countdown = (num for num in [10..1] by 1)
+  arrayEq countdown, []
+
+test "counting down when the range goes up returns an empty array", ->
+  countup = (num for num in [1..10] by -1)
+  arrayEq countup, []
+
+test "counting down by too much returns just the first value", ->
+  countdown = (num for num in [10..1] by -100)
+  arrayEq countdown, [10]
+
+test "counting up by too much returns just the first value", ->
+  countup = (num for num in [1..10] by 100)
+  arrayEq countup, [1]
+
+`;
+
+exports[`slicing_and_splicing.coffee 1`] = `
+# Slicing and Splicing
+# --------------------
+
+# * Slicing
+# * Splicing
+
+# shared array
+shared = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# Slicing
+
+test "basic slicing", ->
+  arrayEq [7, 8, 9]   , shared[7..9]
+  arrayEq [2, 3]      , shared[2...4]
+  arrayEq [2, 3, 4, 5], shared[2...6]
+
+test "slicing with variables as endpoints", ->
+  [a, b] = [1, 4]
+  arrayEq [1, 2, 3, 4], shared[a..b]
+  arrayEq [1, 2, 3]   , shared[a...b]
+
+test "slicing with expressions as endpoints", ->
+  [a, b] = [1, 3]
+  arrayEq [2, 3, 4, 5, 6], shared[(a+1)..2*b]
+  arrayEq [2, 3, 4, 5]   , shared[a+1...(2*b)]
+
+test "unbounded slicing", ->
+  arrayEq [7, 8, 9]   , shared[7..]
+  arrayEq [8, 9]      , shared[-2..]
+  arrayEq [9]         , shared[-1...]
+  arrayEq [0, 1, 2]   , shared[...3]
+  arrayEq [0, 1, 2, 3], shared[..-7]
+
+  arrayEq shared      , shared[..-1]
+  arrayEq shared[0..8], shared[...-1]
+
+  for a in [-shared.length..shared.length]
+    arrayEq shared[a..] , shared[a...]
+  for a in [-shared.length+1...shared.length]
+    arrayEq shared[..a][...-1] , shared[...a]
+
+  arrayEq [1, 2, 3], [1, 2, 3][..]
+
+test "#930, #835, #831, #746 #624: inclusive slices to -1 should slice to end", ->
+  arrayEq shared, shared[0..-1]
+  arrayEq shared, shared[..-1]
+  arrayEq shared.slice(1,shared.length), shared[1..-1]
+
+test "string slicing", ->
+  str = "abcdefghijklmnopqrstuvwxyz"
+  ok str[1...1] is ""
+  ok str[1..1] is "b"
+  ok str[1...5] is "bcde"
+  ok str[0..4] is "abcde"
+  ok str[-5..] is "vwxyz"
+
+test "#1722: operator precedence in unbounded slice compilation", ->
+  list = [0..9]
+  n = 2 # some truthy number in \`list\`
+  arrayEq [0..n], list[..n]
+  arrayEq [0..n], list[..n or 0]
+  arrayEq [0..n], list[..if n then n else 0]
+
+test "#2349: inclusive slicing to numeric strings", ->
+  arrayEq [0, 1], [0..10][.."1"]
+
+test "#4631: slicing with space before and/or after the dots", ->
+  a = (s) -> s
+  b = [4, 5, 6]
+  c = [7, 8, 9]
+  arrayEq [2, 3, 4], shared[2 ... 5]
+  arrayEq [3, 4, 5], shared[3... 6]
+  arrayEq [4, 5, 6], shared[4 ...7]
+  arrayEq shared[(a b...)...(a c...)]  , shared[(a ...b)...(a ...c)]
+  arrayEq shared[(a b...) ... (a c...)], shared[(a ...b) ... (a ...c)]
+  arrayEq shared[(a b...)... (a c...)] , shared[(a ...b)... (a ...c)]
+  arrayEq shared[(a b...) ...(a c...)] , shared[(a ...b) ...(a ...c)]
+
+
+# Splicing
+
+test "basic splicing", ->
+  ary = [0..9]
+  ary[5..9] = [0, 0, 0]
+  arrayEq [0, 1, 2, 3, 4, 0, 0, 0], ary
+
+  ary = [0..9]
+  ary[2...8] = []
+  arrayEq [0, 1, 8, 9], ary
+
+test "unbounded splicing", ->
+  ary = [0..9]
+  ary[3..] = [9, 8, 7]
+  arrayEq [0, 1, 2, 9, 8, 7]. ary
+
+  ary[...3] = [7, 8, 9]
+  arrayEq [7, 8, 9, 9, 8, 7], ary
+
+  ary[..] = [1, 2, 3]
+  arrayEq [1, 2, 3], ary
+
+test "splicing with variables as endpoints", ->
+  [a, b] = [1, 8]
+
+  ary = [0..9]
+  ary[a..b] = [2, 3]
+  arrayEq [0, 2, 3, 9], ary
+
+  ary = [0..9]
+  ary[a...b] = [5]
+  arrayEq [0, 5, 8, 9], ary
+
+test "splicing with expressions as endpoints", ->
+  [a, b] = [1, 3]
+
+  ary = [0..9]
+  ary[ a+1 .. 2*b+1 ] = [4]
+  arrayEq [0, 1, 4, 8, 9], ary
+
+  ary = [0..9]
+  ary[a+1...2*b+1] = [4]
+  arrayEq [0, 1, 4, 7, 8, 9], ary
+
+test "splicing to the end, against a one-time function", ->
+  ary = null
+  fn = ->
+    if ary
+      throw 'err'
+    else
+      ary = [1, 2, 3]
+
+  fn()[0..] = 1
+
+  arrayEq ary, [1]
+
+test "the return value of a splice literal should be the RHS", ->
+  ary = [0, 0, 0]
+  eq (ary[0..1] = 2), 2
+
+  ary = [0, 0, 0]
+  eq (ary[0..] = 3), 3
+
+  arrayEq [ary[0..0] = 0], [0]
+
+test "#1723: operator precedence in unbounded splice compilation", ->
+  n = 4 # some truthy number in \`list\`
+
+  list = [0..9]
+  list[..n] = n
+  arrayEq [n..9], list
+
+  list = [0..9]
+  list[..n or 0] = n
+  arrayEq [n..9], list
+
+  list = [0..9]
+  list[..if n then n else 0] = n
+  arrayEq [n..9], list
+
+test "#2953: methods on endpoints in assignment from array splice literal", ->
+  list = [0..9]
+
+  Number.prototype.same = -> this
+  list[1.same()...9.same()] = 5
+  delete Number.prototype.same
+
+  arrayEq [0, 5, 9], list
+
+test "#1726: \`Op\` expression in property access causes unexpected results", ->
+  a = [0..2]
+  arrayEq a, a[(!1 in a)..]
+  arrayEq a, a[!1 in a..]
+  arrayEq a[(!1 in a)..], a[(!1 in a)..]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+shared = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+test "basic slicing", ->
+  arrayEq [7, 8, 9], shared[7..9]
+  arrayEq [2, 3], shared[2...4]
+  arrayEq [2, 3, 4, 5], shared[2...6]
+
+test "slicing with variables as endpoints", ->
+  [a, b] = [1, 4]
+  arrayEq [1, 2, 3, 4], shared[a..b]
+  arrayEq [1, 2, 3], shared[a...b]
+
+test "slicing with expressions as endpoints", ->
+  [a, b] = [1, 3]
+  arrayEq [2, 3, 4, 5, 6], shared[(a + 1)..(2 * b)]
+  arrayEq [2, 3, 4, 5], shared[(a + 1)...(2 * b)]
+
+test "unbounded slicing", ->
+  arrayEq [7, 8, 9], shared[7..]
+  arrayEq [8, 9], shared[-2..]
+  arrayEq [9], shared[-1...]
+  arrayEq [0, 1, 2], shared[...3]
+  arrayEq [0, 1, 2, 3], shared[..-7]
+
+  arrayEq shared, shared[..-1]
+  arrayEq shared[0..8], shared[...-1]
+
+  for a in [-shared.length..shared.length]
+    arrayEq shared[a..], shared[a...]
+  for a in [(-shared.length + 1)...shared.length]
+    arrayEq shared[..a][...-1], shared[...a]
+
+  arrayEq [1, 2, 3], [1, 2, 3][..]
+
+test "#930, #835, #831, #746 #624: inclusive slices to -1 should slice to end", ->
+  arrayEq shared, shared[0..-1]
+  arrayEq shared, shared[..-1]
+  arrayEq shared.slice(1, shared.length), shared[1..-1]
+
+test "string slicing", ->
+  str = "abcdefghijklmnopqrstuvwxyz"
+  ok str[1...1] is ""
+  ok str[1..1] is "b"
+  ok str[1...5] is "bcde"
+  ok str[0..4] is "abcde"
+  ok str[-5..] is "vwxyz"
+
+test "#1722: operator precedence in unbounded slice compilation", ->
+  list = [0..9]
+  n = 2
+  arrayEq [0..n], list[..n]
+  arrayEq [0..n], list[..(n or 0)]
+  arrayEq [0..n], list[..(if n then n else 0)]
+
+test "#2349: inclusive slicing to numeric strings", ->
+  arrayEq [0, 1], [0..10][.."1"]
+
+test "#4631: slicing with space before and/or after the dots", ->
+  a = (s) -> s
+  b = [4, 5, 6]
+  c = [7, 8, 9]
+  arrayEq [2, 3, 4], shared[2...5]
+  arrayEq [3, 4, 5], shared[3...6]
+  arrayEq [4, 5, 6], shared[4...7]
+  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
+  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
+  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
+  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
+
+test "basic splicing", ->
+  ary = [0..9]
+  ary[5..9] = [0, 0, 0]
+  arrayEq [0, 1, 2, 3, 4, 0, 0, 0], ary
+
+  ary = [0..9]
+  ary[2...8] = []
+  arrayEq [0, 1, 8, 9], ary
+
+test "unbounded splicing", ->
+  ary = [0..9]
+  ary[3..] = [9, 8, 7]
+  arrayEq [0, 1, 2, 9, 8, 7].ary
+
+  ary[...3] = [7, 8, 9]
+  arrayEq [7, 8, 9, 9, 8, 7], ary
+
+  ary[..] = [1, 2, 3]
+  arrayEq [1, 2, 3], ary
+
+test "splicing with variables as endpoints", ->
+  [a, b] = [1, 8]
+
+  ary = [0..9]
+  ary[a..b] = [2, 3]
+  arrayEq [0, 2, 3, 9], ary
+
+  ary = [0..9]
+  ary[a...b] = [5]
+  arrayEq [0, 5, 8, 9], ary
+
+test "splicing with expressions as endpoints", ->
+  [a, b] = [1, 3]
+
+  ary = [0..9]
+  ary[(a + 1)..(2 * b + 1)] = [4]
+  arrayEq [0, 1, 4, 8, 9], ary
+
+  ary = [0..9]
+  ary[(a + 1)...(2 * b + 1)] = [4]
+  arrayEq [0, 1, 4, 7, 8, 9], ary
+
+test "splicing to the end, against a one-time function", ->
+  ary = null
+  fn = ->
+    if ary
+      throw "err"
+    else
+      ary = [1, 2, 3]
+
+  fn()[0..] = 1
+
+  arrayEq ary, [1]
+
+test "the return value of a splice literal should be the RHS", ->
+  ary = [0, 0, 0]
+  eq (ary[0..1] = 2), 2
+
+  ary = [0, 0, 0]
+  eq (ary[0..] = 3), 3
+
+  arrayEq [(ary[0..0] = 0)], [0]
+
+test "#1723: operator precedence in unbounded splice compilation", ->
+  n = 4
+  list = [0..9]
+  list[..n] = n
+  arrayEq [n..9], list
+
+  list = [0..9]
+  list[..(n or 0)] = n
+  arrayEq [n..9], list
+
+  list = [0..9]
+  list[..(if n then n else 0)] = n
+  arrayEq [n..9], list
+
+test "#2953: methods on endpoints in assignment from array splice literal", ->
+  list = [0..9]
+
+  Number::same = -> @
+  list[1.same()...9.same()] = 5
+  delete Number::same
+
+  arrayEq [0, 5, 9], list
+
+test "#1726: \`Op\` expression in property access causes unexpected results", ->
+  a = [0..2]
+  arrayEq a, a[(!1 in a)..]
+  arrayEq a, a[(!1 in a)..]
+  arrayEq a[(!1 in a)..], a[(!1 in a)..]
+
+`;
+
+exports[`soaks.coffee 1`] = `
+# Soaks
+# -----
+
+# * Soaked Property Access
+# * Soaked Method Invocation
+# * Soaked Function Invocation
+
+
+# Soaked Property Access
+
+test "soaked property access", ->
+  nonce = {}
+  obj = a: b: nonce
+  eq nonce    , obj?.a.b
+  eq nonce    , obj?['a'].b
+  eq nonce    , obj.a?.b
+  eq nonce    , obj?.a?['b']
+  eq undefined, obj?.a?.non?.existent?.property
+
+test "soaked property access caches method calls", ->
+  nonce ={}
+  obj = fn: -> a: nonce
+  eq nonce    , obj.fn()?.a
+  eq undefined, obj.fn()?.b
+
+test "soaked property access caching", ->
+  nonce = {}
+  counter = 0
+  fn = ->
+    counter++
+    'self'
+  obj =
+    self: -> @
+    prop: nonce
+  eq nonce, obj[fn()]()[fn()]()[fn()]()?.prop
+  eq 3, counter
+
+test "method calls on soaked methods", ->
+  nonce = {}
+  obj = null
+  eq undefined, obj?.a().b()
+  obj = a: -> b: -> nonce
+  eq nonce    , obj?.a().b()
+
+test "postfix existential operator mixes well with soaked property accesses", ->
+  eq false, nonexistent?.property?
+
+test "function invocation with soaked property access", ->
+  id = (_) -> _
+  eq undefined, id nonexistent?.method()
+
+test "if-to-ternary should safely parenthesize soaked property accesses", ->
+  ok (if nonexistent?.property then false else true)
+
+test "#726: don't check for a property on a conditionally-referenced nonexistent thing", ->
+  eq undefined, nonexistent?[Date()]
+
+test "#756: conditional assignment edge cases", ->
+  # TODO: improve this test
+  a = null
+  ok isNaN      a?.b.c +  1
+  eq undefined, a?.b.c += 1
+  eq undefined, ++a?.b.c
+  eq undefined, delete a?.b.c
+
+test "operations on soaked properties", ->
+  # TODO: improve this test
+  a = b: {c: 0}
+  eq 1,   a?.b.c +  1
+  eq 1,   a?.b.c += 1
+  eq 2,   ++a?.b.c
+  eq yes, delete a?.b.c
+
+
+# Soaked Method Invocation
+
+test "soaked method invocation", ->
+  nonce = {}
+  counter = 0
+  obj =
+    self: -> @
+    increment: -> counter++; @
+  eq obj      , obj.self?()
+  eq undefined, obj.method?()
+  eq nonce    , obj.self?().property = nonce
+  eq undefined, obj.method?().property = nonce
+  eq obj      , obj.increment().increment().self?()
+  eq 2        , counter
+
+test "#733: conditional assignments", ->
+  a = b: {c: null}
+  eq a.b?.c?(), undefined
+  a.b?.c or= (it) -> it
+  eq a.b?.c?(1), 1
+  eq a.b?.c?([2, 3]...), 2
+
+
+# Soaked Function Invocation
+
+test "soaked function invocation", ->
+  nonce = {}
+  id = (_) -> _
+  eq nonce    , id?(nonce)
+  eq nonce    , (id? nonce)
+  eq undefined, nonexistent?(nonce)
+  eq undefined, (nonexistent? nonce)
+
+test "soaked function invocation with generated functions", ->
+  nonce = {}
+  id = (_) -> _
+  maybe = (fn, arg) -> if typeof fn is 'function' then () -> fn(arg)
+  eq maybe(id, nonce)?(), nonce
+  eq (maybe id, nonce)?(), nonce
+  eq (maybe false, nonce)?(), undefined
+
+test "soaked constructor invocation", ->
+  eq 42       , +new Number? 42
+  eq undefined,  new Other?  42
+
+test "soaked constructor invocations with caching and property access", ->
+  semaphore = 0
+  nonce = {}
+  class C
+    constructor: ->
+      ok false if semaphore
+      semaphore++
+    prop: nonce
+  eq nonce, (new C())?.prop
+  eq 1, semaphore
+
+test "soaked function invocation safe on non-functions", ->
+  eq undefined, (0)?(1)
+  eq undefined, (0)? 1, 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test "soaked property access", ->
+  nonce = {}
+  obj = a: b: nonce
+  eq nonce, obj?.a.b
+  eq nonce, obj?["a"].b
+  eq nonce, obj.a?.b
+  eq nonce, obj?.a?["b"]
+  eq undefined, obj?.a?.non?.existent?.property
+
+test "soaked property access caches method calls", ->
+  nonce = {}
+  obj = fn: -> a: nonce
+  eq nonce, obj.fn()?.a
+  eq undefined, obj.fn()?.b
+
+test "soaked property access caching", ->
+  nonce = {}
+  counter = 0
+  fn = ->
+    counter++
+    "self"
+  obj =
+    self: -> @
+    prop: nonce
+  eq nonce, obj[fn()]()[fn()]()[fn()]()?.prop
+  eq 3, counter
+
+test "method calls on soaked methods", ->
+  nonce = {}
+  obj = null
+  eq undefined, obj?.a().b()
+  obj = a: -> b: -> nonce
+  eq nonce, obj?.a().b()
+
+test "postfix existential operator mixes well with soaked property accesses", ->
+  eq false, nonexistent?.property?
+
+test "function invocation with soaked property access", ->
+  id = (_) -> _
+  eq undefined, id nonexistent?.method()
+
+test "if-to-ternary should safely parenthesize soaked property accesses", ->
+  ok(
+    if nonexistent?.property
+      false
+    else
+      true
+  )
+
+test "#726: don't check for a property on a conditionally-referenced nonexistent thing", ->
+  eq undefined, nonexistent?[Date()]
+
+test "#756: conditional assignment edge cases", ->
+  a = null
+  ok isNaN a?.b.c + 1
+  eq undefined, a?.b.c += 1
+  eq undefined, ++a?.b.c
+  eq undefined, delete a?.b.c
+
+test "operations on soaked properties", ->
+  a = b: c: 0
+  eq 1, a?.b.c + 1
+  eq 1, a?.b.c += 1
+  eq 2, ++a?.b.c
+  eq yes, delete a?.b.c
+
+test "soaked method invocation", ->
+  nonce = {}
+  counter = 0
+  obj =
+    self: -> @
+    increment: ->
+      counter++
+      @
+  eq obj, obj.self?()
+  eq undefined, obj.method?()
+  eq nonce, (obj.self?().property = nonce)
+  eq undefined, (obj.method?().property = nonce)
+  eq(
+    obj
+    obj
+      .increment()
+      .increment()
+      .self?()
+  )
+  eq 2, counter
+
+test "#733: conditional assignments", ->
+  a = b: c: null
+  eq a.b?.c?(), undefined
+  a.b?.c or= (it) -> it
+  eq a.b?.c?(1), 1
+  eq a.b?.c?([2, 3]...), 2
+
+test "soaked function invocation", ->
+  nonce = {}
+  id = (_) -> _
+  eq nonce, id? nonce
+  eq nonce, id? nonce
+  eq undefined, nonexistent? nonce
+  eq undefined, nonexistent? nonce
+
+test "soaked function invocation with generated functions", ->
+  nonce = {}
+  id = (_) -> _
+  maybe = (fn, arg) ->
+    if typeof fn is "function"
+      -> fn arg
+  eq maybe(id, nonce)?(), nonce
+  eq maybe(id, nonce)?(), nonce
+  eq maybe(false, nonce)?(), undefined
+
+test "soaked constructor invocation", ->
+  eq 42, +new Number?(42)
+  eq undefined, new Other? 42
+
+test "soaked constructor invocations with caching and property access", ->
+  semaphore = 0
+  nonce = {}
+  class C
+    constructor: ->
+      ok false if semaphore
+      semaphore++
+    prop: nonce
+  eq nonce, new C()?.prop
+  eq 1, semaphore
+
+test "soaked function invocation safe on non-functions", ->
+  eq undefined, (0)? 1
+  eq undefined, (0)? 1, 2
 
 `;
