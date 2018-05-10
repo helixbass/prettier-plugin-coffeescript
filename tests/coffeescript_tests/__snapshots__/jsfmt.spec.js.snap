@@ -931,18 +931,14 @@ test "implicit destructuring assignment in array of objects", ->
   e = {}
   f = {}
   arr = [
-    {
-      a: a
-      b: c: b
-    }
-    {
-      a: c
-      b: c: d
-    }
-    {
-      a: e
-      b: c: f
-    }
+    a: a
+    b: c: b
+  ,
+    a: c
+    b: c: d
+  ,
+    a: e
+    b: c: f
   ]
   result = ([y, z] for { a: y, b: { c: z } } in arr)
   arrayEq [[a, b], [c, d], [e, f]], result
@@ -5283,12 +5279,12 @@ test "#1574: Destructuring and a parameter named _arg", ->
   f = ({ a, b }, _arg, _arg1) -> [a, b, _arg, _arg1]
   arrayEq(
     [1, 2, 3, 4]
-    f(
+    f
       a: 1
       b: 2
+    ,
       3
       4
-    )
   )
 
 test "#1844: bound functions in nested comprehensions causing empty var statements", ->
@@ -6557,7 +6553,7 @@ test "#3598: Unary + and - coerce the operand once when it is an identifier", ->
   assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by +a)
   assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by -a)
   assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by ~a)
-  assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by a * 2 / 2)
+  assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by (a * 2) / 2)
 
   ok 1 in [0, 1]
   ok +1 in [0, 1]

@@ -11,6 +11,7 @@ const {
   breakParent,
   concat,
   conditionalGroup,
+  dedent,
   fill,
   group,
   hardline,
@@ -23,7 +24,7 @@ const {
   softline,
 } = docBuilders
 const docUtils = doc.utils
-const {isEmpty, isLineNext, rawText, willBreak} = docUtils
+const {isEmpty, isLineNext, willBreak} = docUtils
 
 const sysUtil = require('util')
 
@@ -403,7 +404,7 @@ function printPathNoParens(path, options, print) {
       const joinedProps = printedProps.map(prop => {
         const result = concat(separatorParts.concat(group(prop.printed)))
         separatorParts = [ifBreak('', ','), line]
-        if (util.isNextLineEmpty(options.originalText, prop.node)) {
+        if (util.isNextLineEmpty(options.originalText, prop.node, locEnd)) {
           separatorParts.push(hardline)
         }
         return result
@@ -467,7 +468,9 @@ function printPathNoParens(path, options, print) {
         //   : '',
         shouldOmitBracesIfParentBreaks
           ? ifVisibleGroupBroke('', '{', {count: 1})
-          : shouldOmitBraces ? '' : '{',
+          : shouldOmitBraces
+            ? ''
+            : '{',
         dontIndent
           ? concat(joinedProps)
           : indent(
@@ -490,7 +493,9 @@ function printPathNoParens(path, options, print) {
                 : line,
           shouldOmitBracesIfParentBreaks
             ? ifVisibleGroupBroke('', '}', {count: 1})
-            : shouldOmitBraces ? '' : '}',
+            : shouldOmitBraces
+              ? ''
+              : '}',
         ]),
       ])
       return group(content, {
@@ -544,7 +549,8 @@ function printPathNoParens(path, options, print) {
             ),
             softline,
             ']',
-          ])
+          ]),
+          {visible: true}
         )
       )
       return concat(parts)
@@ -1003,14 +1009,15 @@ function printPathNoParens(path, options, print) {
         concat([
           'try',
           path.call(print, 'block'),
-          util.isNextLineEmpty(text, n.block) && (n.handler || n.finalizer)
+          util.isNextLineEmpty(text, n.block, locEnd) &&
+          (n.handler || n.finalizer)
             ? hardline
             : '',
           n.handler
             ? concat([
                 hardline,
                 path.call(print, 'handler'),
-                util.isNextLineEmpty(text, n.handler) && n.finalizer
+                util.isNextLineEmpty(text, n.handler, locEnd) && n.finalizer
                   ? hardline
                   : '',
               ])
@@ -1336,7 +1343,7 @@ function isTemplateOnItsOwnLine(n, text) {
     ((n.type === 'TemplateLiteral' && templateLiteralHasNewLines(n)) ||
       (n.type === 'TaggedTemplateExpression' &&
         templateLiteralHasNewLines(n.quasi))) &&
-    !util.hasNewline(text, util.locStart(n), {backwards: true})
+    !util.hasNewline(text, locStart(n), {backwards: true})
   )
 }
 
@@ -1385,14 +1392,6 @@ function shouldOmitObjectBraces(path, {stackOffset = 0, ifParentBreaks} = {}) {
   ) {
     return {indent: false, trailingLine: false}
   }
-  if (
-    ifParentBreaks &&
-    parent.type === 'CallExpression' &&
-    node !== parent.callee &&
-    callParensOptionalIfParentBreaks(path, {stackOffset: stackOffset + 1})
-  ) {
-    return {indent: false, trailingLine: false, ifParentBreaks: true}
-  }
   const shouldOmitBracesButNotIndent =
     (parent.type === 'ExpressionStatement' &&
       grandparent.type === 'ClassBody') ||
@@ -1421,17 +1420,12 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
     }
     if (
       ifParentBreaks &&
-      isNonLastCallArg(path, {stackOffset: stackOffset + parentLevel})
-    ) {
-      breakingParentCount++
-      return {indent, trailingLine, ifParentBreaks: true, breakingParentCount}
-    }
-    if (
-      ifParentBreaks &&
-      isObjectPropertyValue(path, {
-        stackOffset: stackOffset + parentLevel,
-        // nonLast: true,
-      })
+      (isNonLastCallArg(path, {stackOffset: stackOffset + parentLevel}) ||
+        isObjectPropertyValue(path, {
+          stackOffset: stackOffset + parentLevel,
+          // nonLast: true,
+        }) ||
+        parent.type === 'ArrayExpression')
     ) {
       breakingParentCount++
       return {indent, trailingLine, ifParentBreaks: true, breakingParentCount}
@@ -1458,7 +1452,7 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
       parent.arguments &&
       prevParent === parent.arguments[parent.arguments.length - 1]
     ) {
-      indent = parent.arguments.length === 1
+      indent = false
       trailingLine = false
       breakingParentCount++
     } else if (
@@ -1596,6 +1590,12 @@ function printExportDeclaration(path, options, print) {
 function locStart(node) {
   if (node.range) {
     return node.range[0]
+  }
+}
+
+function locEnd(node) {
+  if (node.range) {
+    return node.range[1]
   }
 }
 
@@ -2245,15 +2245,23 @@ function printArgumentsList(path, options, print) {
   }
 
   const lastArgIndex = args.length - 1
+  let separatorParts = []
   const printedArguments = path.map((argPath, index) => {
-    // const arg = argPath.getNode()
-    const parts = [print(argPath)]
-
-    if (index === lastArgIndex) {
-      // do nothing
-    } else {
-      parts.push(ifBreak('', ','), line)
+    const arg = argPath.getNode()
+    let isObject
+    if ((isObject = isObjectish(arg))) {
+      if (separatorParts.length && index !== lastArgIndex) {
+        separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
+      }
     }
+    const parts = []
+    parts.push(concat(separatorParts))
+    parts.push(print(argPath))
+
+    separatorParts = [
+      ifBreak(isObject ? dedent(concat([line, ','])) : '', ','),
+      line,
+    ]
 
     return concat(parts)
   }, 'arguments')
@@ -2275,9 +2283,12 @@ function printArgumentsList(path, options, print) {
   const shouldntBreak =
     args.length === 1 &&
     (args[0].type === 'FunctionExpression' ||
-      args[0].type === 'ObjectExpression' ||
+      // args[0].type === 'ObjectExpression' ||
       isDoFunc(args[0]))
-  const parensUnnecessary = shouldntBreak && parensOptional
+  const firstArgIsObject =
+    args.length >= 1 && args[0].type === 'ObjectExpression'
+  const parensUnnecessary =
+    (shouldntBreak || firstArgIsObject) && parensOptional
   const parensUnnecessaryIfParentBreaks =
     shouldntBreak && parensOptionalIfParentBreaks
   const nonFinalArgs = args.slice(0, args.length - 1)
@@ -2292,7 +2303,9 @@ function printArgumentsList(path, options, print) {
           '(',
           {count: parensOptionalIfParentBreaks.breakingParentCount || 1}
         )
-      : parensOptional ? ifBreak('(', ' ') : '('
+      : parensOptional
+        ? ifBreak('(', ' ')
+        : '('
   const closingParen = parensUnnecessary
     ? ''
     : parensOptionalIfParentBreaks
@@ -2301,7 +2314,9 @@ function printArgumentsList(path, options, print) {
           ')',
           {count: parensOptionalIfParentBreaks.breakingParentCount || 1}
         )
-      : parensOptional ? ifBreak(')') : ')'
+      : parensOptional
+        ? ifBreak(')')
+        : ')'
 
   return shouldntBreak
     ? group(
@@ -2321,7 +2336,11 @@ function printArgumentsList(path, options, print) {
         concat([
           openingParen,
           indent(concat([softline, concat(printedArguments)])),
-          softline,
+          parensUnnecessary
+            ? ''
+            : parensUnnecessaryIfParentBreaks
+              ? ifVisibleGroupBroke('', softline, {count: 1})
+              : softline,
           closingParen,
         ]),
         {visible: true, shouldBreak}
@@ -2499,7 +2518,10 @@ function printStatementSequence(path, options, print) {
 
     parts.push(stmtPrinted)
 
-    if (util.isNextLineEmpty(text, stmt) && !isLastStatement(stmtPath)) {
+    if (
+      util.isNextLineEmpty(text, stmt, locEnd) &&
+      !isLastStatement(stmtPath)
+    ) {
       parts.push(hardline)
     }
 
@@ -2533,22 +2555,38 @@ function isIdentifierName(str) {
   return IDENTIFIER.test(str)
 }
 
+function isObjectish(node) {
+  return node.type === 'ObjectExpression' || node.type === 'ObjectPattern'
+}
+
 function printArrayItems(path, options, printPath, print) {
   const printedElements = []
   let separatorParts = []
-
   path.each(childPath => {
     const child = childPath.getValue()
+    let isObject
+    if ((isObject = isObjectish(child))) {
+      if (separatorParts.length) {
+        separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
+      }
+    }
     printedElements.push(concat(separatorParts))
     printedElements.push(print(childPath))
 
-    separatorParts = [ifBreak('', ','), line]
-    if (util.isNextLineEmpty(options.originalText, child)) {
+    separatorParts = [
+      ifBreak(isObject ? dedent(concat([line, ','])) : '', ','),
+      line,
+    ]
+    if (util.isNextLineEmpty(options.originalText, child, locEnd)) {
       separatorParts.push(line)
     }
   }, printPath)
 
   return concat(printedElements)
+}
+
+function rawText(node) {
+  return node.extra ? node.extra.raw : node.raw
 }
 
 function nodeStr(node, options) {
