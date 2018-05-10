@@ -391,16 +391,16 @@ function printPathNoParens(path, options, print) {
     case 'ObjectPattern': {
       const parent = path.getParentNode()
       const grandparent = path.getParentNode(1)
-      const props = []
+      const printedProps = []
       path.each(childPath => {
         const node = childPath.getValue()
-        props.push({
+        printedProps.push({
           node,
           printed: print(childPath),
         })
       }, 'properties')
       let separatorParts = []
-      const joinedProps = props.map(prop => {
+      const joinedProps = printedProps.map(prop => {
         const result = concat(separatorParts.concat(group(prop.printed)))
         separatorParts = [ifBreak('', ','), line]
         if (util.isNextLineEmpty(options.originalText, prop.node)) {
@@ -414,6 +414,10 @@ function printPathNoParens(path, options, print) {
       }
 
       const shouldOmitBraces = shouldOmitObjectBraces(path)
+      const shouldOmitBracesIfParentBreaks =
+        !shouldOmitBraces &&
+        shouldOmitObjectBraces(path, {ifParentBreaks: true})
+      // dump({n, shouldOmitBraces, shouldOmitBracesIfParentBreaks})
       let dontIndent = false
       let trailingLine = true
       if (shouldOmitBraces && !shouldOmitBraces.indent) {
@@ -425,29 +429,75 @@ function printPathNoParens(path, options, print) {
       const isClassBody =
         parent.type === 'ExpressionStatement' &&
         grandparent.type === 'ClassBody'
-      const shouldBreak = isClassBody // || (shouldOmitBraces && n.properties.length > 1)
-      if (isClassBody) {
+      const props = n.properties
+      const isNestedObject =
+        n.type === 'ObjectExpression' &&
+        props.length > 1 &&
+        parent.type === 'ObjectProperty' &&
+        n === parent.value
+      const isNonFinalCallArg =
+        props.length > 1 &&
+        parent.type === 'CallExpression' &&
+        n !== parent.callee &&
+        n !== parent.arguments[parent.arguments.length - 1]
+      const isFinalCallArg =
+        props.length > 1 &&
+        parent.type === 'CallExpression' &&
+        parent.arguments &&
+        n === parent.arguments[parent.arguments.length - 1]
+      const shouldBreak =
+        isClassBody || // || (shouldOmitBraces && n.properties.length > 1)
+        isNestedObject ||
+        isNonFinalCallArg ||
+        (props.length > 1 &&
+          props.find(({value}) => value && value.type === 'ObjectExpression'))
+      const shouldBreakIfParentBreaks = isFinalCallArg
+      if (shouldOmitBraces && (isClassBody || isNestedObject)) {
+        dontIndent = true
+      }
+      if (
+        shouldOmitBracesIfParentBreaks &&
+        shouldOmitBracesIfParentBreaks.indent === false
+      ) {
         dontIndent = true
       }
       const content = concat([
-        shouldOmitBraces ? '' : '{',
+        // shouldBreakIfParentBreaks
+        //   ? ifVisibleGroupBroke(breakParent, '', {count: 1})
+        //   : '',
+        shouldOmitBracesIfParentBreaks
+          ? ifVisibleGroupBroke('', '{', {count: 1})
+          : shouldOmitBraces ? '' : '{',
         dontIndent
           ? concat(joinedProps)
           : indent(
               concat([
-                options.bracketSpacing && !shouldOmitBraces ? line : softline,
+                shouldOmitBraces || !options.bracketSpacing
+                  ? softline
+                  : shouldOmitBracesIfParentBreaks
+                    ? ifVisibleGroupBroke('', softline, {count: 1})
+                    : line,
                 concat(joinedProps),
               ])
             ),
         concat([
           dontIndent || !trailingLine
             ? ''
-            : options.bracketSpacing && !shouldOmitBraces ? line : softline,
-          shouldOmitBraces ? '' : '}',
+            : shouldOmitBraces || !options.bracketSpacing
+              ? softline
+              : shouldOmitBracesIfParentBreaks
+                ? ifVisibleGroupBroke('', softline, {count: 1})
+                : line,
+          shouldOmitBracesIfParentBreaks
+            ? ifVisibleGroupBroke('', '}', {count: 1})
+            : shouldOmitBraces ? '' : '}',
         ]),
       ])
-
-      return group(content, {shouldBreak})
+      return group(content, {
+        shouldBreak,
+        visible: true,
+        shouldBreakIfVisibleGroupBroke: shouldBreakIfParentBreaks,
+      })
     }
     case 'ObjectProperty':
       if (n.shorthand) {
@@ -1290,7 +1340,7 @@ function isTemplateOnItsOwnLine(n, text) {
   )
 }
 
-function shouldOmitObjectBraces(path, {stackOffset = 0} = {}) {
+function shouldOmitObjectBraces(path, {stackOffset = 0, ifParentBreaks} = {}) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
@@ -1309,7 +1359,12 @@ function shouldOmitObjectBraces(path, {stackOffset = 0} = {}) {
   }
 
   let isRightmost
-  if ((isRightmost = isRightmostInStatement(path, {stackOffset}))) {
+  if (
+    (isRightmost = isRightmostInStatement(path, {
+      stackOffset,
+      ifParentBreaks,
+    }))
+  ) {
     return isRightmost
   }
 
@@ -1330,11 +1385,22 @@ function shouldOmitObjectBraces(path, {stackOffset = 0} = {}) {
   ) {
     return {indent: false, trailingLine: false}
   }
+  if (
+    ifParentBreaks &&
+    parent.type === 'CallExpression' &&
+    node !== parent.callee &&
+    callParensOptionalIfParentBreaks(path, {stackOffset: stackOffset + 1})
+  ) {
+    return {indent: false, trailingLine: false, ifParentBreaks: true}
+  }
   const shouldOmitBracesButNotIndent =
     (parent.type === 'ExpressionStatement' &&
       grandparent.type === 'ClassBody') ||
     (parent.type === 'ArrayExpression' && parent.elements.length === 1) ||
-    parent.type === 'ObjectProperty' // && grandparent.properties.length === 1
+    isObjectPropertyValue(path, {
+      stackOffset,
+      last: true,
+    })
   if (shouldOmitBracesButNotIndent) {
     return {indent: false}
   }
@@ -1348,6 +1414,7 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
   let parent
   let indent = false
   let trailingLine
+  let breakingParentCount = 0
   while ((parent = path.getParentNode(stackOffset + parentLevel))) {
     if (isBlockLevel(prevParent, parent)) {
       return {indent, trailingLine}
@@ -1356,7 +1423,18 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
       ifParentBreaks &&
       isNonLastCallArg(path, {stackOffset: stackOffset + parentLevel})
     ) {
-      return {indent, trailingLine, ifParentBreaks: true}
+      breakingParentCount++
+      return {indent, trailingLine, ifParentBreaks: true, breakingParentCount}
+    }
+    if (
+      ifParentBreaks &&
+      isObjectPropertyValue(path, {
+        stackOffset: stackOffset + parentLevel,
+        // nonLast: true,
+      })
+    ) {
+      breakingParentCount++
+      return {indent, trailingLine, ifParentBreaks: true, breakingParentCount}
     }
     if (parent.type === 'AssignmentExpression' || isBinaryish(parent)) {
       if (prevParent !== parent.right) {
@@ -1382,6 +1460,16 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
     ) {
       indent = parent.arguments.length === 1
       trailingLine = false
+      breakingParentCount++
+    } else if (
+      isObjectPropertyValue(path, {
+        stackOffset: stackOffset + parentLevel,
+        last: true,
+      })
+    ) {
+      breakingParentCount++
+    } else if (parent.type === 'ObjectExpression') {
+      // continue
     } else {
       return false
     }
@@ -2075,10 +2163,27 @@ function isNonLastCallArg(path, {stackOffset = 0} = {}) {
     node !== parent.arguments[parent.arguments.length - 1]
   )
 }
+
+function isObjectPropertyValue(path, {stackOffset = 0, nonLast, last} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
+
+  return (
+    parent.type === 'ObjectProperty' &&
+    node === parent.value &&
+    (!nonLast ||
+      parent !== grandparent.properties[grandparent.properties.length - 1]) &&
+    (!last ||
+      parent === grandparent.properties[grandparent.properties.length - 1])
+  )
+}
+
 function callParensOptionalIfParentBreaks(path, {stackOffset = 0} = {}) {
   const node = path.getParentNode(stackOffset - 1)
   return (
     isNonLastCallArg(path, {stackOffset}) ||
+    // isObjectPropertyValue(path, {stackOffset}) ||
     (isChainableCall(node) && !followedByComputedAccess(path, {stackOffset})) ||
     (isFirstCallInChain(path, {stackOffset}) &&
       !followedByComputedAccess(path, {stackOffset})) ||
@@ -2126,6 +2231,7 @@ function callParensOptional(path, {stackOffset = 0} = {}) {
     (parent.type === 'For' && parent.postfix && parent.body === node) ||
     (parent.type === 'ObjectProperty' &&
       node === parent.value &&
+      parent === grandparent.properties[grandparent.properties.length - 1] &&
       shouldOmitObjectBraces(path, {stackOffset: stackOffset + 2}))
   )
 }
@@ -2164,6 +2270,7 @@ function printArgumentsList(path, options, print) {
         callParensOptional(path, {stackOffset: 1})))
   const parensOptionalIfParentBreaks =
     !parensOptional && callParensOptionalIfParentBreaks(path)
+  // dump({node, parensOptional, parensOptionalIfParentBreaks})
 
   const shouldntBreak =
     args.length === 1 &&
@@ -2173,6 +2280,9 @@ function printArgumentsList(path, options, print) {
   const parensUnnecessary = shouldntBreak && parensOptional
   const parensUnnecessaryIfParentBreaks =
     shouldntBreak && parensOptionalIfParentBreaks
+  const nonFinalArgs = args.slice(0, args.length - 1)
+  const shouldBreak =
+    args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
 
   const openingParen = parensUnnecessary
     ? ' '
@@ -2180,7 +2290,7 @@ function printArgumentsList(path, options, print) {
       ? ifVisibleGroupBroke(
           parensUnnecessaryIfParentBreaks ? ' ' : ifBreak('(', ' '),
           '(',
-          {count: 1}
+          {count: parensOptionalIfParentBreaks.breakingParentCount || 1}
         )
       : parensOptional ? ifBreak('(', ' ') : '('
   const closingParen = parensUnnecessary
@@ -2189,32 +2299,10 @@ function printArgumentsList(path, options, print) {
       ? ifVisibleGroupBroke(
           parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'),
           ')',
-          {count: 1}
+          {count: parensOptionalIfParentBreaks.breakingParentCount || 1}
         )
       : parensOptional ? ifBreak(')') : ')'
 
-  // if (parensOptionalIfParentBreaks) {
-  //   dump(
-  //     shouldntBreak
-  //       ? group(
-  //           concat([
-  //             openingParen,
-  //             concat(printedArguments),
-  //             parensUnnecessary ? '' : softline,
-  //             closingParen,
-  //           ])
-  //         )
-  //       : group(
-  //           concat([
-  //             openingParen,
-  //             indent(concat([softline, concat(printedArguments)])),
-  //             softline,
-  //             closingParen,
-  //           ]),
-  //           {visible: true}
-  //         )
-  //   )
-  // }
   return shouldntBreak
     ? group(
         concat([
@@ -2236,7 +2324,7 @@ function printArgumentsList(path, options, print) {
           softline,
           closingParen,
         ]),
-        {visible: true}
+        {visible: true, shouldBreak}
       )
 }
 
@@ -2292,6 +2380,7 @@ function printAssignment(
     rightNode.type === 'TemplateLiteral' ||
     rightNode.type === 'FunctionExpression' ||
     rightNode.type === 'ClassExpression' ||
+    rightNode.type === 'ObjectPattern' ||
     isDo(rightNode) ||
     rightNode.type === 'NewExpression'
 
@@ -2315,17 +2404,23 @@ function isDoFunc(node) {
 
 function printFunctionParams(path, print) {
   const fun = path.getValue()
+  const {params} = fun
 
-  if (!(fun.params && fun.params.length)) {
+  if (!(params && params.length)) {
     return concat([]) // TODO: is this the right way to return "empty"?
   }
 
   const printed = path.map(print, 'params')
+  const dontBreak = params.length === 1 && params[0].type === 'ObjectPattern'
 
   return concat([
     '(',
-    indent(concat([softline, join(concat([ifBreak('', ','), line]), printed)])),
-    softline,
+    dontBreak
+      ? join(', ', printed)
+      : indent(
+          concat([softline, join(concat([ifBreak('', ','), line]), printed)])
+        ),
+    dontBreak ? '' : softline,
     ') ',
   ])
 }

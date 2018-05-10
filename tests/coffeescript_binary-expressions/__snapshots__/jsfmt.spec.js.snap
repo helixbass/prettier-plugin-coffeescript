@@ -291,8 +291,8 @@ create = ->
     updatedAt: result.updatedAt
 
 obj =
-  state: shouldHaveState && stateIsOK && { loadState: LOADED, opened: no }
-  loadNext: (stateIsOK && hasNext) || { skipNext: yes }
+  state: shouldHaveState && stateIsOK && loadState: LOADED, opened: no
+  loadNext: (stateIsOK && hasNext) || skipNext: yes
   loaded: yes
 
 `;

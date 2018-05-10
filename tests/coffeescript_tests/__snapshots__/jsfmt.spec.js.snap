@@ -916,7 +916,10 @@ test "implicit destructuring assignment in object of objects", ->
   a = {}
   b = {}
   c = {}
-  obj = a: d: a, b: d: b, c: d: c
+  obj =
+    a: d: a
+    b: d: b
+    c: d: c
   result = ([y, z] for y, { d: z } of obj)
   arrayEq [["a", a], ["b", b], ["c", c]], result
 
@@ -927,8 +930,21 @@ test "implicit destructuring assignment in array of objects", ->
   d = {}
   e = {}
   f = {}
-  arr = [{ a: a, b: c: b }, { a: c, b: c: d }, { a: e, b: c: f }]
-  result = ([y, z] for { a: y, b: c: z } in arr)
+  arr = [
+    {
+      a: a
+      b: c: b
+    }
+    {
+      a: c
+      b: c: d
+    }
+    {
+      a: e
+      b: c: f
+    }
+  ]
+  result = ([y, z] for { a: y, b: { c: z } } in arr)
   arrayEq [[a, b], [c, d], [e, f]], result
 
 test "implicit destructuring assignment in array of arrays", ->
@@ -5265,7 +5281,15 @@ test "reserved keyword at-splat", ->
 
 test "#1574: Destructuring and a parameter named _arg", ->
   f = ({ a, b }, _arg, _arg1) -> [a, b, _arg, _arg1]
-  arrayEq [1, 2, 3, 4], f { a: 1, b: 2 }, 3, 4
+  arrayEq(
+    [1, 2, 3, 4]
+    f(
+      a: 1
+      b: 2
+      3
+      4
+    )
+  )
 
 test "#1844: bound functions in nested comprehensions causing empty var statements", ->
   a = ((=>) for a in [0] for b in [0])
@@ -5288,7 +5312,11 @@ test "#2621: fancy destructuring in parameter lists", ->
     eq key2, "key2"
     eq a, "a"
 
-  func prop1: key1: "key1", prop2: key2: "key2", key3: ["a", "b", "c"]
+  func
+    prop1: key1: "key1"
+    prop2:
+      key2: "key2"
+      key3: ["a", "b", "c"]
 
 test "#1435 Indented property access", ->
   rec = -> rec: rec
@@ -5337,7 +5365,12 @@ test "Destructured parameter with default value, that itself has a default value
   draw = (
     { size = "big", coords = { x: 0, y: 0 }, radius = 25 } = {}
   ) -> "#{size}-#{coords.x}-#{coords.y}-#{radius}"
-  output = draw coords: x: 18, y: 30, radius: 30
+  output =
+    draw
+      coords:
+        x: 18
+        y: 30
+      radius: 30
   eq output, "big-18-30-30"
 
 test "#4566: destructuring with nested default values", ->
