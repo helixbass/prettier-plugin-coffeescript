@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "coffeescript": "../coffeescript_orig",
-    "prettier": "prettier/prettier#5e2e7a2881d07ff0aa4b4673becc9cb4ce2f6cae"
+    "prettier": "helixbass/prettier#visible-group"
   },
   "devDependencies": {
     "eslint": "^4.14.0",

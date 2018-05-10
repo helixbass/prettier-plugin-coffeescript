@@ -1,5 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`booleans.coffee 1`] = `
+# Boolean Literals
+# ----------------
+
+# TODO: add method invocation tests: true.toString() is "true"
+
+test "#764 Booleans should be indexable", ->
+  toString = Boolean::toString
+
+  eq toString, true['toString']
+  eq toString, false['toString']
+  eq toString, yes['toString']
+  eq toString, no['toString']
+  eq toString, on['toString']
+  eq toString, off['toString']
+
+  eq toString, true.toString
+  eq toString, false.toString
+  eq toString, yes.toString
+  eq toString, no.toString
+  eq toString, on.toString
+  eq toString, off.toString
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test "#764 Booleans should be indexable", ->
+  toString = Boolean::toString
+
+  eq toString, true["toString"]
+  eq toString, false["toString"]
+  eq toString, yes["toString"]
+  eq toString, no["toString"]
+  eq toString, on["toString"]
+  eq toString, off["toString"]
+
+  eq toString, true.toString
+  eq toString, false.toString
+  eq toString, yes.toString
+  eq toString, no.toString
+  eq toString, on.toString
+  eq toString, off.toString
+
+`;
+
 exports[`comprehensions.coffee 1`] = `
 # Comprehensions
 # --------------
@@ -587,10 +629,7 @@ test "Basic array comprehensions.", ->
   ok results.join(",") is "2,18"
 
 test "Basic object comprehensions.", ->
-  obj =
-    one: 1
-    two: 2
-    three: 3
+  obj = one: 1, two: 2, three: 3
   names = (prop + "!" for prop of obj)
   odds = (prop + "!" for prop, value of obj when value & 1)
 
@@ -814,7 +853,8 @@ test "Issue #897: Ensure that plucked function variables aren't leaked.", ->
 
   (->
     for entity in list
-      facets[entity] = -> entity)()
+      facets[entity] = -> entity
+  )()
 
   eq typeof entity, "undefined"
   eq facets["two"](), "two"
@@ -876,10 +916,7 @@ test "implicit destructuring assignment in object of objects", ->
   a = {}
   b = {}
   c = {}
-  obj =
-    a: d: a
-    b: d: b
-    c: d: c
+  obj = a: d: a, b: d: b, c: d: c
   result = ([y, z] for y, { d: z } of obj)
   arrayEq [["a", a], ["b", b], ["c", c]], result
 
@@ -1018,9 +1055,7 @@ test "#2274: Allow @values as loop variables", ->
 
 test "#4411: Allow @values as loop indices", ->
   obj =
-    index: null
-    get: -> @index
-    method: -> @get() for _, @index in [1, 2, 3]
+    index: null, get: -> @index, method: -> @get() for _, @index in [1, 2, 3]
   eq obj.index, null
   arrayEq obj.method(), [0, 1, 2]
   eq obj.index, 3
@@ -3874,10 +3909,7 @@ test "#3921: \`switch\`", ->
   eq "five", c
 
 test "#3909: backslash \`for own ... of\`", ->
-  obj =
-    a: 1
-    b: 2
-    c: 3
+  obj = a: 1, b: 2, c: 3
   arr = ["a", "b", "c"]
 
   x1 = (key for own key of obj)
@@ -3908,10 +3940,7 @@ test "#3909: backslash \`for own ... of\`", ->
   arrayEq x9, arr
 
 test "#3909: backslash \`for ... of\`", ->
-  obj =
-    a: 1
-    b: 2
-    c: 3
+  obj = a: 1, b: 2, c: 3
   arr = ["a", "b", "c"]
 
   x1 = (key for key of obj)
@@ -4011,6 +4040,1373 @@ test "#4898: Lexer: backslash line continuation is inconsistent", ->
     f = 24
 
   eq f, 42
+
+`;
+
+exports[`exception_handling.coffee 1`] = `
+# Exception Handling
+# ------------------
+
+# shared nonce
+nonce = {}
+
+
+# Throw
+
+test "basic exception throwing", ->
+  throws (-> throw 'error'), /^error$/
+
+
+# Empty Try/Catch/Finally
+
+test "try can exist alone", ->
+  try
+
+test "try/catch with empty try, empty catch", ->
+  try
+    # nothing
+  catch err
+    # nothing
+
+test "single-line try/catch with empty try, empty catch", ->
+  try catch err
+
+test "try/finally with empty try, empty finally", ->
+  try
+    # nothing
+  finally
+    # nothing
+
+test "single-line try/finally with empty try, empty finally", ->
+  try finally
+
+test "try/catch/finally with empty try, empty catch, empty finally", ->
+  try
+  catch err
+  finally
+
+test "single-line try/catch/finally with empty try, empty catch, empty finally", ->
+  try catch err then finally
+
+
+# Try/Catch/Finally as an Expression
+
+test "return the result of try when no exception is thrown", ->
+  result = try
+    nonce
+  catch err
+    undefined
+  finally
+    undefined
+  eq nonce, result
+
+test "single-line result of try when no exception is thrown", ->
+  result = try nonce catch err then undefined
+  eq nonce, result
+
+test "return the result of catch when an exception is thrown", ->
+  fn = ->
+    try
+      throw ->
+    catch err
+      nonce
+  doesNotThrow fn
+  eq nonce, fn()
+
+test "single-line result of catch when an exception is thrown", ->
+  fn = ->
+    try throw (->) catch err then nonce
+  doesNotThrow fn
+  eq nonce, fn()
+
+test "optional catch", ->
+  fn = ->
+    try throw ->
+    nonce
+  doesNotThrow fn
+  eq nonce, fn()
+
+
+# Try/Catch/Finally Interaction With Other Constructs
+
+test "try/catch with empty catch as last statement in a function body", ->
+  fn = ->
+    try nonce
+    catch err
+  eq nonce, fn()
+
+test "#1595: try/catch with a reused variable name", ->
+  # \`catch\` shouldn’t lead to broken scoping.
+  do ->
+    try
+      inner = 5
+    catch inner
+      # nothing
+  eq typeof inner, 'undefined'
+
+test "#2580: try/catch with destructuring the exception object", ->
+  result = try
+    missing.object
+  catch {message}
+    message
+
+  eq message, 'missing is not defined'
+
+test "Try catch finally as implicit arguments", ->
+  first = (x) -> x
+
+  foo = no
+  try
+    first try iamwhoiam() finally foo = yes
+  catch e
+  eq foo, yes
+
+  bar = no
+  try
+    first try iamwhoiam() catch e finally
+    bar = yes
+  catch e
+  eq bar, yes
+
+test "#2900: parameter-less catch clause", ->
+  # \`catch\` should not require a parameter.
+  try
+    throw new Error 'failed'
+  catch
+    ok true
+
+  try throw new Error 'failed' catch finally ok true
+
+  ok try throw new Error 'failed' catch then true
+
+test "#3709: throwing an if statement", ->
+  # \`throw if\` should return a closure around the \`if\` block, so that the
+  # output is valid JavaScript.
+  try
+    throw if no
+        new Error 'drat!'
+      else
+        new Error 'no escape!'
+  catch err
+    eq err.message, 'no escape!'
+
+  try
+    throw if yes then new Error 'huh?' else null
+  catch err
+    eq err.message, 'huh?'
+
+test "#3709: throwing a switch statement", ->
+  i = 3
+  try
+    throw switch i
+      when 2
+        new Error 'not this one'
+      when 3
+        new Error 'oh no!'
+  catch err
+    eq err.message, 'oh no!'
+
+test "#3709: throwing a for loop", ->
+  # \`throw for\` should return a closure around the \`for\` block, so that the
+  # output is valid JavaScript.
+  try
+    throw for i in [0..3]
+      i * 2
+  catch err
+    arrayEq err, [0, 2, 4, 6]
+
+test "#3709: throwing a while loop", ->
+  i = 0
+  try
+    throw while i < 3
+      i++
+  catch err
+    eq i, 3
+
+test "#3789: throwing a throw", ->
+  try
+    throw throw throw new Error 'whoa!'
+  catch err
+    eq err.message, 'whoa!'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nonce = {}
+
+test "basic exception throwing", -> throws (-> throw "error"), /^error$/
+
+test "try can exist alone", ->
+  try
+
+test "try/catch with empty try, empty catch", ->
+  try
+  catch err
+test "single-line try/catch with empty try, empty catch", ->
+  try
+  catch err
+
+test "try/finally with empty try, empty finally", ->
+  try
+  finally
+test "single-line try/finally with empty try, empty finally", ->
+  try
+  finally
+
+test "try/catch/finally with empty try, empty catch, empty finally", ->
+  try
+  catch err
+  finally
+
+test "single-line try/catch/finally with empty try, empty catch, empty finally", ->
+  try
+  catch err
+  finally
+
+test "return the result of try when no exception is thrown", ->
+  result =
+    try
+      nonce
+    catch err
+      undefined
+    finally
+      undefined
+  eq nonce, result
+
+test "single-line result of try when no exception is thrown", ->
+  result =
+    try
+      nonce
+    catch err
+      undefined
+  eq nonce, result
+
+test "return the result of catch when an exception is thrown", ->
+  fn = ->
+    try
+      throw ->
+    catch err
+      nonce
+  doesNotThrow fn
+  eq nonce, fn()
+
+test "single-line result of catch when an exception is thrown", ->
+  fn = ->
+    try
+      throw ->
+    catch err
+      nonce
+  doesNotThrow fn
+  eq nonce, fn()
+
+test "optional catch", ->
+  fn = ->
+    try
+      throw ->
+    nonce
+  doesNotThrow fn
+  eq nonce, fn()
+
+test "try/catch with empty catch as last statement in a function body", ->
+  fn = ->
+    try
+      nonce
+    catch err
+  eq nonce, fn()
+
+test "#1595: try/catch with a reused variable name", ->
+  do ->
+    try
+      inner = 5
+    catch inner
+  eq typeof inner, "undefined"
+
+test "#2580: try/catch with destructuring the exception object", ->
+  result =
+    try
+      missing.object
+    catch { message }
+      message
+
+  eq message, "missing is not defined"
+
+test "Try catch finally as implicit arguments", ->
+  first = (x) -> x
+
+  foo = no
+  try
+    first(
+      try
+        iamwhoiam()
+      finally
+        foo = yes
+    )
+  catch e
+  eq foo, yes
+
+  bar = no
+  try
+    first(
+      try
+        iamwhoiam()
+      catch e
+      finally
+    )
+    bar = yes
+  catch e
+  eq bar, yes
+
+test "#2900: parameter-less catch clause", ->
+  try
+    throw new Error "failed"
+  catch
+    ok true
+
+  try
+    throw new Error "failed"
+  catch
+  finally
+    ok true
+
+  ok(
+    try
+      throw new Error "failed"
+    catch
+      true
+  )
+
+test "#3709: throwing an if statement", ->
+  try
+    throw (if no then new Error "drat!" else new Error "no escape!")
+  catch err
+    eq err.message, "no escape!"
+
+  try
+    throw (if yes then new Error "huh?" else null)
+  catch err
+    eq err.message, "huh?"
+
+test "#3709: throwing a switch statement", ->
+  i = 3
+  try
+    throw switch i
+      when 2
+        new Error "not this one"
+      when 3
+        new Error "oh no!"
+  catch err
+    eq err.message, "oh no!"
+
+test "#3709: throwing a for loop", ->
+  try
+    throw for i in [0..3]
+      i * 2
+  catch err
+    arrayEq err, [0, 2, 4, 6]
+
+test "#3709: throwing a while loop", ->
+  i = 0
+  try
+    throw while i < 3
+      i++
+  catch err
+    eq i, 3
+
+test "#3789: throwing a throw", ->
+  try
+    throw throw throw new Error "whoa!"
+  catch err
+    eq err.message, "whoa!"
+
+`;
+
+exports[`exponentiation.coffee 1`] = `
+# The \`**\` and \`**=\` operators are only supported in Node 7.5+, so the tests
+# for these exponentiation operators are split out into their own file to be
+# loaded only by supported runtimes.
+
+test "exponentiation operator", ->
+  eq 27, 3 ** 3
+
+test "exponentiation operator has higher precedence than other maths operators", ->
+  eq 55, 1 + 3 ** 3 * 2
+  eq -4, -2 ** 2
+  eq 0, (!2) ** 2
+
+test "exponentiation operator is right associative", ->
+  eq 2, 2 ** 1 ** 3
+
+test "exponentiation operator compound assignment", ->
+  a = 2
+  a **= 3
+  eq 8, a
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test "exponentiation operator", -> eq 27, 3 ** 3
+
+test "exponentiation operator has higher precedence than other maths operators", ->
+  eq 55, 1 + 3 ** 3 * 2
+  eq -4, -(2 ** 2)
+  eq 0, (!2) ** 2
+
+test "exponentiation operator is right associative", -> eq 2, 2 ** (1 ** 3)
+
+test "exponentiation operator compound assignment", ->
+  a = 2
+  a **= 3
+  eq 8, a
+
+`;
+
+exports[`functions.coffee 1`] = `
+# Function Literals
+# -----------------
+
+# TODO: add indexing and method invocation tests: (->)[0], (->).call()
+
+# * Function Definition
+# * Bound Function Definition
+# * Parameter List Features
+#   * Splat Parameters
+#   * Context (@) Parameters
+#   * Parameter Destructuring
+#   * Default Parameters
+
+# Function Definition
+
+x = 1
+y = {}
+y.x = -> 3
+ok x is 1
+ok typeof(y.x) is 'function'
+ok y.x instanceof Function
+ok y.x() is 3
+
+# The empty function should not cause a syntax error.
+->
+() ->
+
+# Multiple nested function declarations mixed with implicit calls should not
+# cause a syntax error.
+(one) -> (two) -> three four, (five) -> six seven, eight, (nine) ->
+
+# with multiple single-line functions on the same line.
+func = (x) -> (x) -> (x) -> x
+ok func(1)(2)(3) is 3
+
+# Make incorrect indentation safe.
+func = ->
+  obj = {
+          key: 10
+        }
+  obj.key - 5
+eq func(), 5
+
+# Ensure that functions with the same name don't clash with helper functions.
+del = -> 5
+ok del() is 5
+
+
+# Bound Function Definition
+
+obj =
+  bound: ->
+    (=> this)()
+  unbound: ->
+    (-> this)()
+  nested: ->
+    (=>
+      (=>
+        (=> this)()
+      )()
+    )()
+eq obj, obj.bound()
+ok obj isnt obj.unbound()
+eq obj, obj.nested()
+
+
+test "even more fancy bound functions", ->
+  obj =
+    one: ->
+      do =>
+        return this.two()
+    two: ->
+      do =>
+        do =>
+          do =>
+            return this.three
+    three: 3
+
+  eq obj.one(), 3
+
+
+test "arguments in bound functions inherit from parent function", ->
+  # The \`arguments\` object in an ES arrow function refers to the \`arguments\`
+  # of the parent scope, just like \`this\`. In the CoffeeScript 1.x
+  # implementation of \`=>\`, the \`arguments\` object referred to the arguments
+  # of the arrow function; but per the ES2015 spec, \`arguments\` should refer
+  # to the parent.
+  arrayEq ((a...) -> a)([1, 2, 3]), ((a...) => a)([1, 2, 3])
+
+  parent = (a, b, c) ->
+    (bound = =>
+      [arguments[0], arguments[1], arguments[2]]
+    )()
+  arrayEq [1, 2, 3], parent(1, 2, 3)
+
+
+test "self-referencing functions", ->
+  changeMe = ->
+    changeMe = 2
+
+  changeMe()
+  eq changeMe, 2
+
+
+# Parameter List Features
+
+test "splats", ->
+  arrayEq [0, 1, 2], (((splat...) -> splat) 0, 1, 2)
+  arrayEq [2, 3], (((_, _1, splat...) -> splat) 0, 1, 2, 3)
+  arrayEq [0, 1], (((splat..., _, _1) -> splat) 0, 1, 2, 3)
+  arrayEq [2], (((_, _1, splat..., _2) -> splat) 0, 1, 2, 3)
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  arrayEq [0, 1, 2], (((splat ...) -> splat) 0, 1, 2)
+  arrayEq [2, 3], (((_, _1, splat ...) -> splat) 0, 1, 2, 3)
+  arrayEq [0, 1], (((splat ..., _, _1) -> splat) 0, 1, 2, 3)
+  arrayEq [2], (((_, _1, splat ..., _2) -> splat) 0, 1, 2, 3)
+
+test "destructured splatted parameters", ->
+  arr = [0,1,2]
+  splatArray = ([a...]) -> a
+  splatArrayRest = ([a...],b...) -> arrayEq(a,b); b
+  arrayEq splatArray(arr), arr
+  arrayEq splatArrayRest(arr,0,1,2), arr
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  splatArray = ([a ...]) -> a
+  splatArrayRest = ([a ...],b ...) -> arrayEq(a,b); b
+
+test "#4884: object-destructured splatted parameters", ->
+  f = ({length}...) -> length
+  eq f(4, 5, 6), 3
+  f = ({length: len}...) -> len
+  eq f(4, 5, 6), 3
+  f = ({length}..., last) -> [length, last]
+  arrayEq f(4, 5, 6), [2, 6]
+  f = ({length: len}..., last) -> [len, last]
+  arrayEq f(4, 5, 6), [2, 6]
+
+test "@-parameters: automatically assign an argument's value to a property of the context", ->
+  nonce = {}
+
+  ((@prop) ->).call context = {}, nonce
+  eq nonce, context.prop
+
+  # Allow splats alongside the special argument
+  ((splat..., @prop) ->).apply context = {}, [0, 0, nonce]
+  eq nonce, context.prop
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  ((splat ..., @prop) ->).apply context = {}, [0, 0, nonce]
+  eq nonce, context.prop
+
+  # Allow the argument itself to be a splat
+  ((@prop...) ->).call context = {}, 0, nonce, 0
+  eq nonce, context.prop[1]
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  ((@prop ...) ->).call context = {}, 0, nonce, 0
+  eq nonce, context.prop[1]
+
+  # The argument should not be able to be referenced normally
+  code = '((@prop) -> prop).call {}'
+  doesNotThrow -> CoffeeScript.compile code
+  throws (-> CoffeeScript.run code), ReferenceError
+  code = '((@prop) -> _at_prop).call {}'
+  doesNotThrow -> CoffeeScript.compile code
+  throws (-> CoffeeScript.run code), ReferenceError
+
+test "@-parameters and splats with constructors", ->
+  a = {}
+  b = {}
+  class Klass
+    constructor: (@first, splat..., @last) ->
+
+  obj = new Klass a, 0, 0, b
+  eq a, obj.first
+  eq b, obj.last
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  class Klass
+    constructor: (@first, splat ..., @last) ->
+
+  obj = new Klass a, 0, 0, b
+  eq a, obj.first
+  eq b, obj.last
+
+test "destructuring in function definition", ->
+  (([{a: [b], c}]...) ->
+    eq 1, b
+    eq 2, c
+  ) {a: [1], c: 2}
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  (([{a: [b], c}] ...) ->
+    eq 1, b
+    eq 2, c
+  ) {a: [1], c: 2}
+
+  context = {}
+  (([{a: [b, c = 2], @d, e = 4}]...) ->
+    eq 1, b
+    eq 2, c
+    eq @d, 3
+    eq context.d, 3
+    eq e, 4
+  ).call context, {a: [1], d: 3}
+
+  (({a: aa = 1, b: bb = 2}) ->
+    eq 5, aa
+    eq 2, bb
+  ) {a: 5}
+
+  ajax = (url, {
+    async = true,
+    beforeSend = (->),
+    cache = true,
+    method = 'get',
+    data = {}
+  }) ->
+    {url, async, beforeSend, cache, method, data}
+
+  fn = ->
+  deepEqual ajax('/home', beforeSend: fn, method: 'post'), {
+    url: '/home', async: true, beforeSend: fn, cache: true, method: 'post', data: {}
+  }
+
+test "#4005: \`([a = {}]..., b) ->\` weirdness", ->
+  fn = ([a = {}]..., b) -> [a, b]
+  deepEqual fn(5), [{}, 5]
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  fn = ([a = {}] ..., b) -> [a, b]
+  deepEqual fn(5), [{}, 5]
+
+test "default values", ->
+  nonceA = {}
+  nonceB = {}
+  a = (_,_1,arg=nonceA) -> arg
+  eq nonceA, a()
+  eq nonceA, a(0)
+  eq nonceB, a(0,0,nonceB)
+  eq nonceA, a(0,0,undefined)
+  eq null, a(0,0,null) # Per ES2015, \`null\` doesn’t trigger a parameter default value
+  eq false , a(0,0,false)
+  eq nonceB, a(undefined,undefined,nonceB,undefined)
+  b = (_,arg=nonceA,_1,_2) -> arg
+  eq nonceA, b()
+  eq nonceA, b(0)
+  eq nonceB, b(0,nonceB)
+  eq nonceA, b(0,undefined)
+  eq null, b(0,null)
+  eq false , b(0,false)
+  eq nonceB, b(undefined,nonceB,undefined)
+  c = (arg=nonceA,_,_1) -> arg
+  eq nonceA, c()
+  eq      0, c(0)
+  eq nonceB, c(nonceB)
+  eq nonceA, c(undefined)
+  eq null, c(null)
+  eq false , c(false)
+  eq nonceB, c(nonceB,undefined,undefined)
+
+test "default values with @-parameters", ->
+  a = {}
+  b = {}
+  obj = f: (q = a, @p = b) -> q
+  eq a, obj.f()
+  eq b, obj.p
+
+test "default values with splatted arguments", ->
+  withSplats = (a = 2, b..., c = 3, d = 5) -> a * (b.length + 1) * c * d
+  eq 30, withSplats()
+  eq 15, withSplats(1)
+  eq  5, withSplats(1,1)
+  eq  1, withSplats(1,1,1)
+  eq  2, withSplats(1,1,1,1)
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  withSplats = (a = 2, b ..., c = 3, d = 5) -> a * (b.length + 1) * c * d
+  eq 30, withSplats()
+  eq 15, withSplats(1)
+  eq  5, withSplats(1,1)
+  eq  1, withSplats(1,1,1)
+  eq  2, withSplats(1,1,1,1)
+
+test "#156: parameter lists with expansion", ->
+  expandArguments = (first, ..., lastButOne, last) ->
+    eq 1, first
+    eq 4, lastButOne
+    last
+  eq 5, expandArguments 1, 2, 3, 4, 5
+
+  throws (-> CoffeeScript.compile "(..., a, b...) ->"), null, "prohibit expansion and a splat"
+  throws (-> CoffeeScript.compile "(...) ->"),          null, "prohibit lone expansion"
+
+test "#156: parameter lists with expansion in array destructuring", ->
+  expandArray = (..., [..., last]) ->
+    last
+  eq 3, expandArray 1, 2, 3, [1, 2, 3]
+
+test "#3502: variable definitions and expansion", ->
+  a = b = 0
+  f = (a, ..., b) -> [a, b]
+  arrayEq [1, 5], f 1, 2, 3, 4, 5
+  eq 0, a
+  eq 0, b
+
+test "variable definitions and splat", ->
+  a = b = 0
+  f = (a, middle..., b) -> [a, middle, b]
+  arrayEq [1, [2, 3, 4], 5], f 1, 2, 3, 4, 5
+  eq 0, a
+  eq 0, b
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  f = (a, middle ..., b) -> [a, middle, b]
+  arrayEq [1, [2, 3, 4], 5], f 1, 2, 3, 4, 5
+  eq 0, a
+  eq 0, b
+
+test "default values with function calls", ->
+  doesNotThrow -> CoffeeScript.compile "(x = f()) ->"
+
+(x = f()) ->
+
+test "arguments vs parameters", ->
+  doesNotThrow -> CoffeeScript.compile "f(x) ->"
+  f = (g) -> g()
+  eq 5, f (x) -> 5
+
+f(x) ->
+
+test "reserved keyword as parameters", ->
+  f = (_case, @case) -> [_case, @case]
+  [a, b] = f(1, 2)
+  eq 1, a
+  eq 2, b
+
+  f = (@case, _case...) -> [@case, _case...]
+  [a, b, c] = f(1, 2, 3)
+  eq 1, a
+  eq 2, b
+  eq 3, c
+
+test "reserved keyword at-splat", ->
+  f = (@case...) -> @case
+  [a, b] = f(1, 2)
+  eq 1, a
+  eq 2, b
+
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
+  f = (@case ...) -> @case
+  [a, b] = f(1, 2)
+  eq 1, a
+  eq 2, b
+
+test "#1574: Destructuring and a parameter named _arg", ->
+  f = ({a, b}, _arg, _arg1) -> [a, b, _arg, _arg1]
+  arrayEq [1, 2, 3, 4], f a: 1, b: 2, 3, 4
+
+test "#1844: bound functions in nested comprehensions causing empty var statements", ->
+  a = ((=>) for a in [0] for b in [0])
+  eq 1, a.length
+
+test "#1859: inline function bodies shouldn't modify prior postfix ifs", ->
+  list = [1, 2, 3]
+  return if list.some (x) -> x is 2
+  ok no
+
+test "#2258: allow whitespace-style parameter lists in function definitions", ->
+  func = (
+    a, b, c
+  ) -> c
+  eq func(1, 2, 3), 3
+
+  func = (
+    a
+    b
+    c
+  ) -> b
+  eq func(1, 2, 3), 2
+
+test "#2621: fancy destructuring in parameter lists", ->
+  func = ({ prop1: { key1 }, prop2: { key2, key3: [a, b, c] } }) ->
+    eq(key2, 'key2')
+    eq(a, 'a')
+
+  func({prop1: {key1: 'key1'}, prop2: {key2: 'key2', key3: ['a', 'b', 'c']}})
+
+test "#1435 Indented property access", ->
+  rec = -> rec: rec
+
+  eq 1, do ->
+    rec()
+      .rec ->
+        rec()
+          .rec ->
+            rec.rec()
+          .rec()
+    1
+
+test "#1038 Optimize trailing return statements", ->
+  compile = (code) -> CoffeeScript.compile(code, bare: yes).trim().replace(/\\s+/g, " ")
+
+  eq "(function() {});",                 compile("->")
+  eq "(function() {});",                 compile("-> return")
+  eq "(function() { return void 0; });", compile("-> undefined")
+  eq "(function() { return void 0; });", compile("-> return undefined")
+  eq "(function() { foo(); });",         compile("""
+                                                 ->
+                                                   foo()
+                                                   return
+                                                 """)
+
+test "#4406 Destructured parameter default evaluation order with incrementing variable", ->
+  i = 0
+  f = ({ a = ++i }, b = ++i) -> [a, b]
+  arrayEq f({}), [1, 2]
+
+test "#4406 Destructured parameter default evaluation order with generator function", ->
+  current = 0
+  next    = -> ++current
+  foo = ({ a = next() }, b = next()) -> [ a, b ]
+  arrayEq foo({}), [1, 2]
+
+test "Destructured parameter with default value, that itself has a default value", ->
+  # Adapted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
+  draw = ({size = 'big', coords = {x: 0, y: 0}, radius = 25} = {}) -> "#{size}-#{coords.x}-#{coords.y}-#{radius}"
+  output = draw
+    coords:
+      x: 18
+      y: 30
+    radius: 30
+  eq output, 'big-18-30-30'
+
+test "#4566: destructuring with nested default values", ->
+  f = ({a: {b = 1}}) ->
+    b
+  eq 2, f a: b: 2
+
+test "#1043: comma after function glyph", ->
+  x = (a=->, b=2) ->
+    a()
+  eq x(), undefined
+
+  f = (a) -> a()
+  g = f ->, 2
+  eq g, undefined
+  h = f(=>, 2)
+  eq h, undefined
+
+test "#3845/#3446: chain after function glyph", ->
+  angular = module: -> controller: -> controller: ->
+
+  eq undefined,
+    angular.module 'foo'
+    .controller 'EmailLoginCtrl', ->
+    .controller 'EmailSignupCtrl', ->
+
+  beforeEach = (f) -> f()
+  getPromise = -> then: -> catch: ->
+
+  eq undefined,
+    beforeEach ->
+      getPromise()
+      .then (@result) =>
+      .catch (@error) =>
+
+  doThing = -> then: -> catch: (f) -> f()
+  handleError = -> 3
+  eq 3,
+    doThing()
+    .then (@result) =>
+    .catch handleError
+
+test "#4413: expressions in function parameters that create generated variables have those variables declared correctly", ->
+  'use strict'
+  # We’re in strict mode because we want an error to be thrown if the generated
+  # variable (\`ref\`) is assigned before being declared.
+  foo = -> null
+  bar = -> 33
+  f = (a = foo() ? bar()) -> a
+  g = (a = foo() ? bar()) -> a + 1
+  eq f(), 33
+  eq g(), 34
+
+test "#4657: destructured array param declarations", ->
+  a = 1
+  b = 2
+  f = ([a..., b]) ->
+  f [3, 4, 5]
+  eq a, 1
+  eq b, 2
+
+test "#4657: destructured array parameters", ->
+  f = ([a..., b]) -> {a, b}
+  result = f [1, 2, 3, 4]
+  arrayEq result.a, [1, 2, 3]
+  eq result.b, 4
+
+# TODO: add tests for newly supported shouldCache() params with default eg ([..., last] = 1) ->, (..., [..., last] = 1) ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+x = 1
+y = {}
+y.x = -> 3
+ok x is 1
+ok typeof y.x is "function"
+ok y.x instanceof Function
+ok y.x() is 3
+
+->
+->
+
+(one) -> (two) -> three four, (five) -> six seven, eight, (nine) ->
+
+func = (x) -> (x) -> (x) -> x
+ok func(1)(2)(3) is 3
+
+func = ->
+  obj = key: 10
+  obj.key - 5
+eq func(), 5
+
+del = -> 5
+ok del() is 5
+
+obj =
+  bound: -> (=> @)(), unbound: -> (-> @)(), nested: -> (=> (=> (=> @)())())()
+eq obj, obj.bound()
+ok obj isnt obj.unbound()
+eq obj, obj.nested()
+
+test "even more fancy bound functions", ->
+  obj =
+    one: ->
+      do =>
+        return @two()
+    two: ->
+      do =>
+        do =>
+          do =>
+            return @three
+    three: 3
+
+  eq obj.one(), 3
+
+test "arguments in bound functions inherit from parent function", ->
+  arrayEq ((a...) -> a)([1, 2, 3]), ((a...) => a) [1, 2, 3]
+
+  parent = (a, b, c) ->
+    (bound = => [arguments[0], arguments[1], arguments[2]])()
+  arrayEq [1, 2, 3], parent 1, 2, 3
+
+test "self-referencing functions", ->
+  changeMe = -> changeMe = 2
+
+  changeMe()
+  eq changeMe, 2
+
+test "splats", ->
+  arrayEq [0, 1, 2], ((splat...) -> splat) 0, 1, 2
+  arrayEq [2, 3], ((_, _1, splat...) -> splat) 0, 1, 2, 3
+  arrayEq [0, 1], ((splat..., _, _1) -> splat) 0, 1, 2, 3
+  arrayEq [2], ((_, _1, splat..., _2) -> splat) 0, 1, 2, 3
+
+  arrayEq [0, 1, 2], ((splat...) -> splat) 0, 1, 2
+  arrayEq [2, 3], ((_, _1, splat...) -> splat) 0, 1, 2, 3
+  arrayEq [0, 1], ((splat..., _, _1) -> splat) 0, 1, 2, 3
+  arrayEq [2], ((_, _1, splat..., _2) -> splat) 0, 1, 2, 3
+
+test "destructured splatted parameters", ->
+  arr = [0, 1, 2]
+  splatArray = ([a...]) -> a
+  splatArrayRest = ([a...], b...) ->
+    arrayEq a, b
+    b
+  arrayEq splatArray(arr), arr
+  arrayEq splatArrayRest(arr, 0, 1, 2), arr
+
+  splatArray = ([a...]) -> a
+  splatArrayRest = ([a...], b...) ->
+    arrayEq a, b
+    b
+
+test "#4884: object-destructured splatted parameters", ->
+  f = ({ length }...) -> length
+  eq f(4, 5, 6), 3
+  f = ({ length: len }...) -> len
+  eq f(4, 5, 6), 3
+  f = ({ length }..., last) -> [length, last]
+  arrayEq f(4, 5, 6), [2, 6]
+  f = ({ length: len }..., last) -> [len, last]
+  arrayEq f(4, 5, 6), [2, 6]
+
+test "@-parameters: automatically assign an argument's value to a property of the context", ->
+  nonce = {}
+
+  ((@prop) ->).call (context = {}), nonce
+  eq nonce, context.prop
+
+  ((splat..., @prop) ->).apply (context = {}), [0, 0, nonce]
+  eq nonce, context.prop
+
+  ((splat..., @prop) ->).apply (context = {}), [0, 0, nonce]
+  eq nonce, context.prop
+
+  ((@prop...) ->).call (context = {}), 0, nonce, 0
+  eq nonce, context.prop[1]
+
+  ((@prop...) ->).call (context = {}), 0, nonce, 0
+  eq nonce, context.prop[1]
+
+  code = "((@prop) -> prop).call {}"
+  doesNotThrow -> CoffeeScript.compile code
+  throws (-> CoffeeScript.run code), ReferenceError
+  code = "((@prop) -> _at_prop).call {}"
+  doesNotThrow -> CoffeeScript.compile code
+  throws (-> CoffeeScript.run code), ReferenceError
+
+test "@-parameters and splats with constructors", ->
+  a = {}
+  b = {}
+  class Klass
+    constructor: (@first, splat..., @last) ->
+
+  obj = new Klass a, 0, 0, b
+  eq a, obj.first
+  eq b, obj.last
+
+  class Klass
+    constructor: (@first, splat..., @last) ->
+
+  obj = new Klass a, 0, 0, b
+  eq a, obj.first
+  eq b, obj.last
+
+test "destructuring in function definition", ->
+  (([{ a: [b], c }]...) ->
+    eq 1, b
+    eq 2, c
+  ) a: [1], c: 2
+
+  (([{ a: [b], c }]...) ->
+    eq 1, b
+    eq 2, c
+  ) a: [1], c: 2
+
+  context = {}
+  (([{ a: [b, c = 2], @d, e = 4 }]...) ->
+    eq 1, b
+    eq 2, c
+    eq @d, 3
+    eq context.d, 3
+    eq e, 4
+  ).call context, a: [1], d: 3
+
+  (({ a: aa = 1, b: bb = 2 }) ->
+    eq 5, aa
+    eq 2, bb
+  ) a: 5
+
+  ajax = (
+    url
+    { async = true, beforeSend = ->, cache = true, method = "get", data = {} }
+  ) ->
+    { url, async, beforeSend, cache, method, data }
+
+  fn = ->
+  deepEqual(
+    ajax "/home", beforeSend: fn, method: "post"
+    url: "/home"
+    async: true
+    beforeSend: fn
+    cache: true
+    method: "post"
+    data: {}
+  )
+
+test "#4005: \`([a = {}]..., b) ->\` weirdness", ->
+  fn = ([a = {}]..., b) -> [a, b]
+  deepEqual fn(5), [{}, 5]
+
+  fn = ([a = {}]..., b) -> [a, b]
+  deepEqual fn(5), [{}, 5]
+
+test "default values", ->
+  nonceA = {}
+  nonceB = {}
+  a = (_, _1, arg = nonceA) -> arg
+  eq nonceA, a()
+  eq nonceA, a 0
+  eq nonceB, a 0, 0, nonceB
+  eq nonceA, a 0, 0, undefined
+  eq null, a 0, 0, null
+  eq false, a 0, 0, false
+  eq nonceB, a undefined, undefined, nonceB, undefined
+  b = (_, arg = nonceA, _1, _2) -> arg
+  eq nonceA, b()
+  eq nonceA, b 0
+  eq nonceB, b 0, nonceB
+  eq nonceA, b 0, undefined
+  eq null, b 0, null
+  eq false, b 0, false
+  eq nonceB, b undefined, nonceB, undefined
+  c = (arg = nonceA, _, _1) -> arg
+  eq nonceA, c()
+  eq 0, c 0
+  eq nonceB, c nonceB
+  eq nonceA, c undefined
+  eq null, c null
+  eq false, c false
+  eq nonceB, c nonceB, undefined, undefined
+
+test "default values with @-parameters", ->
+  a = {}
+  b = {}
+  obj = f: (q = a, @p = b) -> q
+  eq a, obj.f()
+  eq b, obj.p
+
+test "default values with splatted arguments", ->
+  withSplats = (a = 2, b..., c = 3, d = 5) -> a * (b.length + 1) * c * d
+  eq 30, withSplats()
+  eq 15, withSplats 1
+  eq 5, withSplats 1, 1
+  eq 1, withSplats 1, 1, 1
+  eq 2, withSplats 1, 1, 1, 1
+
+  withSplats = (a = 2, b..., c = 3, d = 5) -> a * (b.length + 1) * c * d
+  eq 30, withSplats()
+  eq 15, withSplats 1
+  eq 5, withSplats 1, 1
+  eq 1, withSplats 1, 1, 1
+  eq 2, withSplats 1, 1, 1, 1
+
+test "#156: parameter lists with expansion", ->
+  expandArguments = (first, ..., lastButOne, last) ->
+    eq 1, first
+    eq 4, lastButOne
+    last
+  eq 5, expandArguments 1, 2, 3, 4, 5
+
+  throws(
+    (-> CoffeeScript.compile "(..., a, b...) ->")
+    null
+    "prohibit expansion and a splat"
+  )
+  throws (-> CoffeeScript.compile "(...) ->"), null, "prohibit lone expansion"
+
+test "#156: parameter lists with expansion in array destructuring", ->
+  expandArray = (..., [..., last]) -> last
+  eq 3, expandArray 1, 2, 3, [1, 2, 3]
+
+test "#3502: variable definitions and expansion", ->
+  a = b = 0
+  f = (a, ..., b) -> [a, b]
+  arrayEq [1, 5], f 1, 2, 3, 4, 5
+  eq 0, a
+  eq 0, b
+
+test "variable definitions and splat", ->
+  a = b = 0
+  f = (a, middle..., b) -> [a, middle, b]
+  arrayEq [1, [2, 3, 4], 5], f 1, 2, 3, 4, 5
+  eq 0, a
+  eq 0, b
+
+  f = (a, middle..., b) -> [a, middle, b]
+  arrayEq [1, [2, 3, 4], 5], f 1, 2, 3, 4, 5
+  eq 0, a
+  eq 0, b
+
+test "default values with function calls", ->
+  doesNotThrow -> CoffeeScript.compile "(x = f()) ->"
+
+(x = f()) ->
+
+test "arguments vs parameters", ->
+  doesNotThrow -> CoffeeScript.compile "f(x) ->"
+  f = (g) -> g()
+  eq 5, f (x) -> 5
+
+f(x) ->
+
+test "reserved keyword as parameters", ->
+  f = (_case, @case) -> [_case, @case]
+  [a, b] = f 1, 2
+  eq 1, a
+  eq 2, b
+
+  f = (@case, _case...) -> [@case, _case...]
+  [a, b, c] = f 1, 2, 3
+  eq 1, a
+  eq 2, b
+  eq 3, c
+
+test "reserved keyword at-splat", ->
+  f = (@case...) -> @case
+  [a, b] = f 1, 2
+  eq 1, a
+  eq 2, b
+
+  f = (@case...) -> @case
+  [a, b] = f 1, 2
+  eq 1, a
+  eq 2, b
+
+test "#1574: Destructuring and a parameter named _arg", ->
+  f = ({ a, b }, _arg, _arg1) -> [a, b, _arg, _arg1]
+  arrayEq [1, 2, 3, 4], f { a: 1, b: 2 }, 3, 4
+
+test "#1844: bound functions in nested comprehensions causing empty var statements", ->
+  a = ((=>) for a in [0] for b in [0])
+  eq 1, a.length
+
+test "#1859: inline function bodies shouldn't modify prior postfix ifs", ->
+  list = [1, 2, 3]
+  return if list.some((x) -> x is 2)
+  ok no
+
+test "#2258: allow whitespace-style parameter lists in function definitions", ->
+  func = (a, b, c) -> c
+  eq func(1, 2, 3), 3
+
+  func = (a, b, c) -> b
+  eq func(1, 2, 3), 2
+
+test "#2621: fancy destructuring in parameter lists", ->
+  func = ({ prop1: { key1 }, prop2: { key2, key3: [a, b, c] } }) ->
+    eq key2, "key2"
+    eq a, "a"
+
+  func prop1: key1: "key1", prop2: key2: "key2", key3: ["a", "b", "c"]
+
+test "#1435 Indented property access", ->
+  rec = -> rec: rec
+
+  eq(
+    1
+    do ->
+      rec().rec ->
+        rec()
+          .rec -> rec.rec()
+          .rec()
+      1
+  )
+
+test "#1038 Optimize trailing return statements", ->
+  compile = (code) ->
+    CoffeeScript.compile code, bare: yes
+      .trim()
+      .replace /\\s+/g, " "
+
+  eq "(function() {});", compile "->"
+  eq "(function() {});", compile "-> return"
+  eq "(function() { return void 0; });", compile "-> undefined"
+  eq "(function() { return void 0; });", compile "-> return undefined"
+  eq(
+    "(function() { foo(); });"
+    compile """
+                                                 ->
+                                                   foo()
+                                                   return
+                                                 """
+  )
+
+test "#4406 Destructured parameter default evaluation order with incrementing variable", ->
+  i = 0
+  f = ({ a = ++i }, b = ++i) -> [a, b]
+  arrayEq f({}), [1, 2]
+
+test "#4406 Destructured parameter default evaluation order with generator function", ->
+  current = 0
+  next = -> ++current
+  foo = ({ a = next() }, b = next()) -> [a, b]
+  arrayEq foo({}), [1, 2]
+
+test "Destructured parameter with default value, that itself has a default value", ->
+  draw = (
+    { size = "big", coords = { x: 0, y: 0 }, radius = 25 } = {}
+  ) -> "#{size}-#{coords.x}-#{coords.y}-#{radius}"
+  output = draw coords: x: 18, y: 30, radius: 30
+  eq output, "big-18-30-30"
+
+test "#4566: destructuring with nested default values", ->
+  f = ({ a: { b = 1 } }) -> b
+  eq 2, f a: b: 2
+
+test "#1043: comma after function glyph", ->
+  x = (a = ->, b = 2) -> a()
+  eq x(), undefined
+
+  f = (a) -> a()
+  g = f (->), 2
+  eq g, undefined
+  h = f (=>), 2
+  eq h, undefined
+
+test "#3845/#3446: chain after function glyph", ->
+  angular = module: -> controller: -> controller: ->
+
+  eq(
+    undefined
+    angular
+      .module "foo"
+      .controller "EmailLoginCtrl", ->
+      .controller "EmailSignupCtrl", ->
+  )
+
+  beforeEach = (f) -> f()
+  getPromise = -> then: -> catch: ->
+
+  eq(
+    undefined
+    beforeEach ->
+      getPromise()
+        .then (@result) =>
+        .catch (@error) =>
+  )
+
+  doThing = -> then: -> catch: (f) -> f()
+  handleError = -> 3
+  eq(
+    3
+    doThing()
+      .then (@result) =>
+      .catch handleError
+  )
+
+test "#4413: expressions in function parameters that create generated variables have those variables declared correctly", ->
+  "use strict"
+  foo = -> null
+  bar = -> 33
+  f = (a = foo() ? bar()) -> a
+  g = (a = foo() ? bar()) -> a + 1
+  eq f(), 33
+  eq g(), 34
+
+test "#4657: destructured array param declarations", ->
+  a = 1
+  b = 2
+  f = ([a..., b]) ->
+  f [3, 4, 5]
+  eq a, 1
+  eq b, 2
+
+test "#4657: destructured array parameters", ->
+  f = ([a..., b]) -> { a, b }
+  result = f [1, 2, 3, 4]
+  arrayEq result.a, [1, 2, 3]
+  eq result.b, 4
 
 `;
 
@@ -4149,6 +5545,164 @@ test "escaped JavaScript blocks speed round", ->
     ['\`"Double backslash: \\\\\\\\ "\`', '"Double backslash: \\\\\\\\ ";']
   ]
     eqJS input, output
+
+`;
+
+exports[`numbers.coffee 1`] = `
+# Number Literals
+# ---------------
+
+# * Decimal Integer Literals
+# * Octal Integer Literals
+# * Hexadecimal Integer Literals
+# * Scientific Notation Integer Literals
+# * Scientific Notation Non-Integer Literals
+# * Non-Integer Literals
+# * Binary Integer Literals
+
+
+# Binary Integer Literals
+# Binary notation is understood as would be decimal notation.
+
+test "Parser recognises binary numbers", ->
+  eq 4, 0b100
+
+# Decimal Integer Literals
+
+test "call methods directly on numbers", ->
+  eq 4, 4.valueOf()
+  eq '11', 4.toString 3
+
+eq -1, 3 -4
+
+#764: Numbers should be indexable
+eq Number::toString, 42['toString']
+
+eq Number::toString, 42.toString
+
+eq Number::toString, 2e308['toString'] # Infinity
+
+
+# Non-Integer Literals
+
+# Decimal number literals.
+value = .25 + .75
+ok value is 1
+value = 0.0 + -.25 - -.75 + 0.0
+ok value is 0.5
+
+#764: Numbers should be indexable
+eq Number::toString,   4['toString']
+eq Number::toString, 4.2['toString']
+eq Number::toString, .42['toString']
+eq Number::toString, (4)['toString']
+
+eq Number::toString,   4.toString
+eq Number::toString, 4.2.toString
+eq Number::toString, .42.toString
+eq Number::toString, (4).toString
+
+test '#1168: leading floating point suppresses newline', ->
+  eq 1, do ->
+    1
+    .5 + 0.5
+
+test "Python-style octal literal notation '0o777'", ->
+  eq 511, 0o777
+  eq 1, 0o1
+  eq 1, 0o00001
+  eq parseInt('0777', 8), 0o777
+  eq '777', 0o777.toString 8
+  eq 4, 0o4.valueOf()
+  eq Number::toString, 0o777['toString']
+  eq Number::toString, 0o777.toString
+
+test "#2060: Disallow uppercase radix prefixes and exponential notation", ->
+  for char in ['b', 'o', 'x', 'e']
+    program = "0#{char}0"
+    doesNotThrow -> CoffeeScript.compile program, bare: yes
+    throws -> CoffeeScript.compile program.toUpperCase(), bare: yes
+
+test "#2224: hex literals with 0b or B or E", ->
+  eq 176, 0x0b0
+  eq 177, 0x0B1
+  eq 225, 0xE1
+
+test "Infinity", ->
+  eq Infinity, CoffeeScript.eval "0b#{Array(1024 + 1).join('1')}"
+  eq Infinity, CoffeeScript.eval "0o#{Array(342 + 1).join('7')}"
+  eq Infinity, CoffeeScript.eval "0x#{Array(256 + 1).join('f')}"
+  eq Infinity, CoffeeScript.eval Array(500 + 1).join('9')
+  eq Infinity, 2e308
+
+test "NaN", ->
+  ok isNaN 1/NaN
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test "Parser recognises binary numbers", -> eq 4, 0b100
+
+test "call methods directly on numbers", ->
+  eq 4, 4.valueOf()
+  eq "11", 4.toString 3
+
+eq -1, 3 - 4
+
+eq Number::toString, 42["toString"]
+
+eq Number::toString, 42.toString
+
+eq Number::toString, Infinity["toString"]
+value = 0.25 + 0.75
+ok value is 1
+value = 0.0 + -0.25 - -0.75 + 0.0
+ok value is 0.5
+
+eq Number::toString, 4["toString"]
+eq Number::toString, 4.2["toString"]
+eq Number::toString, 0.42["toString"]
+eq Number::toString, 4["toString"]
+
+eq Number::toString, 4.toString
+eq Number::toString, 4.2.toString
+eq Number::toString, 0.42.toString
+eq Number::toString, 4.toString
+
+test "#1168: leading floating point suppresses newline", ->
+  eq(
+    1
+    do ->
+      1
+      0.5 + 0.5
+  )
+
+test "Python-style octal literal notation '0o777'", ->
+  eq 511, 0o777
+  eq 1, 0o1
+  eq 1, 0o00001
+  eq parseInt("0777", 8), 0o777
+  eq "777", 0o777.toString 8
+  eq 4, 0o4.valueOf()
+  eq Number::toString, 0o777["toString"]
+  eq Number::toString, 0o777.toString
+
+test "#2060: Disallow uppercase radix prefixes and exponential notation", ->
+  for char in ["b", "o", "x", "e"]
+    program = "0#{char}0"
+    doesNotThrow -> CoffeeScript.compile program, bare: yes
+    throws -> CoffeeScript.compile program.toUpperCase(), bare: yes
+
+test "#2224: hex literals with 0b or B or E", ->
+  eq 176, 0x0b0
+  eq 177, 0x0b1
+  eq 225, 0xe1
+
+test "Infinity", ->
+  eq Infinity, CoffeeScript.eval "0b#{Array(1024 + 1).join "1"}"
+  eq Infinity, CoffeeScript.eval "0o#{Array(342 + 1).join "7"}"
+  eq Infinity, CoffeeScript.eval "0x#{Array(256 + 1).join "f"}"
+  eq Infinity, CoffeeScript.eval Array(500 + 1).join "9"
+  eq Infinity, Infinity
+
+test "NaN", -> ok isNaN 1 / NaN
 
 `;
 
@@ -4648,9 +6202,7 @@ test "\`instanceof\`", ->
 
 test "use \`::\` operator on keywords \`this\` and \`@\`", ->
   nonce = {}
-  obj =
-    withAt: -> @::prop
-    withThis: -> @::prop
+  obj = withAt: -> @::prop, withThis: -> @::prop
   obj:: = prop: nonce
   eq nonce, obj.withAt()
   eq nonce, obj.withThis()
@@ -5985,9 +7537,7 @@ test "soaked property access caching", ->
   fn = ->
     counter++
     "self"
-  obj =
-    self: -> @
-    prop: nonce
+  obj = self: -> @, prop: nonce
   eq nonce, obj[fn()]()[fn()]()[fn()]()?.prop
   eq 3, counter
 

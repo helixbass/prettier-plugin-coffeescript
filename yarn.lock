@@ -3113,9 +3113,9 @@ preserve@^0.2.0:
     unicode-regex "1.0.1"
     unified "6.1.6"
 
-prettier@prettier/prettier#5e2e7a2881d07ff0aa4b4673becc9cb4ce2f6cae:
+prettier@helixbass/prettier#visible-group:
   version "1.9.2"
-  resolved "https://codeload.github.com/prettier/prettier/tar.gz/5e2e7a2881d07ff0aa4b4673becc9cb4ce2f6cae"
+  resolved "https://codeload.github.com/helixbass/prettier/tar.gz/0e6acbe2f095a82fd2f761e6b2a990497f6f49bc"
   dependencies:
     "@babel/code-frame" "7.0.0-beta.35"
     "@glimmer/syntax" "0.30.3"

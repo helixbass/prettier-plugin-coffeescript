@@ -1,0 +1,27 @@
+- guard against generating " when string contains #{
+- adjust heredoc indent with surrounding indentation level
+- preserve blank lines in switch cases?
+- can't generate a: b: c when the outer object might have following inline properties eg a: {b: c}, d: e can't generate a: b: c, d: e
+  similarly for eg a: -> someCall arg, b: c it needs to either always break the object if a prop value has something that could be sketchy to follow with a , or it needs to know to parenthesize the -> function
+- would be nice if it was smart enough to not break call args where the last is the only one that breaks and is a callback-style eg:
+  eq '3', ->
+    something
+    else
+  or eg:
+  eq '3', do ->
+    something
+    else
+  could it check whether the call without the last arg wouldn't break and the last arg is a function or do (and the call doesn't need parens)?
+- outdented commas for (adjacent) implicit objects in an array or call
+- prefix/postfix ... in splat
+- @/this, ::/.prototype
+- preserve 2e308 (or anything else that would compile to Infinity)?
+- apply ifParentGroupBroke to pathNeedsParens eg this should be able to omit parens around the first arg if throws() breaks:
+	throws(
+	  (-> CoffeeScript.compile '(..., a, b...) ->')
+	  null
+	  'prohibit expansion and a splat'
+	)
+- this can't omit braces around nested objects when func prints inline:
+  func({prop1: {key1: 'key1'}, prop2: {key2: 'key2', key3: ['a', 'b', 'c']}})
+- option for whether to indent chaining

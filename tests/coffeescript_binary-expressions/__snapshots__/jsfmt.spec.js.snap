@@ -269,22 +269,11 @@ prevState = prevState ||
     searchQuery: ""
     selectedCatalog: null
 
-@steps = steps || [
-  name: "mock-module"
-  path: "/nux/mock-module"
-]
+@steps = steps || [name: "mock-module", path: "/nux/mock-module"]
 
-@steps =
-  steps ||
-  (checkStep && [
-    name: "mock-module"
-    path: "/nux/mock-module"
-  ])
+@steps = steps || (checkStep && [name: "mock-module", path: "/nux/mock-module"])
 
-@steps = (steps && checkStep) || [
-  name: "mock-module"
-  path: "/nux/mock-module"
-]
+@steps = (steps && checkStep) || [name: "mock-module", path: "/nux/mock-module"]
 
 create = ->
   result = doSomething()

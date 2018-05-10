@@ -9,7 +9,7 @@ const prettier = require('prettier')
 // const AST_COMPARE = process.env['AST_COMPARE']
 
 function run_spec(dirname, parsers, options) {
-  options = Object.assign({ plugins: ['.'] }, options)
+  options = Object.assign({plugins: ['.']}, options)
 
   if (!parsers || !parsers.length) {
     throw new Error(`No parsers were specified for ${dirname}`)
@@ -25,7 +25,7 @@ function run_spec(dirname, parsers, options) {
     ) {
       const source = read(path).replace(/\r\n/g, '\n')
 
-      const mergedOptions = Object.assign({}, options, { parser: parsers[0] })
+      const mergedOptions = Object.assign({}, options, {parser: parsers[0]})
       const output = prettyprint(source, path, mergedOptions)
       test(`${filename} - ${mergedOptions.parser}-verify`, () => {
         expect(raw(source + '~'.repeat(80) + '\n' + output)).toMatchSnapshot(
@@ -52,7 +52,7 @@ global.run_spec = run_spec
 // }
 
 function prettyprint(src, filename, options) {
-  return prettier.format(src, Object.assign({ filepath: filename }, options))
+  return prettier.format(src, Object.assign({filepath: filename}, options))
 }
 
 function read(filename) {
@@ -63,5 +63,5 @@ function raw(string) {
   if (typeof string !== 'string') {
     throw new Error('Raw snapshots have to be strings.')
   }
-  return { [Symbol.for('raw')]: string }
+  return {[Symbol.for('raw')]: string}
 }
