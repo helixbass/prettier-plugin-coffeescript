@@ -198,6 +198,8 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
         case 'Range':
         case 'ReturnStatement':
         case 'ThrowStatement':
+        case 'Existence':
+        case 'MemberExpression':
           return true
 
         case 'NewExpression':
@@ -205,7 +207,8 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           return parent.callee === node || node.postfix
         case 'BinaryExpression':
         case 'LogicalExpression':
-          return parent.right === node
+          return true
+        // return parent.right === node
         case 'JSXSpreadAttribute':
           return true
         default:
@@ -536,7 +539,14 @@ function printPathNoParens(path, options, print) {
 
       return concat(parts)
     case 'ArrayExpression':
-    case 'ArrayPattern':
+    case 'ArrayPattern': {
+      if (n.elements.length === 0) {
+        return '[]'
+      }
+
+      const lastElem = util.getLast(n.elements)
+      const needsForcedTrailingComma = lastElem === null
+
       parts.push(
         group(
           concat([
@@ -547,6 +557,7 @@ function printPathNoParens(path, options, print) {
                 printArrayItems(path, options, 'elements', print),
               ])
             ),
+            needsForcedTrailingComma ? ',' : '',
             softline,
             ']',
           ]),
@@ -554,6 +565,7 @@ function printPathNoParens(path, options, print) {
         )
       )
       return concat(parts)
+    }
     case 'SequenceExpression':
       return group(
         concat([join(concat([';', line]), path.map(print, 'expressions'))])
@@ -2565,7 +2577,7 @@ function printArrayItems(path, options, printPath, print) {
   path.each(childPath => {
     const child = childPath.getValue()
     let isObject
-    if ((isObject = isObjectish(child))) {
+    if (child && (isObject = isObjectish(child))) {
       if (separatorParts.length) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
       }
@@ -2577,7 +2589,7 @@ function printArrayItems(path, options, printPath, print) {
       ifBreak(isObject ? dedent(concat([line, ','])) : '', ','),
       line,
     ]
-    if (util.isNextLineEmpty(options.originalText, child, locEnd)) {
+    if (child && util.isNextLineEmpty(options.originalText, child, locEnd)) {
       separatorParts.push(line)
     }
   }, printPath)
