@@ -13,10 +13,10 @@ exports[`last_line.coffee 1`] = `
 </SomeHighlyConfiguredComponent>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <SomeHighlyConfiguredComponent
-  onEnter={@onEnter}
-  onLeave={@onLeave}
-  onChange={@onChange}
-  initialValue={@state.initialValue}
+  onEnter={this.onEnter}
+  onLeave={this.onLeave}
+  onChange={this.onChange}
+  initialValue={this.state.initialValue}
   ignoreStuff={true}>
   <div>and the children go here</div>
   <div>and here too</div>
@@ -37,10 +37,10 @@ exports[`last_line.coffee 2`] = `
 </SomeHighlyConfiguredComponent>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <SomeHighlyConfiguredComponent
-  onEnter={@onEnter}
-  onLeave={@onLeave}
-  onChange={@onChange}
-  initialValue={@state.initialValue}
+  onEnter={this.onEnter}
+  onLeave={this.onLeave}
+  onChange={this.onChange}
+  initialValue={this.state.initialValue}
   ignoreStuff={true}
 >
   <div>and the children go here</div>

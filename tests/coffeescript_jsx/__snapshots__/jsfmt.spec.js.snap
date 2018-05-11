@@ -273,12 +273,12 @@ exports[`expression.coffee 1`] = `
 <RadioListItem
   key={option}
   imageSource={
-    @props.veryBigItemImageSourceFunc &&
-    @props.veryBigItemImageSourceFunc option
+    this.props.veryBigItemImageSourceFunc &&
+    this.props.veryBigItemImageSourceFunc option
   }
-  imageSize={@props.veryBigItemImageSize}
-  imageView={@props.veryBigItemImageViewFunc? option}
-  heading={@props.displayTextFunc option}
+  imageSize={this.props.veryBigItemImageSize}
+  imageView={this.props.veryBigItemImageViewFunc? option}
+  heading={this.props.displayTextFunc option}
   value={option}
 />
 

@@ -577,15 +577,14 @@ single_expression_child_tags =
 expression_does_not_break =
   <div>
     texty text text text text text text text text text text text text{" "}
-    {@props.type}{" "}
+    {this.props.type}{" "}
   </div>
 
 br_triggers_expression_break =
   <div>
     <br />
-    text text text text text text text text text text text text {
-      @props.type
-    }{" "}
+    text text text text text text text text text text text text{" "}
+    {this.props.type}{" "}
   </div>
 
 jsx_whitespace_after_tag =

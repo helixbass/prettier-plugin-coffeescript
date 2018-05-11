@@ -163,7 +163,7 @@ render10 = (props) ->
   </div>
 
 notJSX = (aaaaaaaaaaaaaaaa, bbbbbbbbbbb) ->
-  @someLongCallWithParams(aaaaaa, bbbbbbb).anotherLongCallWithParams(
+  this.someLongCallWithParams(aaaaaa, bbbbbbb).anotherLongCallWithParams(
     ccccccccccc
     dddddddddddddddddddddddd
   )

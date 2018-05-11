@@ -78,19 +78,19 @@ this._pipe.write("
     a
   "
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@_pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
-@_pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
-@_pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+this._pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+this._pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
+this._pipe.write "\\n\\n Pattern matches #{total} #{pluralizeTest}"
 
-@_pipe.write(
+this._pipe.write(
   "\\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong"
 )
 
-@_pipe.write(
+this._pipe.write(
   "\\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong"
 )
 
-@_pipe.write "
+this._pipe.write "
   \\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong
 "
 

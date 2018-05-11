@@ -1268,7 +1268,7 @@ test "Even a convoluted one.", ->
   results =
     for i in [1..3] then do (i) ->
       z = (x * 3 for x in [1..i])
-      ((a, b, c) -> [a, b, c].join " ").apply @, z
+      ((a, b, c) -> [a, b, c].join " ").apply this, z
 
   ok results.join(", ") is "3  , 3 6 , 3 6 9"
 
@@ -5525,7 +5525,9 @@ del = -> 5
 ok del() is 5
 
 obj =
-  bound: -> (=> @)(), unbound: -> (-> @)(), nested: -> (=> (=> (=> @)())())()
+  bound: -> (=> this)()
+  unbound: -> (-> this)()
+  nested: -> (=> (=> (=> this)())())()
 eq obj, obj.bound()
 ok obj isnt obj.unbound()
 eq obj, obj.nested()
@@ -5534,12 +5536,12 @@ test "even more fancy bound functions", ->
   obj =
     one: ->
       do =>
-        return @two()
+        return this.two()
     two: ->
       do =>
         do =>
           do =>
-            return @three
+            return this.three
     three: 3
 
   eq obj.one(), 3
@@ -6761,8 +6763,8 @@ test "\`instanceof\`", ->
 
 test "use \`::\` operator on keywords \`this\` and \`@\`", ->
   nonce = {}
-  obj = withAt: -> @::prop, withThis: -> @::prop
-  obj:: = prop: nonce
+  obj = withAt: -> @::prop, withThis: -> this::prop
+  obj.prototype = prop: nonce
   eq nonce, obj.withAt()
   eq nonce, obj.withThis()
 
@@ -6952,7 +6954,7 @@ test "chained operations should evaluate each value only once", ->
 
 test "#891: incorrect inversion of chained comparisons", ->
   ok (true unless 0 > 1 > 2)
-  ok (true unless (@NaN = 0 / 0) < 0 / 0 < @NaN)
+  ok (true unless (this.NaN = 0 / 0) < 0 / 0 < this.NaN)
 
 test "#1234: Applying a splat to :: applies the splat to the wrong object", ->
   nonce = {}
@@ -7926,9 +7928,9 @@ test "#1723: operator precedence in unbounded splice compilation", ->
 test "#2953: methods on endpoints in assignment from array splice literal", ->
   list = [0..9]
 
-  Number::same = -> @
+  Number.prototype.same = -> this
   list[1.same()...9.same()] = 5
-  delete Number::same
+  delete Number.prototype.same
 
   arrayEq [0, 5, 9], list
 

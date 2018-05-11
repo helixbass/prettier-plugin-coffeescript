@@ -571,7 +571,7 @@ function printPathNoParens(path, options, print) {
         concat([join(concat([';', line]), path.map(print, 'expressions'))])
       )
     case 'ThisExpression':
-      return '@'
+      return n.shorthand ? '@' : 'this'
     case 'Super':
       return 'super'
     case 'NullLiteral':
@@ -2464,15 +2464,18 @@ function printOptionalToken(path) {
   return '?'
 }
 
-function isThisLookup(node) {
+function isThisLookup(node, {shorthand} = {}) {
   return (
-    node.type === 'MemberExpression' && node.object.type === 'ThisExpression'
+    node.type === 'MemberExpression' &&
+    node.object.type === 'ThisExpression' &&
+    (!shorthand || node.object.shorthand)
   )
 }
 
-function isPrototypeLookup(node) {
+function isShorthandPrototypeLookup(node) {
   return (
     node.type === 'MemberExpression' &&
+    node.shorthand &&
     !node.computed &&
     node.property.type === 'Identifier' &&
     node.property.name === 'prototype'
@@ -2498,11 +2501,16 @@ function printMemberLookup(path, options, print) {
     return concat(parts)
   }
 
-  if (isPrototypeLookup(n)) {
+  if (isShorthandPrototypeLookup(n)) {
     parts.push('::')
   } else {
-    const precededByPrototype = isPrototypeLookup(n.object)
-    if (!((precededByPrototype || isThisLookup(n)) && !optional)) {
+    const precededByPrototype = isShorthandPrototypeLookup(n.object)
+    if (
+      !(
+        (precededByPrototype || isThisLookup(n, {shorthand: true})) &&
+        !optional
+      )
+    ) {
       parts.push('.')
     }
     const property = path.call(print, 'property')

@@ -49,7 +49,7 @@ long = "long long long long long long long long long long long #{
 } long long long long long long long long long long long long long"
 
 description = "The value of the #{cssName} css of the #{
-  @_name
+  this._name
 } element isn't long enough"
 
 foo = "such a long template string #{

@@ -19,7 +19,7 @@ new (if typeof this == 'function' then this else Dict())
 new (createObj()).prop(a())
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 new (memoize.Cache || MapCache)()
-new (if typeof @ == "function" then @ else Dict())()
+new (if typeof this == "function" then this else Dict())()
 new (createObj()).prop a()
 
 `;

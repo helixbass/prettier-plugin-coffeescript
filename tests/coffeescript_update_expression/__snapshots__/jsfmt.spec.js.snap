@@ -6,9 +6,9 @@ new (r++)
 (x++)()
 uuid = String(this._uuidCounter++)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(@x++).toString()
+(this.x++).toString()
 new (r++)()
 (x++)()
-uuid = String @_uuidCounter++
+uuid = String this._uuidCounter++
 
 `;

@@ -103,7 +103,7 @@ if (VeryVeryVeryVeryVeryVeryVeryVeryLong is VeryVeryVeryVeryVeryVeryVeryVeryVery
 
 if (VeryVeryVeryVeryVeryVeryVeryVeryLong == VeryVeryVeryVeryVeryVeryVeryVeryVeryLong) then ;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if @hasPlugin("dynamicImportsLong") && @lookahead().typeLong
+if this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong
   ;
 if (
   @hasPlugin("dynamicImportsLonger") and
@@ -111,8 +111,8 @@ if (
 )
   ;
 if (
-  @hasPlugin("dynamicImportsLong") &&
-  @lookahead().typeLong == tt.parenLeft.right
+  this.hasPlugin("dynamicImportsLong") &&
+  this.lookahead().typeLong == tt.parenLeft.right
 )
   ;
 if (
@@ -144,7 +144,7 @@ user =
   renderedUser ||
   (shouldRenderUser &&
     <div>
-      <User name={@state.user.name} age={@state.user.age} />
+      <User name={this.state.user.name} age={this.state.user.age} />
     </div>)
 
 avatar = hasAvatar and <Gravatar user={author} size={size} />
@@ -269,11 +269,13 @@ prevState = prevState ||
     searchQuery: ""
     selectedCatalog: null
 
-@steps = steps || [name: "mock-module", path: "/nux/mock-module"]
+this.steps = steps || [name: "mock-module", path: "/nux/mock-module"]
 
 @steps = steps || (checkStep && [name: "mock-module", path: "/nux/mock-module"])
 
-@steps = (steps && checkStep) || [name: "mock-module", path: "/nux/mock-module"]
+this.steps = (steps && checkStep) || [
+  name: "mock-module", path: "/nux/mock-module"
+]
 
 create = ->
   result = doSomething()
