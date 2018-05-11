@@ -21,7 +21,7 @@
     "node": ">= 6"
   },
   "dependencies": {
-    "coffeescript": "../coffeescript_orig",
+    "coffeescript": "helixbass/copheescript#prettier",
     "prettier": "helixbass/prettier#visible-group"
   },
   "devDependencies": {
