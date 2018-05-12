@@ -179,6 +179,8 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
       if (
         parent.type === 'ExpressionStatement' ||
         parent.type === 'AssignmentExpression' ||
+        parent.type === 'ExportDefaultDeclaration' ||
+        parent.type === 'ExportNamedDeclaration' ||
         (parent.type === 'ConditionalExpression' &&
           parent.postfix &&
           node === parent.consequent)
@@ -242,10 +244,14 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           return true
         case 'NewExpression':
         case 'CallExpression':
-          return (
-            !parent.arguments ||
-            node !== parent.arguments[parent.arguments.length - 1]
-          )
+          if (node === parent.callee) {
+            return true
+          }
+          if (node === getLast(parent.arguments)) {
+            return false
+          } else {
+            return {unlessParentBreaks: true}
+          }
         case 'For':
           return parent.postfix && node === parent.body
         default:
@@ -294,13 +300,17 @@ function genericPrint(path, options, print) {
 
   const parts = []
   if (needsParens) {
-    parts.unshift('(')
+    parts.unshift(
+      needsParens.unlessParentBreaks ? ifVisibleGroupBroke('', '(') : '('
+    )
   }
 
   parts.push(linesWithoutParens)
 
   if (needsParens) {
-    parts.push(')')
+    parts.push(
+      needsParens.unlessParentBreaks ? ifVisibleGroupBroke('', ')') : ')'
+    )
   }
 
   return concat(parts)
@@ -348,7 +358,7 @@ function printPathNoParens(path, options, print) {
         path.call(print, 'left'),
         concat([' ', n.operator]),
         n.right,
-        path.call(print, 'right'),
+        [path, print, 'right'],
         options
       )
     case 'BinaryExpression':
@@ -538,7 +548,7 @@ function printPathNoParens(path, options, print) {
             printedLeft,
             ':',
             n.value,
-            path.call(print, 'value'),
+            [path, print, 'value'],
             options
           )
         )
@@ -1449,7 +1459,9 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
         (prevParent === parent.test ||
           prevParent === parent.consequent ||
           prevParent === parent.alternate)) ||
-      (parent.type === 'SwitchStatement' && prevParent === parent.discriminant)
+      (parent.type === 'SwitchStatement' &&
+        prevParent === parent.discriminant) ||
+      (parent.type === 'For' && prevParent === parent.source)
     ) {
       return {indent, trailingLine}
     }
@@ -1580,7 +1592,15 @@ function printExportDeclaration(path, options, print) {
   }
 
   if (decl.declaration) {
-    parts.push(path.call(print, 'declaration'))
+    const printedDecl = path.call(print, 'declaration')
+    if (
+      decl.declaration.type === 'ObjectExpression' &&
+      path.call(shouldOmitObjectBraces, 'declaration')
+    ) {
+      parts.push(indent(concat([softline, printedDecl])))
+    } else {
+      parts.push(printedDecl)
+    }
   } else {
     if (decl.specifiers && decl.specifiers.length > 0) {
       const specifiers = []
@@ -2207,7 +2227,9 @@ function printBinaryishExpressions(path, print) {
 
 function isBlockLevel(node, parent) {
   return (
-    parent.type === 'ExpressionStatement' || parent.type === 'BlockStatement'
+    parent.type === 'ExpressionStatement' ||
+    parent.type === 'BlockStatement' ||
+    parent.type === 'ExportDefaultDeclaration'
   )
 }
 
@@ -2422,7 +2444,7 @@ function printArgumentsList(path, options, print) {
           .concat(
             (lastArg.type === 'ObjectExpression' &&
               shouldOmitObjectBraces(argPath)) ||
-            lastArg.type === 'ConditionalExpression'
+            shouldGroupLast.indent
               ? indent(concat([softline, printedLastArg]))
               : printedLastArg
           )
@@ -2505,12 +2527,17 @@ function printArgumentsList(path, options, print) {
 }
 
 function couldGroupArg(arg) {
-  return (
+  if (
     (arg.type === 'ObjectExpression' && arg.properties.length > 0) ||
     (arg.type === 'ArrayExpression' && arg.elements.length > 0) ||
-    arg.type === 'FunctionExpression' ||
-    arg.type === 'ConditionalExpression'
-  )
+    arg.type === 'FunctionExpression'
+  ) {
+    return true
+  }
+  if (arg.type === 'ConditionalExpression' || arg.type === 'TryStatement') {
+    return {indent: true}
+  }
+  return false
 }
 
 function shouldGroupLastArg(path, options) {
@@ -2525,15 +2552,19 @@ function shouldGroupLastArg(path, options) {
   }
   const lastArg = util.getLast(args)
   const penultimateArg = util.getPenultimate(args)
+  const couldGroup = couldGroupArg(lastArg)
   if (
     args.length > 1 &&
-    couldGroupArg(lastArg) &&
+    couldGroup &&
     (!penultimateArg ||
       (lastArg.type === 'FunctionExpression'
         ? penultimateArg.type !== 'FunctionExpression'
         : !couldGroupArg(penultimateArg)))
   ) {
-    return isRightmost.ifParentBreaks ? {ifParentBreaks: true} : true
+    return {
+      ifParentBreaks: isRightmost.ifParentBreaks,
+      indent: couldGroup.indent,
+    }
   }
   return false
 }
@@ -2564,11 +2595,15 @@ function isStringLiteral(node) {
 }
 
 function printAssignmentRight(rightNode, printedRight, options, canBreak) {
+  const broken = indent(concat([line, printedRight]))
+  const nonbroken = concat([' ', printedRight])
   if (canBreak) {
-    return indent(concat([line, printedRight]))
+    return canBreak.ifParentBreaks
+      ? ifVisibleGroupBroke(broken, nonbroken)
+      : broken
   }
 
-  return concat([' ', printedRight])
+  return nonbroken
 }
 
 function printAssignment(
@@ -2576,9 +2611,10 @@ function printAssignment(
   printedLeft,
   operator,
   rightNode,
-  printedRight,
+  [path, print, rightName],
   options
 ) {
+  const printedRight = path.call(print, rightName)
   const dontBreak =
     // !(
     //   leftNode.type === 'Identifier' ||
@@ -2591,6 +2627,11 @@ function printAssignment(
     rightNode.type === 'FunctionExpression' ||
     rightNode.type === 'ClassExpression' ||
     rightNode.type === 'ObjectPattern' ||
+    (rightNode.type === 'ObjectExpression' &&
+      !path.call(
+        rightPath => shouldOmitObjectBraces(rightPath, {ifParentBreaks: true}),
+        rightName
+      )) ||
     isDo(rightNode) ||
     rightNode.type === 'NewExpression'
 
