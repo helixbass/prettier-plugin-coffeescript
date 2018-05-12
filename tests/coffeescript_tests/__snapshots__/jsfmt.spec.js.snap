@@ -309,7 +309,7 @@ test "trailing commas", ->
   ok a.length is 2
 
 test "incorrect indentation without commas", ->
-  result = [["a"], {b: "c"}]
+  result = [["a"], { b: "c" }]
   ok result[0][0] is "a"
   ok result[1]["b"] is "c"
 
@@ -369,7 +369,15 @@ test "array elisions nested destructuring", ->
   [, [, , [, b, , [, , c]]]] = arr
   eq b, 5
   eq c, 9
-  aobj = [{}, {x: 2}, {}, [{}, {}, {z: 1, w: [1, 2, 4], p: 3, q: 4}, {}, {}]]
+  aobj = [
+    {}
+  ,
+    x: 2
+  ,
+    {}
+  ,
+    [{}, {}, { z: 1, w: [1, 2, 4], p: 3, q: 4 }, {}, {}]
+  ]
   [, d, , [, , { w }]] = aobj
   deepEqual d, x: 2
   arrayEq w, [1, 2, 4]
@@ -382,17 +390,17 @@ test "array splat expansions with assignments", ->
   arrayEq [0, 1, 2, 3, 4], list
 
 test "mixed shorthand objects in array lists", ->
-  arr = [{a: 1}, "b", {c: 1}]
+  arr = [{ a: 1 }, "b", { c: 1 }]
   ok arr.length is 3
   ok arr[2].c is 1
 
-  arr = [{b: 1, a: 2}, 100]
+  arr = [{ b: 1, a: 2 }, 100]
   eq arr[1], 100
 
-  arr = [{a: 0, b: 1}, 1 + 1]
+  arr = [{ a: 0, b: 1 }, 1 + 1]
   eq arr[1], 2
 
-  arr = [{a: 1}, "a", {b: 1}, "b"]
+  arr = [{ a: 1 }, "a", { b: 1 }, "b"]
   eq arr.length, 4
   eq arr[2].b, 1
   eq arr[3], "b"
@@ -413,29 +421,29 @@ test "#4260: splat after existential operator soak", ->
   foo = (a) -> [a]
   arrayEq [a?.b...], [3]
   arrayEq [c?.b ? []...], []
-  arrayEq [a?.b...], [3]
-  arrayEq [c?.b ? []...], []
+  arrayEq [...a?.b], [3]
+  arrayEq [...c?.b ? []], []
   arrayEq foo(a?.b...), [3]
-  arrayEq foo(a?.b...), [3]
+  arrayEq foo(...a?.b), [3]
   arrayEq foo(c?.b ? []...), [undefined]
-  arrayEq foo(c?.b ? []...), [undefined]
+  arrayEq foo(...c?.b ? []), [undefined]
   e = yes
   f = null
   arrayEq [(a if e)?.b...], [3]
   arrayEq [(a if f)?.b ? []...], []
-  arrayEq [(a if e)?.b...], [3]
-  arrayEq [(a if f)?.b ? []...], []
+  arrayEq [...(a if e)?.b], [3]
+  arrayEq [...(a if f)?.b ? []], []
   arrayEq foo((a if e)?.b...), [3]
-  arrayEq foo((a if e)?.b...), [3]
+  arrayEq foo(...(a if e)?.b), [3]
   arrayEq foo((a if f)?.b ? []...), [undefined]
-  arrayEq foo((a if f)?.b ? []...), [undefined]
+  arrayEq foo(...(a if f)?.b ? []), [undefined]
 
-  arrayEq [a?.b...], [3]
-  arrayEq [c?.b ? []...], []
+  arrayEq [...a?.b], [3]
+  arrayEq [...c?.b ? []], []
   arrayEq [a?.b...], [3]
   arrayEq [(a if e)?.b...], [3]
   arrayEq foo(a?.b...), [3]
-  arrayEq foo(a?.b...), [3]
+  arrayEq foo(...a?.b), [3]
 
 test "#1349: trailing if after splat", ->
   a = [3]
@@ -444,14 +452,14 @@ test "#1349: trailing if after splat", ->
   foo = (a) -> [a]
   arrayEq [a if b...], [3]
   arrayEq [(a if c) ? []...], []
-  arrayEq [a if b...], [3]
-  arrayEq [(a if c) ? []...], []
+  arrayEq [...a if b], [3]
+  arrayEq [...(a if c) ? []], []
   arrayEq foo(a if b...), [3]
-  arrayEq foo(a if b...), [3]
+  arrayEq foo(...a if b), [3]
   arrayEq foo((a if c) ? []...), [undefined]
-  arrayEq foo((a if c) ? []...), [undefined]
+  arrayEq foo(...(a if c) ? []), [undefined]
 
-  arrayEq [a if b...], [3]
+  arrayEq [...a if b], [3]
   arrayEq [a if b...], [3]
 
 test "#1274: \`[] = a()\` compiles to \`false\` instead of \`a()\`", ->
@@ -461,25 +469,25 @@ test "#1274: \`[] = a()\` compiles to \`false\` instead of \`a()\`", ->
   ok a
 
 test "#3194: string interpolation in array", ->
-  arr = ["a", {key: "value"}]
+  arr = ["a", { key: "value" }]
   eq 2, arr.length
   eq "a", arr[0]
   eq "value", arr[1].key
 
   b = "b"
-  arr = ["a#{b}", {key: "value"}]
+  arr = ["a#{b}", { key: "value" }]
   eq 2, arr.length
   eq "ab", arr[0]
   eq "value", arr[1].key
 
 test "regex interpolation in array", ->
-  arr = [/a/, {key: "value"}]
+  arr = [/a/, { key: "value" }]
   eq 2, arr.length
   eq "a", arr[0].source
   eq "value", arr[1].key
 
   b = "b"
-  arr = [RegExp("a#{b}"), {key: "value"}]
+  arr = [RegExp("a#{b}"), { key: "value" }]
   eq 2, arr.length
   eq "ab", arr[0].source
   eq "value", arr[1].key
@@ -505,7 +513,7 @@ test "for-from loops over Array", ->
     array2.push a
   arrayEq array2, [30, 20, 50, 40]
 
-  array1 = [{a: 10, b: 20, c: 30}, {a: 40, b: 50, c: 60}]
+  array1 = [{ a: 10, b: 20, c: 30 }, { a: 40, b: 50, c: 60 }]
   array2 = []
   for { a: a, b, c: d } from array1
     array2.push [a, b, d]
@@ -1544,7 +1552,7 @@ test "#1850: inner \`for\` should not be expression-ized if \`return\`ing", ->
       for a in [1..9]
         for b in [1..9]
           c = Math.sqrt a * a + b * b
-          return String([a, b, c]) unless c % 1
+          return String [a, b, c] unless c % 1
   )
 
 test "#1910: loop index should be mutable within a loop iteration and immutable between loop iterations", ->
@@ -1600,7 +1608,9 @@ test "#2274: Allow @values as loop variables", ->
 
 test "#4411: Allow @values as loop indices", ->
   obj =
-    index: null, get: -> @index, method: -> @get() for _, @index in [1, 2, 3]
+    index: null
+    get: -> @index
+    method: -> @get() for _, @index in [1, 2, 3]
   eq obj.index, null
   arrayEq obj.method(), [0, 1, 2]
   eq obj.index, 3
@@ -3047,15 +3057,13 @@ test "single-line conditional", ->
 
 test "nested conditionals", ->
   nonce = {}
-  eq(
-    nonce
+  eq nonce,
     if true
       unless false
         if false
           false
         else if true
           nonce
-  )
 
 test "nested single-line conditionals", ->
   nonce = {}
@@ -3092,46 +3100,36 @@ test "nested single-line conditionals", ->
   eq nonce, d
 
 test "empty conditional bodies", ->
-  eq(
-    undefined
+  eq undefined,
     if false
     else if false
     else
-  )
 
 test "conditional bodies containing only comments", ->
-  eq(
-    undefined
+  eq undefined,
     if true
     else
-  )
 
-  eq(
-    undefined
+  eq undefined,
     if false
     else if true
     else
-  )
 
 test "return value of if-else is from the proper body", ->
   nonce = {}
-  eq(
-    nonce
+  eq nonce,
     if false
       undefined
     else
       nonce
-  )
 
 test "return value of unless-else is from the proper body", ->
   nonce = {}
-  eq(
-    nonce
+  eq nonce,
     unless true
       undefined
     else
       nonce
-  )
 
 test "assign inside the condition of a conditional statement", ->
   nonce = {}
@@ -3177,19 +3175,17 @@ test "passing a conditional value to a function", ->
 test "unmatched \`then\` should catch implicit calls", ->
   a = 0
   trueFn = -> true
-  if trueFn(undefined)
+  if trueFn undefined
     a++
   eq 1, a
 
 test "if-to-ternary with instanceof requires parentheses", ->
   nonce = {}
-  eq(
-    nonce
+  eq nonce,
     if {} instanceof Object
       nonce
     else
       undefined
-  )
 
 test "if-to-ternary as part of a larger operation requires parentheses", ->
   ok 2, 1 + (if false then 0 else 1)
@@ -3225,13 +3221,11 @@ test "suppressed indentation via assignment", ->
 
 test "tight formatting with leading \`then\`", ->
   nonce = {}
-  eq(
-    nonce
+  eq nonce,
     if true
       nonce
     else
       undefined
-  )
 
 test "#738: inline function defintion", ->
   nonce = {}
@@ -4259,8 +4253,7 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
 
 test "#3921: \`if\` & \`unless\`", ->
   a = {}
-  eq(
-    a
+  eq a,
     if (
       do ->
         no
@@ -4268,7 +4261,6 @@ test "#3921: \`if\` & \`unless\`", ->
       undefined
     else
       a
-  )
   a1 = undefined
   if (
     do ->
@@ -4278,8 +4270,7 @@ test "#3921: \`if\` & \`unless\`", ->
   eq a, a1
 
   b = {}
-  eq(
-    b
+  eq b,
     unless (
       do ->
         no
@@ -4287,7 +4278,6 @@ test "#3921: \`if\` & \`unless\`", ->
       b
     else
       undefined
-  )
   b1 = undefined
   unless (
     do ->
@@ -4306,8 +4296,7 @@ test "#3921: \`if\` & \`unless\`", ->
   eq 1, d
 
   answer = "correct"
-  eq(
-    answer
+  eq answer,
     if (
       do ->
         "wrong"
@@ -4315,9 +4304,7 @@ test "#3921: \`if\` & \`unless\`", ->
       "correct"
     else
       "wrong"
-  )
-  eq(
-    answer
+  eq answer,
     unless (
       do ->
         no
@@ -4325,7 +4312,6 @@ test "#3921: \`if\` & \`unless\`", ->
       "correct"
     else
       "wrong"
-  )
   statm1 = undefined
   if (
     do ->
@@ -5926,6 +5912,10 @@ test "#5052: implicit call of class with no body", ->
       class A
       a
   eq shouldBeA, a
+
+f class
+f class A
+f class A extends B
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 id = (_) ->
   if arguments.length is 1
@@ -6030,14 +6020,7 @@ test "\`@\` and \`this\` should both be able to invoke a method", ->
 test "Trying an implicit object call with a trailing function.", ->
   a = null
   meth = (arg, obj, func) -> a = [obj.a, arg, func()].join " "
-  meth(
-    "apple"
-  ,
-    b: 1
-    a: 13
-  ,
-    -> "orange"
-  )
+  meth "apple", b: 1, a: 13, -> "orange"
   ok a is "13 apple orange"
 
 test "Ensure that empty functions don't return mistaken values.", ->
@@ -6053,14 +6036,11 @@ test "Passing multiple functions without paren-wrapping is legal, and should com
 
 test "Implicit call with a trailing if statement as a param.", ->
   func = -> arguments[1]
-  result =
-    func(
-      "one"
-      if false
-        100
-      else
-        13
-    )
+  result = func "one",
+    if false
+      100
+    else
+      13
   ok result is 13
 
 test "Test more function passing:", ->
@@ -6080,21 +6060,17 @@ test "Chained blocks, with proper indentation levels:", ->
       @results.push func()
       this
   counter
-    .tick -> 3
-    .tick -> 2
-    .tick -> 1
+  .tick -> 3
+  .tick -> 2
+  .tick -> 1
   arrayEq [3, 2, 1], counter.results
 
 test "This is a crazy one.", ->
   x = (obj, func) -> func obj
   ident = (x) -> x
-  result =
-    x
-      one: ident(1)
-    ,
-      (obj) ->
-        inner = ident obj
-        ident inner
+  result = x one: ident(1), (obj) ->
+    inner = ident obj
+    ident inner
   ok result.one is 1
 
 test "More paren compilation tests:", ->
@@ -6121,7 +6097,9 @@ test "Test implicit calls in functions in parens:", ->
 
 test "Ensure that chained calls with indented implicit object literals below are alright.", ->
   result = null
-  obj = method: (val) -> this, second: (hash) -> result = hash.three
+  obj =
+    method: (val) -> this
+    second: (hash) -> result = hash.three
   obj.method(101).second
     one: two: 2
     three: 3
@@ -6130,7 +6108,9 @@ test "Ensure that chained calls with indented implicit object literals below are
 test "Test newline-supressed call chains with nested functions.", ->
   obj = call: -> this
   func = ->
-    obj.call(-> one two).call -> three four
+    obj
+    .call -> one two
+    .call -> three four
     101
   eq func(), 101
 
@@ -6151,13 +6131,11 @@ test "Prefix unary assignment operators are allowed in parenless calls.", ->
 
 test "#855: execution context for \`func arr...\` should be \`null\`", ->
   contextTest = ->
-    eq(
-      @
+    eq @,
       if window?
         window
       else
         global
-    )
   array = []
   contextTest array
   contextTest.apply null, array
@@ -6182,8 +6160,8 @@ test "#4843: Bad output when assigning to @prop in destructuring assignment with
   works = "maybe"
   drinks = "beer"
   class A
-    constructor: ({ (@works = "no"), (@drinks = "wine") }) ->
-  a = new A { works: "yes", drinks: "coffee" }
+    constructor: ({ @works = "no", @drinks = "wine" }) ->
+  a = new A works: "yes", drinks: "coffee"
   eq a.works, "yes"
   eq a.drinks, "coffee"
 
@@ -6223,9 +6201,9 @@ test "Issue 4631: left and right spread dots with preceding space", ->
   f = (a) -> a
   eq(
     yes
-    f(a...) is f(a...) is f(a...) is f(a...) is f(a...) is f(a...) is f(
+    f(...a) is f(...a) is f(a...) is f(a...) is f(a...) is f(...a) is f(
       a...
-    ) is f a...
+    ) is f ...a
   )
 
 test "Issue 894: Splatting against constructor-chained functions.", ->
@@ -6291,7 +6269,7 @@ test "splats and the \`new\` operator: functions that return functions should co
   ok child not instanceof constructor
   eq fn, child
 
-test "implicit return", -> eq ok, new -> ok()
+test "implicit return", -> eq ok, new (-> ok)()
 test "implicit returns with multiple branches", ->
   nonce = {}
   fn = ->
@@ -6321,7 +6299,9 @@ test "preserve context when generating closure wrappers for expression conversio
         if false
           10
         else
-          ("a"; "b"; this.property)
+          "a"
+          "b"
+          this.property
   eq nonce, obj.method()
   eq nonce, obj.property
 
@@ -6336,8 +6316,8 @@ test "don't wrap 'pure' statements in a closure", ->
 test "usage of \`new\` is careful about where the invocation parens end up", ->
   eq(
     "object"
-    typeof new try
-      Array()
+    typeof new (try
+      Array)()
   )
   eq(
     "object"
@@ -6350,7 +6330,7 @@ test "implicit call against control structures", ->
   save = (obj) -> result = obj
 
   save(
-    switch id(false)
+    switch id false
       when true
         "true"
       when false
@@ -6360,7 +6340,7 @@ test "implicit call against control structures", ->
   eq result, "false"
 
   save(
-    if id(false)
+    if id false
       "false"
     else
       "true"
@@ -6369,7 +6349,7 @@ test "implicit call against control structures", ->
   eq result, "true"
 
   save(
-    unless id(false)
+    unless id false
       "true"
     else
       "false"
@@ -6402,7 +6382,7 @@ test "#1420: things like \`(fn() ->)\`; there are no words for this one", ->
 
 test "#1416: don't omit one 'new' when compiling 'new new'", ->
   nonce = {}
-  obj = new new -> -> prop: nonce()()
+  obj = new new (-> -> prop: nonce)()()
   eq obj.prop, nonce
 
 test "#1416: don't omit one 'new' when compiling 'new new fn()()'", ->
@@ -6451,8 +6431,8 @@ test "#2617: implicit call before unrelated implicit object", ->
   pass = -> true
 
   result =
-    if pass(1)
-      { one: 1 }
+    if pass 1
+      one: 1
   eq result.one, 1
 
 test "#2292, b: f (z),(x)", ->
@@ -6476,14 +6456,13 @@ test "#2297, Different behaviors on interpreting literal", ->
   xyzzy =
     e: 1
     f:
-      foo(
+      foo
         a: 1
         b: 2
       ,
         one: 1
         two: 2
         three: 3
-      )
     g:
       a: 1
       b: 2
@@ -6531,7 +6510,7 @@ test "#2715, Chained implicit calls", ->
 test "Implicit calls and new", ->
   first = (x) -> x
   foo = (@x) ->
-  bar = first new foo first(1)
+  bar = first new foo first 1
   eq bar.x, 1
 
   third = (x, y, z) -> z
@@ -6539,7 +6518,7 @@ test "Implicit calls and new", ->
     first(
       new foo(
         new foo(
-          third(
+          third
             one: 1
             two: 2
           ,
@@ -6548,7 +6527,6 @@ test "Implicit calls and new", ->
             three: 3
           ,
             2
-          )
         )
       )
     )
@@ -6593,26 +6571,26 @@ test "implicit invocation with implicit object literal", ->
   f a: 1
   obj =
     if f
-      { a: 2 }
+      a: 2
     else
-      { a: 1 }
+      a: 1
   eq 2, obj.a
 
   f a: 1
   obj =
     if f
-      { a: 2 }
+      a: 2
     else
-      { a: 1 }
+      a: 1
   eq 2, obj.a
 
   a = "a"
-  f ["#{a}"]: 1
+  f "#{a}": 1
   obj =
     if f
-      { ["#{a}"]: 2 }
+      "#{a}": 2
     else
-      { ["#{a}"]: 1 }
+      "#{a}": 1
   eq 2, obj.a
 
 test "get and set can be used as function names when not ambiguous with \`get\`/\`set\` keywords", ->
@@ -6675,7 +6653,9 @@ test "get and set can be used as class method names", ->
   eq 5, B.set()
 
 test "#4524: functions named get or set can be used without parentheses when attached to an object", ->
-  obj = get: (x) -> x + 2, set: (x) -> x + 3
+  obj =
+    get: (x) -> x + 2
+    set: (x) -> x + 3
 
   class A
     get: (x) ->
@@ -6761,22 +6741,30 @@ test "#4473: variable scope in chained calls", ->
       a()
       this
 
-  obj.foo((a = 1)).bar -> a = 2
+  obj
+  .foo (a = 1)
+  .bar -> a = 2
   eq a, 2
 
-  obj.bar(-> b = 2).foo (b = 1)
+  obj
+  .bar -> b = 2
+  .foo (b = 1)
   eq b, 1
 
   obj
-    .foo (c = 1)
-    .bar -> c = 2
-    .foo (c = 3)
+  .foo (c = 1)
+  .bar -> c = 2
+  .foo (c = 3)
   eq c, 3
 
-  obj.foo(([d, e] = [1, 2])).bar -> d = 4
+  obj
+  .foo ([d, e] = [1, 2])
+  .bar -> d = 4
   eq d, 4
 
-  obj.foo(({ f } = { f: 1 })).bar -> f = 5
+  obj
+  .foo ({ f } = { f: 1 })
+  .bar -> f = 5
   eq f, 5
 
 test "#5052: implicit call of class with no body", ->
@@ -6793,12 +6781,17 @@ test "#5052: implicit call of class with no body", ->
   [shouldBeA] = f a, class A
   eq shouldBeA, a
 
-  [obj, klass, shouldBeA] = f
-    b: 1
-  ,
-    class A
-    a
+  [obj, klass, shouldBeA] =
+    f
+      b: 1
+    ,
+      class A
+      a
   eq shouldBeA, a
+
+f class
+f class A
+f class A extends B
 
 `;
 
@@ -7629,7 +7622,7 @@ test "#1844: bound functions in nested comprehensions causing empty var statemen
 
 test "#1859: inline function bodies shouldn't modify prior postfix ifs", ->
   list = [1, 2, 3]
-  return if list.some((x) -> x is 2)
+  return if list.some (x) -> x is 2
   ok no
 
 test "#2258: allow whitespace-style parameter lists in function definitions", ->
@@ -7658,16 +7651,16 @@ test "#1435 Indented property access", ->
     do ->
       rec().rec ->
         rec()
-          .rec -> rec.rec()
-          .rec()
+        .rec -> rec.rec()
+        .rec()
       1
   )
 
 test "#1038 Optimize trailing return statements", ->
   compile = (code) ->
     CoffeeScript.compile code, bare: yes
-      .trim()
-      .replace /\\s+/g, " "
+    .trim()
+    .replace /\\s+/g, " "
 
   eq "(function() {});", compile "->"
   eq "(function() {});", compile "-> return"
@@ -7725,9 +7718,9 @@ test "#3845/#3446: chain after function glyph", ->
   eq(
     undefined
     angular
-      .module "foo"
-      .controller "EmailLoginCtrl", ->
-      .controller "EmailSignupCtrl", ->
+    .module "foo"
+    .controller "EmailLoginCtrl", ->
+    .controller "EmailSignupCtrl", ->
   )
 
   beforeEach = (f) -> f()
@@ -7737,8 +7730,8 @@ test "#3845/#3446: chain after function glyph", ->
     undefined
     beforeEach ->
       getPromise()
-        .then (@result) =>
-        .catch (@error) =>
+      .then (@result) =>
+      .catch (@error) =>
   )
 
   doThing = -> then: -> catch: (f) -> f()
@@ -7746,8 +7739,8 @@ test "#3845/#3446: chain after function glyph", ->
   eq(
     3
     doThing()
-      .then (@result) =>
-      .catch handleError
+    .then (@result) =>
+    .catch handleError
   )
 
 test "#4413: expressions in function parameters that create generated variables have those variables declared correctly", ->
@@ -8567,7 +8560,9 @@ test "\`instanceof\`", ->
 
 test "use \`::\` operator on keywords \`this\` and \`@\`", ->
   nonce = {}
-  obj = withAt: -> @::prop, withThis: -> this::prop
+  obj =
+    withAt: -> @::prop
+    withThis: -> this::prop
   obj.prototype = prop: nonce
   eq nonce, obj.withAt()
   eq nonce, obj.withThis()
@@ -9650,10 +9645,10 @@ test "#4631: slicing with space before and/or after the dots", ->
   arrayEq [2, 3, 4], shared[2...5]
   arrayEq [3, 4, 5], shared[3...6]
   arrayEq [4, 5, 6], shared[4...7]
-  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
-  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
-  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
-  arrayEq shared[(a b...)...(a c...)], shared[(a b...)...(a c...)]
+  arrayEq shared[(a b...)...(a c...)], shared[(a ...b)...(a ...c)]
+  arrayEq shared[(a b...)...(a c...)], shared[(a ...b)...(a ...c)]
+  arrayEq shared[(a b...)...(a c...)], shared[(a ...b)...(a ...c)]
+  arrayEq shared[(a b...)...(a c...)], shared[(a ...b)...(a ...c)]
 
 test "basic splicing", ->
   ary = [0..9]
@@ -9905,7 +9900,9 @@ test "soaked property access caching", ->
   fn = ->
     counter++
     "self"
-  obj = self: -> @, prop: nonce
+  obj =
+    self: -> @
+    prop: nonce
   eq nonce, obj[fn()]()[fn()]()[fn()]()?.prop
   eq 3, counter
 
@@ -9963,9 +9960,9 @@ test "soaked method invocation", ->
   eq(
     obj
     obj
-      .increment()
-      .increment()
-      .self?()
+    .increment()
+    .increment()
+    .self?()
   )
   eq 2, counter
 

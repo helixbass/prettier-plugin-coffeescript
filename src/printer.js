@@ -25,6 +25,7 @@ const {
 } = docBuilders
 const docUtils = doc.utils
 const {isEmpty, isLineNext, willBreak} = docUtils
+const {getLast, getPenultimate} = util
 
 const sysUtil = require('util')
 
@@ -239,6 +240,7 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
         case 'TaggedTemplateExpression':
         case 'MemberExpression':
           return true
+        case 'NewExpression':
         case 'CallExpression':
           return (
             !parent.arguments ||
@@ -264,6 +266,14 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
       switch (parent.type) {
         case 'TaggedTemplateExpression':
           return true
+        default:
+          return false
+      }
+    case 'TryStatement':
+      switch (parent.type) {
+        case 'NewExpression':
+        case 'CallExpression':
+          return node === parent.callee
         default:
           return false
       }
@@ -418,7 +428,9 @@ function printPathNoParens(path, options, print) {
         return concat(['{', '}'])
       }
 
-      const shouldOmitBraces = shouldOmitObjectBraces(path)
+      const shouldOmitBraces =
+        shouldOmitObjectBraces(path) ||
+        isCallArgument(path, {last: 'orBeforeTrailingFunction'})
       const shouldOmitBracesIfParentBreaks =
         !shouldOmitBraces &&
         shouldOmitObjectBraces(path, {ifParentBreaks: true})
@@ -439,19 +451,9 @@ function printPathNoParens(path, options, print) {
         props.length > 1 &&
         parent.type === 'ObjectProperty' &&
         n === parent.value
-      const isCallArg =
-        props.length > 1 &&
-        parent.type === 'CallExpression' &&
-        n !== parent.callee
+      const isCallArg = props.length > 1 && isCallArgument(path)
       const isNonTrailingCallArg =
-        isCallArg &&
-        n !== parent.arguments[parent.arguments.length - 1] &&
-        !(
-          parent.arguments.length >= 2 &&
-          n === parent.arguments[parent.arguments.length - 2] &&
-          parent.arguments[parent.arguments.length - 1].type ===
-            'FunctionExpression'
-        )
+        isCallArg && !isCallArgument(path, {last: 'orBeforeTrailingFunction'})
       const shouldBreak =
         isClassBody || // || (shouldOmitBraces && n.properties.length > 1)
         isNestedObject ||
@@ -460,8 +462,9 @@ function printPathNoParens(path, options, print) {
           props.find(
             ({value}) =>
               value &&
-              value.type === 'ObjectExpression' &&
-              value.properties.length >= 1
+              ((value.type === 'ObjectExpression' &&
+                value.properties.length >= 1) ||
+                value.type === 'FunctionExpression')
           ))
       const shouldBreakIfParentBreaks = isCallArg
       if (shouldOmitBraces && (isClassBody || isNestedObject)) {
@@ -471,36 +474,40 @@ function printPathNoParens(path, options, print) {
         shouldOmitBracesIfParentBreaks &&
         shouldOmitBracesIfParentBreaks.indent === false
       ) {
-        dontIndent = true
+        dontIndent = {ifParentBreaks: true}
       }
+      const propsChunk = concat([
+        shouldOmitBraces || !options.bracketSpacing
+          ? dontIndent
+            ? ''
+            : softline
+          : shouldOmitBracesIfParentBreaks
+            ? ifVisibleGroupBroke('', line, {count: 1})
+            : line,
+        concat(joinedProps),
+      ])
       const content = concat([
-        // shouldBreakIfParentBreaks
-        //   ? ifVisibleGroupBroke(breakParent, '', {count: 1})
-        //   : '',
         shouldOmitBracesIfParentBreaks
           ? ifVisibleGroupBroke('', '{', {count: 1})
           : shouldOmitBraces
             ? ''
             : '{',
-        dontIndent
+        dontIndent === true
           ? concat(joinedProps)
-          : indent(
-              concat([
-                shouldOmitBraces || !options.bracketSpacing
-                  ? softline
-                  : shouldOmitBracesIfParentBreaks
-                    ? ifVisibleGroupBroke('', softline, {count: 1})
-                    : line,
-                concat(joinedProps),
-              ])
-            ),
+          : dontIndent.ifParentBreaks
+            ? propsChunk
+            : indent(propsChunk),
         concat([
-          dontIndent || !trailingLine
+          dontIndent === true || !trailingLine
             ? ''
             : shouldOmitBraces || !options.bracketSpacing
-              ? softline
+              ? dontIndent
+                ? ''
+                : softline
               : shouldOmitBracesIfParentBreaks
-                ? ifVisibleGroupBroke('', softline, {count: 1})
+                ? ifVisibleGroupBroke('', line, {
+                    count: 1,
+                  })
                 : line,
           shouldOmitBracesIfParentBreaks
             ? ifVisibleGroupBroke('', '}', {count: 1})
@@ -609,7 +616,11 @@ function printPathNoParens(path, options, print) {
     }
     case 'SpreadElement':
     case 'RestElement':
-      return concat([n.argument ? path.call(print, 'argument') : '', '...'])
+      return concat([
+        !n.postfix ? '...' : '',
+        n.argument ? path.call(print, 'argument') : '',
+        n.postfix ? '...' : '',
+      ])
     case 'FunctionExpression': {
       const parent = path.getParentNode()
       parts.push(group(printFunctionParams(path, print, options)))
@@ -1305,7 +1316,7 @@ function printPathNoParens(path, options, print) {
 }
 
 function isChainableCall(node) {
-  return node.type !== 'NewExpression' && isMemberish(node.callee)
+  return node.type === 'CallExpression' && isMemberish(node.callee)
 }
 
 function printRegex(node) {
@@ -1406,11 +1417,7 @@ function shouldOmitObjectBraces(path, {stackOffset = 0, ifParentBreaks} = {}) {
   // ) {
   //   return { indent: true, trailingLine: false }
   // }
-  if (
-    parent.type === 'CallExpression' &&
-    parent.arguments &&
-    node === parent.arguments[parent.arguments.length - 1]
-  ) {
+  if (isCallArgument(path, {last: true, stackOffset})) {
     return {indent: false, trailingLine: false}
   }
   const shouldOmitBracesButNotIndent =
@@ -1436,17 +1443,38 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
   let trailingLine
   let breakingParentCount = 0
   while ((parent = path.getParentNode(stackOffset + parentLevel))) {
-    if (isBlockLevel(prevParent, parent)) {
+    if (
+      isBlockLevel(prevParent, parent) ||
+      (isIf(parent) &&
+        (prevParent === parent.test ||
+          prevParent === parent.consequent ||
+          prevParent === parent.alternate)) ||
+      (parent.type === 'SwitchStatement' && prevParent === parent.discriminant)
+    ) {
       return {indent, trailingLine}
     }
     if (
       ifParentBreaks &&
-      (isNonLastCallArg(path, {stackOffset: stackOffset + parentLevel}) ||
+      (isCallArgument(path, {
+        nonLast: true,
+        stackOffset: stackOffset + parentLevel,
+      }) ||
         isObjectPropertyValue(path, {
           stackOffset: stackOffset + parentLevel,
           // nonLast: true,
         }) ||
-        parent.type === 'ArrayExpression')
+        parent.type === 'ArrayExpression' ||
+        (isChainableCall(prevParent) &&
+          !followedByComputedAccess(path, {
+            stackOffset: stackOffset + parentLevel,
+          }) &&
+          parent.type === 'MemberExpression') ||
+        (isFirstCallInChain(path, {
+          stackOffset: stackOffset + parentLevel,
+        }) &&
+          !followedByComputedAccess(path, {
+            stackOffset: stackOffset + parentLevel,
+          })))
     ) {
       breakingParentCount++
       return {indent, trailingLine, ifParentBreaks: true, breakingParentCount}
@@ -1469,9 +1497,7 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
     ) {
       indent = true
     } else if (
-      parent.type === 'CallExpression' &&
-      parent.arguments &&
-      prevParent === parent.arguments[parent.arguments.length - 1]
+      isCallArgument(path, {last: true, stackOffset: stackOffset + parentLevel})
     ) {
       indent = false
       trailingLine = false
@@ -2058,9 +2084,10 @@ function printMemberChain(path, options, print) {
     if (groups.length === 0) {
       return ''
     }
-    return indent(
-      group(concat([hardline, join(hardline, groups.map(printGroup))]))
+    const unindented = group(
+      concat([hardline, join(hardline, groups.map(printGroup))])
     )
+    return options.indentChain ? indent(unindented) : unindented
   }
 
   const lastIndex = groups.length - 1
@@ -2084,11 +2111,19 @@ function printMemberChain(path, options, print) {
     printIndentedGroup(groups.slice(shouldMerge ? 2 : 1)),
   ])
 
-  const callExpressionCount = printedNodes.filter(
+  const callExpressions = printedNodes.filter(
     tuple => tuple.node.type === 'CallExpression'
-  ).length
+  )
+  const callExpressionCount = callExpressions.length
 
-  if (callExpressionCount >= 3 || printedGroups.slice(0, -1).some(willBreak)) {
+  if (
+    callExpressionCount >= 3 ||
+    (callExpressionCount === 2 &&
+      callExpressions.some(({node}) =>
+        node.arguments.some(({type}) => type === 'FunctionExpression')
+      )) ||
+    printedGroups.slice(0, -1).some(willBreak)
+  ) {
     return group(expanded, {visible: true})
   }
 
@@ -2176,15 +2211,35 @@ function isBlockLevel(node, parent) {
   )
 }
 
-function isNonLastCallArg(path, {stackOffset = 0} = {}) {
+function isCallArgument(path, {nonLast, last, stackOffset = 0} = {}) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
 
-  return (
-    parent.type === 'CallExpression' &&
-    node !== parent.callee &&
-    node !== parent.arguments[parent.arguments.length - 1]
-  )
+  if (
+    !(
+      (parent.type === 'CallExpression' || parent.type === 'NewExpression') &&
+      node !== parent.callee
+    )
+  ) {
+    return false
+  }
+  const args = parent.arguments
+  if (nonLast) {
+    return node !== getLast(args)
+  }
+  if (last) {
+    if (node === getLast(args)) {
+      return true
+    }
+    if (last === 'orBeforeTrailingFunction') {
+      return (
+        node === getPenultimate(args) &&
+        getLast(args).type === 'FunctionExpression'
+      )
+    }
+    return false
+  }
+  return true
 }
 
 function isObjectPropertyValue(path, {stackOffset = 0, nonLast, last} = {}) {
@@ -2203,15 +2258,7 @@ function isObjectPropertyValue(path, {stackOffset = 0, nonLast, last} = {}) {
 }
 
 function callParensOptionalIfParentBreaks(path, {stackOffset = 0} = {}) {
-  const node = path.getParentNode(stackOffset - 1)
-  return (
-    isNonLastCallArg(path, {stackOffset}) ||
-    // isObjectPropertyValue(path, {stackOffset}) ||
-    (isChainableCall(node) && !followedByComputedAccess(path, {stackOffset})) ||
-    (isFirstCallInChain(path, {stackOffset}) &&
-      !followedByComputedAccess(path, {stackOffset})) ||
-    isRightmostInStatement(path, {stackOffset, ifParentBreaks: true})
-  )
+  return isRightmostInStatement(path, {stackOffset, ifParentBreaks: true})
 }
 
 function followedByComputedAccess(path, {stackOffset = 0} = {}) {
@@ -2229,6 +2276,8 @@ function isFirstCallInChain(path, {stackOffset = 0} = {}) {
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
   return (
+    node.type === 'CallExpression' &&
+    node.callee.type !== 'MemberExpression' &&
     parent.type === 'MemberExpression' &&
     node === parent.object &&
     grandparent.type === 'CallExpression' &&
@@ -2252,12 +2301,10 @@ function callParensOptional(path, {stackOffset = 0} = {}) {
     (parent.type === 'ConditionalExpression' &&
       (parent.consequent === node || parent.alternate === node)) ||
     (parent.type === 'For' && parent.postfix && parent.body === node) ||
-    (parent.type === 'CallExpression' &&
-      parent.arguments &&
-      parent.arguments[parent.arguments.length - 1] === node) ||
+    (parent.type === 'CallExpression' && node === getLast(parent.arguments)) ||
     (parent.type === 'ObjectProperty' &&
       node === parent.value &&
-      parent === grandparent.properties[grandparent.properties.length - 1] &&
+      parent === getLast(grandparent.properties) &&
       shouldOmitObjectBraces(path, {stackOffset: stackOffset + 2}))
   )
 }
@@ -2317,7 +2364,7 @@ function printArgumentsList(path, options, print) {
   const parensUnnecessary =
     (shouldntBreak || firstArgIsObject) && parensOptional
   const parensUnnecessaryIfParentBreaks =
-    shouldntBreak && parensOptionalIfParentBreaks
+    (shouldntBreak || firstArgIsObject) && parensOptionalIfParentBreaks
   const nonFinalArgs = args.slice(0, args.length - 1)
   const shouldBreak =
     args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
@@ -2358,7 +2405,8 @@ function printArgumentsList(path, options, print) {
     )
   }
 
-  const shouldGroupLast = shouldGroupLastArg(args)
+  const shouldGroupLast = shouldGroupLastArg(path, options)
+  let groupLastPrinted
   if (shouldGroupLast) {
     const nonLastArgs = printedArguments.slice(0, -1)
     const shouldBreak = nonLastArgs.some(willBreak)
@@ -2372,8 +2420,9 @@ function printArgumentsList(path, options, print) {
         printedExpanded = printedArguments
           .slice(0, -1)
           .concat(
-            lastArg.type === 'ObjectExpression' &&
-            shouldOmitObjectBraces(argPath)
+            (lastArg.type === 'ObjectExpression' &&
+              shouldOmitObjectBraces(argPath)) ||
+            lastArg.type === 'ConditionalExpression'
               ? indent(concat([softline, printedLastArg]))
               : printedLastArg
           )
@@ -2381,32 +2430,49 @@ function printArgumentsList(path, options, print) {
       i++
     }, 'arguments')
 
-    // const somePrintedArgumentsWillBreak = printedArguments.some(willBreak)
-    return concat([
-      // somePrintedArgumentsWillBreak ? breakParent : '',
-      conditionalGroup(
-        [
-          // concat([openingParen, concat(printedExpanded), closingParen]),
-          concat([
-            openingParen,
-            concat(nonLastArgs),
-            group(util.getLast(printedExpanded)),
-            closingParen,
-          ]),
-          concat([
-            openingParen,
-            concat(nonLastArgs),
-            group(util.getLast(printedExpanded), {shouldBreak: true}),
-            closingParen,
-          ]),
-          allArgsBrokenOut(),
-        ],
-        {shouldBreak, visible: {firstBreakingIndex: 2}}
-      ),
+    const shouldDedentIfFits =
+      parent.type === 'AssignmentExpression' && node === parent.right
+    const dontBreakAny = concat([
+      openingParen,
+      concat(nonLastArgs),
+      group(util.getLast(printedExpanded)),
+      closingParen,
     ])
+    const breakLast = concat([
+      openingParen,
+      concat(nonLastArgs),
+      group(util.getLast(printedExpanded), {
+        shouldBreak: true,
+        visible: true,
+      }),
+      closingParen,
+    ])
+    const somePrintedArgumentsWillBreak = printedArguments.some(willBreak)
+    const lastAlwaysBreaks = willBreak(util.getLast(printedExpanded))
+    const conditionalGroups = [
+      shouldDedentIfFits ? dedent(breakLast) : breakLast,
+      allArgsBrokenOut(),
+    ]
+    if (!lastAlwaysBreaks) {
+      conditionalGroups.unshift(
+        shouldDedentIfFits ? dedent(dontBreakAny) : dontBreakAny
+      )
+    }
+    groupLastPrinted = concat([
+      somePrintedArgumentsWillBreak && parent.type !== 'AssignmentExpression'
+        ? breakParent
+        : '',
+      conditionalGroup(conditionalGroups, {
+        shouldBreak,
+        visible: {firstBreakingIndex: 2},
+      }),
+    ])
+    if (!shouldGroupLast.ifParentBreaks) {
+      return groupLastPrinted
+    }
   }
 
-  return shouldntBreak
+  const printed = shouldntBreak
     ? group(
         concat([
           openingParen,
@@ -2433,24 +2499,43 @@ function printArgumentsList(path, options, print) {
         ]),
         {visible: true, shouldBreak}
       )
+  return groupLastPrinted
+    ? ifVisibleGroupBroke(groupLastPrinted, printed)
+    : printed
 }
 
 function couldGroupArg(arg) {
   return (
     (arg.type === 'ObjectExpression' && arg.properties.length > 0) ||
     (arg.type === 'ArrayExpression' && arg.elements.length > 0) ||
-    arg.type === 'FunctionExpression'
+    arg.type === 'FunctionExpression' ||
+    arg.type === 'ConditionalExpression'
   )
 }
 
-function shouldGroupLastArg(args) {
+function shouldGroupLastArg(path, options) {
+  const node = path.getValue()
+  const args = node.arguments
+  const isRightmost = isRightmostInStatement(path, {ifParentBreaks: true})
+  if (!isRightmost) {
+    return false
+  }
+  if (isFirstCallInChain(path) && options.indentChain) {
+    return false
+  }
   const lastArg = util.getLast(args)
   const penultimateArg = util.getPenultimate(args)
-  return (
+  if (
     args.length > 1 &&
     couldGroupArg(lastArg) &&
-    (!penultimateArg || !couldGroupArg(penultimateArg))
-  )
+    (!penultimateArg ||
+      (lastArg.type === 'FunctionExpression'
+        ? penultimateArg.type !== 'FunctionExpression'
+        : !couldGroupArg(penultimateArg)))
+  ) {
+    return isRightmost.ifParentBreaks ? {ifParentBreaks: true} : true
+  }
+  return false
 }
 
 function isTestCall(n) {
@@ -2495,11 +2580,11 @@ function printAssignment(
   options
 ) {
   const dontBreak =
-    !(
-      leftNode.type === 'Identifier' ||
-      isStringLiteral(leftNode) ||
-      leftNode.type === 'MemberExpression'
-    ) ||
+    // !(
+    //   leftNode.type === 'Identifier' ||
+    //   isStringLiteral(leftNode) ||
+    //   leftNode.type === 'MemberExpression'
+    // ) ||
     shouldInlineLogicalExpression(rightNode) ||
     rightNode.type === 'ArrayExpression' ||
     rightNode.type === 'TemplateLiteral' ||

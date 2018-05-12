@@ -24,8 +24,8 @@ fooValue = myForm.querySelector("input[name=foo]")?.value
 
 obj?.prop
 obj?[expr]
-func? args...
-func? args...
+func? ...args
+func? ...args
 
 a?()
 a?[++x]

@@ -924,3 +924,7 @@ test "#5052: implicit call of class with no body", ->
       class A
       a
   eq shouldBeA, a
+
+f class
+f class A
+f class A extends B

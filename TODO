@@ -13,8 +13,6 @@
     something
     else
   could it check whether the call without the last arg wouldn't break and the last arg is a function or do (and the call doesn't need parens)?
-- prefix/postfix ... in splat
-- @/this, ::/.prototype
 - preserve 2e308 (or anything else that would compile to Infinity)?
 - apply ifParentGroupBroke to pathNeedsParens eg this should be able to omit parens around the first arg if throws() breaks:
 	throws(
@@ -22,7 +20,6 @@
 	  null
 	  'prohibit expansion and a splat'
 	)
-- option for whether to indent chaining
 - how do elisions and breaking arrays interplay?
 - where to draw the line with what to parenthesize when splatting - you can omit a lot of parens but it looks weird eg [(a if f)?.b ? []...]
 - don't need to parenthesize postfix for comprehensions (and probably other things?) when assignment breaks eg:
@@ -32,3 +29,5 @@
   a =
     b if null
   i guess you could achieve the same thing with parenthesization but seems nice to support this
+- revisit bracketSpacing logic
+- nicely break/indent interpolated expressions that will themselves break, eg chains are ugly

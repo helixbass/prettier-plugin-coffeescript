@@ -71,8 +71,18 @@ const printers = {
   coffeescript: printer,
 }
 
+const options = {
+  indentChain: {
+    type: 'boolean',
+    category: 'Global',
+    default: false,
+    description: 'Indent chained (non-initial) lines of a member call chain',
+  },
+}
+
 module.exports = {
   languages,
   parsers,
   printers,
+  options,
 }
