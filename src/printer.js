@@ -222,6 +222,7 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           return node.postfix
         case 'ReturnStatement':
         case 'MemberExpression':
+        case 'SpreadElement':
           return true
         default:
           return false
@@ -421,7 +422,6 @@ function printPathNoParens(path, options, print) {
       const shouldOmitBracesIfParentBreaks =
         !shouldOmitBraces &&
         shouldOmitObjectBraces(path, {ifParentBreaks: true})
-      // dump({n, shouldOmitBraces, shouldOmitBracesIfParentBreaks})
       let dontIndent = false
       let trailingLine = true
       if (shouldOmitBraces && !shouldOmitBraces.indent) {
@@ -439,23 +439,31 @@ function printPathNoParens(path, options, print) {
         props.length > 1 &&
         parent.type === 'ObjectProperty' &&
         n === parent.value
-      const isNonFinalCallArg =
+      const isCallArg =
         props.length > 1 &&
         parent.type === 'CallExpression' &&
-        n !== parent.callee &&
-        n !== parent.arguments[parent.arguments.length - 1]
-      const isFinalCallArg =
-        props.length > 1 &&
-        parent.type === 'CallExpression' &&
-        parent.arguments &&
-        n === parent.arguments[parent.arguments.length - 1]
+        n !== parent.callee
+      const isNonTrailingCallArg =
+        isCallArg &&
+        n !== parent.arguments[parent.arguments.length - 1] &&
+        !(
+          parent.arguments.length >= 2 &&
+          n === parent.arguments[parent.arguments.length - 2] &&
+          parent.arguments[parent.arguments.length - 1].type ===
+            'FunctionExpression'
+        )
       const shouldBreak =
         isClassBody || // || (shouldOmitBraces && n.properties.length > 1)
         isNestedObject ||
-        isNonFinalCallArg ||
+        isNonTrailingCallArg ||
         (props.length > 1 &&
-          props.find(({value}) => value && value.type === 'ObjectExpression'))
-      const shouldBreakIfParentBreaks = isFinalCallArg
+          props.find(
+            ({value}) =>
+              value &&
+              value.type === 'ObjectExpression' &&
+              value.properties.length >= 1
+          ))
+      const shouldBreakIfParentBreaks = isCallArg
       if (shouldOmitBraces && (isClassBody || isNestedObject)) {
         dontIndent = true
       }
@@ -620,7 +628,8 @@ function printPathNoParens(path, options, print) {
           ? concat([' ', path.call(print, 'body', ...singleExprPath)])
           : concat([ifBreak('', ' '), path.call(print, 'body')])
 
-      const shouldBreak = singleExpr && isDo(parent)
+      const shouldBreak =
+        singleExpr && (isDo(parent) || isIf(singleExpr, {postfix: true}))
       // singleExpr.type === 'FunctionExpression' ||
       // grandparent.type === 'For'
       return group(
@@ -1484,8 +1493,11 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
   }
 }
 
-function isIf(node) {
-  return node.type === 'IfStatement' || node.type === 'ConditionalExpression'
+function isIf(node, {postfix} = {}) {
+  return (
+    (node.type === 'IfStatement' || node.type === 'ConditionalExpression') &&
+    (!postfix || node.postfix)
+  )
 }
 
 function printObjectMethod(path, options, print) {
@@ -2063,8 +2075,7 @@ function printMemberChain(path, options, print) {
   //   .reduce((res, group) => res.concat(group), [])
 
   if (groups.length <= cutoff) {
-    // dump({grouping: oneLine})
-    return group(oneLine, {blockVisible: true})
+    return group(oneLine)
   }
 
   const expanded = concat([
@@ -2241,6 +2252,9 @@ function callParensOptional(path, {stackOffset = 0} = {}) {
     (parent.type === 'ConditionalExpression' &&
       (parent.consequent === node || parent.alternate === node)) ||
     (parent.type === 'For' && parent.postfix && parent.body === node) ||
+    (parent.type === 'CallExpression' &&
+      parent.arguments &&
+      parent.arguments[parent.arguments.length - 1] === node) ||
     (parent.type === 'ObjectProperty' &&
       node === parent.value &&
       parent === grandparent.properties[grandparent.properties.length - 1] &&
@@ -2260,20 +2274,22 @@ function printArgumentsList(path, options, print) {
   let separatorParts = []
   const printedArguments = path.map((argPath, index) => {
     const arg = argPath.getNode()
-    let isObject
-    if ((isObject = isObjectish(arg))) {
-      if (separatorParts.length && index !== lastArgIndex) {
-        separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
-      }
-    }
-    const parts = []
-    parts.push(concat(separatorParts))
-    parts.push(print(argPath))
-
+    const isObject = isObjectish(arg)
+    const isLast = index === lastArgIndex
+    const nextIsNonFinalObject =
+      !isLast && isObjectish(args[index + 1]) && index !== lastArgIndex - 1
     separatorParts = [
-      ifBreak(isObject ? dedent(concat([line, ','])) : '', ','),
+      ifBreak(
+        isObject || nextIsNonFinalObject ? dedent(concat([line, ','])) : '',
+        ','
+      ),
       line,
     ]
+    const parts = []
+    parts.push(print(argPath))
+    if (index !== lastArgIndex) {
+      parts.push(concat(separatorParts))
+    }
 
     return concat(parts)
   }, 'arguments')
@@ -2290,7 +2306,6 @@ function printArgumentsList(path, options, print) {
         callParensOptional(path, {stackOffset: 1})))
   const parensOptionalIfParentBreaks =
     !parensOptional && callParensOptionalIfParentBreaks(path)
-  // dump({node, parensOptional, parensOptionalIfParentBreaks})
 
   const shouldntBreak =
     args.length === 1 &&
@@ -2330,6 +2345,67 @@ function printArgumentsList(path, options, print) {
         ? ifBreak(')')
         : ')'
 
+  function allArgsBrokenOut() {
+    return group(
+      concat([
+        openingParen,
+        indent(concat([line, concat(printedArguments)])),
+        line,
+        closingParen,
+      ]),
+      // {shouldBreak: true, visible: true}
+      {shouldBreak: true}
+    )
+  }
+
+  const shouldGroupLast = shouldGroupLastArg(args)
+  if (shouldGroupLast) {
+    const nonLastArgs = printedArguments.slice(0, -1)
+    const shouldBreak = nonLastArgs.some(willBreak)
+
+    let printedExpanded
+    let i = 0
+    path.each(argPath => {
+      if (i === args.length - 1) {
+        const lastArg = argPath.getValue()
+        const printedLastArg = printedArguments[i]
+        printedExpanded = printedArguments
+          .slice(0, -1)
+          .concat(
+            lastArg.type === 'ObjectExpression' &&
+            shouldOmitObjectBraces(argPath)
+              ? indent(concat([softline, printedLastArg]))
+              : printedLastArg
+          )
+      }
+      i++
+    }, 'arguments')
+
+    // const somePrintedArgumentsWillBreak = printedArguments.some(willBreak)
+    return concat([
+      // somePrintedArgumentsWillBreak ? breakParent : '',
+      conditionalGroup(
+        [
+          // concat([openingParen, concat(printedExpanded), closingParen]),
+          concat([
+            openingParen,
+            concat(nonLastArgs),
+            group(util.getLast(printedExpanded)),
+            closingParen,
+          ]),
+          concat([
+            openingParen,
+            concat(nonLastArgs),
+            group(util.getLast(printedExpanded), {shouldBreak: true}),
+            closingParen,
+          ]),
+          allArgsBrokenOut(),
+        ],
+        {shouldBreak, visible: {firstBreakingIndex: 2}}
+      ),
+    ])
+  }
+
   return shouldntBreak
     ? group(
         concat([
@@ -2357,6 +2433,24 @@ function printArgumentsList(path, options, print) {
         ]),
         {visible: true, shouldBreak}
       )
+}
+
+function couldGroupArg(arg) {
+  return (
+    (arg.type === 'ObjectExpression' && arg.properties.length > 0) ||
+    (arg.type === 'ArrayExpression' && arg.elements.length > 0) ||
+    arg.type === 'FunctionExpression'
+  )
+}
+
+function shouldGroupLastArg(args) {
+  const lastArg = util.getLast(args)
+  const penultimateArg = util.getPenultimate(args)
+  return (
+    args.length > 1 &&
+    couldGroupArg(lastArg) &&
+    (!penultimateArg || !couldGroupArg(penultimateArg))
+  )
 }
 
 function isTestCall(n) {
@@ -2582,6 +2676,8 @@ function isObjectish(node) {
 function printArrayItems(path, options, printPath, print) {
   const printedElements = []
   let separatorParts = []
+  const node = path.getValue()
+  const last = node && node.length && node[node.length - 1]
   path.each(childPath => {
     const child = childPath.getValue()
     let isObject
@@ -2597,6 +2693,12 @@ function printArrayItems(path, options, printPath, print) {
       ifBreak(isObject ? dedent(concat([line, ','])) : '', ','),
       line,
     ]
+    const isLast = child === last
+    const shouldBreakArray =
+      !isLast && child && child.type === 'FunctionExpression'
+    if (shouldBreakArray) {
+      separatorParts.push(breakParent)
+    }
     if (child && util.isNextLineEmpty(options.originalText, child, locEnd)) {
       separatorParts.push(line)
     }

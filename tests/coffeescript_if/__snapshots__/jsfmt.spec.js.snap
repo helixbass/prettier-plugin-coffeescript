@@ -37,7 +37,8 @@ f() if b
 a if b
 a unless b
 
--> return a if b
+->
+  return a if b
 ->
   doSomething()
   return a unless b
