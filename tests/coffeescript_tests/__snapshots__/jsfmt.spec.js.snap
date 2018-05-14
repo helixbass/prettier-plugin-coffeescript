@@ -487,7 +487,7 @@ test "regex interpolation in array", ->
   eq "value", arr[1].key
 
   b = "b"
-  arr = [RegExp("a#{b}"), { key: "value" }]
+  arr = [///a#{b}///, { key: "value" }]
   eq 2, arr.length
   eq "ab", arr[0].source
   eq "value", arr[1].key

@@ -602,7 +602,7 @@ function printPathNoParens(path, options, print) {
     case 'NullLiteral':
       return 'null'
     case 'RegExpLiteral':
-      return printRegex(n)
+      return printRegex(path, print)
     case 'PassthroughLiteral': {
       const quote = n.here ? '```' : '`'
       parts.push(quote, n.value, quote)
@@ -1284,57 +1284,71 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'TemplateElement':
       return join(literalline, n.value.raw.split(/\r?\n/g))
-    case 'TemplateLiteral': {
-      const expressions = path.map(print, 'expressions')
-      const quote = n.quote || '"'
-      parts.push(quote)
-
-      path.each(childPath => {
-        const i = childPath.getName()
-
-        parts.push(print(childPath))
-
-        if (i < expressions.length) {
-          // const tabWidth = options.tabWidth
-          // const indentSize = util.getIndentSize(
-          //   childPath.getValue().value.raw,
-          //   tabWidth
-          // )
-
-          let printed = expressions[i]
-
-          if (
-            n.expressions[i].type === 'MemberExpression' ||
-            n.expressions[i].type === 'ConditionalExpression'
-          ) {
-            printed = concat([indent(concat([softline, printed])), softline])
-          }
-
-          // const aligned = addAlignmentToDoc(printed, indentSize, tabWidth)
-
-          parts.push(group(concat(['#{', printed, '}'])))
-        }
-      }, 'quasis')
-
-      parts.push(quote)
-
-      return concat(parts)
-    }
+    case 'TemplateLiteral':
+      return printTemplateLiteral(path, print)
     case 'TaggedTemplateExpression':
       return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
   }
+}
+
+function printTemplateLiteral(path, print, {omitQuotes} = {}) {
+  const parts = []
+  const node = path.getValue()
+  const expressions = path.map(print, 'expressions')
+  const quote = omitQuotes ? '' : node.quote || '"'
+  parts.push(quote)
+
+  path.each(childPath => {
+    const i = childPath.getName()
+
+    parts.push(print(childPath))
+
+    if (i < expressions.length) {
+      // const tabWidth = options.tabWidth
+      // const indentSize = util.getIndentSize(
+      //   childPath.getValue().value.raw,
+      //   tabWidth
+      // )
+
+      let printed = expressions[i]
+
+      if (
+        node.expressions[i].type === 'MemberExpression' ||
+        node.expressions[i].type === 'ConditionalExpression'
+      ) {
+        printed = concat([indent(concat([softline, printed])), softline])
+      }
+
+      // const aligned = addAlignmentToDoc(printed, indentSize, tabWidth)
+
+      parts.push(group(concat(['#{', printed, '}'])))
+    }
+  }, 'quasis')
+
+  parts.push(quote)
+
+  return concat(parts)
 }
 
 function isChainableCall(node) {
   return node.type === 'CallExpression' && isMemberish(node.callee)
 }
 
-function printRegex(node) {
+function printRegex(path, print) {
+  const node = path.getValue()
+  const delim = node.delimiter || '/'
   const flags = node.flags
     .split('')
     .sort()
     .join('')
-  return `/${node.pattern}/${flags}`
+  const pattern = node.interpolatedPattern
+    ? path.call(
+        patternPath =>
+          printTemplateLiteral(patternPath, print, {omitQuotes: true}),
+        'interpolatedPattern'
+      )
+    : node.pattern
+  return concat([delim, pattern, delim, flags])
 }
 
 function singleExpressionBlock(node, {withPath} = {}) {
