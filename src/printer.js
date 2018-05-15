@@ -414,123 +414,12 @@ function printPathNoParens(path, options, print) {
       ])
     case 'ObjectExpression':
     case 'ObjectPattern': {
-      const parent = path.getParentNode()
-      const grandparent = path.getParentNode(1)
-      const printedProps = []
-      path.each(childPath => {
-        const node = childPath.getValue()
-        printedProps.push({
-          node,
-          printed: print(childPath),
-        })
-      }, 'properties')
-      let separatorParts = []
-      const joinedProps = printedProps.map(prop => {
-        const result = concat(separatorParts.concat(group(prop.printed)))
-        separatorParts = [ifBreak('', ','), line]
-        if (util.isNextLineEmpty(options.originalText, prop.node, locEnd)) {
-          separatorParts.push(hardline)
-        }
-        return result
-      })
-
-      if (joinedProps.length === 0) {
-        return concat(['{', '}'])
+      const ungrouped = printObject(path, print, options)
+      if (!ungrouped.content) {
+        return ungrouped
       }
-
-      const shouldOmitBraces =
-        shouldOmitObjectBraces(path) ||
-        isCallArgument(path, {last: 'orBeforeTrailingFunction'})
-      const shouldOmitBracesIfParentBreaks =
-        !shouldOmitBraces &&
-        shouldOmitObjectBraces(path, {ifParentBreaks: true})
-      let dontIndent = false
-      let trailingLine = true
-      if (shouldOmitBraces && !shouldOmitBraces.indent) {
-        dontIndent = true
-      }
-      if (shouldOmitBraces && shouldOmitBraces.trailingLine === false) {
-        trailingLine = false
-      }
-      const isClassBody =
-        parent.type === 'ExpressionStatement' &&
-        grandparent.type === 'ClassBody'
-      const props = n.properties
-      const isNestedObject =
-        n.type === 'ObjectExpression' &&
-        props.length > 1 &&
-        parent.type === 'ObjectProperty' &&
-        n === parent.value
-      const isCallArg = props.length > 1 && isCallArgument(path)
-      const isNonTrailingCallArg =
-        isCallArg && !isCallArgument(path, {last: 'orBeforeTrailingFunction'})
-      const shouldBreak =
-        isClassBody || // || (shouldOmitBraces && n.properties.length > 1)
-        isNestedObject ||
-        isNonTrailingCallArg ||
-        (props.length > 1 &&
-          props.find(
-            ({value}) =>
-              value &&
-              ((value.type === 'ObjectExpression' &&
-                value.properties.length >= 1) ||
-                value.type === 'FunctionExpression')
-          ))
-      const shouldBreakIfParentBreaks = isCallArg
-      if (shouldOmitBraces && (isClassBody || isNestedObject)) {
-        dontIndent = true
-      }
-      if (
-        shouldOmitBracesIfParentBreaks &&
-        shouldOmitBracesIfParentBreaks.indent === false
-      ) {
-        dontIndent = {ifParentBreaks: true}
-      }
-      const propsChunk = concat([
-        shouldOmitBraces || !options.bracketSpacing
-          ? dontIndent
-            ? ''
-            : softline
-          : shouldOmitBracesIfParentBreaks
-            ? ifVisibleGroupBroke('', line, {count: 1})
-            : line,
-        concat(joinedProps),
-      ])
-      const content = concat([
-        shouldOmitBracesIfParentBreaks
-          ? ifVisibleGroupBroke('', '{', {count: 1})
-          : shouldOmitBraces
-            ? ''
-            : '{',
-        dontIndent === true
-          ? concat(joinedProps)
-          : dontIndent.ifParentBreaks
-            ? propsChunk
-            : indent(propsChunk),
-        concat([
-          dontIndent === true || !trailingLine
-            ? ''
-            : shouldOmitBraces || !options.bracketSpacing
-              ? dontIndent
-                ? ''
-                : softline
-              : shouldOmitBracesIfParentBreaks
-                ? ifVisibleGroupBroke('', line, {
-                    count: 1,
-                  })
-                : line,
-          shouldOmitBracesIfParentBreaks
-            ? ifVisibleGroupBroke('', '}', {count: 1})
-            : shouldOmitBraces
-              ? ''
-              : '}',
-        ]),
-      ])
-      return group(content, {
-        shouldBreak,
-        visible: true,
-        shouldBreakIfVisibleGroupBroke: shouldBreakIfParentBreaks,
-      })
+      const {content, groupOptions} = ungrouped
+      return group(content, groupOptions)
     }
     case 'ObjectProperty':
       if (n.shorthand) {
@@ -1288,6 +1177,128 @@ function printPathNoParens(path, options, print) {
       return printTemplateLiteral(path, print)
     case 'TaggedTemplateExpression':
       return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
+  }
+}
+
+function printObject(path, print, options) {
+  const node = path.getValue()
+  const parent = path.getParentNode()
+  const grandparent = path.getParentNode(1)
+  const printedProps = []
+  path.each(childPath => {
+    const node = childPath.getValue()
+    printedProps.push({
+      node,
+      printed: print(childPath),
+    })
+  }, 'properties')
+  let separatorParts = []
+  const joinedProps = printedProps.map(prop => {
+    const result = concat(separatorParts.concat(group(prop.printed)))
+    separatorParts = [ifBreak('', ','), line]
+    if (util.isNextLineEmpty(options.originalText, prop.node, locEnd)) {
+      separatorParts.push(hardline)
+    }
+    return result
+  })
+
+  if (joinedProps.length === 0) {
+    return concat(['{', '}'])
+  }
+
+  const shouldOmitBraces =
+    shouldOmitObjectBraces(path) ||
+    isCallArgument(path, {last: 'orBeforeTrailingFunction'})
+  const shouldOmitBracesIfParentBreaks =
+    !shouldOmitBraces && shouldOmitObjectBraces(path, {ifParentBreaks: true})
+  let dontIndent = false
+  let trailingLine = true
+  if (shouldOmitBraces && !shouldOmitBraces.indent) {
+    dontIndent = true
+  }
+  if (shouldOmitBraces && shouldOmitBraces.trailingLine === false) {
+    trailingLine = false
+  }
+  const isClassBody =
+    parent.type === 'ExpressionStatement' && grandparent.type === 'ClassBody'
+  const props = node.properties
+  const isNestedObject =
+    node.type === 'ObjectExpression' &&
+    props.length > 1 &&
+    parent.type === 'ObjectProperty' &&
+    node === parent.value
+  const isCallArg = props.length > 1 && isCallArgument(path)
+  const isNonTrailingCallArg =
+    isCallArg && !isCallArgument(path, {last: 'orBeforeTrailingFunction'})
+  const shouldBreak =
+    isClassBody || // || (shouldOmitBraces && n.properties.length > 1)
+    isNestedObject ||
+    isNonTrailingCallArg ||
+    (props.length > 1 &&
+      props.find(
+        ({value}) =>
+          value &&
+          ((value.type === 'ObjectExpression' &&
+            value.properties.length >= 1) ||
+            value.type === 'FunctionExpression')
+      ))
+  const shouldBreakIfParentBreaks = isCallArg
+  if (shouldOmitBraces && (isClassBody || isNestedObject)) {
+    dontIndent = true
+  }
+  if (
+    shouldOmitBracesIfParentBreaks &&
+    shouldOmitBracesIfParentBreaks.indent === false
+  ) {
+    dontIndent = {ifParentBreaks: true}
+  }
+  const propsChunk = concat([
+    shouldOmitBraces || !options.bracketSpacing
+      ? dontIndent
+        ? ''
+        : softline
+      : shouldOmitBracesIfParentBreaks
+        ? ifVisibleGroupBroke('', line, {count: 1})
+        : line,
+    concat(joinedProps),
+  ])
+  const content = concat([
+    shouldOmitBracesIfParentBreaks
+      ? ifVisibleGroupBroke('', '{', {count: 1})
+      : shouldOmitBraces
+        ? ''
+        : '{',
+    dontIndent === true
+      ? concat(joinedProps)
+      : dontIndent.ifParentBreaks
+        ? propsChunk
+        : indent(propsChunk),
+    concat([
+      dontIndent === true || !trailingLine
+        ? ''
+        : shouldOmitBraces || !options.bracketSpacing
+          ? dontIndent
+            ? ''
+            : softline
+          : shouldOmitBracesIfParentBreaks
+            ? ifVisibleGroupBroke('', line, {
+                count: 1,
+              })
+            : line,
+      shouldOmitBracesIfParentBreaks
+        ? ifVisibleGroupBroke('', '}', {count: 1})
+        : shouldOmitBraces
+          ? ''
+          : '}',
+    ]),
+  ])
+  return {
+    content,
+    groupOptions: {
+      shouldBreak,
+      visible: true,
+      shouldBreakIfVisibleGroupBroke: shouldBreakIfParentBreaks,
+    },
   }
 }
 
@@ -2466,8 +2477,6 @@ function printArgumentsList(path, options, print) {
       i++
     }, 'arguments')
 
-    const shouldDedentIfFits =
-      parent.type === 'AssignmentExpression' && node === parent.right
     const dontBreakAny = concat([
       openingParen,
       concat(nonLastArgs),
@@ -2485,14 +2494,9 @@ function printArgumentsList(path, options, print) {
     ])
     const somePrintedArgumentsWillBreak = printedArguments.some(willBreak)
     const lastAlwaysBreaks = willBreak(util.getLast(printedExpanded))
-    const conditionalGroups = [
-      shouldDedentIfFits ? dedent(breakLast) : breakLast,
-      allArgsBrokenOut(),
-    ]
+    const conditionalGroups = [breakLast, allArgsBrokenOut()]
     if (!lastAlwaysBreaks) {
-      conditionalGroups.unshift(
-        shouldDedentIfFits ? dedent(dontBreakAny) : dontBreakAny
-      )
+      conditionalGroups.unshift(dontBreakAny)
     }
     groupLastPrinted = concat([
       somePrintedArgumentsWillBreak && parent.type !== 'AssignmentExpression'
@@ -2500,7 +2504,8 @@ function printArgumentsList(path, options, print) {
         : '',
       conditionalGroup(conditionalGroups, {
         shouldBreak,
-        visible: {firstBreakingIndex: 2},
+        visible: true,
+        firstBreakingIndex: 2,
       }),
     ])
     if (!shouldGroupLast.ifParentBreaks) {
@@ -2609,7 +2614,10 @@ function isStringLiteral(node) {
 }
 
 function printAssignmentRight(rightNode, printedRight, options, canBreak) {
-  const broken = indent(concat([line, printedRight]))
+  const broken = ifBreak(
+    indent(concat([line, printedRight])),
+    concat([line, printedRight])
+  )
   const nonbroken = concat([' ', printedRight])
   if (canBreak) {
     return canBreak.ifParentBreaks
@@ -2630,11 +2638,6 @@ function printAssignment(
 ) {
   const printedRight = path.call(print, rightName)
   const dontBreak =
-    // !(
-    //   leftNode.type === 'Identifier' ||
-    //   isStringLiteral(leftNode) ||
-    //   leftNode.type === 'MemberExpression'
-    // ) ||
     shouldInlineLogicalExpression(rightNode) ||
     rightNode.type === 'ArrayExpression' ||
     rightNode.type === 'TemplateLiteral' ||
@@ -2656,7 +2659,55 @@ function printAssignment(
     !dontBreak
   )
 
-  return group(concat([printedLeft, operator, printed]))
+  const full = concat([printedLeft, operator, printed])
+  if (
+    willBreak(printed) &&
+    !(
+      rightNode.type === 'CallExpression' &&
+      path.call(rightPath => shouldGroupLastArg(rightPath, options), rightName)
+    )
+  ) {
+    return group(full, {shouldBreak: true})
+  }
+  const tryAndBreakLeftOnly = !(
+    leftNode.type === 'Identifier' ||
+    isStringLiteral(leftNode) ||
+    leftNode.type === 'MemberExpression'
+  )
+  const singleGroup = group(full)
+  if (!tryAndBreakLeftOnly) {
+    return singleGroup
+  }
+
+  let printedLeftUngrouped
+  if (leftNode.type === 'ObjectPattern') {
+    printedLeftUngrouped = path.call(
+      leftPath => printObject(leftPath, print, options),
+      'left'
+    )
+    if (!printedLeftUngrouped.content) {
+      printedLeftUngrouped = null
+    }
+  }
+  return conditionalGroup(
+    [
+      full,
+      concat([
+        printedLeftUngrouped
+          ? group(
+              printedLeftUngrouped.content,
+              Object.assign({}, printedLeftUngrouped.groupOptions, {
+                shouldBreak: true,
+              })
+            )
+          : group(printedLeft, {shouldBreak: true}),
+        operator,
+        group(printed),
+      ]),
+      singleGroup,
+    ],
+    {firstBreakingIndex: 1}
+  )
 }
 
 function isDo(node) {
