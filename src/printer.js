@@ -252,6 +252,12 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           } else {
             return {unlessParentBreaks: true}
           }
+        case 'ArrayExpression':
+          if (node === getLast(parent.elements)) {
+            return false
+          } else {
+            return {unlessParentBreaks: true}
+          }
         case 'For':
           return parent.postfix && node === parent.body
         default:
@@ -542,8 +548,17 @@ function printPathNoParens(path, options, print) {
         singleExpr && (isDo(parent) || isIf(singleExpr, {postfix: true}))
       // singleExpr.type === 'FunctionExpression' ||
       // grandparent.type === 'For'
+      const needsParens = pathNeedsParens(path)
       return group(
-        concat([concat(parts), body, pathNeedsParens(path) ? softline : '']),
+        concat([
+          concat(parts),
+          body,
+          needsParens
+            ? needsParens.unlessParentBreaks
+              ? ifVisibleGroupBroke('', softline)
+              : softline
+            : '',
+        ]),
         {shouldBreak}
       )
     }
@@ -1208,7 +1223,8 @@ function printObject(path, print, options) {
 
   const shouldOmitBraces =
     shouldOmitObjectBraces(path) ||
-    isCallArgument(path, {last: 'orBeforeTrailingFunction'})
+    (!objectRequiresBraces(path) &&
+      isCallArgument(path, {last: 'orBeforeTrailingFunction'}))
   const shouldOmitBracesIfParentBreaks =
     !shouldOmitBraces && shouldOmitObjectBraces(path, {ifParentBreaks: true})
   let dontIndent = false
@@ -1414,21 +1430,29 @@ function isTemplateOnItsOwnLine(n, text) {
   )
 }
 
-function shouldOmitObjectBraces(path, {stackOffset = 0, ifParentBreaks} = {}) {
+function objectRequiresBraces(path, {stackOffset = 0} = {}) {
   const node = path.getParentNode(stackOffset - 1)
-  const parent = path.getParentNode(stackOffset)
-  const grandparent = path.getParentNode(stackOffset + 1)
   if (node.type === 'ObjectPattern') {
-    return false
+    return true
   }
   if (!node.properties.length) {
-    return false
+    return true
   }
   if (
     node.properties.find(
       ({shorthand, type}) => shorthand || type === 'SpreadElement'
     )
   ) {
+    return true
+  }
+  return false
+}
+
+function shouldOmitObjectBraces(path, {stackOffset = 0, ifParentBreaks} = {}) {
+  const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
+
+  if (objectRequiresBraces(path, {stackOffset})) {
     return false
   }
 
@@ -1486,7 +1510,8 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
           prevParent === parent.alternate)) ||
       (parent.type === 'SwitchStatement' &&
         prevParent === parent.discriminant) ||
-      (parent.type === 'For' && prevParent === parent.source)
+      (parent.type === 'For' && prevParent === parent.source) ||
+      (parent.type === 'ArrayExpression' && parent.elements.length === 1)
     ) {
       return {indent, trailingLine}
     }
@@ -2257,7 +2282,8 @@ function isBlockLevel(node, parent) {
   return (
     parent.type === 'ExpressionStatement' ||
     parent.type === 'BlockStatement' ||
-    parent.type === 'ExportDefaultDeclaration'
+    parent.type === 'ExportDefaultDeclaration' ||
+    (parent.type === 'SwitchCase' && node !== parent.test)
   )
 }
 
@@ -2375,9 +2401,12 @@ function printArgumentsList(path, options, print) {
     const isLast = index === lastArgIndex
     const nextIsNonFinalObject =
       !isLast && isObjectish(args[index + 1]) && index !== lastArgIndex - 1
+    const consecutiveIf = !isLast && isIf(arg) && isIf(args[index + 1])
     separatorParts = [
       ifBreak(
-        isObject || nextIsNonFinalObject ? dedent(concat([line, ','])) : '',
+        isObject || nextIsNonFinalObject || consecutiveIf
+          ? dedent(concat([line, ',']))
+          : '',
         ','
       ),
       line,
@@ -2407,6 +2436,7 @@ function printArgumentsList(path, options, print) {
   const shouldntBreak =
     args.length === 1 &&
     (args[0].type === 'FunctionExpression' ||
+      args[0].type === 'ArrayExpression' ||
       // args[0].type === 'ObjectExpression' ||
       isDoFunc(args[0]))
   const firstArgIsObject =
@@ -2873,7 +2903,9 @@ function printArrayItems(path, options, printPath, print) {
   const printedElements = []
   let separatorParts = []
   const node = path.getValue()
-  const last = node && node.length && node[node.length - 1]
+  const elements = node[printPath]
+  const last = elements && elements.length && elements[elements.length - 1]
+  let index = 0
   path.each(childPath => {
     const child = childPath.getValue()
     let isObject
@@ -2885,11 +2917,20 @@ function printArrayItems(path, options, printPath, print) {
     printedElements.push(concat(separatorParts))
     printedElements.push(print(childPath))
 
+    const isLast = child === last
+    const consecutiveIf =
+      child &&
+      !isLast &&
+      isIf(child) &&
+      elements[index + 1] &&
+      isIf(elements[index + 1])
     separatorParts = [
-      ifBreak(isObject ? dedent(concat([line, ','])) : '', ','),
+      ifBreak(
+        isObject || consecutiveIf ? dedent(concat([line, ','])) : '',
+        ','
+      ),
       line,
     ]
-    const isLast = child === last
     const shouldBreakArray =
       !isLast && child && child.type === 'FunctionExpression'
     if (shouldBreakArray) {
@@ -2898,6 +2939,7 @@ function printArrayItems(path, options, printPath, print) {
     if (child && util.isNextLineEmpty(options.originalText, child, locEnd)) {
       separatorParts.push(line)
     }
+    index++
   }, printPath)
 
   return concat(printedElements)
