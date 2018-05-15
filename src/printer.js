@@ -1546,7 +1546,10 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
       })
     ) {
       breakingParentCount++
-    } else if (parent.type === 'ObjectExpression') {
+    } else if (
+      parent.type === 'ObjectExpression' ||
+      parent.type === 'UnaryExpression'
+    ) {
       // continue
     } else {
       return false
@@ -2494,9 +2497,11 @@ function printArgumentsList(path, options, print) {
     ])
     const somePrintedArgumentsWillBreak = printedArguments.some(willBreak)
     const lastAlwaysBreaks = willBreak(util.getLast(printedExpanded))
+    let firstBreakingIndex = 1
     const conditionalGroups = [breakLast, allArgsBrokenOut()]
     if (!lastAlwaysBreaks) {
       conditionalGroups.unshift(dontBreakAny)
+      firstBreakingIndex++
     }
     groupLastPrinted = concat([
       somePrintedArgumentsWillBreak && parent.type !== 'AssignmentExpression'
@@ -2505,7 +2510,7 @@ function printArgumentsList(path, options, print) {
       conditionalGroup(conditionalGroups, {
         shouldBreak,
         visible: true,
-        firstBreakingIndex: 2,
+        firstBreakingIndex,
       }),
     ])
     if (!shouldGroupLast.ifParentBreaks) {

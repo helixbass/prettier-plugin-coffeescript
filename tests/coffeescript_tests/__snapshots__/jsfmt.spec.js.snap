@@ -4987,7 +4987,7 @@ test "basic \`switch\`", ->
 
   ok func 2
   ok func 6
-  ok !func(3)
+  ok !func 3
   eq func(8), undefined
 
 test "Ensure that trailing switch elses don't get rewritten.", ->
@@ -11593,7 +11593,7 @@ test "soaked function invocation with generated functions", ->
   eq maybe(false, nonce)?(), undefined
 
 test "soaked constructor invocation", ->
-  eq 42, +new Number?(42)
+  eq 42, +new Number? 42
   eq undefined, new Other? 42
 
 test "soaked constructor invocations with caching and property access", ->
