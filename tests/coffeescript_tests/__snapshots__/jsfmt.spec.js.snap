@@ -8056,27 +8056,27 @@ test "#2297, Different behaviors on interpreting literal", ->
 
   xyzzy =
     e: 1
-    f:
-      foo
-        a: 1
-        b: 2
-      ,
-        one: 1
-        two: 2
-        three: 3
+    f: foo(
+      a: 1
+      b: 2
+    ,
+      one: 1
+      two: 2
+      three: 3
+    )
     g:
       a: 1
       b: 2
       c: foo 2, one: 1, two: 2, three: 3
       d: 3
     four: 4
-    h:
-      foo
-        one: 1
-        two: 2
-        three: three: three: 3
-      ,
-        2
+    h: foo(
+      one: 1
+      two: 2
+      three: three: three: 3
+    ,
+      2
+    )
 
   eq xyzzy.f.two, 2
   eq xyzzy.g.c.three, 3
@@ -8090,22 +8090,20 @@ test "#2715, Chained implicit calls", ->
   foo = first first one: 1
   eq foo.one, 1
 
-  bar =
-    first(
-      second
-        one: 1
-      ,
-        2
-    )
+  bar = first(
+    second
+      one: 1
+    ,
+      2
+  )
   eq bar, 2
 
-  baz =
-    first(
-      second
-        one: 1
-      ,
-        2
-    )
+  baz = first(
+    second
+      one: 1
+    ,
+      2
+  )
   eq baz, 2
 
 test "Implicit calls and new", ->
@@ -8115,22 +8113,21 @@ test "Implicit calls and new", ->
   eq bar.x, 1
 
   third = (x, y, z) -> z
-  baz =
-    first(
+  baz = first(
+    new foo(
       new foo(
-        new foo(
-          third
-            one: 1
-            two: 2
-          ,
-            1
-          ,
-            three: 3
-          ,
-            2
-        )
+        third
+          one: 1
+          two: 2
+        ,
+          1
+        ,
+          three: 3
+        ,
+          2
       )
     )
+  )
   eq baz.x.x.three, 3
 
 test "Loose tokens inside of explicit call lists", ->
@@ -8382,12 +8379,12 @@ test "#5052: implicit call of class with no body", ->
   [shouldBeA] = f a, class A
   eq shouldBeA, a
 
-  [obj, klass, shouldBeA] =
-    f
-      b: 1
-    ,
-      class A
-      a
+  [obj, klass, shouldBeA] = f(
+    b: 1
+  ,
+    class A
+    a
+  )
   eq shouldBeA, a
 
 f class
@@ -9291,12 +9288,12 @@ test "Destructured parameter with default value, that itself has a default value
   draw = (
     { size = "big", coords = { x: 0, y: 0 }, radius = 25 } = {}
   ) -> "#{size}-#{coords.x}-#{coords.y}-#{radius}"
-  output =
-    draw
-      coords:
-        x: 18
-        y: 30
-      radius: 30
+  output = draw(
+    coords:
+      x: 18
+      y: 30
+    radius: 30
+  )
   eq output, "big-18-30-30"
 
 test "#4566: destructuring with nested default values", ->

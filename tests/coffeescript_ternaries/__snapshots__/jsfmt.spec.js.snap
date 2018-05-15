@@ -24,18 +24,12 @@ funnelSnapshotCard =
   else
     null
 
-room =
-  room.map (row, rowIndex) ->
-    row.map (col, colIndex) ->
-      if (
-        rowIndex is 0 or
-        colIndex is 0 or
-        rowIndex is height or
-        colIndex is width
-      )
-        1
-      else
-        0
+room = room.map (row, rowIndex) ->
+  row.map (col, colIndex) ->
+    if rowIndex is 0 or colIndex is 0 or rowIndex is height or colIndex is width
+      1
+    else
+      0
 
 `;
 

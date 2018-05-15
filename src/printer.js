@@ -2441,10 +2441,15 @@ function printArgumentsList(path, options, print) {
       isDoFunc(args[0]))
   const firstArgIsObject =
     args.length >= 1 && args[0].type === 'ObjectExpression'
-  const parensUnnecessary =
-    (shouldntBreak || firstArgIsObject) && parensOptional
+  const isRightSideOfAssignment =
+    (parent.type === 'AssignmentExpression' && node === parent.right) ||
+    (parent.type === 'ObjectProperty' && node === parent.value)
+
+  const unnecessary =
+    shouldntBreak || (firstArgIsObject && !isRightSideOfAssignment)
+  const parensUnnecessary = unnecessary && parensOptional
   const parensUnnecessaryIfParentBreaks =
-    (shouldntBreak || firstArgIsObject) && parensOptionalIfParentBreaks
+    unnecessary && parensOptionalIfParentBreaks
   const nonFinalArgs = args.slice(0, args.length - 1)
   const shouldBreak =
     args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
@@ -2685,7 +2690,10 @@ function printAssignment(
         rightName
       )) ||
     isDo(rightNode) ||
-    rightNode.type === 'NewExpression'
+    rightNode.type === 'NewExpression' ||
+    (rightNode.type === 'CallExpression' &&
+      (rightNode.callee.type === 'Identifier' ||
+        rightNode.callee.type === 'MemberExpression'))
 
   const printed = printAssignmentRight(
     rightNode,
