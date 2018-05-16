@@ -372,7 +372,7 @@ function printPathNoParens(path, options, print) {
       const parent = path.getParentNode()
       const parentParent = path.getParentNode(1)
       const isInsideParenthesis =
-        n !== parent.body && (isIf(parent) || parent.type === 'WhileStatement')
+        n === parent.test && (isIf(parent) || parent.type === 'WhileStatement')
 
       const {parts, breaks} = printBinaryishExpressions(
         path,
