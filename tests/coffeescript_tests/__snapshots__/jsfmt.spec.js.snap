@@ -1467,13 +1467,14 @@ test "#4787 destructuring of objects within arrays", ->
   [..., { a, b }] = arr
   eq a, 1
   eq b, arr[1].b
-  deepEqual
+  deepEqual(
     {
       a
       b
     }
   ,
     arr[1]
+  )
 
 test "destructuring assignment with splats", ->
   a = {}

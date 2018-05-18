@@ -14,3 +14,13 @@ computedDescriptionLines =
   (focused and not loading and descriptionLinesFocused) or descriptionLines
 
 `;
+
+exports[`breaking.coffee 1`] = `
+someVariableThatsGotALongName = not (someCondition or someOtherVeryVeryLongConition)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+someVariableThatsGotALongName = not (
+  someCondition or
+  someOtherVeryVeryLongConition
+)
+
+`;

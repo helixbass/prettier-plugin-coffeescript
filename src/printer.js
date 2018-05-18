@@ -385,6 +385,12 @@ function printPathNoParens(path, options, print) {
         return concat(parts)
       }
 
+      if (parent.type === 'UnaryExpression') {
+        return group(
+          concat([indent(concat([softline, concat(parts)])), softline])
+        )
+      }
+
       const shouldNotIndent =
         parent.type === 'ReturnStatement' ||
         (parent.type === 'JSXExpressionContainer' &&
@@ -1227,6 +1233,10 @@ function printObject(path, print, options) {
       isCallArgument(path, {last: 'orBeforeTrailingFunction'}))
   const shouldOmitBracesIfParentBreaks =
     !shouldOmitBraces && shouldOmitObjectBraces(path, {ifParentBreaks: true})
+  const shouldOmitBracesUnlessBreaks =
+    !shouldOmitBraces &&
+    !shouldOmitBracesIfParentBreaks &&
+    shouldOmitObjectBraces(path, {unlessBreaks: true})
   let dontIndent = false
   let trailingLine = true
   if (shouldOmitBraces && !shouldOmitBraces.indent) {
@@ -1283,7 +1293,9 @@ function printObject(path, print, options) {
       ? ifVisibleGroupBroke('', '{', {count: 1})
       : shouldOmitBraces
         ? ''
-        : '{',
+        : shouldOmitBracesUnlessBreaks
+          ? ifVisibleGroupBroke('{', '')
+          : '{',
     dontIndent === true
       ? concat(joinedProps)
       : dontIndent.ifParentBreaks
@@ -1305,7 +1317,9 @@ function printObject(path, print, options) {
         ? ifVisibleGroupBroke('', '}', {count: 1})
         : shouldOmitBraces
           ? ''
-          : '}',
+          : shouldOmitBracesUnlessBreaks
+            ? ifVisibleGroupBroke('}', '')
+            : '}',
     ]),
   ])
   return {
@@ -1448,12 +1462,23 @@ function objectRequiresBraces(path, {stackOffset = 0} = {}) {
   return false
 }
 
-function shouldOmitObjectBraces(path, {stackOffset = 0, ifParentBreaks} = {}) {
+function shouldOmitObjectBraces(
+  path,
+  {stackOffset = 0, ifParentBreaks, unlessBreaks} = {}
+) {
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
 
   if (objectRequiresBraces(path, {stackOffset})) {
     return false
+  }
+
+  if (isIf(parent, {postfix: true})) {
+    return false
+  }
+
+  if (parent.type === 'ReturnStatement' && isIf(grandparent, {postfix: true})) {
+    return unlessBreaks
   }
 
   let isRightmost
@@ -1502,6 +1527,7 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
   let trailingLine
   let breakingParentCount = 0
   while ((parent = path.getParentNode(stackOffset + parentLevel))) {
+    const grandparent = path.getParentNode(stackOffset + parentLevel + 1)
     if (
       isBlockLevel(prevParent, parent) ||
       (isIf(parent) &&
@@ -1558,6 +1584,7 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
       parent.type === 'ThrowStatement'
     ) {
       indent = true
+      trailingLine = grandparent.type !== 'BlockStatement'
     } else if (
       isCallArgument(path, {last: true, stackOffset: stackOffset + parentLevel})
     ) {
@@ -2437,16 +2464,20 @@ function printArgumentsList(path, options, print) {
     args.length === 1 &&
     (args[0].type === 'FunctionExpression' ||
       args[0].type === 'ArrayExpression' ||
-      // args[0].type === 'ObjectExpression' ||
+      (args[0].type === 'ObjectExpression' &&
+        path.call(objectRequiresBraces, 'arguments', '0')) ||
       isDoFunc(args[0]))
   const firstArgIsObject =
-    args.length >= 1 && args[0].type === 'ObjectExpression'
+    args.length >= 1 &&
+    args[0].type === 'ObjectExpression' &&
+    !path.call(objectRequiresBraces, 'arguments', '0')
   const isRightSideOfAssignment =
     (parent.type === 'AssignmentExpression' && node === parent.right) ||
     (parent.type === 'ObjectProperty' && node === parent.value)
+  const isIfTest = isIf(parent) && node === parent.test
 
   const unnecessary =
-    shouldntBreak || (firstArgIsObject && !isRightSideOfAssignment)
+    shouldntBreak || (firstArgIsObject && !isRightSideOfAssignment && !isIfTest)
   const parensUnnecessary = unnecessary && parensOptional
   const parensUnnecessaryIfParentBreaks =
     unnecessary && parensOptionalIfParentBreaks
@@ -2601,6 +2632,7 @@ function couldGroupArg(arg) {
 
 function shouldGroupLastArg(path, options) {
   const node = path.getValue()
+  const parent = path.getParentNode()
   const args = node.arguments
   const isRightmost = isRightmostInStatement(path, {ifParentBreaks: true})
   if (!isRightmost) {
@@ -2612,6 +2644,13 @@ function shouldGroupLastArg(path, options) {
   const lastArg = util.getLast(args)
   const penultimateArg = util.getPenultimate(args)
   const couldGroup = couldGroupArg(lastArg)
+  if (
+    isIf(parent) &&
+    node === parent.test &&
+    lastArg.type === 'ObjectExpression'
+  ) {
+    return false
+  }
   if (
     args.length > 1 &&
     couldGroup &&
@@ -2683,6 +2722,7 @@ function printAssignment(
     rightNode.type === 'TemplateLiteral' ||
     rightNode.type === 'FunctionExpression' ||
     rightNode.type === 'ClassExpression' ||
+    rightNode.type === 'UnaryExpression' ||
     rightNode.type === 'ObjectPattern' ||
     (rightNode.type === 'ObjectExpression' &&
       !path.call(

@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`implicit.coffee 1`] = `
+->
+  return aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong: object, isThisLongEnough: d
+
+->
+  return aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong: object, isThisLongEnough: d if condition
+
+aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong: object, isThisLongEnough: d if condition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+->
+  return
+    aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong: object
+    isThisLongEnough: d
+
+->
+  return {
+    aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong: object
+    isThisLongEnough: d
+  } if condition
+
+{
+  aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong: object
+  isThisLongEnough: d
+} if condition
+
+`;
