@@ -289,9 +289,24 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
         default:
           return false
       }
+    case 'RegExpLiteral':
+      return (
+        isAmbiguousRegex(node) &&
+        !(
+          parent.type === 'CallExpression' &&
+          parent.arguments.length &&
+          node === parent.arguments[0]
+        )
+      )
   }
 
   return false
+}
+
+function isAmbiguousRegex(node) {
+  return (
+    node.type === 'RegExpLiteral' && node.pattern && /^=?\s+/.test(node.pattern)
+  )
 }
 
 function genericPrint(path, options, print) {
@@ -1537,6 +1552,7 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
       (parent.type === 'SwitchStatement' &&
         prevParent === parent.discriminant) ||
       (parent.type === 'For' && prevParent === parent.source) ||
+      (parent.type === 'WhileStatement' && prevParent === parent.test) ||
       (parent.type === 'ArrayExpression' && parent.elements.length === 1)
     ) {
       return {indent, trailingLine}
@@ -2388,6 +2404,16 @@ function isFirstCallInChain(path, {stackOffset = 0} = {}) {
   )
 }
 
+function callParensNecessary(path, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+
+  return (
+    node.arguments.length &&
+    node.arguments[0].type === 'RegExpLiteral' &&
+    isAmbiguousRegex(node.arguments[0])
+  )
+}
+
 function callParensOptional(path, {stackOffset = 0} = {}) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
@@ -2448,7 +2474,9 @@ function printArgumentsList(path, options, print) {
   }, 'arguments')
 
   const parent = path.getParentNode()
+  const parensNecessary = callParensNecessary(path)
   const parensOptional =
+    !parensNecessary &&
     node.arguments.length &&
     (callParensOptional(path) ||
       (parent.type === 'CallExpression' &&
@@ -2458,7 +2486,9 @@ function printArgumentsList(path, options, print) {
         node === parent.right &&
         callParensOptional(path, {stackOffset: 1})))
   const parensOptionalIfParentBreaks =
-    !parensOptional && callParensOptionalIfParentBreaks(path)
+    !parensNecessary &&
+    !parensOptional &&
+    callParensOptionalIfParentBreaks(path)
 
   const shouldntBreak =
     args.length === 1 &&
