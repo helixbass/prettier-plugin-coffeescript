@@ -2,7 +2,9 @@
 
 const util = require('prettier/src/common/util')
 const embed = require('./embed')
-const {IDENTIFIER} = require('coffeescript/lib/coffeescript/lexer')
+const {
+  IDENTIFIER: LEADING_IDENTIFIER,
+} = require('coffeescript/lib/coffeescript/lexer')
 
 const {doc} = require('prettier')
 const docBuilders = doc.builders
@@ -272,6 +274,7 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           node.superClass) ||
         (parent.type === 'CallExpression' && parent.callee === node) ||
         (parent.type === 'MemberExpression' && parent.object === node) ||
+        (parent.type === 'UnaryExpression' && parent.operator === 'typeof') ||
         (isIf(parent) && parent.test === node)
       )
     case 'ObjectExpression':
@@ -473,7 +476,7 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ClassMethod':
       if (n.static) {
-        parts.push('@')
+        parts.push(n.staticClassName ? `${n.staticClassName}.` : '@')
       }
 
       parts = parts.concat(printObjectMethod(path, options, print))
@@ -509,7 +512,15 @@ function printPathNoParens(path, options, print) {
     }
     case 'SequenceExpression':
       return group(
-        concat([join(concat([';', line]), path.map(print, 'expressions'))])
+        concat([
+          indent(
+            concat([
+              softline,
+              join(concat([';', line]), path.map(print, 'expressions')),
+            ])
+          ),
+          softline,
+        ])
       )
     case 'ThisExpression':
       return n.shorthand ? '@' : 'this'
@@ -1553,6 +1564,11 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
         prevParent === parent.discriminant) ||
       (parent.type === 'For' && prevParent === parent.source) ||
       (parent.type === 'WhileStatement' && prevParent === parent.test) ||
+      (parent.type === 'ClassExpression' &&
+        prevParent === parent.superClass &&
+        ((parent.body && parent.body.body.length) ||
+          isBlockLevel(parent, grandparent))) ||
+      parent.type === 'SequenceExpression' ||
       (parent.type === 'ArrayExpression' && parent.elements.length === 1)
     ) {
       return {indent, trailingLine}
@@ -1647,7 +1663,8 @@ function printObjectMethod(path, options, print) {
   }
 
   parts.push(
-    ': ',
+    objMethod.operator === '=' ? ' =' : ':',
+    ' ',
     group(printFunctionParams(path, print, options)),
     objMethod.bound ? '=>' : '->',
     isEmptyBlock(objMethod.body) ? '' : concat([' ', path.call(print, 'body')])
@@ -2753,6 +2770,7 @@ function printAssignment(
     rightNode.type === 'FunctionExpression' ||
     rightNode.type === 'ClassExpression' ||
     rightNode.type === 'UnaryExpression' ||
+    rightNode.type === 'SequenceExpression' ||
     rightNode.type === 'ObjectPattern' ||
     (rightNode.type === 'ObjectExpression' &&
       !path.call(
@@ -2969,6 +2987,7 @@ function printPropertyKey(path, options, print) {
   return path.call(print, 'key')
 }
 
+const IDENTIFIER = new RegExp(`${LEADING_IDENTIFIER.source}$`)
 function isIdentifierName(str) {
   return IDENTIFIER.test(str)
 }

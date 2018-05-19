@@ -1,5 +1,5 @@
 - guard against generating " when string contains #{
-- adjust heredoc indent with surrounding indentation level
+- adjust heredoc/heregex indent with surrounding indentation level
 - preserve blank lines in switch cases?
 - can't generate a: b: c when the outer object might have following inline properties eg a: {b: c}, d: e can't generate a: b: c, d: e
   similarly for eg a: -> someCall arg, b: c it needs to either always break the object if a prop value has something that could be sketchy to follow with a , or it needs to know to parenthesize the -> function
