@@ -32,3 +32,4 @@
 - revisit bracketSpacing logic
 - nicely break/indent interpolated expressions that will themselves break, eg chains are ugly
 - should it preserve tab character inside regexp?
+- shouldGroupLast on heregex

@@ -308,7 +308,10 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
 
 function isAmbiguousRegex(node) {
   return (
-    node.type === 'RegExpLiteral' && node.pattern && /^=?\s+/.test(node.pattern)
+    node.type === 'RegExpLiteral' &&
+    node.pattern &&
+    /^=?\s+/.test(node.pattern) &&
+    node.delimiter !== '///'
   )
 }
 
@@ -572,7 +575,9 @@ function printPathNoParens(path, options, print) {
         ? ''
         : singleExpr &&
           (singleExpr.type === 'TaggedTemplateExpression' ||
-            singleExpr.type === 'TemplateLiteral')
+            (singleExpr.type === 'TemplateLiteral' &&
+              singleExpr.quasis.length &&
+              singleExpr.quasis[0].value.raw.indexOf('\n') >= 0))
           ? concat([' ', path.call(print, 'body', ...singleExprPath)])
           : concat([ifBreak('', ' '), path.call(print, 'body')])
 
@@ -1102,12 +1107,19 @@ function printPathNoParens(path, options, print) {
     case 'JSXIdentifier':
       return '' + n.name
     case 'JSXSpreadAttribute':
-      return concat(['{...', path.call(print, 'argument'), '}'])
+      return concat([
+        '{',
+        n.postfix ? '' : '...',
+        path.call(print, 'argument'),
+        n.postfix ? '...' : '',
+        '}',
+      ])
     case 'JSXExpressionContainer': {
       const parent = path.getParentNode()
 
       const shouldInlineButStillClosingLinebreak =
         n.expression.type === 'FunctionExpression' ||
+        n.expression.type === 'BlockStatement' ||
         (isJSXNode(parent) &&
           ((isIf(n.expression) && !n.expression.postfix) ||
             (isBinaryish(n.expression) &&
@@ -1384,6 +1396,8 @@ function printTemplateLiteral(path, print, {omitQuotes} = {}) {
         node.expressions[i].type === 'ConditionalExpression'
       ) {
         printed = concat([indent(concat([softline, printed])), softline])
+      } else if (node.expressions[i].type === 'BlockStatement') {
+        printed = concat([printed, softline])
       }
 
       // const aligned = addAlignmentToDoc(printed, indentSize, tabWidth)
@@ -2531,6 +2545,8 @@ function printArgumentsList(path, options, print) {
   const nonFinalArgs = args.slice(0, args.length - 1)
   const shouldBreak =
     args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
+  const closingLinebreakAnyway =
+    parensUnnecessary && parent.type === 'JSXExpressionContainer'
 
   const openingParen = parensUnnecessary
     ? ' '
@@ -2544,7 +2560,9 @@ function printArgumentsList(path, options, print) {
         ? ifBreak('(', ' ')
         : '('
   const closingParen = parensUnnecessary
-    ? ''
+    ? closingLinebreakAnyway
+      ? softline
+      : ''
     : parensOptionalIfParentBreaks
       ? ifVisibleGroupBroke(
           parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'),

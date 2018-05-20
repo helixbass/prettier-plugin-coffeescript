@@ -259,7 +259,8 @@ exports[`expression.coffee 1`] = `
   {items.map (item) ->
     <SomethingElse>
       <span />
-    </SomethingElse>}
+    </SomethingElse>
+  }
 </Something>
 
 <Something>
@@ -382,7 +383,8 @@ exports[`hug.coffee 1`] = `
           pattern={route.to}
           exactly={route.to is "/"}
           getComponent={routeES6Modules[route.value]}
-        />}
+        />
+      }
     </div>
   }
 </div>
@@ -396,7 +398,8 @@ exports[`hug.coffee 1`] = `
           pattern={route.to}
           exactly={route.to is "/"}
           getComponent={routeES6Modules[route.value]}
-        />}
+        />
+      }
     </div>
   }
 </div>
