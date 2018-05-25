@@ -1309,15 +1309,16 @@ function printObject(path, print, options) {
   const isNestedObject =
     node.type === 'ObjectExpression' &&
     props.length > 1 &&
+    props.find(({shorthand}) => !shorthand) &&
     parent.type === 'ObjectProperty' &&
     node === parent.value
   const isCallArg = props.length > 1 && isCallArgument(path)
-  const isNonTrailingCallArg =
-    isCallArg && !isCallArgument(path, {last: 'orBeforeTrailingFunction'})
+  // const isNonTrailingCallArg =
+  //   isCallArg && !isCallArgument(path, {last: 'orBeforeTrailingFunction'})
   const shouldBreak =
-    isClassBody || // || (shouldOmitBraces && n.properties.length > 1)
+    isClassBody || // (shouldOmitBraces && n.properties.length > 1)
     isNestedObject ||
-    isNonTrailingCallArg ||
+    // isNonTrailingCallArg ||
     (props.length > 1 &&
       props.find(
         ({value}) =>
@@ -2563,9 +2564,9 @@ function printArgumentsList(path, options, print) {
   const parensUnnecessary = unnecessary && parensOptional
   const parensUnnecessaryIfParentBreaks =
     unnecessary && parensOptionalIfParentBreaks
-  const nonFinalArgs = args.slice(0, args.length - 1)
-  const shouldBreak =
-    args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
+  // const nonFinalArgs = args.slice(0, args.length - 1)
+  const shouldBreak = false
+  // args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
   const closingLinebreakAnyway =
     parensUnnecessary && parent.type === 'JSXExpressionContainer'
 
