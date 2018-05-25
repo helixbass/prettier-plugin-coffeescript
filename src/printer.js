@@ -599,6 +599,19 @@ function printPathNoParens(path, options, print) {
         {shouldBreak}
       )
     }
+    case 'YieldExpression':
+      parts.push('yield')
+
+      if (n.delegate) {
+        parts.push(' from')
+      }
+      if (n.argument) {
+        parts.push(' ', path.call(print, 'argument'))
+      }
+
+      return concat(parts)
+    case 'AwaitExpression':
+      return concat(['await ', path.call(print, 'argument')])
     case 'ImportSpecifier':
       parts.push(path.call(print, 'imported'))
 
@@ -1646,7 +1659,9 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
       breakingParentCount++
     } else if (
       parent.type === 'ObjectExpression' ||
-      parent.type === 'UnaryExpression'
+      parent.type === 'UnaryExpression' ||
+      parent.type === 'YieldExpression' ||
+      parent.type === 'AwaitExpression'
     ) {
       // continue
     } else {
@@ -2789,6 +2804,8 @@ function printAssignment(
     rightNode.type === 'ClassExpression' ||
     rightNode.type === 'UnaryExpression' ||
     rightNode.type === 'SequenceExpression' ||
+    // (rightNode.type === 'For' && !rightNode.postfix) ||
+    // rightNode.type === 'SwitchStatement' ||
     rightNode.type === 'ObjectPattern' ||
     (rightNode.type === 'ObjectExpression' &&
       !path.call(
