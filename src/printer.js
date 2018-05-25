@@ -1309,7 +1309,7 @@ function printObject(path, print, options) {
   const shouldOmitBraces =
     shouldOmitObjectBraces(path) ||
     (!objectRequiresBraces(path) &&
-      isCallArgument(path, {last: 'orBeforeTrailingFunction'}))
+      isCallArgument(path, {beforeTrailingFunction: true}))
   const shouldOmitBracesIfParentBreaks =
     !shouldOmitBraces && shouldOmitObjectBraces(path, {ifParentBreaks: true})
   const shouldOmitBracesUnlessBreaks =
@@ -1361,14 +1361,19 @@ function printObject(path, print, options) {
   ) {
     dontIndent = {ifParentBreaks: true}
   }
+  const bracketSpacingLine = options.bracketSpacing ? line : softline
   const propsChunk = concat([
-    shouldOmitBraces || !options.bracketSpacing
+    shouldOmitBraces
       ? dontIndent
         ? ''
         : softline
       : shouldOmitBracesIfParentBreaks
-        ? ifVisibleGroupBroke('', line, {count: 1})
-        : line,
+        ? ifVisibleGroupBroke(
+            dontIndent.ifParentBreaks ? '' : softline,
+            bracketSpacingLine,
+            {count: 1}
+          )
+        : bracketSpacingLine,
     concat(joinedProps),
   ])
   const content = concat([
@@ -1547,10 +1552,18 @@ function objectRequiresBraces(path, {stackOffset = 0} = {}) {
   return false
 }
 
+function trailingObjectIsntOptions(callee) {
+  if (callee.type === 'Identifier' && callee.name === 'deepEqual') {
+    return true
+  }
+  return false
+}
+
 function shouldOmitObjectBraces(
   path,
   {stackOffset = 0, ifParentBreaks, unlessBreaks} = {}
 ) {
+  const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
 
@@ -1564,6 +1577,14 @@ function shouldOmitObjectBraces(
 
   if (parent.type === 'ReturnStatement' && isIf(grandparent, {postfix: true})) {
     return unlessBreaks
+  }
+
+  if (
+    parent.type === 'CallExpression' &&
+    node !== parent.callee &&
+    trailingObjectIsntOptions(parent.callee)
+  ) {
+    return ifParentBreaks
   }
 
   let isRightmost
@@ -1676,7 +1697,10 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
       indent = true
       trailingLine = grandparent.type !== 'BlockStatement'
     } else if (
-      isCallArgument(path, {last: true, stackOffset: stackOffset + parentLevel})
+      isCallArgument(path, {
+        last: true,
+        stackOffset: stackOffset + parentLevel,
+      })
     ) {
       indent = false
       trailingLine = false
@@ -2407,7 +2431,10 @@ function isBlockLevel(node, parent) {
   )
 }
 
-function isCallArgument(path, {nonLast, last, stackOffset = 0} = {}) {
+function isCallArgument(
+  path,
+  {nonLast, last, beforeTrailingFunction, stackOffset = 0} = {}
+) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
 
@@ -2423,17 +2450,19 @@ function isCallArgument(path, {nonLast, last, stackOffset = 0} = {}) {
   if (nonLast) {
     return node !== getLast(args)
   }
+  const isBeforeTrailingFunction =
+    node === getPenultimate(args) && getLast(args).type === 'FunctionExpression'
   if (last) {
     if (node === getLast(args)) {
       return true
     }
     if (last === 'orBeforeTrailingFunction') {
-      return (
-        node === getPenultimate(args) &&
-        getLast(args).type === 'FunctionExpression'
-      )
+      return isBeforeTrailingFunction
     }
     return false
+  }
+  if (beforeTrailingFunction) {
+    return isBeforeTrailingFunction
   }
   return true
 }

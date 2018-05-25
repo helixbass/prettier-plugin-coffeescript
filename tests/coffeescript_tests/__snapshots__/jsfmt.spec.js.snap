@@ -660,7 +660,7 @@ test "array elisions nested destructuring", ->
     [{}, {}, { z: 1, w: [1, 2, 4], p: 3, q: 4 }, {}, {}]
   ]
   [, d, , [, , { w }]] = aobj
-  deepEqual d, x: 2
+  deepEqual d, { x: 2 }
   arrayEq w, [1, 2, 4]
 
 test "array splat expansions with assignments", ->
@@ -18540,7 +18540,7 @@ test "#4798 destructuring of objects with splat within arrays", ->
   arr = [1, { a: 1, b: 2 }]
   [..., { a, r... }] = arr
   eq a, 1
-  deepEqual r, b: 2
+  deepEqual r, { b: 2 }
   [b, { q... }] = arr
   eq b, 1
   deepEqual q, arr[1]
@@ -18597,15 +18597,15 @@ test "destructuring assignment with splat with default value", ->
   c = val: 1
   { a: { b... } = c } = obj
 
-  deepEqual b, val: 1
+  deepEqual b, { val: 1 }
 
 test "destructuring assignment with multiple splats in different objects", ->
   obj =
     a: val: 1
     b: val: 2
   { a: { a... }, b: { b... } } = obj
-  deepEqual a, val: 1
-  deepEqual b, val: 2
+  deepEqual a, { val: 1 }
+  deepEqual b, { val: 2 }
 
   o =
     props:
@@ -18615,14 +18615,14 @@ test "destructuring assignment with multiple splats in different objects", ->
       s: 6
   { p: { m, q..., t = { obj... } }, r... } = o.props
   eq m, o.props.p.m
-  deepEqual r, s: 6
-  deepEqual q, n: 1
+  deepEqual r, { s: 6 }
+  deepEqual q, { n: 1 }
   deepEqual t, obj
 
   @props = o.props
   { p: { m }, r... } = @props
   eq m, @props.p.m
-  deepEqual r, s: 6
+  deepEqual r, { s: 6 }
 
   { p: { m }, r... } = {
     o.props...
@@ -18631,8 +18631,8 @@ test "destructuring assignment with multiple splats in different objects", ->
   eq m, 9
 
   { a: { a... }, b: { b... } } = obj
-  deepEqual a, val: 1
-  deepEqual b, val: 2
+  deepEqual a, { val: 1 }
+  deepEqual b, { val: 2 }
 
 test "destructuring assignment with dynamic keys and splats", ->
   i = 0
@@ -18643,24 +18643,24 @@ test "destructuring assignment with dynamic keys and splats", ->
 
   eq a, "a"
   eq i, 1
-  deepEqual b, 2: "b"
+  deepEqual b, { 2: "b" }
 
 test "destructuring assignment with objects and splats: Babel tests", ->
   { x, y, z... } = x: 1, y: 2, a: 3, b: 4
   eq x, 1
   eq y, 2
-  deepEqual z, a: 3, b: 4
+  deepEqual z, { a: 3, b: 4 }
 
   n = { x, y, z... }
-  deepEqual n, x: 1, y: 2, a: 3, b: 4
+  deepEqual n, { x: 1, y: 2, a: 3, b: 4 }
 
   { x, y, z... } = x: 1, y: 2, a: 3, b: 4
   eq x, 1
   eq y, 2
-  deepEqual z, a: 3, b: 4
+  deepEqual z, { a: 3, b: 4 }
 
   n = { x, y, z... }
-  deepEqual n, x: 1, y: 2, a: 3, b: 4
+  deepEqual n, { x: 1, y: 2, a: 3, b: 4 }
 
 test "deep destructuring assignment with objects: ES2015", ->
   a1 = {}
@@ -18699,19 +18699,19 @@ test "deep destructuring assignment with defaults: ES2015", ->
   i = some: "prop"
   { a..., b: { c, d... }, e: { f: hello, g: { h... } = i } = j } = obj
 
-  deepEqual a, foo: "bar"
+  deepEqual a, { foo: "bar" }
   eq c, 1
-  deepEqual d, baz: "qux"
+  deepEqual d, { baz: "qux" }
   eq hello, "world"
-  deepEqual h, some: "prop"
+  deepEqual h, { some: "prop" }
 
   { a..., b: { c, d... }, e: { f: hello, g: { h... } = i } = j } = obj
 
-  deepEqual a, foo: "bar"
+  deepEqual a, { foo: "bar" }
   eq c, 1
-  deepEqual d, baz: "qux"
+  deepEqual d, { baz: "qux" }
   eq hello, "world"
-  deepEqual h, some: "prop"
+  deepEqual h, { some: "prop" }
 
 test "object spread properties: ES2015", ->
   obj = a: 1, b: 2, c: 3, d: 4, e: 5
@@ -18745,7 +18745,7 @@ test "object spread properties: ES2015", ->
 
   (({ a, b, r... }) ->
     eq 1, a
-    deepEqual r, c: 3, d: 44, e: 55
+    deepEqual r, { c: 3, d: 44, e: 55 }
   ) { obj2..., d: 44, e: 55 }
 
   obj =
@@ -18763,7 +18763,7 @@ test "object spread properties: ES2015", ->
 
   (({ a, b, r... }) ->
     eq 1, a
-    deepEqual r, c: 3, d: 44, e: 55
+    deepEqual r, { c: 3, d: 44, e: 55 }
   ) { obj2..., d: 44, e: 55 }
 
   obj4 = { a: 10, obj.c... }
@@ -18826,12 +18826,12 @@ test "object spread properties: ES2015", ->
 
   obj = a: b: c: d: e: {}
   obj9 = { a: 1, obj.a.b.c..., g: 3 }
-  deepEqual obj9.d, e: {}
+  deepEqual obj9.d, { e: {} }
 
   a = "a"
   c = "c"
   obj9 = { a: 1, obj[a].b[c]..., g: 3 }
-  deepEqual obj9.d, e: {}
+  deepEqual obj9.d, { e: {} }
 
   obj9 = { a: 1, obj.a["b"].c["d"]..., g: 3 }
   deepEqual obj9["e"], {}
@@ -18853,19 +18853,19 @@ test "rest element destructuring in function definition", ->
 
   (({ a, b, r... }) ->
     eq 1, a
-    eq 2, b, deepEqual r, c: 3, d: 4, e: 5
+    eq 2, b, deepEqual r, { c: 3, d: 4, e: 5 }
   ) obj
 
   (({ a: p, b, r... }, q) ->
     eq p, 1
     eq q, 9
-    deepEqual r, c: 3, d: 4, e: 5
+    deepEqual r, { c: 3, d: 4, e: 5 }
   ) { a: 1, b: 2, c: 3, d: 4, e: 5 }, 9
 
   (({ a: p, b, r... }, q) ->
     eq p, 1
     eq q, 9
-    deepEqual r, c: 3, d: 4, e: 5
+    deepEqual r, { c: 3, d: 4, e: 5 }
   ) { a: 1, b: 2, c: 3, d: 4, e: 5 }, 9
 
   a1 = {}
@@ -18887,7 +18887,7 @@ test "rest element destructuring in function definition", ->
     eq a1, w
     eq bb, b1
     eq r2.b, undefined
-    deepEqual r1, e: c1, f: d1
+    deepEqual r1, { e: c1, f: d1 }
     deepEqual r2.b2, { b1, c1 }
   ) obj1
 
@@ -18903,7 +18903,7 @@ test "rest element destructuring in function definition", ->
 
   (({ a, r... } = {}) ->
     eq a, 1
-    deepEqual r, b: 2, c: 3
+    deepEqual r, { b: 2, c: 3 }
   ) a: 1, b: 2, c: 3
 
   f = ({ a, r... } = {}) -> [a, r]
@@ -20259,32 +20259,32 @@ test "object keys with interpolations: simple cases", ->
   eq obj[5], "5"
 test "object keys with interpolations: commas in implicit object", ->
   obj = "#{"a"}": 1, b: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = a: 1, "#{"b"}": 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = "#{"a"}": 1, "#{"b"}": 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
 
 test "object keys with interpolations: commas in explicit object", ->
   obj = "#{"a"}": 1, b: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = a: 1, "#{"b"}": 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = "#{"a"}": 1, "#{"b"}": 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
 
 test "object keys with interpolations: commas after key with interpolation", ->
   obj = "#{"a"}": yes
   eq obj.a, yes
   obj = "#{"a"}": 1, "#{"b"}": 2, "#{"c"}": 3
-  deepEqual obj, a: 1, b: 2, c: 3
+  deepEqual obj, { a: 1, b: 2, c: 3 }
   obj = "#{"a"}": 1, "#{"b"}": 2, "#{"c"}": 3
-  deepEqual obj, a: 1, b: 2, c: 3
+  deepEqual obj, { a: 1, b: 2, c: 3 }
   obj = "#{"a"}": 1, "#{"b"}": 2, "#{"c"}": 3, "#{"d"}": 4
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4 }
 
 test "object keys with interpolations: key with interpolation mixed with \`@prop\`", ->
-  deepEqual (-> { @a, "#{"b"}": 2 }).call(a: 1), a: 1, b: 2
+  deepEqual (-> { @a, "#{"b"}": 2 }).call(a: 1), { a: 1, b: 2 }
 
 test "object keys with interpolations: evaluate only once", ->
   count = 0
@@ -20306,11 +20306,11 @@ test "object keys with interpolations: evaluation order", ->
     "#{"f"}": arr.push 6
     g: arr.push 7
   arrayEq arr, [1..7]
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7 }
 
 test "object keys with interpolations: object starting with dynamic key", ->
   obj = "#{"a"}": 1, b: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
 
 test "object keys with interpolations: comments in implicit object", ->
   obj =
@@ -20320,7 +20320,7 @@ test "object keys with interpolations: comments in implicit object", ->
     c: 3
     d: 4
     "#{"e"}": 5
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4, e: 5
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
   obj =
     "#{"a"}": 1
@@ -20329,7 +20329,7 @@ test "object keys with interpolations: comments in implicit object", ->
     c: 3
     d: 4
     "#{"e"}": 5
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4, e: 5
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
 test "object keys with interpolations: more complicated case", ->
   obj =
@@ -20337,7 +20337,7 @@ test "object keys with interpolations: more complicated case", ->
       """
         #{"nested"}
       """: 123: 456
-  deepEqual obj, interpolated: nested: 123: 456
+  deepEqual obj, { interpolated: nested: 123: 456 }
 
 test "#4324: Shorthand after interpolated key", ->
   a = 2
@@ -20360,32 +20360,32 @@ test "computed property keys: simple cases", ->
 
 test "computed property keys: commas in implicit object", ->
   obj = ["a"]: 1, b: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = a: 1, ["b"]: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = ["a"]: 1, ["b"]: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
 
 test "computed property keys: commas in explicit object", ->
   obj = ["a"]: 1, b: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = a: 1, ["b"]: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
   obj = ["a"]: 1, ["b"]: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
 
 test "computed property keys: commas after key with interpolation", ->
   obj = ["a"]: yes
   eq obj.a, yes
   obj = ["a"]: 1, ["b"]: 2, ["c"]: 3
-  deepEqual obj, a: 1, b: 2, c: 3
+  deepEqual obj, { a: 1, b: 2, c: 3 }
   obj = ["a"]: 1, ["b"]: 2, ["c"]: 3
-  deepEqual obj, a: 1, b: 2, c: 3
+  deepEqual obj, { a: 1, b: 2, c: 3 }
   obj = ["a"]: 1, ["b"]: 2, ["c"]: 3, ["d"]: 4
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4 }
 
 test "computed property keys: key with interpolation mixed with \`@prop\`", ->
-  deepEqual (-> { @a, ["b"]: 2 }).call(a: 1), a: 1, b: 2
+  deepEqual (-> { @a, ["b"]: 2 }).call(a: 1), { a: 1, b: 2 }
 
 test "computed property keys: evaluate only once", ->
   count = 0
@@ -20407,11 +20407,11 @@ test "computed property keys: evaluation order", ->
     ["f"]: arr.push 6
     g: arr.push 7
   arrayEq arr, [1..7]
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7 }
 
 test "computed property keys: object starting with dynamic key", ->
   obj = ["a"]: 1, b: 2
-  deepEqual obj, a: 1, b: 2
+  deepEqual obj, { a: 1, b: 2 }
 
 test "computed property keys: comments in implicit object", ->
   obj =
@@ -20421,7 +20421,7 @@ test "computed property keys: comments in implicit object", ->
     c: 3
     d: 4
     ["e"]: 5
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4, e: 5
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
   obj =
     ["a"]: 1
@@ -20430,28 +20430,28 @@ test "computed property keys: comments in implicit object", ->
     c: 3
     d: 4
     ["e"]: 5
-  deepEqual obj, a: 1, b: 2, c: 3, d: 4, e: 5
+  deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
 test "computed property keys: more complicated case", ->
   obj = ["interpolated"]: ["nested"]: 123: 456
-  deepEqual obj, interpolated: nested: 123: 456
+  deepEqual obj, { interpolated: nested: 123: 456 }
 
 test "computed property keys: empty array as key", ->
   o1 = { [[]] }
-  deepEqual o1, [[]]: []
+  deepEqual o1, { [[]]: [] }
   arrayEq o1[[]], []
   o2 = [[]]: 1
-  deepEqual o2, [[]]: 1
+  deepEqual o2, { [[]]: 1 }
   eq o2[[]], 1
   o3 = [[]]: 1
-  deepEqual o3, [[]]: 1
+  deepEqual o3, { [[]]: 1 }
   eq o3[[]], 1
   o4 = a: 1, [[]]: 2
-  deepEqual o4, a: 1, [[]]: 2
+  deepEqual o4, { a: 1, [[]]: 2 }
   eq o4.a, 1
   eq o4[[]], 2
   o5 = a: 1, [[]]: 2
-  deepEqual o5, a: 1, [[]]: 2
+  deepEqual o5, { a: 1, [[]]: 2 }
   eq o5.a, 1
   eq o5[[]], 2
 
@@ -20492,7 +20492,7 @@ test "computed property keys: examples from developer.mozilla.org (Object initia
   param = "size"
   config =
     [param]: 12, ["mobile" + param.charAt(0).toUpperCase() + param.slice(1)]: 4
-  deepEqual config, size: 12, mobileSize: 4
+  deepEqual config, { size: 12, mobileSize: 4 }
 
 test "computed property keys: [Symbol.iterator]", ->
   obj =
