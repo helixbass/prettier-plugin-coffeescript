@@ -38,3 +38,10 @@
   vs
   a:
     b if c
+- would be nice if object as rhs of assignment broke if assignment broke, eg
+  a =
+    b: c
+    d: e
+  instead of
+  a =
+    b: c, d: e

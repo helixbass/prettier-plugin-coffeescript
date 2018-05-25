@@ -20102,7 +20102,9 @@ test "Implicit objects, functions and arrays", ->
     )
     2
   ,
-    one: 1, two: 2, three: first(second (-> no), -> 3)
+    one: 1
+    two: 2
+    three: first second (-> no), -> 3
   ,
     3
     4
@@ -20167,7 +20169,10 @@ test "#1871: Special case for IMPLICIT_END in the middle of an implicit object",
 
   eq result, "result"
 
-  result = ident one: 1, two: 2 for i in [1..3]
+  result = ident(
+    one: 1
+    two: 2 for i in [1..3]
+  )
 
   eq result.two.join(" "), "2 2 2"
 
@@ -20176,11 +20181,11 @@ test "#1871: implicit object closed by IMPLICIT_END in implicit returns", ->
     { a: 1 } if no
   eq ob, undefined
 
-  func = -> key: i for i in [1, 2, 3]
+  func = -> key: (i for i in [1, 2, 3])
 
   eq func().key.join(" "), "1 2 3"
 
-  func = -> key: i for i in [1, 2, 3]
+  func = -> key: (i for i in [1, 2, 3])
 
   eq func().key.join(" "), "1 2 3"
 
@@ -20248,9 +20253,9 @@ test "object keys with interpolations: simple cases", ->
   eq obj.a, yes
   obj = "#{a}": yes
   eq obj.a, yes
-  obj = [(ref = "#{a}")]: ref
+  obj = { "#{a}" }
   eq obj.a, "a"
-  obj = [(ref1 = "#{5}")]: ref1
+  obj = { "#{5}" }
   eq obj[5], "5"
 test "object keys with interpolations: commas in implicit object", ->
   obj = "#{"a"}": 1, b: 2
@@ -20286,7 +20291,7 @@ test "object keys with interpolations: evaluate only once", ->
   a = ->
     count++
     "a"
-  obj = [(ref = "#{a()}")]: ref
+  obj = { "#{a()}" }
   eq obj.a, "a"
   eq count, 1
 
@@ -20346,11 +20351,11 @@ test "computed property keys: simple cases", ->
   eq obj.a, yes
   obj = [a]: yes
   eq obj.a, yes
-  obj = [a]: a
+  obj = { [a] }
   eq obj.a, "a"
-  obj = 5: 5
+  obj = { [5] }
   eq obj[5], 5
-  obj = "5": "5"
+  obj = { ["5"] }
   eq obj["5"], "5"
 
 test "computed property keys: commas in implicit object", ->
@@ -20387,7 +20392,7 @@ test "computed property keys: evaluate only once", ->
   a = ->
     count++
     "a"
-  obj = [(ref = a())]: ref
+  obj = { [a()] }
   eq obj.a, "a"
   eq count, 1
 
@@ -20432,7 +20437,7 @@ test "computed property keys: more complicated case", ->
   deepEqual obj, interpolated: nested: 123: 456
 
 test "computed property keys: empty array as key", ->
-  o1 = [(ref = [])]: ref
+  o1 = { [[]] }
   deepEqual o1, [[]]: []
   arrayEq o1[[]], []
   o2 = [[]]: 1
@@ -20458,15 +20463,15 @@ test "computed property keys: shorthand after computed property key", ->
 
 test "computed property keys: shorthand computed property key", ->
   a = "b"
-  o = [a]: a
+  o = { [a] }
   p = { a }
-  r = a: "a"
+  r = { ["a"] }
   eq o.b, "b"
   eq p.a, o.b
   eq r.a, "a"
 
   foo = -> "a"
-  obj = [(ref = foo())]: ref
+  obj = { [foo()] }
   eq obj.a, "a"
 
 test "computed property keys: arrays", ->
@@ -20536,7 +20541,7 @@ test "#4564: indent should close implicit object", ->
   eq g, 3
 
   h = null
-  if a: i for i in [1, 2, 3]
+  if a: (i for i in [1, 2, 3])
     h = 4
   eq h, 4
 
@@ -20550,11 +20555,18 @@ test "#4544: Postfix conditionals in first line of implicit object literals", ->
 
   f = (x) -> x
 
-  three = foo: f bar: 42 if yes, baz: 1337
+  three =
+    foo: f(
+      bar: 42 if yes
+      baz: 1337
+    )
   eq 42, three.foo.bar
   eq 1337, three.foo.baz
 
-  four = f foo: { bar: 42 } if yes, baz: 1337
+  four = f(
+    foo: { bar: 42 } if yes
+    baz: 1337
+  )
   eq 42, four.foo.bar
   eq 1337, four.baz
 
@@ -20564,7 +20576,10 @@ test "#4544: Postfix conditionals in first line of implicit object literals", ->
 
   a = null
   _alert = (arg) -> a = arg
-  _alert val3: "works" if true, val: "hello", val2: "all good"
+  _alert
+    val3: "works" if true
+    val: "hello"
+    val2: "all good"
   eq a.val2, "all good"
 
 test "#4579: Postfix for/while/until in first line of implicit object literals", ->
@@ -20589,7 +20604,10 @@ test "#4579: Postfix for/while/until in first line of implicit object literals",
   arrayEq ["ac", "bc"], three.foo.bar2
   eq 1337, three.foo.baz
 
-  four = f foo: { "bar_#{x}": x } for x of a: 1, b: 2, baz: 1337
+  four = f(
+    foo: { "bar_#{x}": x } for x of a: 1, b: 2
+    baz: 1337
+  )
   eq "a", four.foo[0].bar_a
   eq "b", four.foo[1].bar_b
   eq 1337, four.baz

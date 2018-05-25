@@ -42,6 +42,7 @@ function isStatement(node) {
 
 function pathNeedsParens(path, {stackOffset = 0} = {}) {
   const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
   if (!parent) {
     return false
   }
@@ -207,6 +208,14 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
         case 'MemberExpression':
           return true
 
+        case 'ObjectProperty':
+          if (!node.postfix) {
+            return false
+          }
+          if (grandparent.properties.length === 1) {
+            return true
+          }
+          return {unlessParentBreaks: true}
         case 'NewExpression':
         case 'CallExpression':
           return parent.callee === node || node.postfix
@@ -225,6 +234,14 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           return parent.callee === node || node.postfix
         case 'AssignmentExpression':
           return node.postfix
+        case 'ObjectProperty':
+          if (!node.postfix) {
+            return false
+          }
+          if (grandparent.properties.length === 1) {
+            return true
+          }
+          return {unlessParentBreaks: true}
         case 'ReturnStatement':
         case 'MemberExpression':
         case 'SpreadElement':
@@ -457,6 +474,10 @@ function printPathNoParens(path, options, print) {
     case 'ObjectProperty':
       if (n.shorthand) {
         parts.push(path.call(print, 'value'))
+        if (n.computed) {
+          parts.unshift('[')
+          parts.push(']')
+        }
       } else {
         let printedLeft
         if (n.computed) {
@@ -1325,9 +1346,12 @@ function printObject(path, print, options) {
           value &&
           ((value.type === 'ObjectExpression' &&
             value.properties.length >= 1) ||
-            value.type === 'FunctionExpression')
+            value.type === 'FunctionExpression' ||
+            (value.type === 'ConditionalExpression' && value.postfix) ||
+            (value.type === 'For' && value.postfix))
       ))
-  const shouldBreakIfParentBreaks = isCallArg
+  const shouldBreakIfParentBreaks =
+    isCallArg || (props.length > 1 && parent.type === 'ArrayExpression')
   if (shouldOmitBraces && (isClassBody || isNestedObject)) {
     dontIndent = true
   }
