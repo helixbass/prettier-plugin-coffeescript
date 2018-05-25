@@ -99,7 +99,7 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           )
 
         case 'MemberExpression':
-          return parent.object === node
+          return parent.object === node && node.operator !== 'do'
 
         case 'TaggedTemplateExpression':
           return true
@@ -563,6 +563,7 @@ function printPathNoParens(path, options, print) {
       ])
     case 'FunctionExpression': {
       const parent = path.getParentNode()
+      const grandparent = path.getParentNode(1)
       parts.push(group(printFunctionParams(path, print, options)))
 
       parts.push(n.bound ? '=>' : '->')
@@ -586,15 +587,21 @@ function printPathNoParens(path, options, print) {
       // singleExpr.type === 'FunctionExpression' ||
       // grandparent.type === 'For'
       const needsParens = pathNeedsParens(path)
+      const isChainedDoIife =
+        isDo(parent) &&
+        grandparent.type === 'MemberExpression' &&
+        parent === grandparent.object
       return group(
         concat([
           concat(parts),
           body,
-          needsParens
-            ? needsParens.unlessParentBreaks
-              ? ifVisibleGroupBroke('', softline)
-              : softline
-            : '',
+          isChainedDoIife
+            ? softline
+            : needsParens
+              ? needsParens.unlessParentBreaks
+                ? ifVisibleGroupBroke('', softline)
+                : softline
+              : '',
         ]),
         {shouldBreak}
       )
@@ -1612,10 +1619,9 @@ function isRightmostInStatement(path, {stackOffset = 0, ifParentBreaks} = {}) {
         }) ||
         parent.type === 'ArrayExpression' ||
         (isChainableCall(prevParent) &&
-          !followedByComputedAccess(path, {
-            stackOffset: stackOffset + parentLevel,
-          }) &&
-          parent.type === 'MemberExpression') ||
+          parent.type === 'MemberExpression' &&
+          grandparent.type === 'CallExpression' &&
+          parent === grandparent.callee) ||
         (isFirstCallInChain(path, {
           stackOffset: stackOffset + parentLevel,
         }) &&
@@ -2700,7 +2706,8 @@ function couldGroupArg(arg) {
   if (
     (arg.type === 'ObjectExpression' && arg.properties.length > 0) ||
     (arg.type === 'ArrayExpression' && arg.elements.length > 0) ||
-    arg.type === 'FunctionExpression'
+    arg.type === 'FunctionExpression' ||
+    isDoFunc(arg)
   ) {
     return true
   }
@@ -2723,7 +2730,7 @@ function shouldGroupLastArg(path, options) {
   }
   const lastArg = util.getLast(args)
   const penultimateArg = util.getPenultimate(args)
-  const couldGroup = couldGroupArg(lastArg)
+  const couldGroup = lastArg && couldGroupArg(lastArg)
   if (
     isIf(parent) &&
     node === parent.test &&
