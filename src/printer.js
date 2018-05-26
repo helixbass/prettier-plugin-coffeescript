@@ -184,6 +184,7 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
         parent.type === 'AssignmentExpression' ||
         parent.type === 'ExportDefaultDeclaration' ||
         parent.type === 'ExportNamedDeclaration' ||
+        isDo(parent) ||
         (parent.type === 'ConditionalExpression' &&
           parent.postfix &&
           node === parent.consequent)
@@ -289,7 +290,10 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
         (parent.type === 'BinaryExpression' &&
           parent.left === node &&
           node.superClass) ||
-        (parent.type === 'CallExpression' && parent.callee === node) ||
+        ((parent.type === 'CallExpression' ||
+          parent.type === 'NewExpression') &&
+          parent.callee === node) ||
+        (isClass(parent) && parent.superClass === node) ||
         (parent.type === 'MemberExpression' && parent.object === node) ||
         (parent.type === 'UnaryExpression' && parent.operator === 'typeof') ||
         (isIf(parent) && parent.test === node)
@@ -597,9 +601,7 @@ function printPathNoParens(path, options, print) {
         ? ''
         : singleExpr &&
           (singleExpr.type === 'TaggedTemplateExpression' ||
-            (singleExpr.type === 'TemplateLiteral' &&
-              singleExpr.quasis.length &&
-              singleExpr.quasis[0].value.raw.indexOf('\n') >= 0))
+            isLinebreakingTemplateLiteral(singleExpr))
           ? concat([' ', path.call(print, 'body', ...singleExprPath)])
           : concat([ifBreak('', ' '), path.call(print, 'body')])
 
@@ -1275,9 +1277,19 @@ function printPathNoParens(path, options, print) {
       return join(literalline, n.value.raw.split(/\r?\n/g))
     case 'TemplateLiteral':
       return printTemplateLiteral(path, print)
+    case 'EmptyInterpolation':
+      return ''
     case 'TaggedTemplateExpression':
       return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
   }
+}
+
+function isLinebreakingTemplateLiteral(node) {
+  return (
+    node.type === 'TemplateLiteral' &&
+    node.quasis.length &&
+    node.quasis[0].value.raw.indexOf('\n') >= 0
+  )
 }
 
 function printObject(path, print, options) {
@@ -1418,6 +1430,10 @@ function printObject(path, print, options) {
       shouldBreakIfVisibleGroupBroke: shouldBreakIfParentBreaks,
     },
   }
+}
+
+function isClass(node) {
+  return node.type === 'ClassExpression' || node.type === 'ClassDeclaration'
 }
 
 function printTemplateLiteral(path, print, {omitQuotes} = {}) {
@@ -1772,6 +1788,9 @@ function printClass(path, options, print) {
   }
 
   parts.push(path.call(print, 'body'))
+  if (pathNeedsParens(path) && n.body && n.body.body && n.body.body.length) {
+    parts.push(hardline)
+  }
 
   return parts
 }
@@ -2513,11 +2532,20 @@ function isFirstCallInChain(path, {stackOffset = 0} = {}) {
 function callParensNecessary(path, {stackOffset = 0} = {}) {
   const node = path.getParentNode(stackOffset - 1)
 
-  return (
+  if (
     node.arguments.length &&
     node.arguments[0].type === 'RegExpLiteral' &&
     isAmbiguousRegex(node.arguments[0])
-  )
+  ) {
+    return true
+  }
+  if (
+    node.callee.type === 'Identifier' &&
+    (node.callee.name === 'get' || node.callee.name === 'set')
+  ) {
+    return true
+  }
+  return false
 }
 
 function callParensOptional(path, {stackOffset = 0} = {}) {
@@ -2761,6 +2789,7 @@ function couldGroupArg(arg) {
     (arg.type === 'ObjectExpression' && arg.properties.length > 0) ||
     (arg.type === 'ArrayExpression' && arg.elements.length > 0) ||
     arg.type === 'FunctionExpression' ||
+    isLinebreakingTemplateLiteral(arg) ||
     isDoFunc(arg)
   ) {
     return true
@@ -3144,7 +3173,63 @@ function rawText(node) {
 
 function nodeStr(node, options) {
   const raw = rawText(node)
-  return util.printString(raw, options)
+  return printString(raw, options)
+}
+
+function printString(raw, options, isDirectiveLiteral) {
+  // `rawContent` is the string exactly like it appeared in the input source
+  // code, without its enclosing quotes.
+  const rawContent = raw.slice(1, -1)
+
+  const double = {quote: '"', regex: /"/g}
+  const single = {quote: "'", regex: /'/g}
+
+  const preferred = options.singleQuote ? single : double
+  const alternate = preferred === single ? double : single
+
+  let shouldUseAlternateQuote = false
+  let canChangeDirectiveQuotes = false
+
+  // If `rawContent` contains at least one of the quote preferred for enclosing
+  // the string, we might want to enclose with the alternate quote instead, to
+  // minimize the number of escaped quotes.
+  // Also check for the alternate quote, to determine if we're allowed to swap
+  // the quotes on a DirectiveLiteral.
+  if (
+    rawContent.includes(preferred.quote) ||
+    rawContent.includes(alternate.quote)
+  ) {
+    const numPreferredQuotes = (rawContent.match(preferred.regex) || []).length
+    const numAlternateQuotes = (rawContent.match(alternate.regex) || []).length
+
+    shouldUseAlternateQuote = numPreferredQuotes > numAlternateQuotes
+  } else {
+    canChangeDirectiveQuotes = true
+  }
+  if (rawContent.includes('#{')) {
+    shouldUseAlternateQuote = preferred.quote === '"'
+  }
+
+  const enclosingQuote = shouldUseAlternateQuote
+    ? alternate.quote
+    : preferred.quote
+
+  // Directives are exact code unit sequences, which means that you can't
+  // change the escape sequences they use.
+  // See https://github.com/prettier/prettier/issues/1555
+  // and https://tc39.github.io/ecma262/#directive-prologue
+  if (isDirectiveLiteral) {
+    if (canChangeDirectiveQuotes) {
+      return enclosingQuote + rawContent + enclosingQuote
+    }
+    return raw
+  }
+
+  // It might sound unnecessary to use `makeString` even if the string already
+  // is enclosed with `enclosingQuote`, but it isn't. The string could contain
+  // unnecessary escapes (such as in `"\'"`). Always using `makeString` makes
+  // sure that we consistently output the minimum amount of escaped quotes.
+  return util.makeString(rawContent, enclosingQuote, false)
 }
 
 const PRECEDENCE = {}

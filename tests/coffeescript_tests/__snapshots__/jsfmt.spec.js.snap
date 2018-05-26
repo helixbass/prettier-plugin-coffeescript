@@ -5616,7 +5616,7 @@ test "#1392 calling \`super\` in methods defined on namespaced classes", ->
         super()
   eq 5, new C.a().m()
 
-test "#4436 immediately instantiated named class", -> ok new class Foo()
+test "#4436 immediately instantiated named class", -> ok new (class Foo)()
 
 test "dynamic method names", ->
   class A
@@ -5845,7 +5845,7 @@ test "\`@\`-params and bound methods with multiple \`super\` paths (expressions)
   new Test false, nonce
 
 test "constructor super in arrow functions", ->
-  class Test extends class
+  class Test extends (class)
     constructor: (@param) ->
       do =>
         super()
@@ -6519,14 +6519,15 @@ test "Bound method of immediately instantiated class with expression base class 
     throw new Error() if calledF
     calledF = yes
     obj
-  a = new class f().A extends B
+  a = new (class f().A extends B
     constructor: (@prop = 3) ->
       super()
       g = @derivedBound
       eq g(), 3
 
     derivedBound: =>
-      @prop()
+      @prop
+  )()
 
   { derivedBound } = a
   eq derivedBound(), 3
@@ -15525,9 +15526,9 @@ test "#960: improved 'do'", ->
     eq two, 2
     eq three, 3
 
-  ret = do (func = (two) ->
+  ret = do func = (two) ->
     eq two, 2
-    func)
+    func
   eq ret, func
 
 test "#2617: implicit call before unrelated implicit object", ->
@@ -15665,14 +15666,14 @@ test "implicit invocation with implicit object literal", ->
 test "get and set can be used as function names when not ambiguous with \`get\`/\`set\` keywords", ->
   get = (val) -> val
   set = (val) -> val
-  eq 2, get 2
-  eq 3, set 3
-  eq "a", get "a"
-  eq "b", set "b"
-  eq 4, get 4
-  eq 5, set 5
-  eq "c", get "c"
-  eq "d", set "d"
+  eq 2, get(2)
+  eq 3, set(3)
+  eq "a", get("a")
+  eq "b", set("b")
+  eq 4, get(4)
+  eq 5, set(5)
+  eq "c", get("c")
+  eq "d", set("d")
 
   @get = get
   @set = set
@@ -15681,14 +15682,14 @@ test "get and set can be used as function names when not ambiguous with \`get\`/
 
   get = ({ val }) -> val
   set = ({ val }) -> val
-  eq 8, get val: 8
-  eq 9, set val: 9
-  eq "e", get val: "e"
-  eq "f", set val: "f"
-  eq 10, get val: 10
-  eq 11, set val: 11
-  eq "g", get val: "g"
-  eq "h", set val: "h"
+  eq 8, get(val: 8)
+  eq 9, set(val: 9)
+  eq "e", get(val: "e")
+  eq "f", set(val: "f")
+  eq 10, get(val: 10)
+  eq 11, set(val: 11)
+  eq "g", get(val: "g")
+  eq "h", set(val: "h")
 
 test "get and set can be used as variable and property names", ->
   get = 2
@@ -17512,6 +17513,236 @@ test "generator methods in classes", ->
 
 `;
 
+exports[`helpers.coffee 1`] = `
+# Helpers
+# -------
+
+# pull the helpers from \`CoffeeScript.helpers\` into local variables
+{starts, ends, repeat, compact, count, merge, extend, flatten, del, baseFileName} = CoffeeScript.helpers
+
+
+# \`starts\`
+
+test "the \`starts\` helper tests if a string starts with another string", ->
+  ok     starts('01234', '012')
+  ok not starts('01234', '123')
+
+test "the \`starts\` helper can take an optional offset", ->
+  ok     starts('01234', '34', 3)
+  ok not starts('01234', '01', 1)
+
+
+# \`ends\`
+
+test "the \`ends\` helper tests if a string ends with another string", ->
+  ok     ends('01234', '234')
+  ok not ends('01234', '012')
+
+test "the \`ends\` helper can take an optional offset", ->
+  ok     ends('01234', '012', 2)
+  ok not ends('01234', '234', 6)
+
+
+# \`repeat\`
+
+test "the \`repeat\` helper concatenates a given number of times", ->
+  eq 'asdasdasd', repeat('asd', 3)
+
+test "\`repeat\`ing a string 0 times always returns the empty string", ->
+  eq '', repeat('whatever', 0)
+
+
+# \`compact\`
+
+test "the \`compact\` helper removes falsey values from an array, preserves truthy ones", ->
+  allValues = [1, 0, false, obj={}, [], '', ' ', -1, null, undefined, true]
+  truthyValues = [1, obj, [], ' ', -1, true]
+  arrayEq truthyValues, compact(allValues)
+
+
+# \`count\`
+
+test "the \`count\` helper counts the number of occurrences of a string in another string", ->
+  eq 1/0, count('abc', '')
+  eq 0, count('abc', 'z')
+  eq 1, count('abc', 'a')
+  eq 1, count('abc', 'b')
+  eq 2, count('abcdc', 'c')
+  eq 2, count('abcdabcd','abc')
+
+
+# \`merge\`
+
+test "the \`merge\` helper makes a new object with all properties of the objects given as its arguments", ->
+  ary = [0, 1, 2, 3, 4]
+  obj = {}
+  merged = merge obj, ary
+  ok merged isnt obj
+  ok merged isnt ary
+  for own key, val of ary
+    eq val, merged[key]
+
+
+# \`extend\`
+
+test "the \`extend\` helper performs a shallow copy", ->
+  ary = [0, 1, 2, 3]
+  obj = {}
+  # should return the object being extended
+  eq obj, extend(obj, ary)
+  # should copy the other object's properties as well (obviously)
+  eq 2, obj[2]
+
+
+# \`flatten\`
+
+test "the \`flatten\` helper flattens an array", ->
+  success = yes
+  (success and= typeof n is 'number') for n in flatten [0, [[[1]], 2], 3, [4]]
+  ok success
+
+
+# \`del\`
+
+test "the \`del\` helper deletes a property from an object and returns the deleted value", ->
+  obj = [0, 1, 2]
+  eq 1, del(obj, 1)
+  ok 1 not of obj
+
+
+# \`baseFileName\`
+
+test "the \`baseFileName\` helper returns the file name to write to", ->
+  ext = '.js'
+  sourceToCompiled =
+    '.coffee': ext
+    'a.coffee': 'a' + ext
+    'b.coffee': 'b' + ext
+    'coffee.coffee': 'coffee' + ext
+
+    '.litcoffee': ext
+    'a.litcoffee': 'a' + ext
+    'b.litcoffee': 'b' + ext
+    'coffee.litcoffee': 'coffee' + ext
+
+    '.lit': ext
+    'a.lit': 'a' + ext
+    'b.lit': 'b' + ext
+    'coffee.lit': 'coffee' + ext
+
+    '.coffee.md': ext
+    'a.coffee.md': 'a' + ext
+    'b.coffee.md': 'b' + ext
+    'coffee.coffee.md': 'coffee' + ext
+
+  for sourceFileName, expectedFileName of sourceToCompiled
+    name = baseFileName sourceFileName, yes
+    filename = name + ext
+    eq filename, expectedFileName
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{
+  starts
+  ends
+  repeat
+  compact
+  count
+  merge
+  extend
+  flatten
+  del
+  baseFileName
+} = CoffeeScript.helpers
+
+test "the \`starts\` helper tests if a string starts with another string", ->
+  ok starts "01234", "012"
+  ok not starts "01234", "123"
+
+test "the \`starts\` helper can take an optional offset", ->
+  ok starts "01234", "34", 3
+  ok not starts "01234", "01", 1
+
+test "the \`ends\` helper tests if a string ends with another string", ->
+  ok ends "01234", "234"
+  ok not ends "01234", "012"
+
+test "the \`ends\` helper can take an optional offset", ->
+  ok ends "01234", "012", 2
+  ok not ends "01234", "234", 6
+
+test "the \`repeat\` helper concatenates a given number of times", ->
+  eq "asdasdasd", repeat "asd", 3
+
+test "\`repeat\`ing a string 0 times always returns the empty string", ->
+  eq "", repeat "whatever", 0
+
+test "the \`compact\` helper removes falsey values from an array, preserves truthy ones", ->
+  allValues = [1, 0, false, (obj = {}), [], "", " ", -1, null, undefined, true]
+  truthyValues = [1, obj, [], " ", -1, true]
+  arrayEq truthyValues, compact allValues
+
+test "the \`count\` helper counts the number of occurrences of a string in another string", ->
+  eq 1 / 0, count "abc", ""
+  eq 0, count "abc", "z"
+  eq 1, count "abc", "a"
+  eq 1, count "abc", "b"
+  eq 2, count "abcdc", "c"
+  eq 2, count "abcdabcd", "abc"
+
+test "the \`merge\` helper makes a new object with all properties of the objects given as its arguments", ->
+  ary = [0, 1, 2, 3, 4]
+  obj = {}
+  merged = merge obj, ary
+  ok merged isnt obj
+  ok merged isnt ary
+  for own key, val of ary
+    eq val, merged[key]
+
+test "the \`extend\` helper performs a shallow copy", ->
+  ary = [0, 1, 2, 3]
+  obj = {}
+  eq obj, extend obj, ary
+  eq 2, obj[2]
+
+test "the \`flatten\` helper flattens an array", ->
+  success = yes
+  (success and= typeof n is "number") for n in flatten [0, [[[1]], 2], 3, [4]]
+  ok success
+
+test "the \`del\` helper deletes a property from an object and returns the deleted value", ->
+  obj = [0, 1, 2]
+  eq 1, del obj, 1
+  ok 1 not of obj
+
+test "the \`baseFileName\` helper returns the file name to write to", ->
+  ext = ".js"
+  sourceToCompiled =
+    ".coffee": ext
+    "a.coffee": "a" + ext
+    "b.coffee": "b" + ext
+    "coffee.coffee": "coffee" + ext
+
+    ".litcoffee": ext
+    "a.litcoffee": "a" + ext
+    "b.litcoffee": "b" + ext
+    "coffee.litcoffee": "coffee" + ext
+
+    ".lit": ext
+    "a.lit": "a" + ext
+    "b.lit": "b" + ext
+    "coffee.lit": "coffee" + ext
+
+    ".coffee.md": ext
+    "a.coffee.md": "a" + ext
+    "b.coffee.md": "b" + ext
+    "coffee.coffee.md": "coffee" + ext
+
+  for sourceFileName, expectedFileName of sourceToCompiled
+    name = baseFileName sourceFileName, yes
+    filename = name + ext
+    eq filename, expectedFileName
+
+`;
+
 exports[`interpolation.coffee 1`] = `
 # Interpolation
 # -------------
@@ -17679,7 +17910,7 @@ eq(
 )
 
 eq "#{"{"}", "{"
-eq "#{"#{}}"} }", "#{}} }"
+eq "#{'#{}}'} }", '#{}} }'
 eq "#{"'#{{ a: "b#{1}" }["a"]}'"}", "'b1'"
 
 eq "#{'"/'}", '"/'
@@ -17689,7 +17920,7 @@ eq "#{"'/" + '/"' + /"'/}", "'//\\"/\\"'/"
 eq "#{"'/"}#{'/"'}#{/"'/}", "'//\\"/\\"'/"
 eq "#{6 / 2}", "3"
 eq "#{6 / 2}#{6 / 2}", "33"
-eq "#{6 + /2}#{6/ + 2}", "6/2}#{6/2"
+eq "#{6 + /2}#{6/ + 2}", '6/2}#{6/2'
 eq(
   "#{6 / 2}
     #{6 / 2}"
@@ -17710,7 +17941,7 @@ eq "<i style='left:#{curWidth / 2}%;'></i>", "<i style='left:2%;'></i>"
 
 hello = "Hello"
 world = "World"
-ok "#{hello} #{world}!" is "#{hello} #{world}!"
+ok '#{hello} #{world}!' is '#{hello} #{world}!'
 ok "#{hello} #{world}!" is "Hello World!"
 ok "[#{hello}#{world}]" is "[HelloWorld]"
 ok "#{hello}##{world}" is "Hello#World"
@@ -17723,17 +17954,17 @@ ok "#{2}#{2}" is "22"
 
 [s, t, r, i, n, g] = ["s", "t", "r", "i", "n", "g"]
 ok "#{s}#{t}#{r}#{i}#{n}#{g}" is "string"
-ok "#{s}#{t}#{r}#{i}#{n}#{g}" is "#{s}#{t}#{r}#{i}#{n}#{g}"
-ok "#{string}" is "#{string}"
+ok '\\#{s}\\#{t}\\#{r}\\#{i}\\#{n}\\#{g}' is '#{s}#{t}#{r}#{i}#{n}#{g}'
+ok '\\#{string}' is '#{string}'
 
-ok "#{Escaping} first" is "#{Escaping} first"
-ok "Escaping #{in} middle" is "Escaping #{in} middle"
-ok "Escaping #{last}" is "Escaping #{last}"
+ok '\\#{Escaping} first' is '#{Escaping} first'
+ok 'Escaping \\#{in} middle' is 'Escaping #{in} middle'
+ok 'Escaping \\#{last}' is 'Escaping #{last}'
 
 ok "##" is "##"
-ok "" is ""
-ok "A  B" is "A  B"
-ok "\\\\#{}" is "\\\\#{}"
+ok "#{}" is ""
+ok "#{}A#{} #{} #{}B#{}" is "A  B"
+ok '\\\\\\#{}' is '\\\\#{}'
 
 ok "I won ##{20} last night." is "I won #20 last night."
 ok "I won ##{"#20"} last night." is "I won ##20 last night."
@@ -17794,7 +18025,7 @@ b = '''
     on two lines
     '''
 ok a is "basic heredoc 10\\non two lines"
-ok b is "basic heredoc #{val}\\non two lines"
+ok b is 'basic heredoc \\#{val}\\non two lines'
 
 eq(
   'multiline nested "interpolations" work'
@@ -17906,12 +18137,9 @@ test "escaped backticks are output correctly", ->
 test "backslashes before a newline don’t break JavaScript blocks", ->
   \`var a = \\\`To be, or not\\\\
   to be.\\\`\`
-  eq(
-    a
-    '''
+  eq a, '''
   To be, or not\\\\
     to be.'''
-  )
 
 test "block inline JavaScript is evaluated", ->
   \`\`\`
@@ -21471,7 +21699,7 @@ test "'new' target", ->
   eq new ctor(), nonce
   eq new ctor(), nonce
 
-  ok new class()
+  ok new (class)()
 
   ctor = class
   ok new ctor() instanceof ctor
@@ -22549,9 +22777,9 @@ test "#2388: \`///\` in heregex interpolations", ->
 
 test "regexes are not callable", ->
   throws -> CoffeeScript.compile "/a/()"
-  throws -> CoffeeScript.compile "///a#{b}///()"
+  throws -> CoffeeScript.compile '///a#{b}///()'
   throws -> CoffeeScript.compile "/a/ 1"
-  throws -> CoffeeScript.compile "///a#{b}/// 1"
+  throws -> CoffeeScript.compile '///a#{b}/// 1'
   throws ->
     CoffeeScript.compile '''
     /a/
@@ -23249,6 +23477,1026 @@ test "soaked function invocation safe on non-functions", ->
 
 `;
 
+exports[`strings.coffee 1`] = `
+# String Literals
+# ---------------
+
+# TODO: refactor string literal tests
+# TODO: add indexing and method invocation tests: "string"["toString"] is String::toString, "string".toString() is "string"
+
+# * Strings
+# * Heredocs
+
+test "backslash escapes", ->
+  eq "\\\\/\\\\\\\\", /\\/\\\\/.source
+
+eq '(((dollars)))', '\\(\\(\\(dollars\\)\\)\\)'
+eq 'one two three', "one
+ two
+ three"
+eq "four five", 'four
+
+ five'
+
+test "#3229, multiline strings", ->
+  # Separate lines by default by a single space in literal strings.
+  eq 'one
+      two', 'one two'
+  eq "one
+      two", 'one two'
+  eq '
+        a
+        b
+    ', 'a b'
+  eq "
+        a
+        b
+    ", 'a b'
+  eq 'one
+
+        two', 'one two'
+  eq "one
+
+        two", 'one two'
+  eq '
+    indentation
+      doesn\\'t
+  matter', 'indentation doesn\\'t matter'
+  eq 'trailing ws      
+    doesn\\'t matter', 'trailing ws doesn\\'t matter'
+
+  # Use backslashes at the end of a line to specify whitespace between lines.
+  eq 'a \\
+      b\\
+      c  \\
+      d', 'a bc  d'
+  eq "a \\
+      b\\
+      c  \\
+      d", 'a bc  d'
+  eq 'ignore  \\  
+      trailing whitespace', 'ignore  trailing whitespace'
+
+  # Backslash at the beginning of a literal string.
+  eq '\\
+      ok', 'ok'
+  eq '  \\
+      ok', '  ok'
+
+  # #1273, empty strings.
+  eq '\\
+     ', ''
+  eq '
+     ', ''
+  eq '
+          ', ''
+  eq '   ', '   '
+
+  # Same behavior in interpolated strings.
+  eq "interpolation #{1}
+      follows #{2}  \\
+      too #{3}\\
+      !", 'interpolation 1 follows 2  too 3!'
+  eq "a #{
+    'string ' + "inside
+                 interpolation"
+    }", "a string inside interpolation"
+  eq "
+      #{1}
+     ", '1'
+
+  # Handle escaped backslashes correctly.
+  eq '\\\\', \`'\\\\'\`
+  eq 'escaped backslash at EOL\\\\
+      next line', 'escaped backslash at EOL\\\\ next line'
+  eq '\\\\
+      next line', '\\\\ next line'
+  eq '\\\\
+     ', '\\\\'
+  eq '\\\\\\\\\\\\
+     ', '\\\\\\\\\\\\'
+  eq "#{1}\\\\
+      after interpolation", '1\\\\ after interpolation'
+  eq 'escaped backslash before slash\\\\  \\
+      next line', 'escaped backslash before slash\\\\  next line'
+  eq 'triple backslash\\\\\\
+      next line', 'triple backslash\\\\next line'
+  eq 'several escaped backslashes\\\\\\\\\\\\
+      ok', 'several escaped backslashes\\\\\\\\\\\\ ok'
+  eq 'several escaped backslashes slash\\\\\\\\\\\\\\
+      ok', 'several escaped backslashes slash\\\\\\\\\\\\ok'
+  eq 'several escaped backslashes with trailing ws \\\\\\\\\\\\   
+      ok', 'several escaped backslashes with trailing ws \\\\\\\\\\\\ ok'
+
+  # Backslashes at beginning of lines.
+  eq 'first line
+      \\   backslash at BOL', 'first line \\   backslash at BOL'
+  eq 'first line\\
+      \\   backslash at BOL', 'first line\\   backslash at BOL'
+
+  # Backslashes at end of strings.
+  eq 'first line \\ ', 'first line  '
+  eq 'first line
+      second line \\
+      ', 'first line second line '
+  eq 'first line
+      second line
+      \\
+      ', 'first line second line'
+  eq 'first line
+      second line
+
+        \\
+
+      ', 'first line second line'
+
+  # Edge case.
+  eq 'lone
+
+        \\
+
+        backslash', 'lone backslash'
+
+test "#3249, escape newlines in heredocs with backslashes", ->
+  # Ignore escaped newlines
+  eq '''
+    Set whitespace      \\
+       <- this is ignored\\  
+           none
+      normal indentation
+    ''', 'Set whitespace      <- this is ignorednone\\n  normal indentation'
+  eq """
+    Set whitespace      \\
+       <- this is ignored\\  
+           none
+      normal indentation
+    """, 'Set whitespace      <- this is ignorednone\\n  normal indentation'
+
+  # Changed from #647, trailing backslash.
+  eq '''
+  Hello, World\\
+
+  ''', 'Hello, World'
+  eq '''
+    \\\\
+  ''', '\\\\'
+
+  # Backslash at the beginning of a literal string.
+  eq '''\\
+      ok''', 'ok'
+  eq '''  \\
+      ok''', '  ok'
+
+  # Same behavior in interpolated strings.
+  eq """
+    interpolation #{1}
+      follows #{2}  \\
+        too #{3}\\
+    !
+  """, 'interpolation 1\\n  follows 2  too 3!'
+  eq """
+
+    #{1} #{2}
+
+    """, '\\n1 2\\n'
+
+  # Handle escaped backslashes correctly.
+  eq '''
+    escaped backslash at EOL\\\\
+      next line
+  ''', 'escaped backslash at EOL\\\\\\n  next line'
+  eq '''\\\\
+
+     ''', '\\\\\\n'
+
+  # Backslashes at beginning of lines.
+  eq '''first line
+      \\   backslash at BOL''', 'first line\\n\\   backslash at BOL'
+  eq """first line\\
+      \\   backslash at BOL""", 'first line\\   backslash at BOL'
+
+  # Backslashes at end of strings.
+  eq '''first line \\ ''', 'first line  '
+  eq '''
+    first line
+    second line \\
+  ''', 'first line\\nsecond line '
+  eq '''
+    first line
+    second line
+    \\
+  ''', 'first line\\nsecond line'
+  eq '''
+    first line
+    second line
+
+      \\
+
+  ''', 'first line\\nsecond line\\n'
+
+  # Edge cases.
+  eq '''lone
+
+          \\
+
+
+
+        backslash''', 'lone\\n\\n  backslash'
+  eq '''\\
+     ''', ''
+
+test '#2388: \`"""\` in heredoc interpolations', ->
+  eq """a heredoc #{
+      "inside \\
+        interpolation"
+    }""", "a heredoc inside interpolation"
+  eq """a#{"""b"""}c""", 'abc'
+  eq """#{""""""}""", ''
+
+test "trailing whitespace", ->
+  testTrailing = (str, expected) ->
+    eq CoffeeScript.eval(str.replace /\\|$/gm, ''), expected
+  testTrailing '''"   |
+      |
+    a   |
+           |
+  "''', 'a'
+  testTrailing """'''   |
+      |
+    a   |
+           |
+  '''""", '  \\na   \\n       '
+
+#647
+eq "''Hello, World\\\\''", '''
+'\\'Hello, World\\\\\\''
+'''
+eq '""Hello, World\\\\""', """
+"\\"Hello, World\\\\\\""
+"""
+
+test "#1273, escaping quotes at the end of heredocs.", ->
+  # """\\""" no longer compiles
+  eq """\\\\""", '\\\\'
+  eq """\\\\\\"""", '\\\\\\"'
+
+a = """
+    basic heredoc
+    on two lines
+    """
+ok a is "basic heredoc\\non two lines"
+
+a = '''
+    a
+      "b
+    c
+    '''
+ok a is "a\\n  \\"b\\nc"
+
+a = """
+a
+ b
+  c
+"""
+ok a is "a\\n b\\n  c"
+
+a = '''one-liner'''
+ok a is 'one-liner'
+
+a = """
+      out
+      here
+"""
+ok a is "out\\nhere"
+
+a = '''
+       a
+     b
+   c
+    '''
+ok a is "    a\\n  b\\nc"
+
+a = '''
+a
+
+
+b c
+'''
+ok a is "a\\n\\n\\nb c"
+
+a = '''more"than"one"quote'''
+ok a is 'more"than"one"quote'
+
+a = '''here's an apostrophe'''
+ok a is "here's an apostrophe"
+
+a = """""surrounded by two quotes"\\""""
+ok a is '""surrounded by two quotes""'
+
+a = '''''surrounded by two apostrophes'\\''''
+ok a is "''surrounded by two apostrophes''"
+
+# The indentation detector ignores blank lines without trailing whitespace
+a = """
+    one
+    two
+
+    """
+ok a is "one\\ntwo\\n"
+
+eq ''' line 0
+  should not be relevant
+    to the indent level
+''', ' line 0\\nshould not be relevant\\n  to the indent level'
+
+eq """
+  interpolation #{
+ "contents"
+ }
+  should not be relevant
+    to the indent level
+""", 'interpolation contents\\nshould not be relevant\\n  to the indent level'
+
+eq ''' '\\\\\\' ''', " '\\\\' "
+eq """ "\\\\\\" """, ' "\\\\" '
+
+eq '''  <- keep these spaces ->  ''', '  <- keep these spaces ->  '
+
+eq '''undefined''', 'undefined'
+eq """undefined""", 'undefined'
+
+
+test "#1046, empty string interpolations", ->
+  eq "#{ }", ''
+
+test "strings are not callable", ->
+  throws -> CoffeeScript.compile '"a"()'
+  throws -> CoffeeScript.compile '"a#{b}"()'
+  throws -> CoffeeScript.compile '"a" 1'
+  throws -> CoffeeScript.compile '"a#{b}" 1'
+  throws -> CoffeeScript.compile '''
+    "a"
+       k: v
+  '''
+  throws -> CoffeeScript.compile '''
+    "a#{b}"
+       k: v
+  '''
+
+test "#3795: Escape otherwise invalid characters", ->
+  eq ' ', '\\u2028'
+  eq ' ', '\\u2029'
+  eq '\\0\\
+      1', '\\x001'
+  eq " ", '\\u2028'
+  eq " ", '\\u2029'
+  eq "\\0\\
+      1", '\\x001'
+  eq ''' ''', '\\u2028'
+  eq ''' ''', '\\u2029'
+  eq '''\\0\\
+      1''', '\\x001'
+  eq """ """, '\\u2028'
+  eq """ """, '\\u2029'
+  eq """\\0\\
+      1""", '\\x001'
+
+  a = 'a'
+  eq "#{a} ", 'a\\u2028'
+  eq "#{a} ", 'a\\u2029'
+  eq "#{a}\\0\\
+      1", 'a\\0' + '1'
+  eq """#{a} """, 'a\\u2028'
+  eq """#{a} """, 'a\\u2029'
+  eq """#{a}\\0\\
+      1""", 'a\\0' + '1'
+
+test "#4314: Whitespace less than or equal to stripped indentation", ->
+  # The odd indentation is intentional here, to test 1-space indentation.
+  eq ' ', """
+ #{} #{}
+"""
+
+  eq '1 2  3   4    5     end\\na 0     b', """
+    #{1} #{2}  #{3}   #{4}    #{5}     end
+    a #{0}     b"""
+
+test "#4248: Unicode code point escapes", ->
+  eq '\\u01ab\\u00cd', '\\u{1ab}\\u{cd}'
+  eq '\\u01ab', '\\u{000001ab}'
+  eq 'a\\u01ab', "#{ 'a' }\\u{1ab}"
+  eq '\\u01abc', '''\\u{01ab}c'''
+  eq '\\u01abc', """\\u{1ab}#{ 'c' }"""
+  eq '\\udab3\\uddef', '\\u{bcdef}'
+  eq '\\udab3\\uddef', '\\u{0000bcdef}'
+  eq 'a\\udab3\\uddef', "#{ 'a' }\\u{bcdef}"
+  eq '\\udab3\\uddefc', '''\\u{0bcdef}c'''
+  eq '\\udab3\\uddefc', """\\u{bcdef}#{ 'c' }"""
+  eq '\\\\u{123456}', "#{'\\\\'}#{'u{123456}'}"
+
+  # don't rewrite code point escapes
+  eqJS """
+    '\\\\u{bcdef}\\\\u{abc}'
+  """,
+  """
+    '\\\\u{bcdef}\\\\u{abc}';
+  """
+
+  eqJS """
+    "#{ 'a' }\\\\u{bcdef}"
+  """,
+  """
+    "a\\\\u{bcdef}";
+  """
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test "backslash escapes", -> eq "\\\\/\\\\\\\\", /\\/\\\\/.source
+
+eq "(((dollars)))", "\\(\\(\\(dollars\\)\\)\\)"
+eq "one two three", "one
+ two
+ three"
+eq "four five", 'four
+
+ five'
+
+test "#3229, multiline strings", ->
+  eq(
+    'one
+      two'
+    "one two"
+  )
+  eq(
+    "one
+      two"
+    "one two"
+  )
+  eq(
+    '
+        a
+        b
+    '
+    "a b"
+  )
+  eq(
+    "
+        a
+        b
+    "
+    "a b"
+  )
+  eq(
+    'one
+
+        two'
+    "one two"
+  )
+  eq(
+    "one
+
+        two"
+    "one two"
+  )
+  eq(
+    '
+    indentation
+      doesn\\'t
+  matter'
+    "indentation doesn't matter"
+  )
+  eq(
+    'trailing ws      
+    doesn\\'t matter'
+    "trailing ws doesn't matter"
+  )
+
+  eq(
+    'a \\
+      b\\
+      c  \\
+      d'
+    "a bc  d"
+  )
+  eq(
+    "a \\
+      b\\
+      c  \\
+      d"
+    "a bc  d"
+  )
+  eq(
+    'ignore  \\  
+      trailing whitespace'
+    "ignore  trailing whitespace"
+  )
+
+  eq(
+    '\\
+      ok'
+    "ok"
+  )
+  eq(
+    '  \\
+      ok'
+    "  ok"
+  )
+
+  eq(
+    '\\
+     '
+    ""
+  )
+  eq(
+    '
+     '
+    ""
+  )
+  eq(
+    '
+          '
+    ""
+  )
+  eq "   ", "   "
+
+  eq(
+    "interpolation #{1}
+      follows #{2}  \\
+      too #{3}\\
+      !"
+    "interpolation 1 follows 2  too 3!"
+  )
+  eq(
+    "a #{"string " + "inside
+                 interpolation"}"
+    "a string inside interpolation"
+  )
+  eq(
+    "
+      #{1}
+     "
+    "1"
+  )
+
+  eq "\\\\", \`'\\\\'\`
+  eq(
+    'escaped backslash at EOL\\\\
+      next line'
+    "escaped backslash at EOL\\\\ next line"
+  )
+  eq(
+    '\\\\
+      next line'
+    "\\\\ next line"
+  )
+  eq(
+    '\\\\
+     '
+    "\\\\"
+  )
+  eq(
+    '\\\\\\\\\\\\
+     '
+    "\\\\\\\\\\\\"
+  )
+  eq(
+    "#{1}\\\\
+      after interpolation"
+    "1\\\\ after interpolation"
+  )
+  eq(
+    'escaped backslash before slash\\\\  \\
+      next line'
+    "escaped backslash before slash\\\\  next line"
+  )
+  eq(
+    'triple backslash\\\\\\
+      next line'
+    "triple backslash\\\\next line"
+  )
+  eq(
+    'several escaped backslashes\\\\\\\\\\\\
+      ok'
+    "several escaped backslashes\\\\\\\\\\\\ ok"
+  )
+  eq(
+    'several escaped backslashes slash\\\\\\\\\\\\\\
+      ok'
+    "several escaped backslashes slash\\\\\\\\\\\\ok"
+  )
+  eq(
+    'several escaped backslashes with trailing ws \\\\\\\\\\\\   
+      ok'
+    "several escaped backslashes with trailing ws \\\\\\\\\\\\ ok"
+  )
+
+  eq(
+    'first line
+      \\   backslash at BOL'
+    "first line \\   backslash at BOL"
+  )
+  eq(
+    'first line\\
+      \\   backslash at BOL'
+    "first line\\   backslash at BOL"
+  )
+
+  eq "first line \\ ", "first line  "
+  eq(
+    'first line
+      second line \\
+      '
+    "first line second line "
+  )
+  eq(
+    'first line
+      second line
+      \\
+      '
+    "first line second line"
+  )
+  eq(
+    'first line
+      second line
+
+        \\
+
+      '
+    "first line second line"
+  )
+
+  eq(
+    'lone
+
+        \\
+
+        backslash'
+    "lone backslash"
+  )
+
+test "#3249, escape newlines in heredocs with backslashes", ->
+  eq(
+    '''
+    Set whitespace      \\
+       <- this is ignored\\  
+           none
+      normal indentation
+    '''
+    "Set whitespace      <- this is ignorednone\\n  normal indentation"
+  )
+  eq(
+    """
+    Set whitespace      \\
+       <- this is ignored\\  
+           none
+      normal indentation
+    """
+    "Set whitespace      <- this is ignorednone\\n  normal indentation"
+  )
+
+  eq(
+    '''
+  Hello, World\\
+
+  '''
+    "Hello, World"
+  )
+  eq(
+    '''
+    \\\\
+  '''
+    "\\\\"
+  )
+
+  eq(
+    '''\\
+      ok'''
+    "ok"
+  )
+  eq(
+    '''  \\
+      ok'''
+    "  ok"
+  )
+
+  eq(
+    """
+    interpolation #{1}
+      follows #{2}  \\
+        too #{3}\\
+    !
+  """
+    "interpolation 1\\n  follows 2  too 3!"
+  )
+  eq(
+    """
+
+    #{1} #{2}
+
+    """
+    "\\n1 2\\n"
+  )
+
+  eq(
+    '''
+    escaped backslash at EOL\\\\
+      next line
+  '''
+    "escaped backslash at EOL\\\\\\n  next line"
+  )
+  eq(
+    '''\\\\
+
+     '''
+    "\\\\\\n"
+  )
+
+  eq(
+    '''first line
+      \\   backslash at BOL'''
+    "first line\\n\\   backslash at BOL"
+  )
+  eq(
+    """first line\\
+      \\   backslash at BOL"""
+    "first line\\   backslash at BOL"
+  )
+
+  eq "first line \\ ", "first line  "
+  eq(
+    '''
+    first line
+    second line \\
+  '''
+    "first line\\nsecond line "
+  )
+  eq(
+    '''
+    first line
+    second line
+    \\
+  '''
+    "first line\\nsecond line"
+  )
+  eq(
+    '''
+    first line
+    second line
+
+      \\
+
+  '''
+    "first line\\nsecond line\\n"
+  )
+
+  eq(
+    '''lone
+
+          \\
+
+
+
+        backslash'''
+    "lone\\n\\n  backslash"
+  )
+  eq(
+    '''\\
+     '''
+    ""
+  )
+
+test '#2388: \`"""\` in heredoc interpolations', ->
+  eq(
+    """a heredoc #{"inside \\
+        interpolation"}"""
+    "a heredoc inside interpolation"
+  )
+  eq """a#{"b"}c""", "abc"
+  eq """#{""}""", ""
+
+test "trailing whitespace", ->
+  testTrailing = (str, expected) ->
+    eq CoffeeScript.eval(str.replace /\\|$/gm, ""), expected
+  testTrailing(
+    '''"   |
+      |
+    a   |
+           |
+  "'''
+    "a"
+  )
+  testTrailing(
+    """'''   |
+      |
+    a   |
+           |
+  '''"""
+    "  \\na   \\n       "
+  )
+
+eq "''Hello, World\\\\''", '''
+'\\'Hello, World\\\\\\''
+'''
+eq '""Hello, World\\\\""', """
+"\\"Hello, World\\\\\\""
+"""
+
+test "#1273, escaping quotes at the end of heredocs.", ->
+  eq "\\\\", "\\\\"
+  eq '\\\\"', '\\\\"'
+
+a = """
+    basic heredoc
+    on two lines
+    """
+ok a is "basic heredoc\\non two lines"
+
+a = '''
+    a
+      "b
+    c
+    '''
+ok a is 'a\\n  "b\\nc'
+
+a = """
+a
+ b
+  c
+"""
+ok a is "a\\n b\\n  c"
+
+a = "one-liner"
+ok a is "one-liner"
+
+a = """
+      out
+      here
+"""
+ok a is "out\\nhere"
+
+a = '''
+       a
+     b
+   c
+    '''
+ok a is "    a\\n  b\\nc"
+
+a = '''
+a
+
+
+b c
+'''
+ok a is "a\\n\\n\\nb c"
+
+a = 'more"than"one"quote'
+ok a is 'more"than"one"quote'
+
+a = "here's an apostrophe"
+ok a is "here's an apostrophe"
+
+a = '""surrounded by two quotes""'
+ok a is '""surrounded by two quotes""'
+
+a = "''surrounded by two apostrophes''"
+ok a is "''surrounded by two apostrophes''"
+
+a = """
+    one
+    two
+
+    """
+ok a is "one\\ntwo\\n"
+
+eq(
+  ''' line 0
+  should not be relevant
+    to the indent level
+'''
+  " line 0\\nshould not be relevant\\n  to the indent level"
+)
+
+eq(
+  """
+  interpolation #{"contents"}
+  should not be relevant
+    to the indent level
+"""
+  "interpolation contents\\nshould not be relevant\\n  to the indent level"
+)
+
+eq " '\\\\' ", " '\\\\' "
+eq ' "\\\\" ', ' "\\\\" '
+
+eq "  <- keep these spaces ->  ", "  <- keep these spaces ->  "
+
+eq "undefined", "undefined"
+eq "undefined", "undefined"
+
+test "#1046, empty string interpolations", -> eq "#{}", ""
+
+test "strings are not callable", ->
+  throws -> CoffeeScript.compile '"a"()'
+  throws -> CoffeeScript.compile '"a#{b}"()'
+  throws -> CoffeeScript.compile '"a" 1'
+  throws -> CoffeeScript.compile '"a#{b}" 1'
+  throws ->
+    CoffeeScript.compile '''
+    "a"
+       k: v
+  '''
+  throws ->
+    CoffeeScript.compile '''
+    "a#{b}"
+       k: v
+  '''
+
+test "#3795: Escape otherwise invalid characters", ->
+  eq "\\u2028", "\\u2028"
+  eq "\\u2029", "\\u2029"
+  eq(
+    '\\0\\
+      1'
+    "\\x001"
+  )
+  eq "\\u2028", "\\u2028"
+  eq "\\u2029", "\\u2029"
+  eq(
+    "\\0\\
+      1"
+    "\\x001"
+  )
+  eq "\\u2028", "\\u2028"
+  eq "\\u2029", "\\u2029"
+  eq(
+    '''\\0\\
+      1'''
+    "\\x001"
+  )
+  eq "\\u2028", "\\u2028"
+  eq "\\u2029", "\\u2029"
+  eq(
+    """\\0\\
+      1"""
+    "\\x001"
+  )
+
+  a = "a"
+  eq "#{a} ", "a\\u2028"
+  eq "#{a} ", "a\\u2029"
+  eq(
+    "#{a}\\0\\
+      1"
+    "a\\0" + "1"
+  )
+  eq """#{a} """, "a\\u2028"
+  eq """#{a} """, "a\\u2029"
+  eq(
+    """#{a}\\0\\
+      1"""
+    "a\\0" + "1"
+  )
+
+test "#4314: Whitespace less than or equal to stripped indentation", ->
+  eq " ", """
+ #{} #{}
+"""
+
+  eq "1 2  3   4    5     end\\na 0     b", """
+    #{1} #{2}  #{3}   #{4}    #{5}     end
+    a #{0}     b"""
+
+test "#4248: Unicode code point escapes", ->
+  eq "\\u01ab\\u00cd", "\\u{1ab}\\u{cd}"
+  eq "\\u01ab", "\\u{000001ab}"
+  eq "a\\u01ab", "#{"a"}\\u{1ab}"
+  eq "\\u01abc", "\\u{01ab}c"
+  eq "\\u01abc", """\\u{1ab}#{"c"}"""
+  eq "\\udab3\\uddef", "\\u{bcdef}"
+  eq "\\udab3\\uddef", "\\u{0000bcdef}"
+  eq "a\\udab3\\uddef", "#{"a"}\\u{bcdef}"
+  eq "\\udab3\\uddefc", "\\u{0bcdef}c"
+  eq "\\udab3\\uddefc", """\\u{bcdef}#{"c"}"""
+  eq "\\\\u{123456}", "#{"\\\\"}#{"u{123456}"}"
+
+  eqJS(
+    """
+    '\\\\u{bcdef}\\\\u{abc}'
+  """
+    """
+    '\\\\u{bcdef}\\\\u{abc}';
+  """
+  )
+
+  eqJS(
+    """
+    "#{"a"}\\\\u{bcdef}"
+  """
+    """
+    "a\\\\u{bcdef}";
+  """
+  )
+
+`;
+
 exports[`tagged_template_literals.coffee 1`] = `
 # Tagged template literals
 # ------------------------
@@ -23559,7 +24807,7 @@ test "tagged template literal with an empty string", ->
   eq "text: [] expressions: []", func''
 
 test "tagged template literal with an empty interpolated string", ->
-  eq "text: [] expressions: []", func""
+  eq "text: [] expressions: []", func"#{}"
 
 test "tagged template literal as single interpolated expression", ->
   eq "text: [|] expressions: [3]", func"#{3}"
