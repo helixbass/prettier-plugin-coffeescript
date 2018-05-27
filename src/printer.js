@@ -928,6 +928,7 @@ function printPathNoParens(path, options, print) {
     case 'For': {
       const opening = concat([
         'for ',
+        n.await ? 'await ' : '',
         n.own ? 'own ' : '',
         n.name || n.index
           ? concat([
