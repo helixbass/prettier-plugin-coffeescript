@@ -2843,7 +2843,7 @@ createAsyncIterable = (syncIterable) ->
     yield await winLater elem, 50
 
 test "async iteration", ->
-  foo = (x for x from createAsyncIterable [1, 2, 3])
+  foo = (x for await x from createAsyncIterable [1, 2, 3])
   arrayEq foo, [1, 2, 3]
 
 test "async generator functions", ->

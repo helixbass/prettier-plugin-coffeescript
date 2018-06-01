@@ -387,6 +387,20 @@ function printPathNoParens(path, options, print) {
     case 'File':
       return path.call(print, 'program')
     case 'Program':
+      if (n.directives) {
+        path.each(childPath => {
+          parts.push(print(childPath), hardline)
+          if (
+            util.isNextLineEmpty(
+              options.originalText,
+              childPath.getValue(),
+              locEnd
+            )
+          ) {
+            parts.push(hardline)
+          }
+        }, 'directives')
+      }
       parts.push(
         path.call(bodyPath => {
           return printStatementSequence(bodyPath, options, print)
@@ -748,10 +762,12 @@ function printPathNoParens(path, options, print) {
       }, 'body')
 
       const hasContent = n.body.length > 0
+      const hasDirectives = n.directives && n.directives.length > 0
 
       const parent = path.getParentNode()
       if (
         !hasContent &&
+        !hasDirectives &&
         (((parent.type === 'IfStatement' ||
           parent.type === 'ConditionalExpression') &&
           n === parent.consequent &&
@@ -763,6 +779,7 @@ function printPathNoParens(path, options, print) {
 
       if (
         !hasContent &&
+        !hasDirectives &&
         (((parent.type === 'IfStatement' ||
           parent.type === 'ConditionalExpression') &&
           (n === parent.alternate || n === parent.consequent)) ||
@@ -773,11 +790,28 @@ function printPathNoParens(path, options, print) {
         return ''
       }
 
-      const shouldInline = n.body.length === 1
-      if (shouldInline) {
-        parts.push(indent(concat([softline, naked])))
-      } else {
-        parts.push(indent(concat([hardline, naked])))
+      if (hasDirectives) {
+        path.each(childPath => {
+          parts.push(indent(concat([hardline, print(childPath)])))
+          if (
+            util.isNextLineEmpty(
+              options.originalText,
+              childPath.getValue(),
+              locEnd
+            )
+          ) {
+            parts.push(hardline)
+          }
+        }, 'directives')
+      }
+
+      if (hasContent) {
+        const shouldInline = n.body.length === 1 && !hasDirectives
+        if (shouldInline) {
+          parts.push(indent(concat([softline, naked])))
+        } else {
+          parts.push(indent(concat([hardline, naked])))
+        }
       }
 
       return concat(parts)
@@ -846,6 +880,10 @@ function printPathNoParens(path, options, print) {
       if (typeof n.value !== 'string') {
         return '' + n.value
       }
+      return nodeStr(n, options)
+    case 'Directive':
+      return path.call(print, 'value')
+    case 'DirectiveLiteral':
       return nodeStr(n, options)
     case 'UnaryExpression': {
       const {operator} = n
@@ -2168,6 +2206,7 @@ function isMeaningfulJSXText(node) {
 function isLiteral(node) {
   return (
     node.type === 'BooleanLiteral' ||
+    node.type === 'DirectiveLiteral' ||
     node.type === 'NullLiteral' ||
     node.type === 'NumericLiteral' ||
     node.type === 'RegExpLiteral' ||
