@@ -1,7 +1,9 @@
 'use strict'
 
 const util = require('prettier/src/common/util')
+const comments = require('prettier/src/main/comments')
 const embed = require('./embed')
+const handleComments = require('./comments')
 const {
   IDENTIFIER: LEADING_IDENTIFIER,
 } = require('coffeescript/lib/coffeescript/lexer')
@@ -149,6 +151,10 @@ function pathNeedsParens(path, {stackOffset = 0} = {}) {
           }
 
           if (pp === np && !shouldFlatten(parent, node)) {
+            return true
+          }
+
+          if (util.isBitwiseOperator(po)) {
             return true
           }
 
@@ -373,6 +379,7 @@ function dump(obj) {
 function printPathNoParens(path, options, print) {
   // return dump(path)
   const n = path.getValue()
+  const {locStart, locEnd} = options
 
   if (!n) {
     return ''
@@ -768,6 +775,7 @@ function printPathNoParens(path, options, print) {
       if (
         !hasContent &&
         !hasDirectives &&
+        !hasDanglingComments(n) &&
         (((parent.type === 'IfStatement' ||
           parent.type === 'ConditionalExpression') &&
           n === parent.consequent &&
@@ -780,6 +788,7 @@ function printPathNoParens(path, options, print) {
       if (
         !hasContent &&
         !hasDirectives &&
+        !hasDanglingComments(n) &&
         (((parent.type === 'IfStatement' ||
           parent.type === 'ConditionalExpression') &&
           (n === parent.alternate || n === parent.consequent)) ||
@@ -814,6 +823,8 @@ function printPathNoParens(path, options, print) {
         }
       }
 
+      parts.push(comments.printDanglingComments(path, options))
+
       return concat(parts)
     }
     case 'ReturnStatement':
@@ -847,7 +858,11 @@ function printPathNoParens(path, options, print) {
 
       if (
         (n.arguments.length === 1 &&
-          isTemplateOnItsOwnLine(n.arguments[0], options.originalText)) ||
+          isTemplateOnItsOwnLine(
+            n.arguments[0],
+            options.originalText,
+            options
+          )) ||
         (!isNew && isTestCall(n))
       ) {
         return concat([
@@ -1335,6 +1350,7 @@ function printObject(path, print, options) {
   const node = path.getValue()
   const parent = path.getParentNode()
   const grandparent = path.getParentNode(1)
+  const {locEnd} = options
   const printedProps = []
   path.each(childPath => {
     const node = childPath.getValue()
@@ -1580,7 +1596,7 @@ function templateLiteralHasNewLines(template) {
   return template.quasis.some(quasi => quasi.value.raw.includes('\n'))
 }
 
-function isTemplateOnItsOwnLine(n, text) {
+function isTemplateOnItsOwnLine(n, text, {locStart}) {
   return (
     ((n.type === 'TemplateLiteral' && templateLiteralHasNewLines(n)) ||
       (n.type === 'TaggedTemplateExpression' &&
@@ -1835,7 +1851,12 @@ function printClass(path, options, print) {
 }
 
 function isEmptyBlock(node) {
-  return node.type === 'BlockStatement' && !node.body.length
+  return (
+    node.type === 'BlockStatement' &&
+    !node.body.length &&
+    !hasDanglingComments(node) &&
+    !(node.directives && node.directives.length)
+  )
 }
 
 function printExportDeclaration(path, options, print) {
@@ -1910,18 +1931,6 @@ function printExportDeclaration(path, options, print) {
   }
 
   return concat(parts)
-}
-
-function locStart(node) {
-  if (node.range) {
-    return node.range[0]
-  }
-}
-
-function locEnd(node) {
-  if (node.range) {
-    return node.range[1]
-  }
 }
 
 function shouldInlineLogicalExpression(node, {notJSX} = {}) {
@@ -2433,8 +2442,7 @@ function isBinaryish(node) {
   return node.type === 'BinaryExpression' || node.type === 'LogicalExpression'
 }
 
-// function printBinaryishExpressions(path, print, options, isNested) {
-function printBinaryishExpressions(path, print) {
+function printBinaryishExpressions(path, print, options, isNested) {
   let parts = []
   const node = path.getValue()
 
@@ -2446,7 +2454,9 @@ function printBinaryishExpressions(path, print) {
         path.call(left => {
           const {parts: flattenedParts, breaks} = printBinaryishExpressions(
             left,
-            print
+            print,
+            options,
+            true
           )
           if (breaks) {
             flattenedBreaks = true
@@ -2474,6 +2484,10 @@ function printBinaryishExpressions(path, print) {
     ])
 
     parts.push(' ', right)
+
+    if (isNested && node.comments) {
+      parts = comments.printComments(path, () => concat(parts), options)
+    }
   } else {
     parts.push(path.call(print))
   }
@@ -3103,6 +3117,7 @@ function printMemberLookup(path, options, print) {
 
 function printStatementSequence(path, options, print) {
   const printed = []
+  const {locEnd} = options
 
   // const bodyNode = path.getNode()
   const text = options.originalText
@@ -3167,6 +3182,7 @@ function printArrayItems(path, options, printPath, print) {
   const node = path.getValue()
   const elements = node[printPath]
   const last = elements && elements.length && elements[elements.length - 1]
+  const {locEnd} = options
   let index = 0
   path.each(childPath => {
     const child = childPath.getValue()
@@ -3327,8 +3343,40 @@ function shouldFlatten(parent, node) {
 // const clean = (ast, newObj) => {}
 const clean = () => {}
 
+function printComment(commentPath /*, options */) {
+  const comment = commentPath.getValue()
+
+  switch (comment.type) {
+    case 'CommentBlock':
+      return '###' + comment.value + '###'
+    case 'CommentLine':
+      return '#' + comment.value.trimRight()
+    default:
+      throw new Error('Not a comment: ' + JSON.stringify(comment))
+  }
+}
+
+function canAttachComment(node) {
+  return (
+    node.type &&
+    node.type !== 'CommentBlock' &&
+    node.type !== 'CommentLine' &&
+    node.type !== 'TemplateElement'
+  )
+}
+
+function hasDanglingComments(node) {
+  return (
+    node.comments &&
+    node.comments.some(comment => !comment.leading && !comment.trailing)
+  )
+}
+
 module.exports = {
   print: genericPrint,
   embed,
   massageAstNode: clean,
+  canAttachComment,
+  printComment,
+  isBlockComment: handleComments.isBlockComment,
 }

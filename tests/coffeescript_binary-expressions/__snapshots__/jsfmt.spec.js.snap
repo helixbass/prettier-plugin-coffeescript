@@ -46,6 +46,18 @@ all = FLAG_A | FLAG_B | FLAG_C
 
 `;
 
+exports[`comment.coffee 1`] = `
+a = (
+  # Comment 1
+  (Math.random() * (yRange * (1 - minVerticalFraction))) + (minVerticalFraction * yRange)
+) - offset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a =
+  # Comment 1
+  Math.random() * (yRange * (1 - minVerticalFraction)) + minVerticalFraction * yRange - offset
+
+`;
+
 exports[`equality.coffee 1`] = `
 x == y == z
 x != y == z
@@ -295,5 +307,212 @@ obj =
   state: shouldHaveState && stateIsOK && loadState: LOADED, opened: no
   loadNext: (stateIsOK && hasNext) || skipNext: yes
   loaded: yes
+
+`;
+
+exports[`jsx_parent.coffee 1`] = `
+<div
+  src={
+    !isJellyfishEnabled &&
+    diffUpdateMessageInput != null &&
+    this.state.isUpdateMessageEmpty
+  }
+/>
+
+<div>
+  {not isJellyfishEnabled and
+    diffUpdateMessageInput != null and
+    @state.isUpdateMessageEmpty}
+</div>
+
+<div
+  style={
+    !isJellyfishEnabled &&
+    diffUpdateMessageInput && {
+      fontSize: 14,
+      color: '#fff'
+    }
+  }
+/>
+
+<div>
+  {!isJellyfishEnabled &&
+    diffUpdateMessageInput != null && <div><span>Text</span></div>}
+</div>
+
+<div>
+  {!isJellyfishEnabled &&
+    diffUpdateMessageInput != null && child || <div><span>Text</span></div>}
+</div>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<div
+  src={
+    !isJellyfishEnabled &&
+    diffUpdateMessageInput != null &&
+    this.state.isUpdateMessageEmpty
+  }
+/>
+
+<div>
+  {not isJellyfishEnabled and
+    diffUpdateMessageInput != null and
+    @state.isUpdateMessageEmpty
+  }
+</div>
+
+<div
+  style={
+    !isJellyfishEnabled &&
+    diffUpdateMessageInput && { fontSize: 14, color: "#fff" }
+  }
+/>
+
+<div>
+  {!isJellyfishEnabled &&
+    diffUpdateMessageInput != null &&
+    <div>
+      <span>Text</span>
+    </div>
+  }
+</div>
+
+<div>
+  {(!isJellyfishEnabled && diffUpdateMessageInput != null && child) ||
+    <div>
+      <span>Text</span>
+    </div>
+  }
+</div>
+
+`;
+
+exports[`math.coffee 1`] = `
+x + y / z
+x / y + z
+
+x * y % z
+x / y % z
+x % y * z
+x % y / z
+
+x % y % z
+
+x << y >> z
+x >>> y << z
+x >>> y >>> z
+x + y >> z
+
+x | y & z
+x & y | z
+x ^ y ^ z
+x & y & z
+x | y | z
+x & y >> z
+x << y | z
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+x + y / z
+x / y + z
+
+(x * y) % z
+(x / y) % z
+(x % y) * z
+(x % y) / z
+
+(x % y) % z
+
+(x << y) >> z
+(x >>> y) << z
+(x >>> y) >>> z
+(x + y) >> z
+
+x | (y & z)
+(x & y) | z
+x ^ y ^ z
+x & y & z
+x | y | z
+x & (y >> z)
+(x << y) | z
+
+`;
+
+exports[`return.coffee 1`] = `
+foo = ->
+  return this.hasPlugin("dynamicImports") && this.lookahead().type is tt.parenLeft.right
+
+foo = ->
+  return if @hasPlugin("dynamicImports") and @lookahead().type is tt.parenLeft.right.left.right then yes else no
+
+foo = ->
+  return if this.calculate().compute().first.numberOfThings > this.calculate().compute().last.numberOfThings then true else false
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+foo = ->
+  return (
+    this.hasPlugin("dynamicImports") &&
+    this.lookahead().type is tt.parenLeft.right
+  )
+
+foo = ->
+  return (
+    if (
+      @hasPlugin("dynamicImports") and
+      @lookahead().type is tt.parenLeft.right.left.right
+    )
+      yes
+    else
+      no
+  )
+
+foo = ->
+  return (
+    if (
+      this.calculate().compute().first
+        .numberOfThings > this.calculate().compute().last.numberOfThings
+    )
+      true
+    else
+      false
+  )
+
+`;
+
+exports[`short-right.coffee 1`] = `
+this._cumulativeHeights &&
+ Math.abs(
+   this._cachedItemHeight(this._firstVisibleIndex + i) -
+     this._provider.fastHeight(i + this._firstVisibleIndex),
+ ) >
+   1
+
+foooooooooooooooooooooooooooooooooooooooooooooooooooooooooo(
+  aaaaaaaaaaaaaaaaaaa
+) +
+  a
+
+isPartOfPackageJSON = dependenciesArray.indexOf(
+  dependencyWithOutRelativePath.split('/')[0],
+) != -1
+
+defaultContent.filter((defaultLocale) ->
+  # ...
+)[0] || null
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+this._cumulativeHeights &&
+  Math.abs(
+    this._cachedItemHeight(
+      this._firstVisibleIndex + i
+    ) - this._provider.fastHeight i + this._firstVisibleIndex
+  ) > 1
+
+foooooooooooooooooooooooooooooooooooooooooooooooooooooooooo(
+  aaaaaaaaaaaaaaaaaaa
+) + a
+
+isPartOfPackageJSON =
+  dependenciesArray.indexOf(dependencyWithOutRelativePath.split("/")[0]) != -1
+
+defaultContent.filter((defaultLocale) ->
+  # ...
+)[0] ||
+  null
 
 `;

@@ -60,10 +60,24 @@ const languages = [
   },
 ]
 
+function locStart(node) {
+  if (node.range) {
+    return node.range[0]
+  }
+}
+
+function locEnd(node) {
+  if (node.range) {
+    return node.range[1]
+  }
+}
+
 const parsers = {
   coffeescript: {
     parse,
     astFormat: 'coffeescript',
+    locStart,
+    locEnd,
   },
 }
 
