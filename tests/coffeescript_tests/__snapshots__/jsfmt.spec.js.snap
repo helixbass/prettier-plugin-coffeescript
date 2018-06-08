@@ -241,6 +241,8 @@ test "throw on invalid options", ->
   argv = ["-co"]
   throws (-> optionParser.parse argv), /value required/
 
+  # Check if all flags in a multi-flag are recognized before checking if flags
+  # before the last need arguments.
   argv = ["-ok"]
   throws (-> optionParser.parse argv), /unrecognized option/
 
@@ -572,6 +574,14 @@ test "for-from comprehensions over Array", ->
   array2 = (a + b for [a, b] from [[10, 20], [30, 40], [50, 60]] when a + b >= 70)
   ok array2.join(' ') is '70 110'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Array Literals
+# --------------
+
+# * Array Literals
+# * Splats in Array Literals
+
+# TODO: add indexing and method invocation tests: [1][0] is 1, [].toString()
+
 test "trailing commas", ->
   trailingComma = [1, 2, 3]
   ok(
@@ -594,6 +604,7 @@ test "incorrect indentation without commas", ->
   ok result[0][0] is "a"
   ok result[1]["b"] is "c"
 
+# Elisions
 test "array elisions", ->
   eq [, 1].length, 2
   eq [, , 1, 2, ,].length, 5
@@ -663,6 +674,8 @@ test "array elisions nested destructuring", ->
   deepEqual d, { x: 2 }
   arrayEq w, [1, 2, 4]
 
+# Splats in Array Literals
+
 test "array splat expansions with assignments", ->
   nums = [1, 2, 3]
   list = [(a = 0), nums..., (b = 4)]
@@ -719,6 +732,7 @@ test "#4260: splat after existential operator soak", ->
   arrayEq foo((a if f)?.b ? []...), [undefined]
   arrayEq foo(...(a if f)?.b ? []), [undefined]
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   arrayEq [...a?.b], [3]
   arrayEq [...c?.b ? []], []
   arrayEq [a?.b...], [3]
@@ -740,6 +754,7 @@ test "#1349: trailing if after splat", ->
   arrayEq foo((a if c) ? []...), [undefined]
   arrayEq foo(...(a if c) ? []), [undefined]
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   arrayEq [...a if b], [3]
   arrayEq [a if b...], [3]
 
@@ -1573,6 +1588,16 @@ test "#4884: destructured array splat", ->
   eq three, 3
   eq x[2], 3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Assignment
+# ----------
+
+# * Assignment
+# * Compound Assignment
+# * Destructuring Assignment
+# * Context Property (@) Assignment
+# * Existential Assignment (?=)
+# * Assignment to variables similar to generated variables
+
 test "context property assignment (using @)", ->
   nonce = {}
   addMethod = ->
@@ -1588,6 +1613,8 @@ test "unassignable values", ->
         CoffeeScript.compile "#{nonref} = v"
       catch e
         nonce
+
+# Compound Assignment
 
 test "boolean operators", ->
   nonce = {}
@@ -1608,6 +1635,7 @@ test "boolean operators", ->
   d and= nonce
   eq nonce, d
 
+  # ensure that RHS is treated as a group
   e = f = false
   e and= f or true
   eq false, e
@@ -1619,6 +1647,7 @@ test "compound assignment as a sub expression", ->
   eq 5, b
   eq 3, c
 
+# *note: this test could still use refactoring*
 test "compound assignment should be careful about caching variables", ->
   count = 0
   list = []
@@ -1707,6 +1736,8 @@ test "#1192: assignment starting with object literals", ->
 { a: 1, "b", "#{1}": 2 }.p = 0
 { a: 0: {} }.a[0] = 0
 
+# Destructuring Assignment
+
 test "empty destructuring assignment", ->
   {} = {}
   [] = []
@@ -1761,6 +1792,7 @@ test "destructuring assignment with splats", ->
   arrayEq [b, c, d], y
   eq e, z
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   [x, y..., z] = [a, b, c, d, e]
   eq a, x
   arrayEq [b, c, d], y
@@ -1819,6 +1851,7 @@ test "destructuring assignment with objects and splats", ->
   eq a, y
   arrayEq [b, c, d], z
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   { a: { b: [y, z...] } } = obj
   eq a, y
   arrayEq [b, c, d], z
@@ -1837,6 +1870,8 @@ test "destructuring assignment against an expression", ->
 test "bracket insertion when necessary", ->
   [a] = [0] ? [1]
   eq a, 0
+
+# for implicit destructuring assignment in comprehensions, see the comprehension tests
 
 test "destructuring assignment with context (@) properties", ->
   a = {}
@@ -1872,7 +1907,7 @@ test "#1005: invalid identifiers allowed on LHS of destructuring assignment", ->
     "all disallowed as splats"
   )
   t = tSplat = null
-  for v in disallowed when v isnt "class"
+  for v in disallowed when v isnt "class" # \`class\` by itself is an expression
     throws (-> CoffeeScript.compile t), null, (t = "[#{v}] = x")
     throws (-> CoffeeScript.compile tSplat), null, (tSplat = "[#{v}...] = x")
   doesNotThrow ->
@@ -1923,7 +1958,7 @@ test "simple array destructuring defaults", ->
   [a = 2] = [undefined]
   eq 2, a
   [a = 3] = [null]
-  eq null, a
+  eq null, a # Breaking change in CS2: per ES2015, default values are applied for \`undefined\` but not for \`null\`.
   [a = 4] = [0]
   eq 0, a
   arr = [(a = 5)]
@@ -1936,7 +1971,7 @@ test "simple object destructuring defaults", ->
   { b = 2 } = b: undefined
   eq b, 2
   { b = 3 } = b: null
-  eq b, null
+  eq b, null # Breaking change in CS2: per ES2015, default values are applied for \`undefined\` but not for \`null\`.
   { b = 4 } = b: 0
   eq b, 0
 
@@ -1945,7 +1980,7 @@ test "simple object destructuring defaults", ->
   { b: c = 2 } = b: undefined
   eq c, 2
   { b: c = 3 } = b: null
-  eq c, null
+  eq c, null # Breaking change in CS2: per ES2015, default values are applied for \`undefined\` but not for \`null\`.
   { b: c = 4 } = b: 0
   eq c, 0
 
@@ -2013,6 +2048,8 @@ test "destructuring assignment with defaults single evaluation", ->
   eq 20, a
   eq c, 1
   eq callCount, 2
+
+# Existential Assignment
 
 test "existential assignment", ->
   nonce = {}
@@ -2110,6 +2147,7 @@ test "#1348, #1216: existential assignment compilation", ->
   a = nonce
   b = a ?= 0
   eq nonce, b
+  #the first ?= compiles into a statement; the second ?= compiles to a ternary expression
   eq a ?= b ?= 1, nonce
 
   if a
@@ -2142,7 +2180,7 @@ test "#1643: splatted accesses in destructuring assignments should not be declar
     "f?().a"
   ]
   for access in accesses
-    for i, j in [1, 2, 3]
+    for i, j in [1, 2, 3] #position can matter
       code = """
         nonce = {}; nonce2 = {}; nonce3 = {};
         @o = o = new (class C then a:{}); f = -> o
@@ -2159,6 +2197,7 @@ test "#1643: splatted accesses in destructuring assignments should not be declar
             true
         )
           nonce
+  # subpatterns like \`[[a]...]\` and \`[{a}...]\`
   subpatterns = ["[sub, sub2, sub3]", "{0: sub, 1: sub2, 2: sub3}"]
   for subpattern in subpatterns
     for i, j in [1, 2, 3]
@@ -2617,8 +2656,18 @@ test "async methods in classes", ->
   eq await Child.static(), 1
   eq await new Child().method(), 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Functions that contain the \`await\` keyword will compile into async functions,
+# supported by Node 7.6+, Chrome 55+, Firefox 52+, Safari 10.1+ and Edge.
+# But runtimes that don’t support the \`await\` keyword will throw an error just
+# from parsing this file, even without executing it, even if we put
+# \`return unless try new Function 'async () => {}'\` at the top of this file.
+# Therefore we need to prevent runtimes which will choke on such code from
+# parsing it, which is handled in \`Cakefile\`.
+
+# This is always fulfilled.
 winning = (val) -> Promise.resolve val
 
+# This is always rejected.
 failing = (val) -> Promise.reject new Error val
 
 test "async as argument", -> ok -> await winning()
@@ -2715,6 +2764,7 @@ test "await precedence", ->
   fn = (win, fail) -> win 3
 
   promise = do ->
+    # assert precedence between unary (new) and power (**) operators
     out = 1 + await new Promise(fn) ** 2
 
   promise.then -> eq out, 10
@@ -2724,7 +2774,9 @@ test "\`await\` inside IIFEs", ->
 
   a = do ->
     x =
-      switch 4
+      switch (
+        4 # switch 4
+      )
         when 2
           await winning 1
         when 4
@@ -2758,7 +2810,7 @@ test "error handling", ->
     try
       await failing "fail"
     catch e
-      val = 7
+      val = 7 # to assure the catch block runs
       return e
 
   b = do ->
@@ -2833,8 +2885,10 @@ test "async generator functions", ->
   catch err
     ok no
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# This is always fulfilled.
 winLater = (val, ms) -> new Promise (resolve) -> setTimeout (-> resolve val), ms
 
+# This is always rejected.
 failLater = (val, ms) ->
   new Promise (resolve, reject) -> setTimeout (-> reject new Error val), ms
 
@@ -2886,6 +2940,11 @@ test "#764 Booleans should be indexable", ->
   eq toString, on.toString
   eq toString, off.toString
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Boolean Literals
+# ----------------
+
+# TODO: add method invocation tests: true.toString() is "true"
+
 test "#764 Booleans should be indexable", ->
   toString = Boolean::toString
 
@@ -4808,6 +4867,14 @@ test "#4868: Incorrect ‘Can’t call super with @params’ error", ->
 
   d = new (new D).c
   eq 3, d.a~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Classes
+# -------
+
+# * Class Definition
+# * Class Instantiation
+# * Inheritance and Super
+# * ES2015+ Class Interoperability
+
 test "classes with a four-level inheritance chain", ->
   class Base
     func: (string) ->
@@ -4831,6 +4898,7 @@ test "classes with a four-level inheritance chain", ->
       super()
       thirdCtor.call this
 
+    # Gratuitous comment for testing.
     func: (string) ->
       super("three/") + string
 
@@ -5201,6 +5269,7 @@ test "ensure that constructors invoked with splats return a new object", ->
   eq type1.constructor, Type1
   ok type1.a is args[0] and type1.b is args[1] and type1.c is args[2]
 
+  # Ensure that constructors invoked with splats cache the function.
   called = 0
   get = ->
     if called++
@@ -5323,6 +5392,8 @@ test "#1842: Regression with bound functions within bound class methods", ->
 
   Store.bound()
 
+  # And a fancier case:
+
   class Store
     eq this, Store
 
@@ -5379,6 +5450,7 @@ test "#1980: regression with an inherited class with static function members", -
   eq B.static(), "value"
 
 test "#1534: class then 'use strict'", ->
+  # [14.1 Directive Prologues and the Use Strict Directive](http://es5.github.com/#x14.1)
   nonce = {}
   error = "do -> ok this"
   strictTest = "do ->'use strict';#{error}"
@@ -5393,6 +5465,7 @@ test "#1534: class then 'use strict'", ->
   doesNotThrow -> CoffeeScript.run "class then #{error}", bare: yes
   doesNotThrow -> CoffeeScript.run "class then #{error};'use strict'", bare: yes
 
+  # comments are ignored in the Directive Prologue
   comments = [
     """
   class
@@ -5415,6 +5488,7 @@ test "#1534: class then 'use strict'", ->
   ]
   throws -> CoffeeScript.run comment, bare: yes for comment in comments
 
+  # [ES5 §14.1](http://es5.github.com/#x14.1) allows for other directives
   directives = [
     """
   class
@@ -5462,6 +5536,7 @@ test "directives in class with extends ", ->
 test "#2630: class bodies can't reference arguments", ->
   throws -> CoffeeScript.compile "class Test then arguments"
 
+  # #4320: Don't be too eager when checking, though.
   class Test
     arguments: 5
   eq 5, Test::arguments
@@ -5686,6 +5761,9 @@ test "dynamic method names and super", ->
       super()
   eq 5, new C().m()
 
+# ES2015+ class interoperability
+# Based on https://github.com/balupton/es6-javascript-class-interop
+# Helper functions to generate true ES classes to extend:
 getBasicClass = ->
   \`\`\`
   class BasicClass {
@@ -5826,6 +5904,7 @@ test "\`@\`-params and bound methods with multiple \`super\` paths (expressions)
 
   class Test extends Base
     constructor: (param, @param) ->
+      # Contrived example: force each path into an expression with inline assertions
       if param
         result = (
           eq super("param"), @;
@@ -5853,6 +5932,14 @@ test "constructor super in arrow functions", ->
 
   new Test (nonce = {})
 
+# TODO Some of these tests use CoffeeScript.compile and CoffeeScript.run when they could use
+# regular test mechanics.
+# TODO Some of these tests might be better placed in \`test/error_messages.coffee\`.
+# TODO Some of these tests are duplicates.
+
+# Ensure that we always throw if we experience more than one super()
+# call in a constructor.  This ends up being a runtime error.
+# Should be caught at compile time.
 test "multiple super calls", ->
   throwsA = """
   class A
@@ -5868,6 +5955,8 @@ test "multiple super calls", ->
   """
   throws -> CoffeeScript.run throwsA, bare: yes
 
+# Basic test to ensure we can pass @params in a constuctor and
+# inheritance works correctly
 test "@ params", ->
   class A
     constructor: (@drink, @shots, @flavor) ->
@@ -5881,8 +5970,10 @@ test "@ params", ->
   b = new B "Machiato", 2, "chocolate"
   eq b.make(), "Making a chocolate Machiato with 2 shot(s)"
 
+# Ensure we can accept @params with default parameters in a constructor
 test "@ params with defaults in a constructor", ->
   class A
+    # Multiple @ params with defaults
     constructor: (@drink = "Americano", @shots = "1", @flavor = "caramel") ->
     make: ->
       "Making a #{@flavor} #{@drink} with #{@shots} shot(s)"
@@ -5890,6 +5981,7 @@ test "@ params with defaults in a constructor", ->
   a = new A()
   eq a.make(), "Making a caramel Americano with 1 shot(s)"
 
+# Ensure we can handle default constructors with class params
 test "@ params with class params", ->
   class Beverage
     drink: "Americano"
@@ -5897,18 +5989,21 @@ test "@ params with class params", ->
     flavor: "caramel"
 
   class A
+    # Class creation as a default param with \`this\`
     constructor: (@drink = new Beverage()) ->
   a = new A()
   eq a.drink.drink, "Americano"
 
   beverage = new Beverage()
   class B
+    # class costruction with a default external param
     constructor: (@drink = beverage) ->
 
   b = new B()
   eq b.drink.drink, "Americano"
 
   class C
+    # Default constructor with anonymous empty class
     constructor: (@meta = class) ->
   c = new C()
   ok c.meta instanceof Function
@@ -5944,6 +6039,7 @@ test "@ params super race condition", ->
   """
   throws -> CoffeeScript.compile classA + throwsB, bare: yes
 
+  # Race condition with @ and super
   throwsC = """
   class C extends A
     constructor: (@params) ->
@@ -5978,6 +6074,7 @@ test "@ with splats and super call", ->
   eq B.make(), "Making a Machiato"
 
 test "super and external constructors", ->
+  # external constructor with @ param is allowed
   ctorA = (@drink) ->
   class A
     constructor: ctorA
@@ -5986,6 +6083,7 @@ test "super and external constructors", ->
   a = new A "Machiato"
   eq a.make(), "Making a Machiato"
 
+  # External constructor with super
   throwsC = """
   class B
     constructor: (@drink) ->
@@ -6001,6 +6099,9 @@ test "super and external constructors", ->
   throws -> CoffeeScript.compile throwsC, bare: yes
 
 test "bound functions without super", ->
+  # Bound function with @
+  # Throw on compile, since bound
+  # constructors are illegal
   throwsA = """
   class A
     constructor: (drink) =>
@@ -6030,6 +6131,7 @@ test "super in a bound function", ->
   b = new B "Machiato"
   eq b.make("vanilla"), "Making a Machiato with vanilla"
 
+  # super in a bound function in a bound function
   class C extends A
     make: (@flavor) =>
       func = => super() + " with #{@flavor}"
@@ -6038,6 +6140,7 @@ test "super in a bound function", ->
   c = new C "Machiato"
   eq c.make("vanilla"), "Making a Machiato with vanilla"
 
+  # bound function in a constructor
   class D extends A
     constructor: (drink) ->
       super drink
@@ -6046,6 +6149,7 @@ test "super in a bound function", ->
   d = new D "Machiato"
   eq d.make(), "Making a Machiato"
 
+# duplicate
 test "super in a try/catch", ->
   classA = """
   class A
@@ -6072,6 +6176,9 @@ test "super in a try/catch", ->
   throws -> CoffeeScript.run classA + throwsC, bare: yes
 
 test "mixed ES6 and CS6 classes with a four-level inheritance chain", ->
+  # Extended test
+  # ES2015+ class interoperability
+
   \`\`\`
   class Base {
     constructor (greeting) {
@@ -6111,6 +6218,7 @@ test "mixed ES6 and CS6 classes with a four-level inheritance chain", ->
   ok result is "zero/one/two/three/four"
   ok Base.staticFunc("word") is "static/word"
 
+# exercise extends in a nested class
 test "nested classes with super", ->
   class Outer
     constructor: ->
@@ -6192,11 +6300,13 @@ test "ES6 static class methods can be overriden", ->
   eq A.name(), "A"
   eq B.name(), "B"
 
+# If creating static by direct assignment rather than ES6 static keyword
 test "ES6 Static methods should set \`this\` to undefined // ES6 ", ->
   class A
     @test: ->
       eq this, undefined
 
+# Ensure that our object prototypes work with ES6
 test "ES6 prototypes can be overriden", ->
   class A
     className: "classA"
@@ -6212,9 +6322,57 @@ test "ES6 prototypes can be overriden", ->
   eq b.test(), "B"
   Object.setPrototypeOf b, a
   eq b.className, "classA"
+  # This shouldn't throw,
+  # as we only change inheritance not object construction
+  # This may be an issue with ES, rather than CS construction?
+  #eq b.test(), 'B'
+
   class D extends B
   B::test = -> "D"
   eq new D().test(), "D"
+
+# TODO: implement this error check
+# test "ES6 conformance to extending non-classes", ->
+#   A = (@title) ->
+#     'Title: ' + @
+
+#   class B extends A
+#   b = new B('caffeinated')
+#   eq b.title, 'caffeinated'
+
+#   # Check inheritance chain
+#   A::getTitle = () -> @title
+#   eq b.getTitle(), 'caffeinated'
+
+#   throwsC = """
+#   C = {title: 'invalid'}
+#   class D extends {}
+#   """
+#   # This should catch on compile and message should be "class can only extend classes and functions."
+#   throws -> CoffeeScript.run throwsC, bare: yes
+
+# TODO: Evaluate future compliance with "strict mode";
+# test "Class function environment should be in \`strict mode\`, ie as if 'use strict' was in use", ->
+#   class A
+#     # this might be a meaningless test, since these are likely to be runtime errors and different
+#     # for every browser.  Thoughts?
+#     constructor: () ->
+#       # Ivalid: prop reassignment
+#       @state = {prop: [1], prop: {a: 'a'}}
+#       # eval reassignment
+#       @badEval = eval;
+
+#   # Should throw, but doesn't
+#   a = new A
+
+# TODO: new.target needs support  Separate issue
+# test "ES6 support for new.target (functions and constructors)", ->
+#   throwsA = """
+#   class A
+#     constructor: () ->
+#       a = new.target.name
+#   """
+#   throws -> CoffeeScript.compile throwsA, bare: yes
 
 test "only one method named constructor allowed", ->
   throwsA = """
@@ -6242,6 +6400,7 @@ test "super can only exist in extended classes", ->
   """
   throws -> CoffeeScript.compile throwsA, bare: yes
 
+# --- CS1 classes compatability breaks ---
 test "CS6 Class extends a CS1 compiled class", ->
   \`\`\`
   // Generated by CoffeeScript 1.11.1
@@ -6647,6 +6806,9 @@ if cluster.isMaster
 else
   process.exit 0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Cluster Module
+# ---------
+
 return if testingBrowser?
 
 cluster = require "cluster"
@@ -6841,11 +7003,19 @@ test "#3306: trailing comma in a function call in the last line", ->
   ''', '''
   foo(bar);
   '''~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Compilation
+# -----------
+
+# Helper to assert that a string should fail compilation.
 cantCompile = (code) -> throws -> CoffeeScript.compile code
 
+# Helper to pipe the CoffeeScript compiler’s output through a transpiler.
 transpile = (method, code, options = {}) ->
+  # \`method\` should be 'compile' or 'eval' or 'run'
   options.bare = yes
-  options.transpile = presets: [["env", { targets: browsers: ["ie 6"] }]]
+  options.transpile =
+    # Target Internet Explorer 6, which supports no ES2015+ features.
+    presets: [["env", { targets: browsers: ["ie 6"] }]]
   CoffeeScript[method] code, options
 
 test "ensure that carriage returns don't break compilation on Windows", ->
@@ -6895,24 +7065,27 @@ test "Issue #986: Unicode identifiers", ->
 test "#2516: Unicode spaces should not be part of identifiers", ->
   a = (x) -> x * 2
   b = 3
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
-  eq 6, a b
+  eq 6, a b # U+00A0 NO-BREAK SPACE
+  eq 6, a b # U+1680 OGHAM SPACE MARK
+  eq 6, a b # U+2000 EN QUAD
+  eq 6, a b # U+2001 EM QUAD
+  eq 6, a b # U+2002 EN SPACE
+  eq 6, a b # U+2003 EM SPACE
+  eq 6, a b # U+2004 THREE-PER-EM SPACE
+  eq 6, a b # U+2005 FOUR-PER-EM SPACE
+  eq 6, a b # U+2006 SIX-PER-EM SPACE
+  eq 6, a b # U+2007 FIGURE SPACE
+  eq 6, a b # U+2008 PUNCTUATION SPACE
+  eq 6, a b # U+2009 THIN SPACE
+  eq 6, a b # U+200A HAIR SPACE
+  eq 6, a b # U+202F NARROW NO-BREAK SPACE
+  eq 6, a b # U+205F MEDIUM MATHEMATICAL SPACE
+  eq 6, a b # U+3000 IDEOGRAPHIC SPACE
+
+  # #3560: Non-breaking space (U+00A0) (before \`'c'\`)
   eq 5, { c: 5 }["c"]
 
+  # A line where every space in non-breaking
   eq 1 + 1, 2
 test "don't accidentally stringify keywords", ->
   ok (-> this == "this")() is false
@@ -6931,8 +7104,9 @@ test "#1050: no closing asterisk comments from within block comments", ->
   cantCompile "### */ ###"
 
 test "#1273: escaping quotes at the end of heredocs", ->
-  cantCompile '"""\\\\"""'
-  cantCompile '"""\\\\\\\\\\\\"""'
+  cantCompile '"""\\\\"""' # """\\"""
+  cantCompile '"""\\\\\\\\\\\\"""' # """\\\\\\"""
+
 test "#1106: __proto__ compilation", ->
   object = eq
   @["__proto__"] = true
@@ -6987,8 +7161,13 @@ test "transpile option has merged source maps", ->
     untranspiledOutput.v3SourceMap.mappings isnt transpiledOutput.v3SourceMap
       .mappings
   )
+  # Babel adds \`'use strict';\` to the top of files with the modules transform.
   eq transpiledOutput.js.indexOf("use strict"), 1
+  # The \`'use strict';\` followed by two newlines results in the first two lines
+  # of the source map mappings being two blank/skipped lines.
   eq transpiledOutput.v3SourceMap.mappings.indexOf(";;"), 0
+  # The number of lines in the transpiled code should match the number of lines
+  # in the source map.
   eq(
     transpiledOutput.js.split("\\n").length
     transpiledOutput.v3SourceMap.mappings.split(";").length
@@ -7603,6 +7782,17 @@ test "#3778: Consistently always cache for loop range boundaries and steps, even
   a = 1; arrayEq [1, 2, 3], (for n in [1..3] by  a    then a = 4; n)
   a = 1; arrayEq [1, 2, 3], (for n in [1..3] by +a    then a = 4; n)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Comprehensions
+# --------------
+
+# * Array Comprehensions
+# * Range Comprehensions
+# * Object Comprehensions
+# * Implicit Destructuring Assignment
+# * Comprehensions with Nonstandard Step
+
+# TODO: refactor comprehension tests
+
 test "Basic array comprehensions.", ->
   nums = (n * n for n in [1, 2, 3] when n & 1)
   results = (n * 2 for n in nums)
@@ -7950,13 +8140,16 @@ test "#1326: \`by\` value is uncached", ->
   forCompile = []
   rangeCompileSimple = []
 
+  #exercises For.compile
   for v, i in a by f()
     forCompile.push i
 
+  #exercises Range.compileSimple
   rangeCompileSimple = (i for i in [0..2] by g())
 
   arrayEq a, forCompile
   arrayEq a, rangeCompileSimple
+  #exercises Range.compile
   eq "#{i for i in [0..2] by h()}", "0,1,2"
 
 test "#1669: break/continue should skip the result only for that branch", ->
@@ -7970,6 +8163,7 @@ test "#1669: break/continue should skip the result only for that branch", ->
         n
   eq "#{ns}", "0,2,4,6,8"
 
+  # \`else undefined\` is implied.
   ns =
     for n in [1..9]
       if n % 2
@@ -7977,6 +8171,7 @@ test "#1669: break/continue should skip the result only for that branch", ->
         n
   eq "#{ns}", "1,,3,,,7,,9"
 
+  # Ditto.
   ns =
     for n in [1..9]
       switch
@@ -9447,11 +9642,28 @@ test "#4898: Lexer: backslash line continuation is inconsistent", ->
 
   eq f, 42
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Control Flow
+# ------------
+
+# * Conditionals
+# * Loops
+#   * For
+#   * While
+#   * Until
+#   * Loop
+# * Switch
+# * Throw
+
+# TODO: make sure postfix forms and expression coercion are properly tested
+
+# shared identity function
 id = (_) ->
   if arguments.length is 1
     _
   else
     Array::slice.call arguments
+
+# Conditionals
 
 test "basic conditionals", ->
   if false
@@ -9545,11 +9757,19 @@ test "empty conditional bodies", ->
 test "conditional bodies containing only comments", ->
   eq undefined,
     if true
+      ###
+  block comment
+  ###
     else
+      # comment
 
   eq undefined,
     if false
+      # comment
     else if true
+      ###
+  block comment
+  ###
     else
 
 test "return value of if-else is from the proper body", ->
@@ -9575,6 +9795,8 @@ test "assign inside the condition of a conditional statement", ->
   eq nonce, a
   1 if (b = nonce)
   eq nonce, b
+
+# Interactions With Functions
 
 test "single-line function definition with single-line conditional", ->
   fn = ->
@@ -9616,6 +9838,8 @@ test "unmatched \`then\` should catch implicit calls", ->
     a++
   eq 1, a
 
+# if-to-ternary
+
 test "if-to-ternary with instanceof requires parentheses", ->
   nonce = {}
   eq nonce,
@@ -9626,6 +9850,8 @@ test "if-to-ternary with instanceof requires parentheses", ->
 
 test "if-to-ternary as part of a larger operation requires parentheses", ->
   ok 2, 1 + (if false then 0 else 1)
+
+# Odd Formatting
 
 test "if-else indented within an assignment", ->
   nonce = {}
@@ -9698,10 +9924,14 @@ test "if-else within an assignment, condition parenthesized", ->
       "wrong"
   eq result, "correct"
 
+# Postfix
+
 test "#3056: multiple postfix conditionals", ->
   temp = "initial"
   temp = "ignored" unless true if false
   eq temp, "initial"
+
+# Loops
 
 test "basic \`while\` loops", ->
   i = 5
@@ -9795,6 +10025,8 @@ test "break *not* at the top level", ->
     result
   eq 2, someFunc()
 
+# Switch
+
 test "basic \`switch\`", ->
   num = 10
   result =
@@ -9807,6 +10039,8 @@ test "basic \`switch\`", ->
         false
       when 10
         true
+      # Mid-switch comment with whitespace
+      # and multi line
       when 11
         false
       else
@@ -9921,6 +10155,8 @@ test "Issue #997. Switch doesn't fallthrough.", ->
 
   eq val, 1
 
+# Throw
+
 test "Throw should be usable as an expression.", ->
   try
     false or throw "up"
@@ -9966,6 +10202,7 @@ test "#2367: super in for-loop", ->
   eq 10, new Bar().add 2, 3, 5
 
 test "#4267: lots of for-loops in the same scope", ->
+  # This used to include the invalid JavaScript \`var do = 0\`.
   code = """
     do ->
       #{Array(200).join "for [0..0] then\\n  "}
@@ -9973,6 +10210,7 @@ test "#4267: lots of for-loops in the same scope", ->
   """
   ok CoffeeScript.eval code
 
+# Test for issue #2342: Lexer: Inline \`else\` binds to wrong \`if\`/\`switch\`
 test "#2343: if / then / if / then / else", ->
   a = b = yes
   c = e = g = no
@@ -10688,6 +10926,7 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
   eq 0, x()
   eq 0, y()
 
+# Test for issue #3921: Inline function without parentheses used in condition fails to compile
 test "#3921: \`if\` & \`unless\`", ->
   a = {}
   eq a,
@@ -10876,6 +11115,7 @@ test "#3921: \`switch\`", ->
         "none"
   eq "five", c
 
+# Issue #3909: backslash to break line in \`for\` loops throw syntax error
 test "#3909: backslash \`for own ... of\`", ->
   obj = a: 1, b: 2, c: 3
   arr = ["a", "b", "c"]
@@ -11836,6 +12076,9 @@ test '#5055: JSX expression indentation bug', ->
     </div>;
   '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# We usually do not check the actual JS output from the compiler, but since
+# JSX is not natively supported by Node, we do it in this case.
+
 test "self closing", ->
   eqJS(
     '''
@@ -12021,6 +12264,7 @@ test "interpolation in string attribute value", ->
   '''
   )
 
+# Unlike in \`coffee-react-transform\`.
 test "bare numbers not allowed", -> throws -> CoffeeScript.compile "<div x=3 />"
 
 test "bare expressions not allowed", ->
@@ -12041,6 +12285,9 @@ test "space around equal sign", ->
     <div popular="yes" />;
   '''
   )
+
+# The following tests were adopted from James Friend’s
+# [https://github.com/jsdf/coffee-react-transform](https://github.com/jsdf/coffee-react-transform).
 
 test "ambiguous tag-like expression", ->
   throws -> CoffeeScript.compile "x = a <b > c"
@@ -12215,6 +12462,30 @@ test "lots of attributes", ->
     <Person eyes={2} friends={getFriends()} popular="yes" active={isActive() ? 'active' : 'inactive'} data-attr='works' checked check={me_out} />;
   '''
   )
+
+# TODO: fix partially indented CSX
+# test 'multiline elements', ->
+#   eqJS '''
+#     <div something={
+#       do ->
+#         test = /432/gm # this is a regex
+#         6 /432/gm # this is division
+#     }
+#     >
+#     <div>
+#     <div>
+#     <div>
+#       <article name={ new Date() } number={203}
+#        range={getRange()}
+#       >
+#       </article>
+#     </div>
+#     </div>
+#     </div>
+#     </div>
+#   ''', '''
+#     bla
+#   '''
 
 test "complex regex", ->
   eqJS(
@@ -12588,6 +12859,8 @@ test "closing tags must be closed", ->
     <a></a
   '''
 
+# Tests for allowing less than operator without spaces when ther is no CSX
+
 test "unspaced less than without CSX: identifier", ->
   a = 3
   div = 5
@@ -12736,6 +13009,7 @@ test "#4686: comments inside interpolations that also contain CSX attributes", -
   '''
   )
 
+# https://reactjs.org/blog/2017/11/28/react-v16.2.0-fragment-support.html
 test "JSX fragments: empty fragment", ->
   eqJS(
     '''
@@ -13021,23 +13295,37 @@ test "#3789: throwing a throw", ->
   catch err
     eq err.message, 'whoa!'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exception Handling
+# ------------------
+
+# shared nonce
 nonce = {}
 
+# Throw
+
 test "basic exception throwing", -> throws (-> throw "error"), /^error$/
+
+# Empty Try/Catch/Finally
 
 test "try can exist alone", ->
   try
 
 test "try/catch with empty try, empty catch", ->
   try
+    # nothing
   catch err
+    # nothing
+
 test "single-line try/catch with empty try, empty catch", ->
   try
   catch err
 
 test "try/finally with empty try, empty finally", ->
   try
+    # nothing
   finally
+    # nothing
+
 test "single-line try/finally with empty try, empty finally", ->
   try
   finally
@@ -13051,6 +13339,8 @@ test "single-line try/catch/finally with empty try, empty catch, empty finally",
   try
   catch err
   finally
+
+# Try/Catch/Finally as an Expression
 
 test "return the result of try when no exception is thrown", ->
   result =
@@ -13096,6 +13386,8 @@ test "optional catch", ->
   doesNotThrow fn
   eq nonce, fn()
 
+# Try/Catch/Finally Interaction With Other Constructs
+
 test "try/catch with empty catch as last statement in a function body", ->
   fn = ->
     try
@@ -13104,10 +13396,12 @@ test "try/catch with empty catch as last statement in a function body", ->
   eq nonce, fn()
 
 test "#1595: try/catch with a reused variable name", ->
+  # \`catch\` shouldn’t lead to broken scoping.
   do ->
     try
       inner = 5
     catch inner
+      # nothing
   eq typeof inner, "undefined"
 
 test "#2580: try/catch with destructuring the exception object", ->
@@ -13146,6 +13440,7 @@ test "Try catch finally as implicit arguments", ->
   eq bar, yes
 
 test "#2900: parameter-less catch clause", ->
+  # \`catch\` should not require a parameter.
   try
     throw new Error "failed"
   catch
@@ -13165,6 +13460,8 @@ test "#2900: parameter-less catch clause", ->
   )
 
 test "#3709: throwing an if statement", ->
+  # \`throw if\` should return a closure around the \`if\` block, so that the
+  # output is valid JavaScript.
   try
     throw (if no then new Error "drat!" else new Error "no escape!")
   catch err
@@ -13187,6 +13484,8 @@ test "#3709: throwing a switch statement", ->
     eq err.message, "oh no!"
 
 test "#3709: throwing a for loop", ->
+  # \`throw for\` should return a closure around the \`for\` block, so that the
+  # output is valid JavaScript.
   try
     throw for i in [0..3]
       i * 2
@@ -13230,6 +13529,10 @@ test "exponentiation operator compound assignment", ->
   a **= 3
   eq 8, a
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The \`**\` and \`**=\` operators are only supported in Node 7.5+, so the tests
+# for these exponentiation operators are split out into their own file to be
+# loaded only by supported runtimes.
+
 test "exponentiation operator", -> eq 27, 3 ** 3
 
 test "exponentiation operator has higher precedence than other maths operators", ->
@@ -13704,12 +14007,30 @@ test "#3736: chaining after do IIFE", ->
     do b
     .c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Formatting
+# ----------
+
+# TODO: maybe this file should be split up into their respective sections:
+#   operators -> operators
+#   array literals -> array literals
+#   string literals -> string literals
+#   function invocations -> function invocations
+
 doesNotThrow -> CoffeeScript.compile "a = then b"
 
 test "multiple semicolon-separated statements in parentheticals", ->
   nonce = {}
   eq nonce, (1; 2; nonce)
   eq nonce, (-> return (1; 2; nonce))()
+
+# * Line Continuation
+#   * Property Accesss
+#   * Operators
+#   * Array Literals
+#   * Function Invocations
+#   * String Literals
+
+# Property Access
 
 test "chained accesses split on period/newline, backwards and forwards", ->
   str = "abc"
@@ -13750,6 +14071,8 @@ test "chained accesses split on period/newline, backwards and forwards", ->
     .reverse()
   )
 
+# Operators
+
 test "newline suppression for operators", ->
   six = 1 + 2 + 3
   eq 6, six
@@ -13758,6 +14081,11 @@ test "\`?.\` and \`::\` should continue lines", ->
   ok not Date::?.foo
 
   ok not Date?::?.foo
+  #eq Object::toString, Date?.
+  #prototype
+  #::
+  #?.foo
+
 doesNotThrow ->
   CoffeeScript.compile """
   oh. yes
@@ -13775,10 +14103,14 @@ doesNotThrow ->
 test "#1768: space between \`::\` and index is ignored", ->
   eq "function", typeof String::["toString"]
 
+# Array Literals
+
 test "indented array literals don't trigger whitespace rewriting", ->
   getArgs = -> arguments
   result = getArgs [[[[[], []], [[]]]], []]
   eq 1, result.length
+
+# Function Invocations
 
 doesNotThrow ->
   CoffeeScript.compile """
@@ -13791,6 +14123,8 @@ doesNotThrow ->
     f: 1
   """
 
+# String Literals
+
 test "indented heredoc", ->
   result =
     ((_) -> _)(
@@ -13800,16 +14134,32 @@ test "indented heredoc", ->
     )
   eq "abc", result
 
+# Chaining - all open calls are closed by property access starting a new line
+# * chaining after
+#   * indented argument
+#   * function block
+#   * indented object
+#
+#   * single line arguments
+#   * inline function literal
+#   * inline object literal
+#
+# * chaining inside
+#   * implicit object literal
+
 test "chaining after outdent", ->
   id = (x) -> x
 
+  # indented argument
   ff = id(parseInt "ff", 16).toString()
   eq "255", ff
 
+  # function block
   str = "abc"
   zero = parseInt(str.replace /\\w/, (letter) -> 0).toString()
   eq "0", zero
 
+  # indented object
   a = id(id a: 1).a
   eq 1, a
 
@@ -13826,19 +14176,23 @@ test "#1495, method call chaining", ->
 
   eq "abc", "aaabbbccc".replace(/(\\w)\\1\\1/g, "$1$1").replace /([abc])\\1/g, "$1"
 
+  # Nested calls
   result = [1..3].slice(Math.max 0, 1).concat [3]
   arrayEq [2, 3, 3], result
 
+  # Single line function arguments
   result = [1..6]
   .map (x) -> x * x
   .filter (x) -> x % 2 is 0
   .reverse()
   arrayEq [36, 16, 4], result
 
+  # Single line implicit objects
   id = (x) -> x
   result = id(a: 1).a
   eq 1, result
 
+  # The parens are forced
   result = str.split("".split("").join "").join ", "
   eq "a, b, c", result
 
@@ -13885,6 +14239,7 @@ test "#4568: refine sameLine implicit object tagging", ->
   x = fn bar: foo: 123 if not condition
   eq x, undefined
 
+# Nested blocks caused by paren unwrapping
 test "#1492: Nested blocks don't cause double semicolons", ->
   js = CoffeeScript.compile "(0;0)"
   eq -1, js.indexOf ";;"
@@ -14084,6 +14439,7 @@ test "#3736: chaining after do IIFE", ->
     .a
   )
 
+  # preserve existing chaining behavior for non-IIFE \`do\`
   b = c: -> 4
   eq 4, do b.c
 
@@ -15021,12 +15377,22 @@ f class
 f class A
 f class A extends B
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function Invocation
+# -------------------
+
+# * Function Invocation
+# * Splats in Function Invocations
+# * Implicit Returns
+# * Explicit Returns
+
+# shared identity function
 id = (_) ->
   if arguments.length is 1
     _
   else
     [arguments...]
 
+# helper to assert that a string should fail compilation
 cantCompile = (code) -> throws -> CoffeeScript.compile code
 
 test "basic argument passing", ->
@@ -15058,6 +15424,8 @@ test "hanging commas and semicolons in argument list", ->
   eq 2, fn 0, 1
   eq 3, fn 0, 1, 2
   eq 2, fn 0, 1
+  # TODO: this test fails (the string compiles), but should it?
+  #throws -> CoffeeScript.compile "fn(0,1,;)"
   throws -> CoffeeScript.compile "fn(0,1,;;)"
   throws -> CoffeeScript.compile "fn(0, 1;,)"
   throws -> CoffeeScript.compile "fn(,0)"
@@ -15111,6 +15479,8 @@ test "Ensure that functions can have a trailing comma in their argument list", -
   mult = (x, mids..., y) ->
     (x *= n) for n in mids
     x *= y
+  #ok mult(1, 2,) is 2
+  #ok mult(1, 2, 3,) is 6
   ok mult(10, (i for i in [1..6])...) is 7200
 
 test "\`@\` and \`this\` should both be able to invoke a method", ->
@@ -15285,6 +15655,7 @@ test "passing splats to functions", ->
   arrayEq [2..6], others
   eq 7, last
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   arrayEq [0..4], id id [0..4]...
   fn = (a, b, c..., d) -> [a, b, c, d]
   range = [0..3]
@@ -15338,6 +15709,7 @@ test "splats with super() within classes.", ->
       super nums...
   ok new Child().meth().join(" ") is "3 2 1"
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   class Parent
     meth: (args...) ->
       args
@@ -15353,6 +15725,7 @@ test "#1011: passing a splat to a method of a number", ->
   eq "1011", 69.0.toString [4]...
   eq "1011", 131.0.toString [5]...
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   eq "1011", 11.toString [2]...
   eq "1011", 31.toString [3]...
   eq "1011", 69.0.toString [4]...
@@ -15363,6 +15736,7 @@ test "splats and the \`new\` operator: functions that return \`null\` should con
   child = new (constructor = -> null) args...
   ok child instanceof constructor
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   child = new (constructor = -> null) args...
   ok child instanceof constructor
 
@@ -15373,7 +15747,16 @@ test "splats and the \`new\` operator: functions that return functions should co
   ok child not instanceof constructor
   eq fn, child
 
-test "implicit return", -> eq ok, new (-> ok)()
+test "implicit return", ->
+  eq(
+    ok
+    new (->
+      ok
+      ### Should \`return\` implicitly   ###
+      ### even with trailing comments. ###
+    )()
+  )
+
 test "implicit returns with multiple branches", ->
   nonce = {}
   fn = ->
@@ -15654,6 +16037,7 @@ test "implicit invocation with implicit object literal", ->
       a: 1
   eq 2, obj.a
 
+  # #3935: Implicit call when the first key of an implicit object has interpolation.
   a = "a"
   f "#{a}": 1
   obj =
@@ -16364,6 +16748,21 @@ test "#4657: destructured array parameters", ->
 
 # TODO: add tests for newly supported shouldCache() params with default eg ([..., last] = 1) ->, (..., [..., last] = 1) ->
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function Literals
+# -----------------
+
+# TODO: add indexing and method invocation tests: (->)[0], (->).call()
+
+# * Function Definition
+# * Bound Function Definition
+# * Parameter List Features
+#   * Splat Parameters
+#   * Context (@) Parameters
+#   * Parameter Destructuring
+#   * Default Parameters
+
+# Function Definition
+
 x = 1
 y = {}
 y.x = -> 3
@@ -16372,21 +16771,29 @@ ok typeof y.x is "function"
 ok y.x instanceof Function
 ok y.x() is 3
 
+# The empty function should not cause a syntax error.
 ->
 ->
 
+# Multiple nested function declarations mixed with implicit calls should not
+# cause a syntax error.
 (one) -> (two) -> three four, (five) -> six seven, eight, (nine) ->
 
+# with multiple single-line functions on the same line.
 func = (x) -> (x) -> (x) -> x
 ok func(1)(2)(3) is 3
 
+# Make incorrect indentation safe.
 func = ->
   obj = key: 10
   obj.key - 5
 eq func(), 5
 
+# Ensure that functions with the same name don't clash with helper functions.
 del = -> 5
 ok del() is 5
+
+# Bound Function Definition
 
 obj =
   bound: -> (=> this)()
@@ -16411,6 +16818,11 @@ test "even more fancy bound functions", ->
   eq obj.one(), 3
 
 test "arguments in bound functions inherit from parent function", ->
+  # The \`arguments\` object in an ES arrow function refers to the \`arguments\`
+  # of the parent scope, just like \`this\`. In the CoffeeScript 1.x
+  # implementation of \`=>\`, the \`arguments\` object referred to the arguments
+  # of the arrow function; but per the ES2015 spec, \`arguments\` should refer
+  # to the parent.
   arrayEq ((a...) -> a)([1, 2, 3]), ((a...) => a) [1, 2, 3]
 
   parent = (a, b, c) ->
@@ -16423,12 +16835,15 @@ test "self-referencing functions", ->
   changeMe()
   eq changeMe, 2
 
+# Parameter List Features
+
 test "splats", ->
   arrayEq [0, 1, 2], ((splat...) -> splat) 0, 1, 2
   arrayEq [2, 3], ((_, _1, splat...) -> splat) 0, 1, 2, 3
   arrayEq [0, 1], ((splat..., _, _1) -> splat) 0, 1, 2, 3
   arrayEq [2], ((_, _1, splat..., _2) -> splat) 0, 1, 2, 3
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   arrayEq [0, 1, 2], ((splat...) -> splat) 0, 1, 2
   arrayEq [2, 3], ((_, _1, splat...) -> splat) 0, 1, 2, 3
   arrayEq [0, 1], ((splat..., _, _1) -> splat) 0, 1, 2, 3
@@ -16443,6 +16858,7 @@ test "destructured splatted parameters", ->
   arrayEq splatArray(arr), arr
   arrayEq splatArrayRest(arr, 0, 1, 2), arr
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   splatArray = ([a...]) -> a
   splatArrayRest = ([a...], b...) ->
     arrayEq a, b
@@ -16464,18 +16880,23 @@ test "@-parameters: automatically assign an argument's value to a property of th
   ((@prop) ->).call (context = {}), nonce
   eq nonce, context.prop
 
+  # Allow splats alongside the special argument
   ((splat..., @prop) ->).apply (context = {}), [0, 0, nonce]
   eq nonce, context.prop
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   ((splat..., @prop) ->).apply (context = {}), [0, 0, nonce]
   eq nonce, context.prop
 
+  # Allow the argument itself to be a splat
   ((@prop...) ->).call (context = {}), 0, nonce, 0
   eq nonce, context.prop[1]
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   ((@prop...) ->).call (context = {}), 0, nonce, 0
   eq nonce, context.prop[1]
 
+  # The argument should not be able to be referenced normally
   code = "((@prop) -> prop).call {}"
   doesNotThrow -> CoffeeScript.compile code
   throws (-> CoffeeScript.run code), ReferenceError
@@ -16493,6 +16914,7 @@ test "@-parameters and splats with constructors", ->
   eq a, obj.first
   eq b, obj.last
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   class Klass
     constructor: (@first, splat..., @last) ->
 
@@ -16506,6 +16928,7 @@ test "destructuring in function definition", ->
     eq 2, c
   ) a: [1], c: 2
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   (([{ a: [b], c }]...) ->
     eq 1, b
     eq 2, c
@@ -16544,6 +16967,7 @@ test "#4005: \`([a = {}]..., b) ->\` weirdness", ->
   fn = ([a = {}]..., b) -> [a, b]
   deepEqual fn(5), [{}, 5]
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   fn = ([a = {}]..., b) -> [a, b]
   deepEqual fn(5), [{}, 5]
 
@@ -16555,7 +16979,7 @@ test "default values", ->
   eq nonceA, a 0
   eq nonceB, a 0, 0, nonceB
   eq nonceA, a 0, 0, undefined
-  eq null, a 0, 0, null
+  eq null, a 0, 0, null # Per ES2015, \`null\` doesn’t trigger a parameter default value
   eq false, a 0, 0, false
   eq nonceB, a undefined, undefined, nonceB, undefined
   b = (_, arg = nonceA, _1, _2) -> arg
@@ -16590,6 +17014,7 @@ test "default values with splatted arguments", ->
   eq 1, withSplats 1, 1, 1
   eq 2, withSplats 1, 1, 1, 1
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   withSplats = (a = 2, b..., c = 3, d = 5) -> a * (b.length + 1) * c * d
   eq 30, withSplats()
   eq 15, withSplats 1
@@ -16629,6 +17054,7 @@ test "variable definitions and splat", ->
   eq 0, a
   eq 0, b
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   f = (a, middle..., b) -> [a, middle, b]
   arrayEq [1, [2, 3, 4], 5], f 1, 2, 3, 4, 5
   eq 0, a
@@ -16664,6 +17090,7 @@ test "reserved keyword at-splat", ->
   eq 1, a
   eq 2, b
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   f = (@case...) -> @case
   [a, b] = f 1, 2
   eq 1, a
@@ -16741,6 +17168,7 @@ test "#4406 Destructured parameter default evaluation order with generator funct
   arrayEq foo({}), [1, 2]
 
 test "Destructured parameter with default value, that itself has a default value", ->
+  # Adapted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
   draw = ({ size = "big", coords = { x: 0, y: 0 }, radius = 25 } = {}) ->
     "#{size}-#{coords.x}-#{coords.y}-#{radius}"
   output = draw(
@@ -16798,6 +17226,8 @@ test "#3845/#3446: chain after function glyph", ->
 
 test "#4413: expressions in function parameters that create generated variables have those variables declared correctly", ->
   "use strict"
+  # We’re in strict mode because we want an error to be thrown if the generated
+  # variable (\`ref\`) is assigned before being declared.
   foo = -> null
   bar = -> 33
   f = (a = foo() ? bar()) -> a
@@ -16818,6 +17248,8 @@ test "#4657: destructured array parameters", ->
   result = f [1, 2, 3, 4]
   arrayEq result.a, [1, 2, 3]
   eq result.b, 4
+
+# TODO: add tests for newly supported shouldCache() params with default eg ([..., last] = 1) ->, (..., [..., last] = 1) ->
 
 `;
 
@@ -17167,6 +17599,11 @@ test "generator methods in classes", ->
   arrayEq [1], Array.from Child.static()
   arrayEq [2], Array.from new Child().method()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Generators
+# -----------------
+#
+# * Generator Definition
+
 test "most basic generator support", -> ok -> yield
 
 test "empty generator", ->
@@ -17438,6 +17875,9 @@ test "for-from loops over generators", ->
     array4.push x
 
   arrayEq array2, [50, 30]
+  # Different JS engines have different opinions on the value of array3:
+  # https://github.com/jashkenas/coffeescript/pull/4306#issuecomment-257066877
+  # As a temporary measure, either result is accepted.
   ok array3.length is 0 or array3.join(",") is "70,20"
   arrayEq array4, []
 
@@ -17640,6 +18080,10 @@ test "the \`baseFileName\` helper returns the file name to write to", ->
     filename = name + ext
     eq filename, expectedFileName
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Helpers
+# -------
+
+# pull the helpers from \`CoffeeScript.helpers\` into local variables
 {
   starts
   ends
@@ -17653,6 +18097,8 @@ test "the \`baseFileName\` helper returns the file name to write to", ->
   baseFileName
 } = CoffeeScript.helpers
 
+# \`starts\`
+
 test "the \`starts\` helper tests if a string starts with another string", ->
   ok starts "01234", "012"
   ok not starts "01234", "123"
@@ -17660,6 +18106,8 @@ test "the \`starts\` helper tests if a string starts with another string", ->
 test "the \`starts\` helper can take an optional offset", ->
   ok starts "01234", "34", 3
   ok not starts "01234", "01", 1
+
+# \`ends\`
 
 test "the \`ends\` helper tests if a string ends with another string", ->
   ok ends "01234", "234"
@@ -17669,16 +18117,22 @@ test "the \`ends\` helper can take an optional offset", ->
   ok ends "01234", "012", 2
   ok not ends "01234", "234", 6
 
+# \`repeat\`
+
 test "the \`repeat\` helper concatenates a given number of times", ->
   eq "asdasdasd", repeat "asd", 3
 
 test "\`repeat\`ing a string 0 times always returns the empty string", ->
   eq "", repeat "whatever", 0
 
+# \`compact\`
+
 test "the \`compact\` helper removes falsey values from an array, preserves truthy ones", ->
   allValues = [1, 0, false, (obj = {}), [], "", " ", -1, null, undefined, true]
   truthyValues = [1, obj, [], " ", -1, true]
   arrayEq truthyValues, compact allValues
+
+# \`count\`
 
 test "the \`count\` helper counts the number of occurrences of a string in another string", ->
   eq 1 / 0, count "abc", ""
@@ -17687,6 +18141,8 @@ test "the \`count\` helper counts the number of occurrences of a string in anoth
   eq 1, count "abc", "b"
   eq 2, count "abcdc", "c"
   eq 2, count "abcdabcd", "abc"
+
+# \`merge\`
 
 test "the \`merge\` helper makes a new object with all properties of the objects given as its arguments", ->
   ary = [0, 1, 2, 3, 4]
@@ -17697,21 +18153,31 @@ test "the \`merge\` helper makes a new object with all properties of the objects
   for own key, val of ary
     eq val, merged[key]
 
+# \`extend\`
+
 test "the \`extend\` helper performs a shallow copy", ->
   ary = [0, 1, 2, 3]
   obj = {}
+  # should return the object being extended
   eq obj, extend obj, ary
+  # should copy the other object's properties as well (obviously)
   eq 2, obj[2]
+
+# \`flatten\`
 
 test "the \`flatten\` helper flattens an array", ->
   success = yes
   (success and= typeof n is "number") for n in flatten [0, [[[1]], 2], 3, [4]]
   ok success
 
+# \`del\`
+
 test "the \`del\` helper deletes a property from an object and returns the deleted value", ->
   obj = [0, 1, 2]
   eq 1, del obj, 1
   ok 1 not of obj
+
+# \`baseFileName\`
 
 test "the \`baseFileName\` helper returns the file name to write to", ->
   ext = ".js"
@@ -17901,6 +18367,16 @@ test "heregex interpolation", ->
    \\\\ "
   /// + ''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Interpolation
+# -------------
+
+# * String Interpolation
+# * Regular Expression Interpolation
+
+# String Interpolation
+
+# TODO: refactor string interpolation tests
+
 eq(
   'multiline nested "interpolations" work'
   """multiline #{"nested #{
@@ -17909,32 +18385,45 @@ eq(
   }"} work"""
 )
 
+# Issue #923: Tricky interpolation.
 eq "#{"{"}", "{"
 eq "#{'#{}}'} }", '#{}} }'
 eq "#{"'#{{ a: "b#{1}" }["a"]}'"}", "'b1'"
 
+# Issue #1150: String interpolation regression
 eq "#{'"/'}", '"/'
 eq "#{"/'"}", "/'"
 eq "#{/'"/}", "/'\\"/"
 eq "#{"'/" + '/"' + /"'/}", "'//\\"/\\"'/"
 eq "#{"'/"}#{'/"'}#{/"'/}", "'//\\"/\\"'/"
 eq "#{6 / 2}", "3"
-eq "#{6 / 2}#{6 / 2}", "33"
-eq "#{6 + /2}#{6/ + 2}", '6/2}#{6/2'
+eq(
+  "#{6 / 2}#{6 / 2}"
+  "33" # parsed as division
+)
+eq(
+  "#{6 + /2}#{6/ + 2}"
+  '6/2}#{6/2' # parsed as a regex
+)
 eq(
   "#{6 / 2}
     #{6 / 2}"
-  "3 3"
+  "3 3" # newline cannot be part of a regex, so it's division
 )
-eq "#{/// "'/'"/" ///}", '/"\\'\\\\/\\'"\\\\/"/'
+eq(
+  "#{/// "'/'"/" ///}"
+  '/"\\'\\\\/\\'"\\\\/"/' # heregex, stuffed with spicy characters
+)
 eq "#{/\\\\'/}", "/\\\\\\\\'/"
 
+# Issue #2321: Regex/division conflict in interpolation
 eq "#{4 / 2}/", "2/"
 curWidth = 4
 eq "<i style='left:#{curWidth / 2}%;'></i>", "<i style='left:2%;'></i>"
 throws ->
   CoffeeScript.compile '''
    "<i style='left:#{ curWidth /2 }%;'></i>"'''
+#                 valid regex--^^^^^^^^^^^ ^--unclosed string
 eq "<i style='left:#{curWidth / 2}%;'></i>", "<i style='left:2%;'></i>"
 eq "<i style='left:#{curWidth / 2}%;'></i>", "<i style='left:2%;'></i>"
 eq "<i style='left:#{curWidth / 2}%;'></i>", "<i style='left:2%;'></i>"
@@ -18039,11 +18528,15 @@ eq "function(){}", "#{->}".replace /\\s/g, ""
 ok /^a[\\s\\S]+b$/.test "a#{=>}b"
 ok /^a[\\s\\S]+b$/.test "a#{(x) -> x %% 2}b"
 
+# Regular Expression Interpolation
+
+# TODO: improve heregex interpolation tests
+
 test "heregex interpolation", ->
   eq(
     /\\\\#{}\\\\"/ + ""
     ///
-   #{"#{"\\\\"}"}
+   #{"#{"\\\\"}"} # normal comment
    # regex comment
    \\#{}
    \\\\ "
@@ -18124,6 +18617,9 @@ test "escaped JavaScript blocks speed round", ->
   ]
     eqJS input, output
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# JavaScript Literals
+# -------------------
+
 test "inline JavaScript is evaluated", ->
   eq "\\\\\`", \`
     // Inline JS
@@ -18173,6 +18669,14 @@ test "JavaScript block only escapes backslashes followed by backticks", ->
   eq \`'\\\\\\n'\`, "\\\\\\n"
 
 test "escaped JavaScript blocks speed round", ->
+  # The following has escaped backslashes because they’re required in strings, but the intent is this:
+  # \`hello\`                                       → hello;
+  # \`\\\`hello\\\`\`                                   → \`hello\`;
+  # \`\\\`Escaping backticks in JS: \\\\\\\`hello\\\\\\\`\\\`\` → \`Escaping backticks in JS: \\\`hello\\\`\`;
+  # \`Single backslash: \\ \`                        → Single backslash: \\ ;
+  # \`Double backslash: \\\\ \`                       → Double backslash: \\\\ ;
+  # \`Single backslash at EOS: \\\\\`                 → Single backslash at EOS: \\;
+  # \`Double backslash at EOS: \\\\\\\\\`               → Double backslash at EOS: \\\\;
   for [input, output] in [
     ["\`hello\`", "hello;"]
     ["\`\\\\\`hello\\\\\`\`", "\`hello\`;"]
@@ -18182,6 +18686,8 @@ test "escaped JavaScript blocks speed round", ->
     ]
     ['\`"Single backslash: \\\\ "\`', '"Single backslash: \\\\ ";']
     ['\`"Double backslash: \\\\\\\\ "\`', '"Double backslash: \\\\\\\\ ";']
+    # ['\`Single backslash at EOS: \\\\\\\\\`',                       'Single backslash at EOS: \\\\;']
+    # ['\`Double backslash at EOS: \\\\\\\\\\\\\\\\\`',                   'Double backslash at EOS: \\\\\\\\;']
   ]
     eqJS input, output
 
@@ -18277,7 +18783,23 @@ test "Infinity", ->
 test "NaN", ->
   ok isNaN 1/NaN
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Number Literals
+# ---------------
+
+# * Decimal Integer Literals
+# * Octal Integer Literals
+# * Hexadecimal Integer Literals
+# * Scientific Notation Integer Literals
+# * Scientific Notation Non-Integer Literals
+# * Non-Integer Literals
+# * Binary Integer Literals
+
+# Binary Integer Literals
+# Binary notation is understood as would be decimal notation.
+
 test "Parser recognises binary numbers", -> eq 4, 0b100
+
+# Decimal Integer Literals
 
 test "call methods directly on numbers", ->
   eq 4, 4.valueOf()
@@ -18285,16 +18807,25 @@ test "call methods directly on numbers", ->
 
 eq -1, 3 - 4
 
+#764: Numbers should be indexable
 eq Number::toString, 42["toString"]
 
 eq Number::toString, 42.toString
 
-eq Number::toString, Infinity["toString"]
+eq(
+  Number::toString
+  Infinity["toString"] # Infinity
+)
+
+# Non-Integer Literals
+
+# Decimal number literals.
 value = 0.25 + 0.75
 ok value is 1
 value = 0.0 + -0.25 - -0.75 + 0.0
 ok value is 0.5
 
+#764: Numbers should be indexable
 eq Number::toString, 4["toString"]
 eq Number::toString, 4.2["toString"]
 eq Number::toString, 0.42["toString"]
@@ -18815,6 +19346,7 @@ test "destructuring assignment with splats and default values", ->
   eq b, 1
   deepEqual d, {}
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   { a: { b } = c, d... } = obj
 
   eq b, 1
@@ -18858,6 +19390,7 @@ test "destructuring assignment with multiple splats in different objects", ->
   }
   eq m, 9
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   { a: { a... }, b: { b... } } = obj
   deepEqual a, { val: 1 }
   deepEqual b, { val: 2 }
@@ -18873,15 +19406,19 @@ test "destructuring assignment with dynamic keys and splats", ->
   eq i, 1
   deepEqual b, { 2: "b" }
 
+# Tests from https://babeljs.io/docs/plugins/transform-object-rest-spread/.
 test "destructuring assignment with objects and splats: Babel tests", ->
+  # What Babel calls “rest properties:”
   { x, y, z... } = x: 1, y: 2, a: 3, b: 4
   eq x, 1
   eq y, 2
   deepEqual z, { a: 3, b: 4 }
 
+  # What Babel calls “spread properties:”
   n = { x, y, z... }
   deepEqual n, { x: 1, y: 2, a: 3, b: 4 }
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   { x, y, z... } = x: 1, y: 2, a: 3, b: 4
   eq x, 1
   eq y, 2
@@ -18911,6 +19448,7 @@ test "deep destructuring assignment with objects: ES2015", ->
   eq bb, b1
   eq r2.b2, obj.b2
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   { a: w, b: { c: { d: { b1: bb, r1... } } }, r2... } = obj
   eq r1.e, c1
   eq r2.b, undefined
@@ -18933,6 +19471,7 @@ test "deep destructuring assignment with defaults: ES2015", ->
   eq hello, "world"
   deepEqual h, { some: "prop" }
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   { a..., b: { c, d... }, e: { f: hello, g: { h... } = i } = j } = obj
 
   deepEqual a, { foo: "bar" }
@@ -18947,6 +19486,7 @@ test "object spread properties: ES2015", ->
   eq obj2.c, 9
   eq obj.a, obj2.a
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   obj2 = { obj..., c: 9 }
   eq obj2.c, 9
   eq obj.a, obj2.a
@@ -18955,6 +19495,7 @@ test "object spread properties: ES2015", ->
   eq obj2.c, 3
   eq obj.a, obj2.a
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   obj2 = { obj..., a: 8, c: 9, obj... }
   eq obj2.c, 3
   eq obj.a, obj2.a
@@ -18989,11 +19530,13 @@ test "object spread properties: ES2015", ->
   eq obj4.f.g, 5
   deepEqual obj4.f, obj.c.f
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   (({ a, b, r... }) ->
     eq 1, a
     deepEqual r, { c: 3, d: 44, e: 55 }
   ) { obj2..., d: 44, e: 55 }
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   obj4 = { a: 10, obj.c... }
   eq obj4.a, 10
   eq obj4.d, 3
@@ -19004,6 +19547,7 @@ test "object spread properties: ES2015", ->
   eq obj5.b, 99
   deepEqual obj5.c, obj.c
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   obj5 = { obj..., ((k) -> b: k)(99)... }
   eq obj5.b, 99
   deepEqual obj5.c, obj.c
@@ -19036,6 +19580,7 @@ test "object spread properties: ES2015", ->
     e: 44
     f: g: 55
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   obj7 = {
     obj...
     fn()...
@@ -19090,6 +19635,7 @@ test "rest element destructuring in function definition", ->
     deepEqual r, { c: 3, d: 4, e: 5 }
   ) { a: 1, b: 2, c: 3, d: 4, e: 5 }, 9
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   (({ a: p, b, r... }, q) ->
     eq p, 1
     eq q, 9
@@ -20065,6 +20611,12 @@ test "#4579: Postfix for/while/until in first line of implicit object literals",
   arrayEq [4, 3, 2, 1, 0], six.foo.bar
   eq 1337, six.foo.baz
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Object Literals
+# ---------------
+
+# TODO: refactor object literal tests
+# TODO: add indexing and method invocation tests: {a}['a'] is a, {a}.a()
+
 trailingComma =
   k1: "v1"
   k2: 4
@@ -20089,11 +20641,16 @@ obj =
 ok obj.is()
 ok not obj.not()
 
+### Top-level object literal... ###
 obj: 1
+### ...doesn't break things. ###
+
+# Object literals should be able to include keywords.
 obj = class: "höt"
 obj.function = "dog"
 ok obj.class + obj.function is "hötdog"
 
+# Implicit objects as part of chained calls.
 pluck = (x) -> x.a
 eq 100, pluck pluck pluck a: a: a: 100
 
@@ -20120,6 +20677,7 @@ obj = a: 1, b: 2
 ok obj.a is 1
 ok obj.b is 2
 
+# Implicit objects nesting.
 obj =
   options: value: yes
   fn: ->
@@ -20128,6 +20686,7 @@ obj =
 ok obj.options.value is yes
 ok obj.fn() is null
 
+# Implicit objects with wacky indentation:
 obj =
   reverse: (obj) -> Array.prototype.reverse.call obj
   abc: -> @reverse @reverse @reverse ["a", "b", "c"].reverse()
@@ -20145,13 +20704,18 @@ ok obj.red.orange.yellow.green is "blue"
 ok obj.red.indigo is "violet"
 ok obj.misdent.toString() is ",,,"
 
+#542: Objects leading expression statement should be parenthesized.
 { f: -> ok yes }.f() + 1
 
+# String-keyed objects shouldn't suppress newlines.
 one = ">!": 3
 six: -> 10
 ok not one.six
 
+# Shorthand objects with property references.
 obj =
+  ### comment one ###
+  ### comment two ###
   one: 1
   two: 2
   object: -> { @one, @two }
@@ -20383,7 +20947,13 @@ test "#1322: implicit call against implicit object with block comments", ->
   ((obj, arg) ->
     eq obj.x * obj.y, 6
     ok not arg
-  ) x: 2, y: 3
+  )
+    ###
+  x
+  ###
+    x: 2
+    ### y ###
+    y: 3
 
 test "#1513: Top level bare objs need to be wrapped in parens for unary and existence ops", ->
   doesNotThrow -> CoffeeScript.run "{}?", bare: true
@@ -20409,6 +20979,7 @@ test "#1871: implicit object closed by IMPLICIT_END in implicit returns", ->
     { a: 1 } if no
   eq ob, undefined
 
+  # instead these return an object
   func = -> key: (i for i in [1, 2, 3])
 
   eq func().key.join(" "), "1 2 3"
@@ -20484,7 +21055,8 @@ test "object keys with interpolations: simple cases", ->
   obj = { "#{a}" }
   eq obj.a, "a"
   obj = { "#{5}" }
-  eq obj[5], "5"
+  eq obj[5], "5" # Note that the value is a string, just like the key.
+
 test "object keys with interpolations: commas in implicit object", ->
   obj = "#{"a"}": 1, b: 2
   deepEqual obj, { a: 1, b: 2 }
@@ -20504,11 +21076,24 @@ test "object keys with interpolations: commas in explicit object", ->
 test "object keys with interpolations: commas after key with interpolation", ->
   obj = "#{"a"}": yes
   eq obj.a, yes
-  obj = "#{"a"}": 1, "#{"b"}": 2, "#{"c"}": 3
+  obj =
+    "#{"a"}": 1
+    "#{"b"}": 2
+    ### herecomment ###
+    "#{"c"}": 3
   deepEqual obj, { a: 1, b: 2, c: 3 }
-  obj = "#{"a"}": 1, "#{"b"}": 2, "#{"c"}": 3
+  obj =
+    "#{"a"}": 1
+    "#{"b"}": 2
+    ### herecomment ###
+    "#{"c"}": 3
   deepEqual obj, { a: 1, b: 2, c: 3 }
-  obj = "#{"a"}": 1, "#{"b"}": 2, "#{"c"}": 3, "#{"d"}": 4
+  obj =
+    "#{"a"}": 1
+    "#{"b"}": 2
+    ### herecomment ###
+    "#{"c"}": 3
+    "#{"d"}": 4
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4 }
 
 test "object keys with interpolations: key with interpolation mixed with \`@prop\`", ->
@@ -20542,19 +21127,30 @@ test "object keys with interpolations: object starting with dynamic key", ->
 
 test "object keys with interpolations: comments in implicit object", ->
   obj =
+    ### leading comment ###
     "#{"a"}": 1
 
+    ### middle ###
+
     "#{"b"}": 2
+    # regular comment
     c: 3
+    ### foo ###
     d: 4
     "#{"e"}": 5
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
+  # Comments in explicit object.
   obj =
+    ### leading comment ###
     "#{"a"}": 1
 
+    ### middle ###
+
     "#{"b"}": 2
+    # regular comment
     c: 3
+    ### foo ###
     d: 4
     "#{"e"}": 5
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
@@ -20605,11 +21201,24 @@ test "computed property keys: commas in explicit object", ->
 test "computed property keys: commas after key with interpolation", ->
   obj = ["a"]: yes
   eq obj.a, yes
-  obj = ["a"]: 1, ["b"]: 2, ["c"]: 3
+  obj =
+    ["a"]: 1
+    ["b"]: 2
+    ### herecomment ###
+    ["c"]: 3
   deepEqual obj, { a: 1, b: 2, c: 3 }
-  obj = ["a"]: 1, ["b"]: 2, ["c"]: 3
+  obj =
+    ["a"]: 1
+    ["b"]: 2
+    ### herecomment ###
+    ["c"]: 3
   deepEqual obj, { a: 1, b: 2, c: 3 }
-  obj = ["a"]: 1, ["b"]: 2, ["c"]: 3, ["d"]: 4
+  obj =
+    ["a"]: 1
+    ["b"]: 2
+    ### herecomment ###
+    ["c"]: 3
+    ["d"]: 4
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4 }
 
 test "computed property keys: key with interpolation mixed with \`@prop\`", ->
@@ -20643,19 +21252,29 @@ test "computed property keys: object starting with dynamic key", ->
 
 test "computed property keys: comments in implicit object", ->
   obj =
+    ### leading comment ###
     ["a"]: 1
 
+    ### middle ###
+
     ["b"]: 2
+    # regular comment
     c: 3
+    ### foo ###
     d: 4
     ["e"]: 5
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
   obj =
+    ### leading comment ###
     ["a"]: 1
 
+    ### middle ###
+
     ["b"]: 2
+    # regular comment
     c: 3
+    ### foo ###
     d: 4
     ["e"]: 5
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
@@ -20802,6 +21421,7 @@ test "#4544: Postfix conditionals in first line of implicit object literals", ->
   baz: 1337
   ok not x?
 
+  # Example from #2051
   a = null
   _alert = (arg) -> a = arg
   _alert
@@ -21308,6 +21928,16 @@ test "'new' target", ->
   # classes must be called with \`new\`. In this case \`new\` applies to \`get\` only
   throws -> new get()()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Operators
+# ---------
+
+# * Operators
+# * Existential Operator (Binary)
+# * Existential Operator (Unary)
+# * Aliased Operators
+# * [not] in/of
+# * Chained Comparison
+
 test "binary (2-ary) math operators do not require spaces", ->
   a = 1
   b = -1
@@ -21353,6 +21983,7 @@ test "bitwise operators", ->
 test "\`instanceof\`", ->
   ok new String() instanceof String
   ok new Boolean() instanceof Boolean
+  # \`instanceof\` supports negation by prefixing the operator with \`not\`
   ok new Number() not instanceof String
   ok new Array() not instanceof Boolean
 
@@ -21364,6 +21995,8 @@ test "use \`::\` operator on keywords \`this\` and \`@\`", ->
   obj.prototype = prop: nonce
   eq nonce, obj.withAt()
   eq nonce, obj.withThis()
+
+# Existential Operator (Binary)
 
 test "binary existential operator", ->
   nonce = {}
@@ -21394,6 +22027,8 @@ test "binary existential operator with negative number", ->
   a = null ? -1
   eq -1, a
 
+# Existential Operator (Unary)
+
 test "postfix existential operator", ->
   ok(
     if nonexistent?
@@ -21422,6 +22057,8 @@ test "negated postfix existential operator", -> ok !nothing?.value
 
 test "postfix existential operator on expressions", -> eq true, (1 or 0)?, true
 
+# \`is\`,\`isnt\`,\`==\`,\`!=\`
+
 test "\`==\` and \`is\` should be interchangeable", ->
   a = b = 1
   ok a is 1 and b == 1
@@ -21435,10 +22072,15 @@ test "\`!=\` and \`isnt\` should be interchangeable", ->
   ok a != b
   ok a isnt b
 
+# [not] in/of
+
+# - \`in\` should check if an array contains a value using \`indexOf\`
+# - \`of\` should check if a property is defined on an object using \`in\`
 test "in, of", ->
   arr = [1]
   ok 0 of arr
   ok 1 in arr
+  # prefixing \`not\` to \`in and \`of\` should negate them
   ok 1 not of arr
   ok 0 not in arr
 
@@ -21448,6 +22090,7 @@ test "\`in\` should be able to operate on an array literal", ->
   arr = [0, 1, 2, 3]
   ok 2 in arr
   ok 4 not in arr
+  # should cache the value used to test the array
   arr = [0]
   val = 0
   ok val++ in arr
@@ -21509,9 +22152,10 @@ test "#1714: lexer bug with raw range \`for\` followed by \`in\`", ->
   0 for [1..2]
   ok not ("a" in ["b"])
 
-  0 for [1..10]
+  0 for [1..10] # comment ending
   ok not ("a" in ["b"])
 
+  # lexer state (specifically @seenFor) should be reset before each compilation
   CoffeeScript.compile "0 for [1..2]"
   CoffeeScript.compile "'a' in ['b']"
 
@@ -21523,6 +22167,8 @@ test "#1099: make sure expression tested gets evaluted when array is empty", ->
   (do ->
     a = 1) in []
   eq a, 1
+
+# Chained Comparison
 
 test "chainable operators", ->
   ok 100 > 10 > 1 > 0 > -1
@@ -21539,10 +22185,12 @@ test "different comparison operators (\`>\`,\`<\`,\`is\`,etc.) may be combined",
 test "some chainable operators can be negated by \`unless\`", ->
   ok (true unless 0 == 10 != 100)
 
-test "operator precedence: \`|\` lower than \`<\`", -> eq 1, 1 | 2 < 3 < 4
+test "operator precedence: \`|\` lower than \`<\`", -> eq 1, 1 | (2 < 3 < 4)
 
 test "preserve references", ->
   a = b = c = 1
+  # \`a == b <= c\` should become \`a === b && b <= c\`
+  # (this test does not seem to test for this)
   ok (a == b) <= c
 
 test "chained operations should evaluate each value only once", ->
@@ -21561,7 +22209,8 @@ test "#1234: Applying a splat to :: applies the splat to the wrong object", ->
     nonce: nonce
 
   arr = []
-  eq nonce, C::method arr...
+  eq nonce, C::method arr... # should be applied to \`C::\`
+
 test "#1102: String literal prevents line continuation", ->
   eq "': '", "" + "': '"
 
@@ -21651,6 +22300,13 @@ test "#3363: Modulo operator coercing order", ->
   eq 5, count
 
 test "#3598: Unary + and - coerce the operand once when it is an identifier", ->
+  # Unary + and - do not generate \`_ref\`s when the operand is a number, for
+  # readability. To make sure that they do when the operand is an identifier,
+  # test that they are consistent with another unary operator as well as another
+  # complex expression.
+  # Tip: Making one of the tests temporarily fail lets you easily inspect the
+  # compiled JavaScript.
+
   assertOneCoercion = (fn) ->
     count = 0
     value =
@@ -21705,6 +22361,7 @@ test "'new' target", ->
   ok new ctor() instanceof ctor
   ok new ctor() instanceof ctor
 
+  # Force an executable class body
   ctor = class
     a = 1
   ok new ctor() instanceof ctor
@@ -21713,6 +22370,7 @@ test "'new' target", ->
   ok new get() not instanceof ctor
   ok new (get())() instanceof ctor
 
+  # classes must be called with \`new\`. In this case \`new\` applies to \`get\` only
   throws -> new get()()
 
 `;
@@ -21963,6 +22621,12 @@ test "counting up by too much returns just the first value", ->
   countup = (num for num in [1..10] by 100)
   arrayEq countup, [1]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Range Literals
+# --------------
+
+# TODO: add indexing and method invocation tests: [1..4][0] is 1, [0...3].toString()
+
+# shared array
 shared = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 test "basic inclusive ranges", ->
@@ -21987,6 +22651,7 @@ test "basic exclusive ranges", ->
   arrayEq [], [0...0]
   arrayEq [], [-1...-1]
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   arrayEq [1, 2, 3], [1...4]
   arrayEq [0, 1, 2], [0...3]
   arrayEq [0, 1], [0...2]
@@ -22037,6 +22702,7 @@ test "ranges with expressions as endpoints", ->
   arrayEq [2, 3, 4, 5, 6], [(a + 1)..(2 * b)]
   arrayEq [2, 3, 4, 5], [(a + 1)...(2 * b)]
 
+  # Should not trigger implicit call, e.g. rest ... => rest(...)
   arrayEq [2, 3, 4, 5], [(a + 1)...(2 * b)]
 
 test "large ranges are generated with looping constructs", ->
@@ -22530,6 +23196,14 @@ test "#4811, heregex comments with ///", ->
    // /// 'heregex' in comment will be consumed
   """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Regular Expression Literals
+# ---------------------------
+
+# TODO: add method invocation tests: /regex/.toString()
+
+# * Regexen
+# * Heregexen
+
 test "basic regular expression literals", ->
   ok "a".match /a/
   ok "a".match /a/
@@ -22537,6 +23211,7 @@ test "basic regular expression literals", ->
   ok "a".match /a/g
 
 test "division is not confused for a regular expression", ->
+  # Any spacing around the slash is allowed when it cannot be a regex.
   eq 2, 4 / 2 / 1
   eq 2, 4 / 2 / 1
   eq 2, 4 / 2 / 1
@@ -22553,12 +23228,14 @@ test "division is not confused for a regular expression", ->
   eq 2, a / b / g
   eq 2, a / b / g
   eq 2, a / b / g
-  eq 2, a / b / g
-  eq 2, a / b / g
+  eq 2, a / b / g # Tabs.
+  eq 2, a / b / g # Non-breaking spaces.
   eq true, a /b/g
+  # Use parentheses to disambiguate.
   eq true, a(/ b/g)
   eq true, a(/ b/)
   eq true, a(/ b/)
+  # Escape to disambiguate.
   eq true, a /\\ b/g
   eq false, a /\\	b/g
   eq true, a /\\ b/
@@ -22589,9 +23266,11 @@ test "division is not confused for a regular expression", ->
       no
   eq a, no
 
+  #3182:
   match = "foo=bar".match /=/
   eq match[0], "="
 
+  #3410:
   ok " ".match(/ /)[0] is " "
 
 test "division vs regex after a callable token", ->
@@ -22714,11 +23393,11 @@ test "compound division vs regex", ->
   eq a, 5
 
   a = 10
-  b = a /= c / i
+  b = a /= c / i # Tabs.
   eq a, 5
 
   a = 10
-  b = a /= c / i
+  b = a /= c / i # Non-breaking spaces.
   eq a, 5
 
   a = 10
@@ -22734,12 +23413,14 @@ test "compound division vs regex", ->
   eq b, true
 
   a = (regex) -> regex.test "= C "
+  # Use parentheses to disambiguate.
   b = a(/= c /i)
   eq b, true
   b = a(/= c /)
   eq b, false
   b = a(/= c /)
   eq b, false
+  # Escape to disambiguate.
   b = a /\\= c /i
   eq b, true
   b = a /\\= c /
@@ -22753,6 +23434,8 @@ test "#584: slashes are allowed unescaped in character classes", ->
 
 test "does not allow to escape newlines", ->
   throws -> CoffeeScript.compile "/a\\\\\\nb/"
+
+# Heregexe(n|s)
 
 test "a heregex will ignore whitespace and comments", ->
   eq(
@@ -22798,14 +23481,14 @@ test "#3795: Escape otherwise invalid characters", ->
   ok (/ /).test "\\u2029"
   ok ///\\ ///.test "\\u2028"
   ok ///\\ ///.test "\\u2029"
-  ok ///a b///.test "ab"
-  ok ///a b///.test "ab"
+  ok ///a b///.test "ab" # The space is U+2028.
+  ok ///a b///.test "ab" # The space is U+2029.
   ok ///\\0
       1///.test "\\x001"
 
   a = "a"
-  ok ///#{a} b///.test "ab"
-  ok ///#{a} b///.test "ab"
+  ok ///#{a} b///.test "ab" # The space is U+2028.
+  ok ///#{a} b///.test "ab" # The space is U+2029.
   ok ///#{a}\\ ///.test "a\\u2028"
   ok ///#{a}\\ ///.test "a\\u2029"
   ok(
@@ -22819,11 +23502,13 @@ test "#4248: Unicode code point escapes", ->
   ok ///a\\u{000001ab}c///u.test "a\\u{1ab}c"
   ok /a\\u{12345}c/u.test "a\\ud808\\udf45c"
 
+  # and now without u flag
   ok /a\\u{1ab}c/.test "a\\u01abc"
   ok ///#{"a"}\\u{000001ab}c///.test "a\\u{1ab}c"
   ok ///a\\u{000001ab}c///.test "a\\u{1ab}c"
   ok /a\\u{12345}c/.test "a\\ud808\\udf45c"
 
+  # rewrite code point escapes unless u flag is set
   eqJS(
     """
     /\\\\u{bcdef}\\\\u{abc}/u
@@ -22867,6 +23552,11 @@ exports[`regex_dotall.coffee 1`] = `
 test "dotall flag", ->
   doesNotThrow -> /a.b/s.test 'a\\nb'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Regex “dotall” flag, or \`s\`, is only supported in Node 9+, so put tests for
+# the feature in their own file. The feature detection in \`Cakefile\` that
+# causes this test to load is adapted from
+# https://github.com/tc39/proposal-regexp-dotall-flag#proposed-solution.
+
 test "dotall flag", -> doesNotThrow -> /a.b/s.test "a\\nb"
 
 `;
@@ -23046,7 +23736,16 @@ test "#1726: \`Op\` expression in property access causes unexpected results", ->
   arrayEq a, a[!1 in a..]
   arrayEq a[(!1 in a)..], a[(!1 in a)..]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Slicing and Splicing
+# --------------------
+
+# * Slicing
+# * Splicing
+
+# shared array
 shared = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# Slicing
 
 test "basic slicing", ->
   arrayEq [7, 8, 9], shared[7..9]
@@ -23095,7 +23794,7 @@ test "string slicing", ->
 
 test "#1722: operator precedence in unbounded slice compilation", ->
   list = [0..9]
-  n = 2
+  n = 2 # some truthy number in \`list\`
   arrayEq [0..n], list[..n]
   arrayEq [0..n], list[..(n or 0)]
   arrayEq [0..n], list[..(if n then n else 0)]
@@ -23114,6 +23813,8 @@ test "#4631: slicing with space before and/or after the dots", ->
   arrayEq shared[(a b...)...(a c...)], shared[(a ...b)...(a ...c)]
   arrayEq shared[(a b...)...(a c...)], shared[(a ...b)...(a ...c)]
   arrayEq shared[(a b...)...(a c...)], shared[(a ...b)...(a ...c)]
+
+# Splicing
 
 test "basic splicing", ->
   ary = [0..9]
@@ -23179,7 +23880,8 @@ test "the return value of a splice literal should be the RHS", ->
   arrayEq [(ary[0..0] = 0)], [0]
 
 test "#1723: operator precedence in unbounded splice compilation", ->
-  n = 4
+  n = 4 # some truthy number in \`list\`
+
   list = [0..9]
   list[..n] = n
   arrayEq [n..9], list
@@ -23344,6 +24046,15 @@ test "soaked function invocation safe on non-functions", ->
   eq undefined, (0)?(1)
   eq undefined, (0)? 1, 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Soaks
+# -----
+
+# * Soaked Property Access
+# * Soaked Method Invocation
+# * Soaked Function Invocation
+
+# Soaked Property Access
+
 test "soaked property access", ->
   nonce = {}
   obj = a: b: nonce
@@ -23397,6 +24108,7 @@ test "#726: don't check for a property on a conditionally-referenced nonexistent
   eq undefined, nonexistent?[Date()]
 
 test "#756: conditional assignment edge cases", ->
+  # TODO: improve this test
   a = null
   ok isNaN a?.b.c + 1
   eq undefined, a?.b.c += 1
@@ -23404,11 +24116,14 @@ test "#756: conditional assignment edge cases", ->
   eq undefined, delete a?.b.c
 
 test "operations on soaked properties", ->
+  # TODO: improve this test
   a = b: c: 0
   eq 1, a?.b.c + 1
   eq 1, a?.b.c += 1
   eq 2, ++a?.b.c
   eq yes, delete a?.b.c
+
+# Soaked Method Invocation
 
 test "soaked method invocation", ->
   nonce = {}
@@ -23437,6 +24152,8 @@ test "#733: conditional assignments", ->
   a.b?.c or= (it) -> it
   eq a.b?.c?(1), 1
   eq a.b?.c?([2, 3]...), 2
+
+# Soaked Function Invocation
 
 test "soaked function invocation", ->
   nonce = {}
@@ -23909,6 +24626,15 @@ test "#4248: Unicode code point escapes", ->
     "a\\\\u{bcdef}";
   """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# String Literals
+# ---------------
+
+# TODO: refactor string literal tests
+# TODO: add indexing and method invocation tests: "string"["toString"] is String::toString, "string".toString() is "string"
+
+# * Strings
+# * Heredocs
+
 test "backslash escapes", -> eq "\\\\/\\\\\\\\", /\\/\\\\/.source
 
 eq "(((dollars)))", "\\(\\(\\(dollars\\)\\)\\)"
@@ -23920,6 +24646,7 @@ eq "four five", 'four
  five'
 
 test "#3229, multiline strings", ->
+  # Separate lines by default by a single space in literal strings.
   eq(
     'one
       two'
@@ -23969,6 +24696,7 @@ test "#3229, multiline strings", ->
     "trailing ws doesn't matter"
   )
 
+  # Use backslashes at the end of a line to specify whitespace between lines.
   eq(
     'a \\
       b\\
@@ -23989,6 +24717,7 @@ test "#3229, multiline strings", ->
     "ignore  trailing whitespace"
   )
 
+  # Backslash at the beginning of a literal string.
   eq(
     '\\
       ok'
@@ -24000,6 +24729,7 @@ test "#3229, multiline strings", ->
     "  ok"
   )
 
+  # #1273, empty strings.
   eq(
     '\\
      '
@@ -24017,6 +24747,7 @@ test "#3229, multiline strings", ->
   )
   eq "   ", "   "
 
+  # Same behavior in interpolated strings.
   eq(
     "interpolation #{1}
       follows #{2}  \\
@@ -24036,6 +24767,7 @@ test "#3229, multiline strings", ->
     "1"
   )
 
+  # Handle escaped backslashes correctly.
   eq "\\\\", \`'\\\\'\`
   eq(
     'escaped backslash at EOL\\\\
@@ -24088,6 +24820,7 @@ test "#3229, multiline strings", ->
     "several escaped backslashes with trailing ws \\\\\\\\\\\\ ok"
   )
 
+  # Backslashes at beginning of lines.
   eq(
     'first line
       \\   backslash at BOL'
@@ -24099,6 +24832,7 @@ test "#3229, multiline strings", ->
     "first line\\   backslash at BOL"
   )
 
+  # Backslashes at end of strings.
   eq "first line \\ ", "first line  "
   eq(
     'first line
@@ -24123,6 +24857,7 @@ test "#3229, multiline strings", ->
     "first line second line"
   )
 
+  # Edge case.
   eq(
     'lone
 
@@ -24133,6 +24868,7 @@ test "#3229, multiline strings", ->
   )
 
 test "#3249, escape newlines in heredocs with backslashes", ->
+  # Ignore escaped newlines
   eq(
     '''
     Set whitespace      \\
@@ -24152,6 +24888,7 @@ test "#3249, escape newlines in heredocs with backslashes", ->
     "Set whitespace      <- this is ignorednone\\n  normal indentation"
   )
 
+  # Changed from #647, trailing backslash.
   eq(
     '''
   Hello, World\\
@@ -24166,6 +24903,7 @@ test "#3249, escape newlines in heredocs with backslashes", ->
     "\\\\"
   )
 
+  # Backslash at the beginning of a literal string.
   eq(
     '''\\
       ok'''
@@ -24177,6 +24915,7 @@ test "#3249, escape newlines in heredocs with backslashes", ->
     "  ok"
   )
 
+  # Same behavior in interpolated strings.
   eq(
     """
     interpolation #{1}
@@ -24195,6 +24934,7 @@ test "#3249, escape newlines in heredocs with backslashes", ->
     "\\n1 2\\n"
   )
 
+  # Handle escaped backslashes correctly.
   eq(
     '''
     escaped backslash at EOL\\\\
@@ -24209,6 +24949,7 @@ test "#3249, escape newlines in heredocs with backslashes", ->
     "\\\\\\n"
   )
 
+  # Backslashes at beginning of lines.
   eq(
     '''first line
       \\   backslash at BOL'''
@@ -24220,6 +24961,7 @@ test "#3249, escape newlines in heredocs with backslashes", ->
     "first line\\   backslash at BOL"
   )
 
+  # Backslashes at end of strings.
   eq "first line \\ ", "first line  "
   eq(
     '''
@@ -24247,6 +24989,7 @@ test "#3249, escape newlines in heredocs with backslashes", ->
     "first line\\nsecond line\\n"
   )
 
+  # Edge cases.
   eq(
     '''lone
 
@@ -24292,6 +25035,7 @@ test "trailing whitespace", ->
     "  \\na   \\n       "
   )
 
+#647
 eq "''Hello, World\\\\''", '''
 '\\'Hello, World\\\\\\''
 '''
@@ -24300,6 +25044,7 @@ eq '""Hello, World\\\\""', """
 """
 
 test "#1273, escaping quotes at the end of heredocs.", ->
+  # """\\""" no longer compiles
   eq "\\\\", "\\\\"
   eq '\\\\"', '\\\\"'
 
@@ -24359,6 +25104,7 @@ ok a is '""surrounded by two quotes""'
 a = "''surrounded by two apostrophes''"
 ok a is "''surrounded by two apostrophes''"
 
+# The indentation detector ignores blank lines without trailing whitespace
 a = """
     one
     two
@@ -24456,6 +25202,7 @@ test "#3795: Escape otherwise invalid characters", ->
   )
 
 test "#4314: Whitespace less than or equal to stripped indentation", ->
+  # The odd indentation is intentional here, to test 1-space indentation.
   eq " ", """
  #{} #{}
 """
@@ -24477,6 +25224,7 @@ test "#4248: Unicode code point escapes", ->
   eq "\\udab3\\uddefc", """\\u{bcdef}#{"c"}"""
   eq "\\\\u{123456}", "#{"\\\\"}#{"u{123456}"}"
 
+  # don't rewrite code point escapes
   eqJS(
     """
     '\\\\u{bcdef}\\\\u{abc}'
@@ -24676,6 +25424,20 @@ test '#4467: tagged template literal call recognized as a callable function', ->
   outerobj.obj.f()'dot notation'
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Tagged template literals
+# ------------------------
+
+# NOTES:
+# A tagged template literal is a string that is passed to a prefixing function for
+# post-processing. There's a bunch of different angles that need testing:
+# - Prefixing function, which can be any form of function call:
+#   - function: func'Hello'
+#   - object property with dot notation: outerobj.obj.func'Hello'
+#   - object property with bracket notation: outerobj['obj']['func']'Hello'
+# - String form: single quotes, double quotes and block strings
+# - String is single-line or multi-line
+# - String is interpolated or not
+
 func = (text, expressions...) ->
   "text: [#{text.join "|"}] expressions: [#{expressions.join "|"}]"
 
@@ -24684,6 +25446,7 @@ outerobj =
     func: func
     f: -> func
 
+# Example use
 test "tagged template literal for html templating", ->
   html = (htmlFragments, expressions...) ->
     htmlFragments.reduce (fullHtml, htmlFragment, i) ->
@@ -24704,6 +25467,7 @@ test "tagged template literal for html templating", ->
     """
   )
 
+# Simple, non-interpolated strings
 test "tagged template literal with a single-line single-quote string", ->
   eq(
     "text: [single-line single quotes] expressions: []"
@@ -24760,6 +25524,7 @@ test "tagged template literal with a multi-line double-quote block string", ->
       """
   )
 
+# Interpolated strings with expressions
 test "tagged template literal with a single-line double-quote interpolated string", ->
   eq(
     "text: [single-line | double quotes | interpolation] expressions: [36|42]"
@@ -24788,6 +25553,7 @@ test "tagged template literal with a multi-line double-quote block interpolated 
       """
   )
 
+# Tagged template literal must use a callable function
 test "tagged template literal dot notation recognized as a callable function", ->
   eq "text: [dot notation] expressions: []", outerobj.obj.func'dot notation'
 
@@ -24803,6 +25569,7 @@ test "tagged template literal mixed dot and bracket notation recognized as a cal
     outerobj["obj"].func'mixed notation'
   )
 
+# Edge cases
 test "tagged template literal with an empty string", ->
   eq "text: [] expressions: []", func''
 

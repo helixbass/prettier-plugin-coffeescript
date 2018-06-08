@@ -2,6 +2,7 @@
 
 const util = require('prettier/src/common/util')
 const comments = require('prettier/src/main/comments')
+const {isNextLineEmpty} = require('./util')
 const embed = require('./embed')
 const handleComments = require('./comments')
 const {
@@ -398,11 +399,7 @@ function printPathNoParens(path, options, print) {
         path.each(childPath => {
           parts.push(print(childPath), hardline)
           if (
-            util.isNextLineEmpty(
-              options.originalText,
-              childPath.getValue(),
-              locEnd
-            )
+            isNextLineEmpty(options.originalText, childPath.getValue(), locEnd)
           ) {
             parts.push(hardline)
           }
@@ -803,11 +800,7 @@ function printPathNoParens(path, options, print) {
         path.each(childPath => {
           parts.push(indent(concat([hardline, print(childPath)])))
           if (
-            util.isNextLineEmpty(
-              options.originalText,
-              childPath.getValue(),
-              locEnd
-            )
+            isNextLineEmpty(options.originalText, childPath.getValue(), locEnd)
           ) {
             parts.push(hardline)
           }
@@ -1089,15 +1082,14 @@ function printPathNoParens(path, options, print) {
         concat([
           'try',
           path.call(print, 'block'),
-          util.isNextLineEmpty(text, n.block, locEnd) &&
-          (n.handler || n.finalizer)
+          isNextLineEmpty(text, n.block, locEnd) && (n.handler || n.finalizer)
             ? hardline
             : '',
           n.handler
             ? concat([
                 hardline,
                 path.call(print, 'handler'),
-                util.isNextLineEmpty(text, n.handler, locEnd) && n.finalizer
+                isNextLineEmpty(text, n.handler, locEnd) && n.finalizer
                   ? hardline
                   : '',
               ])
@@ -1137,6 +1129,7 @@ function printPathNoParens(path, options, print) {
       }
       const groupedCases = []
       let currentGroup = []
+      let currentGroupPrintedLeadingComments = null
       const printConsequent = casePath =>
         indent(
           concat([
@@ -1150,6 +1143,13 @@ function printPathNoParens(path, options, print) {
         )
       path.map(casePath => {
         const kase = casePath.getValue()
+        if (kase.comments && kase.comments.length) {
+          currentGroupPrintedLeadingComments = comments.printComments(
+            casePath,
+            () => '',
+            options
+          )
+        }
         if (kase.test) {
           currentGroup.push(casePath.call(print, 'test'))
           if (kase.consequent && kase.consequent.length) {
@@ -1160,19 +1160,25 @@ function printPathNoParens(path, options, print) {
               //   casePath.call(print, 'consequent')
               // ),
               consequent: printConsequent(casePath),
+              printedLeadingComments: currentGroupPrintedLeadingComments,
             })
             currentGroup = []
+            currentGroupPrintedLeadingComments = null
           }
         } else {
           // default should be last case
           groupedCases.push({
             consequent: printConsequent(casePath),
+            printedLeadingComments: currentGroupPrintedLeadingComments,
           })
         }
       }, 'cases')
       const body = []
       const lastIndex = groupedCases.length - 1
-      groupedCases.map((groupedCase, i) => {
+      groupedCases.forEach((groupedCase, i) => {
+        if (groupedCase.printedLeadingComments) {
+          body.push(groupedCase.printedLeadingComments)
+        }
         if (groupedCase.cases) {
           body.push('when ')
           body.push(join(', ', groupedCase.cases))
@@ -1363,7 +1369,7 @@ function printObject(path, print, options) {
   const joinedProps = printedProps.map(prop => {
     const result = concat(separatorParts.concat(group(prop.printed)))
     separatorParts = [ifBreak('', ','), line]
-    if (util.isNextLineEmpty(options.originalText, prop.node, locEnd)) {
+    if (isNextLineEmpty(options.originalText, prop.node, locEnd)) {
       separatorParts.push(hardline)
     }
     return result
@@ -3134,10 +3140,7 @@ function printStatementSequence(path, options, print) {
 
     parts.push(stmtPrinted)
 
-    if (
-      util.isNextLineEmpty(text, stmt, locEnd) &&
-      !isLastStatement(stmtPath)
-    ) {
+    if (isNextLineEmpty(text, stmt, locEnd) && !isLastStatement(stmtPath)) {
       parts.push(hardline)
     }
 
@@ -3214,7 +3217,7 @@ function printArrayItems(path, options, printPath, print) {
     if (shouldBreakArray) {
       separatorParts.push(breakParent)
     }
-    if (child && util.isNextLineEmpty(options.originalText, child, locEnd)) {
+    if (child && isNextLineEmpty(options.originalText, child, locEnd)) {
       separatorParts.push(line)
     }
     index++
