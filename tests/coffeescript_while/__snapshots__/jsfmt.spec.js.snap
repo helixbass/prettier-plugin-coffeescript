@@ -76,7 +76,6 @@ doSomething() while someVeryLongFunc(
   someVeryLongArgD
 )
 
-while 0
-  1
+while 0 then 1
 
 `;

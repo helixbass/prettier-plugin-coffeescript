@@ -46,6 +46,7 @@
   instead of
   a =
     b: c, d: e
+- preserve switch then alignment?
 - comments:
   - preserve herecomment spacing
   - a b, c # d is breaking, probably should preserve trailing inline comment formatting

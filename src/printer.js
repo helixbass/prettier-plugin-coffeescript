@@ -997,7 +997,6 @@ function printPathNoParens(path, options, print) {
         {withPath: true}
       )
       const shouldBreak =
-        isEmptyBlock(n.body) ||
         !singleExpr ||
         (options.respectBreak.indexOf('control') > -1 &&
           !hasSameStartLine(n, n.body))
@@ -1040,7 +1039,10 @@ function printPathNoParens(path, options, print) {
         return concat(parts)
       }
 
-      const shouldBreak = true
+      const shouldBreak =
+        !singleExpressionBlock(n.body) ||
+        (options.respectBreak.indexOf('control') > -1 &&
+          !hasSameStartLine(n, n.body))
       const shouldIndent = !shouldBreak
 
       const body = adjustClause(n.body, path.call(print, 'body'))
@@ -1049,7 +1051,7 @@ function printPathNoParens(path, options, print) {
         concat([
           shouldIndent ? softline : '',
           opening,
-          ifBreak('', ' then'),
+          ifBreak('', ' then '),
           body,
         ])
       )
@@ -1120,17 +1122,26 @@ function printPathNoParens(path, options, print) {
       const groupedCases = []
       let currentGroup = []
       let currentGroupPrintedLeadingComments = null
-      const printConsequent = casePath =>
-        indent(
-          concat([
-            hardline,
-            casePath.call(
-              consequentPath =>
-                printStatementSequence(consequentPath, options, print),
-              'consequent'
-            ),
-          ])
+      const printConsequent = (casePath, {isElse} = {}) => {
+        const kase = casePath.getValue()
+        const shouldBreak =
+          kase.consequent.length !== 1 ||
+          (options.respectBreak.indexOf('control') > -1 &&
+            !hasSameStartLine(kase, kase.consequent[0]))
+        return group(
+          indent(
+            concat([
+              ifBreak(line, isElse ? ' ' : ' then '),
+              casePath.call(
+                consequentPath =>
+                  printStatementSequence(consequentPath, options, print),
+                'consequent'
+              ),
+            ])
+          ),
+          {shouldBreak}
         )
+      }
       path.map(casePath => {
         const kase = casePath.getValue()
         if (kase.comments && kase.comments.length) {
@@ -1158,7 +1169,7 @@ function printPathNoParens(path, options, print) {
         } else {
           // default should be last case
           groupedCases.push({
-            consequent: printConsequent(casePath),
+            consequent: printConsequent(casePath, {isElse: true}),
             printedLeadingComments: currentGroupPrintedLeadingComments,
           })
         }

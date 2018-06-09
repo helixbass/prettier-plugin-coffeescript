@@ -9956,20 +9956,16 @@ test "basic \`switch\`", ->
   num = 10
   result =
     switch num
-      when 5
-        false
+      when 5 then false
       when "a"
         true
         true
         false
-      when 10
-        true
+      when 10 then true
       # Mid-switch comment with whitespace
       # and multi line
-      when 11
-        false
-      else
-        false
+      when 11 then false
+      else false
 
   ok result
 
@@ -10009,24 +10005,15 @@ test "Ensure that trailing switch elses don't get rewritten.", ->
 test "Should be able to handle switches sans-condition.", ->
   result =
     switch
-      when null
-        0
-      when !1
-        1
-      when "" not of { "" }
-        2
-      when [] not instanceof Array
-        3
-      when true is false
-        4
-      when "x" < "y" > "z"
-        5
-      when "a" in ["b", "c"]
-        6
-      when "d" in ["e", "f"]
-        7
-      else
-        ok
+      when null then 0
+      when !1 then 1
+      when "" not of { "" } then 2
+      when [] not instanceof Array then 3
+      when true is false then 4
+      when "x" < "y" > "z" then 5
+      when "a" in ["b", "c"] then 6
+      when "d" in ["e", "f"] then 7
+      else ok
 
   eq result, ok
 
@@ -10035,10 +10022,8 @@ test "Should be able to use \`@properties\` within the switch clause.", ->
     num: 101
     func: ->
       switch @num
-        when 101
-          "101!"
-        else
-          "other"
+        when 101 then "101!"
+        else "other"
 
   ok obj.func() is "101!"
 
@@ -10048,10 +10033,8 @@ test "Should be able to use \`@properties\` within the switch cases.", ->
     func: (yesOrNo) ->
       result =
         switch yesOrNo
-          when yes
-            @num
-          else
-            "other"
+          when yes then @num
+          else "other"
       result
 
   ok obj.func(yes) is 101
@@ -10062,10 +10045,8 @@ test "Switch with break as the return value of a loop.", ->
     while i > 0
       i--
       switch i % 2
-        when 1
-          i
-        when 0
-          break
+        when 1 then i
+        when 0 then break
 
   eq results.join(", "), "9, 7, 5, 3, 1"
 
@@ -10396,13 +10377,11 @@ test "#2343: switch / when / then / if / then / else", ->
 
   u = ->
     switch
-      when a
-        if b then if c then d else if e then f else if g then h else i
+      when a then if b then if c then d else if e then f else if g then h else i
 
   v = ->
     switch
-      when a
-        if b then if c then d else if e then f else if g then h else i
+      when a then if b then if c then d else if e then f else if g then h else i
 
   w = ->
     switch
@@ -10419,13 +10398,11 @@ test "#2343: switch / when / then / if / then / else", ->
 
   x = ->
     switch
-      when a
-        if b then if c then d else if e then f else if g then h else i
+      when a then if b then if c then d else if e then f else if g then h else i
 
   y = ->
     switch
-      when a
-        if b then if c then d else if e then f else if g then h else i
+      when a then if b then if c then d else if e then f else if g then h else i
 
   eq 4, s()
   eq 4, t()
@@ -10473,8 +10450,7 @@ test "#2343: switch / when / then / if / then / else / else", ->
             h
           else
             i
-      else
-        0
+      else 0
 
   t = ->
     switch
@@ -10488,8 +10464,7 @@ test "#2343: switch / when / then / if / then / else / else", ->
             h
           else
             i
-      else
-        0
+      else 0
 
   u = ->
     switch
@@ -10503,8 +10478,7 @@ test "#2343: switch / when / then / if / then / else / else", ->
             h
           else
             i
-      else
-        0
+      else 0
 
   v = ->
     switch
@@ -10518,29 +10492,25 @@ test "#2343: switch / when / then / if / then / else / else", ->
             h
           else
             i
-      else
-        0
+      else 0
 
   w = ->
     switch
       when a
         if b then if c then d else if e then f else if g then h else i
-      else
-        0
+      else 0
 
   x = ->
     switch
       when a
         if b then if c then d else if e then f else if g then h else i
-      else
-        0
+      else 0
 
   y = ->
     switch
       when a
         if b then if c then d else if e then f else if g then h else i
-      else
-        0
+      else 0
 
   eq 4, s()
   eq 4, t()
@@ -10601,8 +10571,7 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
             i
         else
           j
-      else
-        0
+      else 0
 
   t = ->
     switch
@@ -10618,8 +10587,7 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
             i
         else
           j
-      else
-        0
+      else 0
 
   u = ->
     switch
@@ -10635,8 +10603,7 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
             i
         else
           j
-      else
-        0
+      else 0
 
   v = ->
     switch
@@ -10652,8 +10619,7 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
             i
         else
           j
-      else
-        0
+      else 0
 
   w = ->
     switch
@@ -10662,22 +10628,19 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
           if c then d else if e then f else if g then h else i
         else
           j
-      else
-        0
+      else 0
 
   x = ->
     switch
       when a
         if b then if c then d else if e then f else if g then h else i else j
-      else
-        0
+      else 0
 
   y = ->
     switch
       when a
         if b then if c then d else if e then f else if g then h else i else j
-      else
-        0
+      else 0
 
   eq 4, s()
   eq 4, t()
@@ -10794,52 +10757,34 @@ test "#3921: \`switch\`", ->
   i = 1
   a =
     switch do (m = 2) -> i * m
-      when 5
-        "five"
-      when 4
-        "four"
-      when 3
-        "three"
-      when 2
-        "two"
-      when 1
-        "one"
-      else
-        "none"
+      when 5 then "five"
+      when 4 then "four"
+      when 3 then "three"
+      when 2 then "two"
+      when 1 then "one"
+      else "none"
   eq "two", a
 
   j = 12
   b =
     switch do (m = 3) -> j / m
-      when 5
-        "five"
-      when 4
-        "four"
-      when 3
-        "three"
-      when 2
-        "two"
-      when 1
-        "one"
-      else
-        "none"
+      when 5 then "five"
+      when 4 then "four"
+      when 3 then "three"
+      when 2 then "two"
+      when 1 then "one"
+      else "none"
   eq "four", b
 
   k = 20
   c =
     switch do (m = 4) -> k / m
-      when 5
-        "five"
-      when 4
-        "four"
-      when 3
-        "three"
-      when 2
-        "two"
-      when 1
-        "one"
-      else
-        "none"
+      when 5 then "five"
+      when 4 then "four"
+      when 3 then "three"
+      when 2 then "two"
+      when 1 then "one"
+      else "none"
   eq "five", c
 
 # Issue #3909: backslash to break line in \`for\` loops throw syntax error
@@ -14051,10 +13996,8 @@ test "#4487: Handle unusual outdentation", ->
     switch 1
       when 2
         no
-      when 3
-        no
-      when 1
-        yes
+      when 3 then no
+      when 1 then yes
   eq yes, a
 
   b = do ->
@@ -15506,10 +15449,8 @@ test "implicit returns with switches", ->
   nonce = {}
   fn = ->
     switch nonce
-      when nonce
-        nonce
-      else
-        return undefined
+      when nonce then nonce
+      else return undefined
   eq nonce, fn()
 
 test "preserve context when generating closure wrappers for expression conversions", ->
@@ -17479,10 +17420,8 @@ test "yield in switch expressions", ->
   x = do ->
     y =
       switch yield 1
-        when 2
-          yield 1337
-        else
-          1336
+        when 2 then yield 1337
+        else 1336
 
   z = x.next()
   ok z.value is 1 and z.done is false
@@ -17496,10 +17435,8 @@ test "yield in switch expressions", ->
 test "yielding switch expressions", ->
   x = do ->
     yield switch 1337
-      when 1337
-        1338
-      else
-        1336
+      when 1337 then 1338
+      else 1336
 
   y = x.next()
   ok y.value is 1338 and y.done is false
@@ -17562,8 +17499,7 @@ test "symbolic operators has precedence over the \`yield\`", ->
 test "yield handles 'this' correctly", ->
   x = ->
     yield switch
-      when true
-        yield => this
+      when true then yield => this
     array =
       for item in [1]
         yield => this
