@@ -21,6 +21,7 @@
 	  'prohibit expansion and a splat'
 	)
 - how do elisions and breaking arrays interplay?
+- make comma option less naive (eg either omit or dedent comma if the arg has indentation eg breaking function or control)
 - where to draw the line with what to parenthesize when splatting - you can omit a lot of parens but it looks weird eg [(a if f)?.b ? []...]
 - don't need to parenthesize postfix for comprehensions (and probably other things?) when assignment breaks eg:
   array2 =

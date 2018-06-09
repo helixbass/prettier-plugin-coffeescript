@@ -174,40 +174,56 @@ test "combined options are not split after initial file name", ->
 
   argv = ["-c", "some-file.coffee", "-bc"]
   parsed = optionParser.parse argv
-  expected = compile: yes, arguments: ["some-file.coffee", "-bc"]
+  expected =
+    compile: yes
+    arguments: ["some-file.coffee", "-bc"]
   sameOptions parsed, expected
 
   argv = ["-bc", "some-file.coffee", "-bc"]
   parsed = optionParser.parse argv
-  expected = bare: yes, compile: yes, arguments: ["some-file.coffee", "-bc"]
+  expected =
+    bare: yes
+    compile: yes
+    arguments: ["some-file.coffee", "-bc"]
   sameOptions parsed, expected
 
 test "combined options are not split after a '--', which is discarded", ->
   argv = ["--", "-bc"]
   parsed = optionParser.parse argv
-  expected = doubleDashed: yes, arguments: ["-bc"]
+  expected =
+    doubleDashed: yes
+    arguments: ["-bc"]
   sameOptions parsed, expected
 
   argv = ["-bc", "--", "-bc"]
   parsed = optionParser.parse argv
-  expected = bare: yes, compile: yes, doubleDashed: yes, arguments: ["-bc"]
+  expected =
+    bare: yes
+    compile: yes
+    doubleDashed: yes
+    arguments: ["-bc"]
   sameOptions parsed, expected
 
 test "options are not split after any '--'", ->
   argv = ["--", "--", "-bc"]
   parsed = optionParser.parse argv
-  expected = doubleDashed: yes, arguments: ["--", "-bc"]
+  expected =
+    doubleDashed: yes
+    arguments: ["--", "-bc"]
   sameOptions parsed, expected
 
   argv = ["--", "some-file.coffee", "--", "arg"]
   parsed = optionParser.parse argv
-  expected = doubleDashed: yes, arguments: ["some-file.coffee", "--", "arg"]
+  expected =
+    doubleDashed: yes
+    arguments: ["some-file.coffee", "--", "arg"]
   sameOptions parsed, expected
 
   argv = ["--", "arg", "some-file.coffee", "--", "-bc"]
   parsed = optionParser.parse argv
   expected =
-    doubleDashed: yes, arguments: ["arg", "some-file.coffee", "--", "-bc"]
+    doubleDashed: yes
+    arguments: ["arg", "some-file.coffee", "--", "-bc"]
   sameOptions parsed, expected
 
 test "any non-option argument stops argument parsing", ->
@@ -2379,7 +2395,9 @@ test "#4878: Compile error when using destructuring with a splat or expansion in
   arrayEq bar(arr), ["a", ["b", "c", "d"]]
 
 test "destructuring assignment with an empty array in object", ->
-  obj = a1: [1, 2], b1: 3
+  obj =
+    a1: [1, 2]
+    b1: 3
 
   { a1: [], b1 } = obj
   eq "undefined", typeof a1
@@ -5089,7 +5107,9 @@ test "anonymous classes", ->
 
 test "Implicit objects as static properties", ->
   class Static
-    @static = one: 1, two: 2
+    @static =
+      one: 1
+      two: 2
 
   ok Static.static.one is 1
   ok Static.static.two is 2
@@ -5104,7 +5124,9 @@ test "classes with static-level implicit objects", ->
     two: 2
 
   class B
-    @static = one: 1, two: 2
+    @static =
+      one: 1
+      two: 2
 
   eq A.static.one, 1
   eq A.static.two, undefined
@@ -14035,40 +14057,40 @@ test "multiple semicolon-separated statements in parentheticals", ->
 test "chained accesses split on period/newline, backwards and forwards", ->
   str = "abc"
   result = str
-  .split ""
-  .reverse()
-  .reverse()
-  .reverse()
-  arrayEq ["c", "b", "a"], result
-  arrayEq(
-    ["c", "b", "a"]
-    str
     .split ""
     .reverse()
     .reverse()
     .reverse()
+  arrayEq ["c", "b", "a"], result
+  arrayEq(
+    ["c", "b", "a"]
+    str
+      .split ""
+      .reverse()
+      .reverse()
+      .reverse()
   )
   result = str
-  .split ""
-  .reverse()
-  .reverse()
-  .reverse()
+    .split ""
+    .reverse()
+    .reverse()
+    .reverse()
   arrayEq ["c", "b", "a"], result
   arrayEq(
     ["c", "b", "a"]
     str
-    .split ""
-    .reverse()
-    .reverse()
-    .reverse()
+      .split ""
+      .reverse()
+      .reverse()
+      .reverse()
   )
   arrayEq(
     ["c", "b", "a"]
     str
-    .split ""
-    .reverse()
-    .reverse()
-    .reverse()
+      .split ""
+      .reverse()
+      .reverse()
+      .reverse()
   )
 
 # Operators
@@ -14182,9 +14204,9 @@ test "#1495, method call chaining", ->
 
   # Single line function arguments
   result = [1..6]
-  .map (x) -> x * x
-  .filter (x) -> x % 2 is 0
-  .reverse()
+    .map (x) -> x * x
+    .filter (x) -> x % 2 is 0
+    .reverse()
   arrayEq [36, 16, 4], result
 
   # Single line implicit objects
@@ -14229,7 +14251,9 @@ test "chaining should work within spilling ternary", ->
 
 test "method call chaining inside objects", ->
   f = (x) -> c: 42
-  result = a: f(1), b: f(a: 1).c
+  result =
+    a: f 1
+    b: f(a: 1).c
   eq 42, result.b
 
 test "#4568: refine sameLine implicit object tagging", ->
@@ -14400,12 +14424,16 @@ test "#3906: handle further indentation inside indented chain", ->
 test "#3199: throw multiline implicit object", ->
   x = do ->
     if no
-      throw type: "a", msg: "b"
+      throw
+        type: "a"
+        msg: "b"
   eq undefined, x
 
   y = do ->
     if no
-      return type: "a", msg: "b"
+      return
+        type: "a"
+        msg: "b"
   eq undefined, y
 
 test "#4576: multiple row function chaining", -> (-> eq @a, 3).call a: 3
@@ -14413,8 +14441,8 @@ test "#4576: multiple row function chaining", -> (-> eq @a, 3).call a: 3
 test "#4576: function chaining on separate rows", ->
   do ->
     Promise.resolve()
-    .then -> yes
-    .then ok
+      .then -> yes
+      .then ok
 
 test "#3736: chaining after do IIFE", ->
   eq(
@@ -15534,9 +15562,9 @@ test "Chained blocks, with proper indentation levels:", ->
       @results.push func()
       this
   counter
-  .tick -> 3
-  .tick -> 2
-  .tick -> 1
+    .tick -> 3
+    .tick -> 2
+    .tick -> 1
   arrayEq [3, 2, 1], counter.results
 
 test "This is a crazy one.", ->
@@ -15583,8 +15611,8 @@ test "Test newline-supressed call chains with nested functions.", ->
   obj = call: -> this
   func = ->
     obj
-    .call -> one two
-    .call -> three four
+      .call -> one two
+      .call -> three four
     101
   eq func(), 101
 
@@ -15942,11 +15970,21 @@ test "#2297, Different behaviors on interpreting literal", ->
 
   xyzzy =
     e: 1
-    f: foo { a: 1, b: 2 }, one: 1, two: 2, three: 3
+    f: foo(
+      a: 1
+      b: 2
+    ,
+      one: 1
+      two: 2
+      three: 3
+    )
     g:
       a: 1
       b: 2
-      c: foo 2, one: 1, two: 2, three: 3
+      c: foo 2,
+        one: 1
+        two: 2
+        three: 3
       d: 3
     four: 4
     h: foo(
@@ -15982,7 +16020,21 @@ test "Implicit calls and new", ->
   eq bar.x, 1
 
   third = (x, y, z) -> z
-  baz = first new foo new foo third { one: 1, two: 2 }, 1, { three: 3 }, 2
+  baz = first(
+    new foo(
+      new foo(
+        third
+          one: 1
+          two: 2
+        ,
+          1
+        ,
+          three: 3
+        ,
+          2
+      )
+    )
+  )
   eq baz.x.x.three, 3
 
 test "Loose tokens inside of explicit call lists", ->
@@ -16196,29 +16248,29 @@ test "#4473: variable scope in chained calls", ->
       this
 
   obj
-  .foo (a = 1)
-  .bar -> a = 2
+    .foo (a = 1)
+    .bar -> a = 2
   eq a, 2
 
   obj
-  .bar -> b = 2
-  .foo (b = 1)
+    .bar -> b = 2
+    .foo (b = 1)
   eq b, 1
 
   obj
-  .foo (c = 1)
-  .bar -> c = 2
-  .foo (c = 3)
+    .foo (c = 1)
+    .bar -> c = 2
+    .foo (c = 3)
   eq c, 3
 
   obj
-  .foo ([d, e] = [1, 2])
-  .bar -> d = 4
+    .foo ([d, e] = [1, 2])
+    .bar -> d = 4
   eq d, 4
 
   obj
-  .foo ({ f } = { f: 1 })
-  .bar -> f = 5
+    .foo ({ f } = { f: 1 })
+    .bar -> f = 5
   eq f, 5
 
 test "#5052: implicit call of class with no body", ->
@@ -17133,15 +17185,15 @@ test "#1435 Indented property access", ->
   eq 1, do ->
     rec().rec ->
       rec()
-      .rec -> rec.rec()
-      .rec()
+        .rec -> rec.rec()
+        .rec()
     1
 
 test "#1038 Optimize trailing return statements", ->
   compile = (code) ->
     CoffeeScript.compile code, bare: yes
-    .trim()
-    .replace /\\s+/g, " "
+      .trim()
+      .replace /\\s+/g, " "
 
   eq "(function() {});", compile "->"
   eq "(function() {});", compile "-> return"
@@ -17199,9 +17251,9 @@ test "#3845/#3446: chain after function glyph", ->
   eq(
     undefined
     angular
-    .module "foo"
-    .controller "EmailLoginCtrl", ->
-    .controller "EmailSignupCtrl", ->
+      .module "foo"
+      .controller "EmailLoginCtrl", ->
+      .controller "EmailSignupCtrl", ->
   )
 
   beforeEach = (f) -> f()
@@ -17211,8 +17263,8 @@ test "#3845/#3446: chain after function glyph", ->
     undefined
     beforeEach ->
       getPromise()
-      .then (@result) =>
-      .catch (@error) =>
+        .then (@result) =>
+        .catch (@error) =>
   )
 
   doThing = -> then: -> catch: (f) -> f()
@@ -17220,8 +17272,8 @@ test "#3845/#3446: chain after function glyph", ->
   eq(
     3
     doThing()
-    .then (@result) =>
-    .catch handleError
+      .then (@result) =>
+      .catch handleError
   )
 
 test "#4413: expressions in function parameters that create generated variables have those variables declared correctly", ->
@@ -17906,7 +17958,13 @@ test "from as an iterator variable name in a for loop declaration", ->
   arrayEq a, b
 
 test "from as a destructured object variable name in a for loop declaration", ->
-  a = [{ from: 1, to: 2 }, { from: 3, to: 4 }]
+  a = [
+    from: 1
+    to: 2
+  ,
+    from: 3
+    to: 4
+  ]
   b = []
   for { from, to } in a
     b.push from
@@ -17918,7 +17976,13 @@ test "from as a destructured object variable name in a for loop declaration", ->
   arrayEq c, [1, 3]
 
 test "from as a destructured, aliased object variable name in a for loop declaration", ->
-  a = [{ b: 1, c: 2 }, { b: 3, c: 4 }]
+  a = [
+    b: 1
+    c: 2
+  ,
+    b: 3
+    c: 4
+  ]
   out = []
 
   for { b: from } in a
@@ -19487,7 +19551,10 @@ test "object spread properties: ES2015", ->
   eq obj.a, obj2.a
 
   # Should not trigger implicit call, e.g. rest ... => rest(...)
-  obj2 = { obj..., c: 9 }
+  obj2 = {
+    obj...
+    c: 9
+  }
   eq obj2.c, 9
   eq obj.a, obj2.a
 
@@ -19496,7 +19563,12 @@ test "object spread properties: ES2015", ->
   eq obj.a, obj2.a
 
   # Should not trigger implicit call, e.g. rest ... => rest(...)
-  obj2 = { obj..., a: 8, c: 9, obj... }
+  obj2 = {
+    obj...
+    a: 8
+    c: 9
+    obj...
+  }
   eq obj2.c, 3
   eq obj.a, obj2.a
 
@@ -19534,10 +19606,17 @@ test "object spread properties: ES2015", ->
   (({ a, b, r... }) ->
     eq 1, a
     deepEqual r, { c: 3, d: 44, e: 55 }
-  ) { obj2..., d: 44, e: 55 }
+  ) {
+    obj2...
+    d: 44
+    e: 55
+  }
 
   # Should not trigger implicit call, e.g. rest ... => rest(...)
-  obj4 = { a: 10, obj.c... }
+  obj4 = {
+    a: 10
+    obj.c...
+  }
   eq obj4.a, 10
   eq obj4.d, 3
   eq obj4.f.g, 5
@@ -19548,7 +19627,10 @@ test "object spread properties: ES2015", ->
   deepEqual obj5.c, obj.c
 
   # Should not trigger implicit call, e.g. rest ... => rest(...)
-  obj5 = { obj..., ((k) -> b: k)(99)... }
+  obj5 = {
+    obj...
+    ((k) -> b: k)(99)...
+  }
   eq obj5.b, 99
   deepEqual obj5.c, obj.c
 
@@ -20655,7 +20737,9 @@ pluck = (x) -> x.a
 eq 100, pluck pluck pluck a: a: a: 100
 
 test "YAML-style object literals", ->
-  obj = a: 1, b: 2
+  obj =
+    a: 1
+    b: 2
   eq 1, obj.a
   eq 2, obj.b
 
@@ -20673,7 +20757,9 @@ test "YAML-style object literals", ->
   ok config.development.timeout is 10
   ok config.production.timeout is 1000
 
-obj = a: 1, b: 2
+obj =
+  a: 1
+  b: 2
 ok obj.a is 1
 ok obj.b is 2
 
@@ -20726,7 +20812,9 @@ eq result.two, 2
 eq result.two, obj.list()[1]
 
 third = (a, b, c) -> c
-obj = one: "one", two: third "one", "two", "three"
+obj =
+  one: "one"
+  two: third "one", "two", "three"
 ok obj.one is "one"
 ok obj.two is "three"
 
@@ -20745,7 +20833,10 @@ test "invoking functions with implicit object literals", ->
   result = getA a, b: 1
   eq undefined, result
 
-  result = getA b: 1, a: 43
+  result = getA(
+    b: 1
+    a: 43
+  )
   eq 43, result
 
   result = getA { b: 1 }, a: 62
@@ -20907,13 +20998,18 @@ test "Implicit objects, functions and arrays", ->
   eq bar[4], 3
 
 test "#2549, Brace-less Object Literal as a Second Operand on a New Line", ->
-  foo = no or one: 1, two: 2, three: 3
+  foo = no or
+    one: 1
+    two: 2
+    three: 3
   eq foo.one, 1
 
   bar = yes and one: 1
   eq bar.one, 1
 
-  baz = null ? one: 1, two: 2
+  baz = null ?
+    one: 1
+    two: 2
   eq baz.two, 2
 
 test "#2757, Nested", ->
@@ -20991,13 +21087,17 @@ test "#1871: implicit object closed by IMPLICIT_END in implicit returns", ->
 test "#1961, #1974, regression with compound assigning to an implicit object", ->
   obj = null
 
-  obj ?= one: 1, two: 2
+  obj ?=
+    one: 1
+    two: 2
 
   eq obj.two, 2
 
   obj = null
 
-  obj or= three: 3, four: 4
+  obj or=
+    three: 3
+    four: 4
 
   eq obj.four, 4
 
@@ -21122,7 +21222,9 @@ test "object keys with interpolations: evaluation order", ->
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7 }
 
 test "object keys with interpolations: object starting with dynamic key", ->
-  obj = "#{"a"}": 1, b: 2
+  obj =
+    "#{"a"}": 1
+    b: 2
   deepEqual obj, { a: 1, b: 2 }
 
 test "object keys with interpolations: comments in implicit object", ->
@@ -21247,7 +21349,9 @@ test "computed property keys: evaluation order", ->
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7 }
 
 test "computed property keys: object starting with dynamic key", ->
-  obj = ["a"]: 1, b: 2
+  obj =
+    ["a"]: 1
+    b: 2
   deepEqual obj, { a: 1, b: 2 }
 
 test "computed property keys: comments in implicit object", ->
@@ -21324,21 +21428,28 @@ test "computed property keys: shorthand computed property key", ->
 test "computed property keys: arrays", ->
   b = "b"
   f = (c) -> "#{c}1"
-  obj = ["a"]: [1, 2, 3], [b]: [4, 5, 6], [f(b)]: [7, 8, 9]
+  obj =
+    ["a"]: [1, 2, 3]
+    [b]: [4, 5, 6]
+    [f(b)]: [7, 8, 9]
   arrayEq obj.a, [1, 2, 3]
   arrayEq obj.b, [4, 5, 6]
   arrayEq obj.b1, [7, 8, 9]
 
 test "computed property keys: examples from developer.mozilla.org (Object initializer)", ->
   i = 0
-  obj = ["foo" + ++i]: i, ["foo" + ++i]: i, ["foo" + ++i]: i
+  obj =
+    ["foo" + ++i]: i
+    ["foo" + ++i]: i
+    ["foo" + ++i]: i
   eq obj.foo1, 1
   eq obj.foo2, 2
   eq obj.foo3, 3
 
   param = "size"
   config =
-    [param]: 12, ["mobile" + param.charAt(0).toUpperCase() + param.slice(1)]: 4
+    [param]: 12
+    ["mobile" + param.charAt(0).toUpperCase() + param.slice(1)]: 4
   deepEqual config, { size: 12, mobileSize: 4 }
 
 test "computed property keys: [Symbol.iterator]", ->
@@ -24140,9 +24251,9 @@ test "soaked method invocation", ->
   eq(
     obj
     obj
-    .increment()
-    .increment()
-    .self?()
+      .increment()
+      .increment()
+      .self?()
   )
   eq 2, counter
 
@@ -25452,7 +25563,9 @@ test "tagged template literal for html templating", ->
     htmlFragments.reduce (fullHtml, htmlFragment, i) ->
       fullHtml + "#{expressions[i - 1]}#{htmlFragment}"
 
-  state = name: "Greg", adjective: "awesome"
+  state =
+    name: "Greg"
+    adjective: "awesome"
 
   eq(
     """

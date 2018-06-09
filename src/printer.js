@@ -547,7 +547,11 @@ function printPathNoParens(path, options, print) {
                 printArrayItems(path, options, 'elements', print),
               ])
             ),
-            needsForcedTrailingComma ? ',' : '',
+            needsForcedTrailingComma
+              ? ','
+              : options.comma !== 'all'
+                ? ''
+                : ifBreak(',', ''),
             softline,
             ']',
           ]),
@@ -1422,6 +1426,14 @@ function printObject(path, print, options) {
             value.type === 'FunctionExpression' ||
             (value.type === 'ConditionalExpression' && value.postfix) ||
             (value.type === 'For' && value.postfix))
+      )) ||
+    (node.type === 'ObjectExpression' &&
+      options.respectBreak.indexOf('object') > -1 &&
+      props.length > 1 &&
+      util.hasNewlineInRange(
+        options.originalText,
+        options.locStart(node),
+        options.locEnd(node)
       ))
   const shouldBreakIfParentBreaks =
     isCallArg || (props.length > 1 && parent.type === 'ArrayExpression')
@@ -1940,7 +1952,12 @@ function printExportDeclaration(path, options, print) {
 }
 
 function shouldInlineLogicalExpression(node, {notJSX} = {}) {
-  if (node.type !== 'LogicalExpression') {
+  if (
+    !(
+      node.type === 'LogicalExpression' ||
+      (node.type === 'BinaryExpression' && node.operator === '?')
+    )
+  ) {
     return false
   }
 
@@ -2653,7 +2670,9 @@ function printArgumentsList(path, options, print) {
       ifBreak(
         isObject || nextIsNonFinalObject || consecutiveIf
           ? dedent(concat([line, ',']))
-          : '',
+          : options.comma !== 'none'
+            ? ','
+            : '',
         ','
       ),
       line,
@@ -2662,6 +2681,8 @@ function printArgumentsList(path, options, print) {
     parts.push(print(argPath))
     if (index !== lastArgIndex) {
       parts.push(concat(separatorParts))
+    } else if (index === lastArgIndex && options.comma === 'all') {
+      parts.push(ifBreak(','))
     }
 
     return concat(parts)
@@ -3034,7 +3055,7 @@ function isDoFunc(node) {
   return isDo(node) && node.argument.type === 'FunctionExpression'
 }
 
-function printFunctionParams(path, print) {
+function printFunctionParams(path, print, options) {
   const fun = path.getValue()
   const {params} = fun
 
@@ -3050,9 +3071,15 @@ function printFunctionParams(path, print) {
     dontBreak
       ? join(', ', printed)
       : indent(
-          concat([softline, join(concat([ifBreak('', ','), line]), printed)])
+          concat([
+            softline,
+            join(
+              concat([ifBreak(options.comma !== 'none' ? ',' : '', ','), line]),
+              printed
+            ),
+          ])
         ),
-    dontBreak ? '' : softline,
+    dontBreak ? '' : concat([options.comma === 'all' ? ',' : '', softline]),
     ') ',
   ])
 }
@@ -3207,7 +3234,11 @@ function printArrayItems(path, options, printPath, print) {
       isIf(elements[index + 1])
     separatorParts = [
       ifBreak(
-        isObject || consecutiveIf ? dedent(concat([line, ','])) : '',
+        isObject || consecutiveIf
+          ? dedent(concat([line, ',']))
+          : options.comma !== 'none'
+            ? ','
+            : '',
         ','
       ),
       line,

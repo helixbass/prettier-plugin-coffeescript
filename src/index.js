@@ -89,8 +89,36 @@ const options = {
   indentChain: {
     type: 'boolean',
     category: 'Global',
-    default: false,
+    default: true,
     description: 'Indent chained (non-initial) lines of a member call chain',
+  },
+  comma: {
+    type: 'choice',
+    choices: [
+      {value: 'none', description: 'No commas'},
+      {value: 'nonTrailing', description: 'Include commas except trailing'},
+      {value: 'all', description: 'Include commas'},
+    ],
+    category: 'Global',
+    default: 'none',
+    description:
+      'Include commas when breaking call args, function params or arrays',
+  },
+  respectBreak: {
+    array: true,
+    type: 'choice',
+    choices: [
+      {
+        value: 'control',
+        description: "Don't inline indented control structures",
+      },
+      {value: 'function', description: "Don't inline indented function bodies"},
+      {value: 'object', description: "Don't inline multiline objects"},
+    ],
+    category: 'Global',
+    default: [{value: ['control', 'function', 'object']}],
+    description:
+      'Include commas when breaking call args, function params or arrays',
   },
 }
 
