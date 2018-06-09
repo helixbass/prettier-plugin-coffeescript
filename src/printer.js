@@ -996,7 +996,11 @@ function printPathNoParens(path, options, print) {
         n.body,
         {withPath: true}
       )
-      const shouldBreak = !(singleExpr && isDoFunc(singleExpr))
+      const shouldBreak =
+        isEmptyBlock(n.body) ||
+        !singleExpr ||
+        (options.respectBreak.indexOf('control') > -1 &&
+          !hasSameStartLine(n, n.body))
       const body = shouldBreak
         ? adjustClause(n.body, path.call(print, 'body'))
         : path.call(print, 'body', ...singleExprPath)
