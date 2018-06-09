@@ -18,10 +18,7 @@ obj.foo ? "default"
 
 x = (foo, bar = foo ? bar) ->
 
-if foo
-  bar ? foo
-else
-  baz
+if foo then bar ? foo else baz
 
 foo ? (bar ? baz)
 

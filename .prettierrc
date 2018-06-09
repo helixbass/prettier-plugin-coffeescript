@@ -4,4 +4,4 @@ trailingComma: 'es5'
 bracketSpacing: false
 indentChain: false
 # comma: 'nonTrailing'
-# respectBreak: ['control']
+# respectBreak: ['object']

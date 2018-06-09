@@ -1876,11 +1876,7 @@ test "destructuring assignment with objects and splats", ->
 test "destructuring assignment against an expression", ->
   a = {}
   b = {}
-  [y, z] =
-    if true
-      [a, b]
-    else
-      [b, a]
+  [y, z] = if true then [a, b] else [b, a]
   eq a, y
   eq b, z
 
@@ -2164,10 +2160,7 @@ test "#1348, #1216: existential assignment compilation", ->
   #the first ?= compiles into a statement; the second ?= compiles to a ternary expression
   eq a ?= b ?= 1, nonce
 
-  if a
-    a ?= 2
-  else
-    a = 3
+  if a then a ?= 2 else a = 3
   eq a, nonce
 
 test "#1591, #1101: splatted expressions in destructuring assignment must be assignable", ->
@@ -5287,11 +5280,7 @@ test "ensure that constructors invoked with splats return a new object", ->
 
   # Ensure that constructors invoked with splats cache the function.
   called = 0
-  get = ->
-    if called++
-      false
-    else
-      class Type
+  get = -> if called++ then false else class Type
   new (get()) args...
 
 test "\`new\` shouldn't add extra parens", ->
@@ -9653,11 +9642,7 @@ test "#4898: Lexer: backslash line continuation is inconsistent", ->
 # TODO: make sure postfix forms and expression coercion are properly tested
 
 # shared identity function
-id = (_) ->
-  if arguments.length is 1
-    _
-  else
-    Array::slice.call arguments
+id = (_) -> if arguments.length is 1 then _ else Array::slice.call arguments
 
 # Conditionals
 
@@ -9691,14 +9676,8 @@ test "basic conditionals", ->
     ok true
 
 test "single-line conditional", ->
-  if false
-    ok false
-  else
-    ok true
-  unless false
-    ok true
-  else
-    ok false
+  if false then ok false else ok true
+  unless false then ok true else ok false
 
 test "nested conditionals", ->
   nonce = {}
@@ -9713,35 +9692,14 @@ test "nested conditionals", ->
 test "nested single-line conditionals", ->
   nonce = {}
 
-  a =
-    if false
-      undefined
-    else
-      (b =
-        if 0
-          undefined
-        else
-          nonce)
+  a = if false then undefined else (b = if 0 then undefined else nonce)
   eq nonce, a
   eq nonce, b
 
-  c =
-    if false
-      undefined
-    else if 0
-      undefined
-    else
-      nonce
+  c = if false then undefined else if 0 then undefined else nonce
   eq nonce, c
 
-  d =
-    if true
-      id(
-        if false
-          undefined
-        else
-          nonce
-      )
+  d = if true then id if false then undefined else nonce
   eq nonce, d
 
 test "empty conditional bodies", ->
@@ -9770,24 +9728,15 @@ test "conditional bodies containing only comments", ->
 
 test "return value of if-else is from the proper body", ->
   nonce = {}
-  eq nonce,
-    if false
-      undefined
-    else
-      nonce
+  eq nonce, if false then undefined else nonce
 
 test "return value of unless-else is from the proper body", ->
   nonce = {}
-  eq nonce,
-    unless true
-      undefined
-    else
-      nonce
+  eq nonce, unless true then undefined else nonce
 
 test "assign inside the condition of a conditional statement", ->
   nonce = {}
-  if (a = nonce)
-    1
+  if (a = nonce) then 1
   eq nonce, a
   1 if (b = nonce)
   eq nonce, b
@@ -9795,11 +9744,7 @@ test "assign inside the condition of a conditional statement", ->
 # Interactions With Functions
 
 test "single-line function definition with single-line conditional", ->
-  fn = ->
-    if 1 < 0.5
-      1
-    else
-      -1
+  fn = -> if 1 < 0.5 then 1 else -1
   ok fn() is -1
 
 test "function resturns conditional value with no \`else\`", ->
@@ -9820,21 +9765,12 @@ test "function returns a conditional value", ->
 
 test "passing a conditional value to a function", ->
   nonce = {}
-  eq(
-    nonce
-    id(
-      if false
-        undefined
-      else
-        nonce
-    )
-  )
+  eq nonce, id if false then undefined else nonce
 
 test "unmatched \`then\` should catch implicit calls", ->
   a = 0
   trueFn = -> true
-  if trueFn undefined
-    a++
+  if trueFn undefined then a++
   eq 1, a
 
 # if-to-ternary
@@ -9873,12 +9809,7 @@ test "suppressed indentation via assignment", ->
     else if 1 < 0
       undefined
     else
-      id(
-        if false
-          undefined
-        else
-          nonce
-      )
+      id if false then undefined else nonce
   eq nonce, result
 
 test "tight formatting with leading \`then\`", ->
@@ -9891,9 +9822,7 @@ test "tight formatting with leading \`then\`", ->
 
 test "#738: inline function defintion", ->
   nonce = {}
-  fn =
-    if true
-      -> nonce
+  fn = if true then -> nonce
   eq nonce, fn()
 
 test "#748: trailing reserved identifiers", ->
@@ -9905,22 +9834,14 @@ test "#748: trailing reserved identifiers", ->
   eq nonce, result
 
 test "if-else within an assignment, condition parenthesized", ->
-  result =
-    if 1 is 1
-      "correct"
+  result = if 1 is 1 then "correct"
   eq result, "correct"
 
-  result =
-    if "whatever" ? no
-      "correct"
+  result = if "whatever" ? no then "correct"
   eq result, "correct"
 
   f = -> "wrong"
-  result =
-    if f?()
-      "correct"
-    else
-      "wrong"
+  result = if f?() then "correct" else "wrong"
   eq result, "correct"
 
 # Postfix
@@ -9959,10 +9880,7 @@ test "basic \`while\` loops", ->
   ok results.join(" ") is "16 12 8 4"
 
 test "Issue 759: \`if\` within \`while\` condition", ->
-  2 while (
-    if 1
-      0
-  )
+  2 while if 1 then 0
 
 test "assignment inside the condition of a \`while\` loop", ->
   nonce = {}
@@ -10256,14 +10174,7 @@ test "#2343: if / then / if / then / else", ->
   v = ->
     if a
       if b
-        if c
-          d
-        else if e
-          f
-        else if g
-          h
-        else
-          i
+        if c then d else if e then f else if g then h else i
 
   w = ->
     if a
@@ -10278,28 +10189,10 @@ test "#2343: if / then / if / then / else", ->
           i
 
   x = ->
-    if a
-      if b
-        if c
-          d
-        else if e
-          f
-        else if g
-          h
-        else
-          i
+    if a then if b then if c then d else if e then f else if g then h else i
 
   y = ->
-    if a
-      if b
-        if c
-          d
-        else if e
-          f
-        else if g
-          h
-        else
-          i
+    if a then if b then if c then d else if e then f else if g then h else i
 
   eq 4, s()
   eq 4, t()
@@ -10390,14 +10283,7 @@ test "#2343: if / then / if / then / else / else", ->
   v = ->
     if a
       if b
-        if c
-          d
-        else if e
-          f
-        else if g
-          h
-        else
-          i
+        if c then d else if e then f else if g then h else i
       else
         j
     else
@@ -10421,33 +10307,13 @@ test "#2343: if / then / if / then / else / else", ->
 
   x = ->
     if a
-      if b
-        if c
-          d
-        else if e
-          f
-        else if g
-          h
-        else
-          i
-      else
-        j
+      if b then if c then d else if e then f else if g then h else i else j
     else
       k
 
   y = ->
     if a
-      if b
-        if c
-          d
-        else if e
-          f
-        else if g
-          h
-        else
-          i
-      else
-        j
+      if b then if c then d else if e then f else if g then h else i else j
     else
       k
 
@@ -10523,28 +10389,12 @@ test "#2343: switch / when / then / if / then / else", ->
   u = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+        if b then if c then d else if e then f else if g then h else i
 
   v = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+        if b then if c then d else if e then f else if g then h else i
 
   w = ->
     switch
@@ -10562,28 +10412,12 @@ test "#2343: switch / when / then / if / then / else", ->
   x = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+        if b then if c then d else if e then f else if g then h else i
 
   y = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+        if b then if c then d else if e then f else if g then h else i
 
   eq 4, s()
   eq 4, t()
@@ -10682,45 +10516,21 @@ test "#2343: switch / when / then / if / then / else / else", ->
   w = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+        if b then if c then d else if e then f else if g then h else i
       else
         0
 
   x = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+        if b then if c then d else if e then f else if g then h else i
       else
         0
 
   y = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+        if b then if c then d else if e then f else if g then h else i
       else
         0
 
@@ -10841,14 +10651,7 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
     switch
       when a
         if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
+          if c then d else if e then f else if g then h else i
         else
           j
       else
@@ -10857,34 +10660,14 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
   x = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
-        else
-          j
+        if b then if c then d else if e then f else if g then h else i else j
       else
         0
 
   y = ->
     switch
       when a
-        if b
-          if c
-            d
-          else if e
-            f
-          else if g
-            h
-          else
-            i
-        else
-          j
+        if b then if c then d else if e then f else if g then h else i else j
       else
         0
 
@@ -10927,30 +10710,21 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
 # Test for issue #3921: Inline function without parentheses used in condition fails to compile
 test "#3921: \`if\` & \`unless\`", ->
   a = {}
-  eq a,
-    if do -> no
-      undefined
-    else
-      a
+  eq a, if do -> no then undefined else a
   a1 = undefined
   if do -> yes
     a1 = a
   eq a, a1
 
   b = {}
-  eq b,
-    unless do -> no
-      b
-    else
-      undefined
+  eq b, unless do -> no then b else undefined
   b1 = undefined
   unless do -> no
     b1 = b
   eq b, b1
 
   c = 0
-  if (arg = undefined) -> yes
-    c++
+  if (arg = undefined) -> yes then c++
   eq 1, c
   d = 0
   if (arg = undefined) -> yes
@@ -10958,16 +10732,8 @@ test "#3921: \`if\` & \`unless\`", ->
   eq 1, d
 
   answer = "correct"
-  eq answer,
-    if do -> "wrong"
-      "correct"
-    else
-      "wrong"
-  eq answer,
-    unless do -> no
-      "correct"
-    else
-      "wrong"
+  eq answer, if do -> "wrong" then "correct" else "wrong"
+  eq answer, unless do -> no then "correct" else "wrong"
   statm1 = undefined
   if do -> "wrong"
     statm1 = "correct"
@@ -11155,14 +10921,7 @@ test "#3909: backslash \`for ... in\`", ->
   x8 = (key for key in arr)
   arrayEq x8, arr
 
-if a
-  b
-else if c
-  d
-else if e
-  f
-else
-  g
+if a then b else if c then d else if e then f else g
 
 if no
   1
@@ -13418,7 +13177,12 @@ test "#3709: throwing an if statement", ->
   # \`throw if\` should return a closure around the \`if\` block, so that the
   # output is valid JavaScript.
   try
-    throw (if no then new Error "drat!" else new Error "no escape!")
+    throw (
+      if no
+        new Error "drat!"
+      else
+        new Error "no escape!"
+    )
   catch err
     eq err.message, "no escape!"
 
@@ -14167,24 +13931,13 @@ test "chaining should not wrap spilling ternary", ->
 test "chaining should wrap calls containing spilling ternary", ->
   f = (x) -> h: x
   id = (x) -> x
-  result =
-    f(
-      if true
-        42
-      else
-        id a: 2
-    ).h
+  result = f(if true then 42 else id a: 2).h
   eq 42, result
 
 test "chaining should work within spilling ternary", ->
   f = (x) -> h: x
   id = (x) -> x
-  result = f(
-    if false
-      1
-    else
-      id { a: 3 }.a
-  )
+  result = f if false then 1 else id { a: 3 }.a
   eq 3, result.h
 
 test "method call chaining inside objects", ->
@@ -15351,11 +15104,7 @@ f class A extends B
 # * Explicit Returns
 
 # shared identity function
-id = (_) ->
-  if arguments.length is 1
-    _
-  else
-    [arguments...]
+id = (_) -> if arguments.length is 1 then _ else [arguments...]
 
 # helper to assert that a string should fail compilation
 cantCompile = (code) ->
@@ -15487,11 +15236,7 @@ test "Passing multiple functions without paren-wrapping is legal, and should com
 
 test "Implicit call with a trailing if statement as a param.", ->
   func = -> arguments[1]
-  result = func "one",
-    if false
-      100
-    else
-      13
+  result = func "one", if false then 100 else 13
   ok result is 13
 
 test "Test more function passing:", ->
@@ -15591,12 +15336,7 @@ test "Prefix unary assignment operators are allowed in parenless calls.", ->
   ok func(--val) is 5
 
 test "#855: execution context for \`func arr...\` should be \`null\`", ->
-  contextTest = ->
-    eq @,
-      if window?
-        window
-      else
-        global
+  contextTest = -> eq @, if window? then window else global
   array = []
   contextTest array
   contextTest.apply null, array
@@ -17691,11 +17431,7 @@ test "\`yield from\` at the end of a function errors", ->
   throws -> CoffeeScript.compile "x = -> x = 1; yield from"
 
 test "yield in if statements", ->
-  x = do ->
-    if 1 is yield 2
-      3
-    else
-      4
+  x = do -> if 1 is yield 2 then 3 else 4
 
   y = x.next()
   ok y.value is 2 and y.done is false
@@ -17704,11 +17440,7 @@ test "yield in if statements", ->
   ok y.value is 3 and y.done is true
 
 test "yielding if statements", ->
-  x = do ->
-    yield if true
-      3
-    else
-      4
+  x = do -> yield if true then 3 else 4
 
   y = x.next()
   ok y.value is 3 and y.done is false
@@ -17828,8 +17560,7 @@ test "yield handles 'this' correctly", ->
       for item in [1]
         yield => this
     yield array
-    yield if true
-      yield => this
+    yield if true then yield => this
     yield try
       throw yield => this
     throw yield => this
@@ -22123,12 +21854,7 @@ test "binary existential operator with negative number", ->
 # Existential Operator (Unary)
 
 test "postfix existential operator", ->
-  ok(
-    if nonexistent?
-      false
-    else
-      true
-  )
+  ok if nonexistent? then false else true
   defined = true
   ok defined?
   defined = false
@@ -22139,12 +21865,7 @@ test "postfix existential operator only evaluates its operand once", ->
   fn = ->
     ok false if semaphore
     ++semaphore
-  ok(
-    if fn()?
-      true
-    else
-      false
-  )
+  ok if fn()? then true else false
 
 test "negated postfix existential operator", ->
   ok !nothing?.value
@@ -22318,10 +22039,7 @@ test "Regression with implicit calls against an indented assignment", ->
 
 test "#2155 ... conditional assignment to a closure", ->
   x = null
-  func = ->
-    x ?= ->
-      if true
-        "hi"
+  func = -> x ?= -> if true then "hi"
   func()
   eq x(), "hi"
 
@@ -23362,18 +23080,10 @@ test "division is not confused for a regular expression", ->
   a += " " until (/   /).test a
   eq a, "   "
 
-  a =
-    if /=/.test "="
-      yes
-    else
-      no
+  a = if /=/.test "=" then yes else no
   eq a, yes
 
-  a =
-    if !/=/.test "="
-      yes
-    else
-      no
+  a = if !/=/.test "=" then yes else no
   eq a, no
 
   #3182:
@@ -23422,11 +23132,7 @@ test "division vs regex after a callable token", ->
     eq true, this /b/g
   ).call r
   class A
-    p: (regex) ->
-      if regex
-        r regex
-      else
-        4
+    p: (regex) -> if regex then r regex else 4
   class B extends A
     p: ->
       eq 2, super() / b / g
@@ -24214,12 +23920,7 @@ test "function invocation with soaked property access", ->
   eq undefined, id nonexistent?.method()
 
 test "if-to-ternary should safely parenthesize soaked property accesses", ->
-  ok(
-    if nonexistent?.property
-      false
-    else
-      true
-  )
+  ok if nonexistent?.property then false else true
 
 test "#726: don't check for a property on a conditionally-referenced nonexistent thing", ->
   eq undefined, nonexistent?[Date()]
@@ -24283,9 +23984,7 @@ test "soaked function invocation", ->
 test "soaked function invocation with generated functions", ->
   nonce = {}
   id = (_) -> _
-  maybe = (fn, arg) ->
-    if typeof fn is "function"
-      -> fn arg
+  maybe = (fn, arg) -> if typeof fn is "function" then -> fn arg
   eq maybe(id, nonce)?(), nonce
   eq maybe(id, nonce)?(), nonce
   eq maybe(false, nonce)?(), undefined

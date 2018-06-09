@@ -4,10 +4,7 @@ exports[`new-expression.coffee 1`] = `
 testConsole = new TestConsole(if config.useStderr then process.stderr else process.stdout)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 testConsole = new TestConsole(
-  if config.useStderr
-    process.stderr
-  else
-    process.stdout
+  if config.useStderr then process.stderr else process.stdout
 )
 
 `;

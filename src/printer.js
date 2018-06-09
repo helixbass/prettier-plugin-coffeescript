@@ -894,6 +894,7 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'ConditionalExpression':
     case 'IfStatement': {
+      const parent = path.getParentNode()
       const simpleTest = path.call(print, 'test')
       const breakingTest = group(
         concat([
@@ -914,10 +915,8 @@ function printPathNoParens(path, options, print) {
         return concat(parts)
       }
 
-      // const isStatement = n.type === 'IfStatement'
-      // const shouldBreak = isStatement
-      const shouldBreak = !pathNeedsParens(path, options)
-      const shouldIndent = !shouldBreak
+      const shouldBreak = shouldBreakIf(n, options)
+      const shouldIndent = pathNeedsParens(path, options)
 
       const con = adjustClause(n.consequent, path.call(print, 'consequent'))
 
@@ -925,26 +924,38 @@ function printPathNoParens(path, options, print) {
         shouldIndent ? softline : '',
         keyword,
         test,
-        ifBreak('', ' then'),
+        ifBreak(
+          '',
+          concat([' then', n.consequent.type === 'BlockStatement' ? ' ' : ''])
+        ),
         con,
       ])
       parts.push(opening)
 
       if (n.alternate) {
         const alternate = path.call(print, 'alternate')
-        const isChainedElseIf = isIf(n.alternate)
-        const alt = isChainedElseIf
+        const hasChainedElseIf = isIf(n.alternate)
+        const alt = hasChainedElseIf
           ? concat([' ', alternate])
           : adjustClause(n.alternate, alternate)
-        parts.push(line, 'else', alt)
+        parts.push(
+          line,
+          'else',
+          n.consequent.type === 'BlockStatement' && !hasChainedElseIf
+            ? ' '
+            : '',
+          alt
+        )
       }
 
-      return group(
-        shouldIndent
-          ? concat([indent(concat(parts)), softline])
-          : concat(parts),
-        {shouldBreak}
-      )
+      const isChainedElseIf = parent.type === n.type && n === parent.alternate
+      const content = shouldIndent
+        ? concat([indent(concat(parts)), softline])
+        : concat(parts)
+      if (isChainedElseIf) {
+        return content
+      }
+      return group(content, {shouldBreak})
     }
     case 'For': {
       const opening = concat([
@@ -1321,6 +1332,16 @@ function printPathNoParens(path, options, print) {
     case 'TaggedTemplateExpression':
       return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
   }
+}
+
+function shouldBreakIf(node, options) {
+  return (
+    isEmptyBlock(node.consequent) ||
+    isEmptyBlock(node.alternate) ||
+    (options.respectBreak.indexOf('control') > -1 &&
+      (!hasSameStartLine(node, node.consequent) ||
+        (isIf(node.alternate) && shouldBreakIf(node.alternate, options))))
+  )
 }
 
 function functionWillBreak(path, options) {
@@ -1874,6 +1895,7 @@ function isRightmostInStatement(
 
 function isIf(node, {postfix} = {}) {
   return (
+    node &&
     (node.type === 'IfStatement' || node.type === 'ConditionalExpression') &&
     (!postfix || node.postfix)
   )
@@ -1929,6 +1951,7 @@ function printClass(path, options, print) {
 
 function isEmptyBlock(node) {
   return (
+    node &&
     node.type === 'BlockStatement' &&
     !node.body.length &&
     !hasDanglingComments(node) &&

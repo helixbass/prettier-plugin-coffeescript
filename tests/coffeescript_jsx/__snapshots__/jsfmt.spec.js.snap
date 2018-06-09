@@ -43,20 +43,11 @@ if cable then <div><span>thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToe
   )}
 </div>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if <div />
-  jsxModeFromElementNonBreaking
-else
-  "a"
+if <div /> then jsxModeFromElementNonBreaking else "a"
 
-if jsxModeFromElementNonBreaking
-  <div />
-else
-  "a"
+if jsxModeFromElementNonBreaking then <div /> else "a"
 
-if jsxModeFromElementNonBreaking
-  "a"
-else
-  <div />
+if jsxModeFromElementNonBreaking then "a" else <div />
 
 if (
   <div>
@@ -87,15 +78,7 @@ else
     </span>
   </div>
 
-<div>
-  {if a
-    "a"
-  else if b
-    "b"
-  else
-    "c"
-  }
-</div>
+<div>{if a then "a" else if b then "b" else "c"}</div>
 
 if cable
   "satellite"
@@ -482,19 +465,11 @@ exports[`logical-expression.coffee 1`] = `
 
 <div>{a and <span />}</div>
 
-<div>
-  {if a
-    <span />
-  }
-</div>
+<div>{if a then <span />}</div>
 
 <div>{<span /> if a}</div>
 
-<div>
-  {unless a
-    <span />
-  }
-</div>
+<div>{unless a then <span />}</div>
 
 <div>{<span /> unless a}</div>
 

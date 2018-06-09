@@ -231,11 +231,7 @@ renderTernary = (props) ->
     else
       <div attr="blah" />
     }
-    {if props.showTheOtherThing
-      <div>I am here!!</div>
-    else
-      null
-    }
+    {if props.showTheOtherThing then <div>I am here!!</div> else null}
   </BaseForm>
 
 `;
