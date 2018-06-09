@@ -112,11 +112,14 @@ const options = {
         value: 'control',
         description: "Don't inline indented control structures",
       },
-      {value: 'function', description: "Don't inline indented function bodies"},
+      {
+        value: 'functionBody',
+        description: "Don't inline indented function bodies",
+      },
       {value: 'object', description: "Don't inline multiline objects"},
     ],
     category: 'Global',
-    default: [{value: ['control', 'function', 'object']}],
+    default: [{value: ['control', 'functionBody', 'object']}],
     description:
       'Include commas when breaking call args, function params or arrays',
   },

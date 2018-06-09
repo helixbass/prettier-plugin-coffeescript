@@ -97,6 +97,11 @@ function isNextLineEmpty(text, node, locEnd) {
   return isNextLineEmptyAfterIndex(text, locEnd(node))
 }
 
+function hasSameStartLine(node, other) {
+  return node.loc.start.line === other.loc.start.line
+}
+
 module.exports = {
   isNextLineEmpty,
+  hasSameStartLine,
 }

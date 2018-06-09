@@ -1776,7 +1776,8 @@ test "variable swapping to verify caching of RHS values when appropriate", ->
   eq nonceC, a
   eq nonceA, b
   eq nonceB, c
-  fn = -> [a, b, c] = [b, c, a]
+  fn = ->
+    [a, b, c] = [b, c, a]
   arrayEq [nonceA, nonceB, nonceC], fn()
   eq nonceA, a
   eq nonceB, b
@@ -2140,14 +2141,11 @@ x ||= 10
 x = null
 x or= 10
 x = null
-do ->
-  x ?= 10
+do -> x ?= 10
 x = null
-do ->
-  x ||= 10
+do -> x ||= 10
 x = null
-do ->
-  x or= 10
+do -> x or= 10
 x = null
 -> -> -> x ?= 10
 
@@ -2293,7 +2291,8 @@ test "#1500: Assignment to variables similar to generated variables", ->
   eq 0, len
 
   for x in [1, 2, 3]
-    f = -> i = 0
+    f = ->
+      i = 0
     f()
     eq "undefined", typeof i
 
@@ -2333,8 +2332,7 @@ test "Assignment to variables similar to helper functions", ->
     extend = 3
     hasProp = 4
     value: 5
-    method: (bind, bind1) =>
-      [bind, bind1, extend, hasProp, @value]
+    method: (bind, bind1) => [bind, bind1, extend, hasProp, @value]
   { method } = new B()
   arrayEq [1, 2, 3, 4, 5], method 1, 2
 
@@ -2357,9 +2355,11 @@ test "#4566: destructuring with nested default values", ->
 test "#4878: Compile error when using destructuring with a splat or expansion in an array", ->
   arr = ["a", "b", "c", "d"]
 
-  f1 = (list) -> [first, ..., last] = list
+  f1 = (list) ->
+    [first, ..., last] = list
 
-  f2 = (list) -> [first..., last] = list
+  f2 = (list) ->
+    [first..., last] = list
 
   f3 = (list) ->
     [first, ...] = list
@@ -2415,9 +2415,12 @@ test "#5004: array destructuring with accessors", ->
   obj =
     arr: ["a", "b", "c", "d"]
     list: {}
-    f1: -> [@first, @rest...] = @arr
-    f2: -> [@second, @third..., @last] = @rest
-    f3: -> [@list.a, @list.middle..., @list.d] = @arr
+    f1: ->
+      [@first, @rest...] = @arr
+    f2: ->
+      [@second, @third..., @last] = @rest
+    f3: ->
+      [@list.a, @list.middle..., @list.d] = @arr
 
   obj.f1()
   eq obj.first, "a"
@@ -2688,13 +2691,16 @@ winning = (val) -> Promise.resolve val
 # This is always rejected.
 failing = (val) -> Promise.reject new Error val
 
-test "async as argument", -> ok -> await winning()
+test "async as argument", ->
+  ok ->
+    await winning()
 
 test "explicit async", ->
   a = do ->
     await return 5
   eq a.constructor, Promise
-  a.then (val) -> eq val, 5
+  a.then (val) ->
+    eq val, 5
 
 test "implicit async", ->
   a = do ->
@@ -2716,16 +2722,19 @@ test "async return value (implicit)", ->
   b = do ->
     out = await a()
 
-  b.then -> arrayEq out, [5, 4, 3]
+  b.then ->
+    arrayEq out, [5, 4, 3]
 
 test "async return value (explicit)", ->
   out = null
-  a = -> await return [5, 2, 3]
+  a = ->
+    await return [5, 2, 3]
 
   b = do ->
     out = await a()
 
-  b.then -> arrayEq out, [5, 2, 3]
+  b.then ->
+    arrayEq out, [5, 2, 3]
 
 test "async parameters", ->
   [out1, out2] = [null, null]
@@ -2779,13 +2788,15 @@ test "async \`this\` scoping", ->
 test "await precedence", ->
   out = null
 
-  fn = (win, fail) -> win 3
+  fn = (win, fail) ->
+    win 3
 
   promise = do ->
     # assert precedence between unary (new) and power (**) operators
     out = 1 + await new Promise(fn) ** 2
 
-  promise.then -> eq out, 10
+  promise.then ->
+    eq out, 10
 
 test "\`await\` inside IIFEs", ->
   [x, y, z] = new Array 3
@@ -2840,7 +2851,8 @@ test "error handling", ->
     ok res.message?
     eq res.message, "fail"
 
-test "await expression evaluates to argument if not A+", -> eq await 4, 4
+test "await expression evaluates to argument if not A+", ->
+  eq await 4, 4
 
 test "implicit call with \`await\`", ->
   addOne = (arg) -> arg + 1
@@ -2859,10 +2871,8 @@ test "async methods in classes", ->
   eq await new Base().method(), 2
 
   class Child extends Base
-    @static: ->
-      super()
-    method: ->
-      super()
+    @static: -> super()
+    method: -> super()
 
   eq await Child.static(), 1
   eq await new Child().method(), 2
@@ -2904,7 +2914,8 @@ test "async generator functions", ->
     ok no
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This is always fulfilled.
-winLater = (val, ms) -> new Promise (resolve) -> setTimeout (-> resolve val), ms
+winLater = (val, ms) ->
+  new Promise (resolve) -> setTimeout (-> resolve val), ms
 
 # This is always rejected.
 failLater = (val, ms) ->
@@ -2919,17 +2930,19 @@ test "async iteration", ->
   arrayEq foo, [1, 2, 3]
 
 test "async generator functions", ->
-  foo = (val) -> yield await winLater val + 1, 50
+  foo = (val) ->
+    yield await winLater val + 1, 50
 
-  bar = (val) -> yield await failLater val - 1, 50
+  bar = (val) ->
+    yield await failLater val - 1, 50
 
   a = await foo(41).next()
   eq a.value, 42
 
   try
-    b = do ->
-      await bar(41).next()
-    b.catch (err) -> eq "40", err.message
+    b = do -> await bar(41).next()
+    b.catch (err) ->
+      eq "40", err.message
   catch err
     ok no
 
@@ -4909,7 +4922,8 @@ test "classes with a four-level inheritance chain", ->
     func: (string) ->
       super("two/") + string
 
-  thirdCtor = -> @array = [1, 2, 3]
+  thirdCtor = ->
+    @array = [1, 2, 3]
 
   class ThirdChild extends SecondChild
     constructor: ->
@@ -4946,23 +4960,16 @@ test "constructors with inheritance and super", ->
 
 test "'super' with accessors", ->
   class Base
-    m: ->
-      4
-    n: ->
-      5
-    o: ->
-      6
+    m: -> 4
+    n: -> 5
+    o: -> 6
 
   name = "o"
   class A extends Base
-    m: ->
-      super()
-    n: ->
-      super.n()
-    "#{name}": ->
-      super()
-    p: ->
-      super[name]()
+    m: -> super()
+    n: -> super.n()
+    "#{name}": -> super()
+    p: -> super[name]()
 
   a = new A()
   eq 4, a.m()
@@ -4972,14 +4979,11 @@ test "'super' with accessors", ->
 
 test "soaked 'super' invocation", ->
   class Base
-    method: ->
-      2
+    method: -> 2
 
   class A extends Base
-    method: ->
-      super?()
-    noMethod: ->
-      super?()
+    method: -> super?()
+    noMethod: -> super?()
 
   a = new A()
   eq 2, a.method()
@@ -4987,10 +4991,8 @@ test "soaked 'super' invocation", ->
 
   name = "noMethod"
   class B extends Base
-    "#{"method"}": ->
-      super?()
-    "#{"noMethod"}": ->
-      super?() ? super["method"]()
+    "#{"method"}": -> super?()
+    "#{"noMethod"}": -> super?() ? super["method"]()
 
   b = new B()
   eq 2, b.method()
@@ -5006,12 +5008,10 @@ test "'@' referring to the current instance, and not being coerced into a call",
 
 test "super() calls in constructors of classes that are defined as object properties", ->
   class Hive
-    constructor: (name) ->
-      @name = name
+    constructor: (name) -> @name = name
 
   class Hive.Bee extends Hive
-    constructor: (name) ->
-      super name
+    constructor: (name) -> super name
 
   maya = new Hive.Bee "Maya"
   ok maya.name is "Maya"
@@ -5019,8 +5019,7 @@ test "super() calls in constructors of classes that are defined as object proper
 test "classes with JS-keyword properties", ->
   class Class
     class: "class"
-    name: ->
-      @class
+    name: -> @class
 
   instance = new Class()
   ok instance.class is "class"
@@ -5052,7 +5051,8 @@ test "a bound function in a bound function", ->
     num: 10
     generate: =>
       for i in [1..3]
-        => @num
+        =>
+          @num
 
   m = new Mini()
   eq (func() for func in m.generate()).join(" "), "10 10 10"
@@ -5072,12 +5072,10 @@ test "contructor called with varargs", ->
 
 test "calling super and passing along all arguments", ->
   class Parent
-    method: (args...) ->
-      @args = args
+    method: (args...) -> @args = args
 
   class Child extends Parent
-    method: ->
-      super arguments...
+    method: -> super arguments...
 
   c = new Child()
   c.method 1, 2, 3, 4
@@ -5099,8 +5097,7 @@ test "classes wrapped in decorators", ->
 test "anonymous classes", ->
   obj =
     klass: class
-      method: ->
-        "value"
+      method: -> "value"
 
   instance = new obj.klass()
   ok instance.method() is "value"
@@ -5255,21 +5252,18 @@ test "variables in constructor bodies are correctly scoped", ->
 test "Issue #924: Static methods in nested classes", ->
   class A
     @B: class
-      @c = ->
-        5
+      @c = -> 5
 
   eq A.B.c(), 5
 
 test "\`class extends this\`", ->
   class A
-    func: ->
-      "A"
+    func: -> "A"
 
   B = null
   makeClass = ->
     B = class extends this
-      func: ->
-        super() + " B"
+      func: -> super() + " B"
 
   makeClass.call A
 
@@ -5300,9 +5294,16 @@ test "ensure that constructors invoked with splats return a new object", ->
       class Type
   new (get()) args...
 
-test "\`new\` shouldn't add extra parens", -> ok new Date().constructor is Date
+test "\`new\` shouldn't add extra parens", ->
+  ok new Date().constructor is Date
 
-test "\`new\` works against bare function", -> eq Date, new (-> Date)()
+test "\`new\` works against bare function", ->
+  eq(
+    Date
+    new (->
+      Date
+    )()
+  )
 
 test "#1182: a subclass should be able to set its constructor to an external function", ->
   ctor = ->
@@ -5326,8 +5327,7 @@ test "#1313: misplaced __extends", ->
   class A
   class B extends A
     prop: nonce
-    constructor: ->
-      super()
+    constructor: -> super()
   eq nonce, B::prop
 
 test "#1182: execution order needs to be considered as well", ->
@@ -5346,8 +5346,7 @@ test "#1182: external constructors with bound functions", ->
   class B
   class A
     constructor: fn
-    method: =>
-      this instanceof A
+    method: => this instanceof A
   ok new A().method.call new B()
 
 test "#1372: bound class methods with reserved names", ->
@@ -5357,13 +5356,11 @@ test "#1372: bound class methods with reserved names", ->
 
 test "#1380: \`super\` with reserved names", ->
   class C
-    do: ->
-      super()
+    do: -> super()
   ok C::do
 
   class B
-    0: ->
-      super()
+    0: -> super()
   ok B::[0]
 
 test "#1464: bound class methods should keep context", ->
@@ -5371,10 +5368,8 @@ test "#1464: bound class methods should keep context", ->
   nonce2 = {}
   class C
     constructor: (@id) ->
-    @boundStaticColon: =>
-      new this nonce
-    @boundStaticEqual = =>
-      new this nonce2
+    @boundStaticColon: => new this nonce
+    @boundStaticEqual = => new this nonce2
   eq nonce, C.boundStaticColon().id
   eq nonce2, C.boundStaticEqual().id
 
@@ -5466,8 +5461,7 @@ test "#1980: regression with an inherited class with static function members", -
   class A
 
   class B extends A
-    @static: =>
-      "value"
+    @static: => "value"
 
   eq B.static(), "value"
 
@@ -5556,7 +5550,8 @@ test "directives in class with extends ", ->
   CoffeeScript.run strictTest, bare: yes
 
 test "#2630: class bodies can't reference arguments", ->
-  throws -> CoffeeScript.compile "class Test then arguments"
+  throws ->
+    CoffeeScript.compile "class Test then arguments"
 
   # #4320: Don't be too eager when checking, though.
   class Test
@@ -5571,16 +5566,14 @@ test "#2319: fn class n extends o.p [INDENT] x = 123", ->
   first(
     class OneKeeper extends base.onebase
       one = 1
-      one: ->
-        one
+      one: -> one
   )
 
   eq new OneKeeper().one(), 1
 
 test "#2599: other typed constructors should be inherited", ->
   class Base
-    constructor: ->
-      return {}
+    constructor: -> return {}
 
   class Derived extends Base
 
@@ -5590,18 +5583,15 @@ test "#2599: other typed constructors should be inherited", ->
 
 test "extending native objects works with and without defining a constructor", ->
   class MyArray extends Array
-    method: ->
-      "yes!"
+    method: -> "yes!"
 
   myArray = new MyArray()
   ok myArray instanceof MyArray
   ok "yes!", myArray.method()
 
   class OverrideArray extends Array
-    constructor: ->
-      super()
-    method: ->
-      "yes!"
+    constructor: -> super()
+    method: -> "yes!"
 
   overrideArray = new OverrideArray()
   ok overrideArray instanceof OverrideArray
@@ -5633,15 +5623,15 @@ test "#2781: overriding bound functions", ->
 
 test "#2791: bound function with destructured argument", ->
   class Foo
-    method: ({ a }) =>
-      "Bar"
+    method: ({ a }) => "Bar"
 
   eq new Foo().method(a: "Bar"), "Bar"
 
 test "#2796: ditto, ditto, ditto", ->
   answer = null
 
-  outsideMethod = (func) -> func.call message: "wrong!"
+  outsideMethod = (func) ->
+    func.call message: "wrong!"
 
   class Base
     constructor: ->
@@ -5664,43 +5654,34 @@ test "#3063: Class bodies cannot contain pure statements", ->
 
 test "#2949: super in static method with reserved name", ->
   class Foo
-    @static: ->
-      "baz"
+    @static: -> "baz"
 
   class Bar extends Foo
-    @static: ->
-      super()
+    @static: -> super()
 
   eq Bar.static(), "baz"
 
 test "#3232: super in static methods (not object-assigned)", ->
   class Foo
-    @baz = ->
-      true
-    @qux = ->
-      true
+    @baz = -> true
+    @qux = -> true
 
   class Bar extends Foo
-    @baz = ->
-      super()
-    Bar.qux = ->
-      super()
+    @baz = -> super()
+    Bar.qux = -> super()
 
   ok Bar.baz()
   ok Bar.qux()
 
 test "#1392 calling \`super\` in methods defined on namespaced classes", ->
   class Base
-    m: ->
-      5
-    n: ->
-      4
+    m: -> 5
+    n: -> 4
   namespace =
     A: ->
     B: ->
   class namespace.A extends Base
-    m: ->
-      super()
+    m: -> super()
 
   eq 5, new namespace.A().m()
   namespace.B::m = namespace.A::m
@@ -5709,39 +5690,32 @@ test "#1392 calling \`super\` in methods defined on namespaced classes", ->
 
   class C
     @a: class extends Base
-      m: ->
-        super()
+      m: -> super()
   eq 5, new C.a().m()
 
-test "#4436 immediately instantiated named class", -> ok new (class Foo)()
+test "#4436 immediately instantiated named class", ->
+  ok new (class Foo)()
 
 test "dynamic method names", ->
   class A
-    "#{(name = "m")}": ->
-      1
+    "#{(name = "m")}": -> 1
   eq 1, new A().m()
 
   class B extends A
-    "#{(name = "m")}": ->
-      super()
+    "#{(name = "m")}": -> super()
   eq 1, new B().m()
 
   getName = -> "m"
   class C
-    "#{(name = getName())}": ->
-      1
+    "#{(name = getName())}": -> 1
   eq 1, new C().m()
 
 test "dynamic method names and super", ->
   class Base
-    @m: ->
-      6
-    m: ->
-      5
-    m2: ->
-      4.5
-    n: ->
-      4
+    @m: -> 6
+    m: -> 5
+    m2: -> 4.5
+    n: -> 4
 
   name = ->
     count++
@@ -5750,10 +5724,8 @@ test "dynamic method names and super", ->
 
   m = "m"
   class A extends Base
-    "#{m}": ->
-      super()
-    "#{name()}": ->
-      super()
+    "#{m}": -> super()
+    "#{name()}": -> super()
 
   m = "n"
   eq 5, new A().m()
@@ -5765,12 +5737,9 @@ test "dynamic method names and super", ->
   m2 = "m2"
   count = 0
   class B extends Base
-    @[name()] = ->
-      super()
-    "#{m}": ->
-      super()
-    "#{m2}": ->
-      super()
+    @[name()] = -> super()
+    "#{m}": -> super()
+    "#{m2}": -> super()
   b = new B()
   m = m2 = "n"
   eq 6, B.m()
@@ -5779,8 +5748,7 @@ test "dynamic method names and super", ->
   eq 1, count
 
   class C extends B
-    m: ->
-      super()
+    m: -> super()
   eq 5, new C().m()
 
 # ES2015+ class interoperability
@@ -5948,8 +5916,7 @@ test "\`@\`-params and bound methods with multiple \`super\` paths (expressions)
 test "constructor super in arrow functions", ->
   class Test extends (class)
     constructor: (@param) ->
-      do =>
-        super()
+      do => super()
       eq @param, nonce
 
   new Test (nonce = {})
@@ -5982,8 +5949,7 @@ test "multiple super calls", ->
 test "@ params", ->
   class A
     constructor: (@drink, @shots, @flavor) ->
-    make: ->
-      "Making a #{@flavor} #{@drink} with #{@shots} shot(s)"
+    make: -> "Making a #{@flavor} #{@drink} with #{@shots} shot(s)"
 
   a = new A "Machiato", 2, "chocolate"
   eq a.make(), "Making a chocolate Machiato with 2 shot(s)"
@@ -5997,8 +5963,7 @@ test "@ params with defaults in a constructor", ->
   class A
     # Multiple @ params with defaults
     constructor: (@drink = "Americano", @shots = "1", @flavor = "caramel") ->
-    make: ->
-      "Making a #{@flavor} #{@drink} with #{@shots} shot(s)"
+    make: -> "Making a #{@flavor} #{@drink} with #{@shots} shot(s)"
 
   a = new A()
   eq a.make(), "Making a caramel Americano with 1 shot(s)"
@@ -6073,8 +6038,7 @@ test "@ params super race condition", ->
 
 test "@ with super call", ->
   class D
-    make: ->
-      "Making a #{@drink}"
+    make: -> "Making a #{@drink}"
 
   class E extends D
     constructor: (@drink) ->
@@ -6085,8 +6049,7 @@ test "@ with super call", ->
 
 test "@ with splats and super call", ->
   class A
-    make: ->
-      "Making a #{@drink}"
+    make: -> "Making a #{@drink}"
 
   class B extends A
     constructor: (@drink...) ->
@@ -6100,8 +6063,7 @@ test "super and external constructors", ->
   ctorA = (@drink) ->
   class A
     constructor: ctorA
-    make: ->
-      "Making a #{@drink}"
+    make: -> "Making a #{@drink}"
   a = new A "Machiato"
   eq a.make(), "Making a Machiato"
 
@@ -6143,8 +6105,7 @@ test "super in a bound function in a constructor", ->
 test "super in a bound function", ->
   class A
     constructor: (@drink) ->
-    make: ->
-      "Making a #{@drink}"
+    make: -> "Making a #{@drink}"
 
   class B extends A
     make: (@flavor) =>
@@ -6156,7 +6117,8 @@ test "super in a bound function", ->
   # super in a bound function in a bound function
   class C extends A
     make: (@flavor) =>
-      func = => super() + " with #{@flavor}"
+      func = =>
+        super() + " with #{@flavor}"
       func()
 
   c = new C "Machiato"
@@ -6166,7 +6128,8 @@ test "super in a bound function", ->
   class D extends A
     constructor: (drink) ->
       super drink
-      x = => eq @drink, "Machiato"
+      x = =>
+        eq @drink, "Machiato"
       x()
   d = new D "Machiato"
   eq d.make(), "Making a Machiato"
@@ -6227,7 +6190,8 @@ test "mixed ES6 and CS6 classes with a four-level inheritance chain", ->
   }
   \`\`\`
 
-  thirdCtor = -> @array = [1, 2, 3]
+  thirdCtor = ->
+    @array = [1, 2, 3]
 
   class ThirdChild extends SecondChild
     constructor: ->
@@ -6280,12 +6244,10 @@ test "Static methods generate 'static' keywords", ->
 
 test "Static methods in nested classes", ->
   class Outer
-    @name: ->
-      "Outer"
+    @name: -> "Outer"
 
     class @Inner
-      @name: ->
-        "Inner"
+      @name: -> "Inner"
 
   eq Outer.name(), "Outer"
   eq Outer.Inner.name(), "Inner"
@@ -6312,12 +6274,10 @@ test "mixed constructors with inheritance and ES6 super", ->
 
 test "ES6 static class methods can be overriden", ->
   class A
-    @name: ->
-      "A"
+    @name: -> "A"
 
   class B extends A
-    @name: ->
-      "B"
+    @name: -> "B"
 
   eq A.name(), "A"
   eq B.name(), "B"
@@ -6795,15 +6755,13 @@ test "#4868: Incorrect ‘Can’t call super with @params’ error", ->
   eq 2, b.x
 
   class C
-    constructor: (@c = class) ->
-      @c
+    constructor: (@c = class) -> @c
 
   class D extends C
     constructor: ->
       super(
         class
-          constructor: (@a) ->
-            @a = 3
+          constructor: (@a) -> @a = 3
       )
 
   d = new new D().c()
@@ -6837,7 +6795,8 @@ cluster = require "cluster"
 
 if cluster.isMaster
   test "#2737 - cluster module can spawn workers from a coffeescript process", ->
-    cluster.once "exit", (worker, code) -> eq code, 0
+    cluster.once "exit", (worker, code) ->
+      eq code, 0
 
     cluster.fork()
 else
@@ -7029,7 +6988,8 @@ test "#3306: trailing comma in a function call in the last line", ->
 # -----------
 
 # Helper to assert that a string should fail compilation.
-cantCompile = (code) -> throws -> CoffeeScript.compile code
+cantCompile = (code) ->
+  throws -> CoffeeScript.compile code
 
 # Helper to pipe the CoffeeScript compiler’s output through a transpiler.
 transpile = (method, code, options = {}) ->
@@ -7067,7 +7027,8 @@ test "multiple generated references", ->
   d = []
   ok a.b[0 < ++c < 2] d...
 
-test "splat on a line by itself is invalid", -> cantCompile "x 'a'\\n...\\n"
+test "splat on a line by itself is invalid", ->
+  cantCompile "x 'a'\\n...\\n"
 
 test "Issue 750", ->
   cantCompile "f(->"
@@ -7152,7 +7113,8 @@ test "#2944: implicit call with a regex argument", ->
 test "#3001: \`own\` shouldn't be allowed in a \`for\`-\`in\` loop", ->
   cantCompile "a for own b in c"
 
-test "#2994: single-line \`if\` requires \`then\`", -> cantCompile "if b else x"
+test "#2994: single-line \`if\` requires \`then\`", ->
+  cantCompile "if b else x"
 
 test "transpile option, for Node API CoffeeScript.compile", ->
   return if global.testingBrowser
@@ -7877,15 +7839,18 @@ test "Multiline array comprehension with filter.", ->
       num * -1
   eq evens + "", "4,6,8"
 
-  test "The in operator still works, standalone.", -> ok 2 of evens
+  test "The in operator still works, standalone.", ->
+    ok 2 of evens
 
-test "all isn't reserved.", -> all = 1
+test "all isn't reserved.", ->
+  all = 1
 
 test "Ensure that the closure wrapper preserves local variables.", ->
   obj = {}
 
   for method in ["one", "two", "three"] then do (method) ->
-    obj[method] = -> "I'm " + method
+    obj[method] = ->
+      "I'm " + method
 
   ok obj.one() is "I'm one"
   ok obj.two() is "I'm two"
@@ -7922,7 +7887,9 @@ test "Even a convoluted one.", ->
 
   for i in [1..3] then do (i) ->
     x = i * 2
-    ((z) -> funcs.push -> z + " " + i) x
+    ((z) ->
+      funcs.push -> z + " " + i
+    ) x
 
   ok (func() for func in funcs).join(", ") is "2 1, 4 2, 6 3"
 
@@ -7977,14 +7944,14 @@ test "Comprehensions within parentheses.", ->
   ok result.join(" ") is "6 4 2"
 
 test "Closure-wrapped comprehensions that refer to the 'arguments' object.", ->
-  expr = -> result = (item * item for item in arguments)
+  expr = ->
+    result = (item * item for item in arguments)
 
   ok expr(2, 4, 8).join(" ") is "4 16 64"
 
 test "Fast object comprehensions over all properties, including prototypal ones.", ->
   class Cat
-    constructor: ->
-      @name = "Whiskers"
+    constructor: -> @name = "Whiskers"
     breed: "tabby"
     hair: "cream"
 
@@ -8061,7 +8028,8 @@ test "Issue #905. Soaks as the for loop subject.", ->
 
 test "Issue #948. Capturing loop variables.", ->
   funcs = []
-  list = -> [1, 2, 3]
+  list = ->
+    [1, 2, 3]
 
   for y in list() then do (y) ->
     z = y
@@ -8078,9 +8046,11 @@ test "Cancel the comprehension if there's a jump inside the loop.", ->
 
   eq result, 10
 
-test "Comprehensions over break.", -> arrayEq (break for [1..10]), []
+test "Comprehensions over break.", ->
+  arrayEq (break for [1..10]), []
 
-test "Comprehensions over continue.", -> arrayEq (continue for [1..10]), []
+test "Comprehensions over continue.", ->
+  arrayEq (continue for [1..10]), []
 
 test "Comprehensions over function literals.", ->
   a = 0
@@ -8098,11 +8068,14 @@ test "Comprehensions that mention arguments.", ->
 
 test "expression conversion under explicit returns", ->
   nonce = {}
-  fn = -> return (nonce for x in [1, 2, 3])
+  fn = ->
+    return (nonce for x in [1, 2, 3])
   arrayEq [nonce, nonce, nonce], fn()
-  fn = -> return [nonce for x in [1, 2, 3]][0]
+  fn = ->
+    return [nonce for x in [1, 2, 3]][0]
   arrayEq [nonce, nonce, nonce], fn()
-  fn = -> return [nonce for x in [1..3]][0]
+  fn = ->
+    return [nonce for x in [1..3]][0]
   arrayEq [nonce, nonce, nonce], fn()
 
 test "implicit destructuring assignment in object of objects", ->
@@ -8264,7 +8237,8 @@ test "#4411: Allow @values as loop indices", ->
   obj =
     index: null
     get: -> @index
-    method: -> @get() for _, @index in [1, 2, 3]
+    method: ->
+      @get() for _, @index in [1, 2, 3]
   eq obj.index, null
   arrayEq obj.method(), [0, 1, 2]
   eq obj.index, 3
@@ -9829,16 +9803,19 @@ test "single-line function definition with single-line conditional", ->
   ok fn() is -1
 
 test "function resturns conditional value with no \`else\`", ->
-  fn = -> return (if false then true)
+  fn = ->
+    return (if false then true)
   eq undefined, fn()
 
 test "function returns a conditional value", ->
   a = {}
-  fnA = -> return (if false then undefined else a)
+  fnA = ->
+    return (if false then undefined else a)
   eq a, fnA()
 
   b = {}
-  fnB = -> return (unless false then b else undefined)
+  fnB = ->
+    return (unless false then b else undefined)
   eq b, fnB()
 
 test "passing a conditional value to a function", ->
@@ -10213,8 +10190,7 @@ test "#1057: \`catch\` or \`finally\` in single-line functions", ->
 test "#2367: super in for-loop", ->
   class Foo
     sum: 0
-    add: (val) ->
-      @sum += val
+    add: (val) -> @sum += val
 
   class Bar extends Foo
     add: (vals...) ->
@@ -10952,35 +10928,23 @@ test "#2343: switch / when / then / if / then / else / else / else", ->
 test "#3921: \`if\` & \`unless\`", ->
   a = {}
   eq a,
-    if (
-      do ->
-        no
-    )
+    if do -> no
       undefined
     else
       a
   a1 = undefined
-  if (
-    do ->
-      yes
-  )
+  if do -> yes
     a1 = a
   eq a, a1
 
   b = {}
   eq b,
-    unless (
-      do ->
-        no
-    )
+    unless do -> no
       b
     else
       undefined
   b1 = undefined
-  unless (
-    do ->
-      no
-  )
+  unless do -> no
     b1 = b
   eq b, b1
 
@@ -10995,42 +10959,28 @@ test "#3921: \`if\` & \`unless\`", ->
 
   answer = "correct"
   eq answer,
-    if (
-      do ->
-        "wrong"
-    )
+    if do -> "wrong"
       "correct"
     else
       "wrong"
   eq answer,
-    unless (
-      do ->
-        no
-    )
+    unless do -> no
       "correct"
     else
       "wrong"
   statm1 = undefined
-  if (
-    do ->
-      "wrong"
-  )
+  if do -> "wrong"
     statm1 = "correct"
   eq answer, statm1
   statm2 = undefined
-  unless (
-    do ->
-      no
-  )
+  unless do -> no
     statm2 = "correct"
   eq answer, statm2
 
 test "#3921: \`post if\`", ->
   a = {}
-  eq a, a unless do ->
-    no
-  a1 = a if do ->
-    yes
+  eq a, a unless do -> no
+  a1 = a if do -> yes
   eq a, a1
 
   c = 0
@@ -11041,37 +10991,27 @@ test "#3921: \`post if\`", ->
   eq 1, d
 
   answer = "correct"
-  eq answer, "correct" if do ->
-    "wrong"
-  eq answer, "correct" unless do ->
-    not "wrong"
+  eq answer, "correct" if do -> "wrong"
+  eq answer, "correct" unless do -> not "wrong"
   statm1 = undefined
-  statm1 = "correct" if do ->
-    "wrong"
+  statm1 = "correct" if do -> "wrong"
   eq answer, statm1
   statm2 = undefined
-  statm2 = "correct" unless do ->
-    not "wrong"
+  statm2 = "correct" unless do -> not "wrong"
   eq answer, statm2
 
 test "Issue 3921: \`while\` & \`until\`", ->
   i = 5
   assert = (a) -> ok 5 > a > 0
   result1 =
-    while (
-      do (num = 1) ->
-        i -= num
-    )
+    while do (num = 1) -> i -= num
       assert i
       i
   ok result1.join(" ") is "4 3 2 1"
 
   j = 5
   result2 =
-    until (
-      do (num = 1) ->
-        (j -= num) < 1
-    )
+    until do (num = 1) -> (j -= num) < 1
       assert j
       j
   ok result2.join(" ") is "4 3 2 1"
@@ -11079,10 +11019,7 @@ test "Issue 3921: \`while\` & \`until\`", ->
 test "#3921: \`switch\`", ->
   i = 1
   a =
-    switch (
-      do (m = 2) ->
-        i * m
-    )
+    switch do (m = 2) -> i * m
       when 5
         "five"
       when 4
@@ -11099,10 +11036,7 @@ test "#3921: \`switch\`", ->
 
   j = 12
   b =
-    switch (
-      do (m = 3) ->
-        j / m
-    )
+    switch do (m = 3) -> j / m
       when 5
         "five"
       when 4
@@ -11119,10 +11053,7 @@ test "#3921: \`switch\`", ->
 
   k = 20
   c =
-    switch (
-      do (m = 4) ->
-        k / m
-    )
+    switch do (m = 4) -> k / m
       when 5
         "five"
       when 4
@@ -12287,7 +12218,8 @@ test "interpolation in string attribute value", ->
   )
 
 # Unlike in \`coffee-react-transform\`.
-test "bare numbers not allowed", -> throws -> CoffeeScript.compile "<div x=3 />"
+test "bare numbers not allowed", ->
+  throws -> CoffeeScript.compile "<div x=3 />"
 
 test "bare expressions not allowed", ->
   throws -> CoffeeScript.compile "<div x=y />"
@@ -13325,7 +13257,8 @@ nonce = {}
 
 # Throw
 
-test "basic exception throwing", -> throws (-> throw "error"), /^error$/
+test "basic exception throwing", ->
+  throws (-> throw "error"), /^error$/
 
 # Empty Try/Catch/Finally
 
@@ -13555,14 +13488,16 @@ test "exponentiation operator compound assignment", ->
 # for these exponentiation operators are split out into their own file to be
 # loaded only by supported runtimes.
 
-test "exponentiation operator", -> eq 27, 3 ** 3
+test "exponentiation operator", ->
+  eq 27, 3 ** 3
 
 test "exponentiation operator has higher precedence than other maths operators", ->
   eq 55, 1 + 3 ** 3 * 2
   eq -4, -(2 ** 2)
   eq 0, (!2) ** 2
 
-test "exponentiation operator is right associative", -> eq 2, 2 ** (1 ** 3)
+test "exponentiation operator is right associative", ->
+  eq 2, 2 ** (1 ** 3)
 
 test "exponentiation operator compound assignment", ->
   a = 2
@@ -14178,7 +14113,10 @@ test "chaining after outdent", ->
 
   # function block
   str = "abc"
-  zero = parseInt(str.replace /\\w/, (letter) -> 0).toString()
+  zero = parseInt(
+    str.replace /\\w/, (letter) ->
+      0
+  ).toString()
   eq "0", zero
 
   # indented object
@@ -14436,12 +14374,16 @@ test "#3199: throw multiline implicit object", ->
         msg: "b"
   eq undefined, y
 
-test "#4576: multiple row function chaining", -> (-> eq @a, 3).call a: 3
+test "#4576: multiple row function chaining", ->
+  (->
+    eq @a, 3
+  ).call a: 3
 
 test "#4576: function chaining on separate rows", ->
   do ->
     Promise.resolve()
-      .then -> yes
+      .then ->
+        yes
       .then ok
 
 test "#3736: chaining after do IIFE", ->
@@ -14452,12 +14394,7 @@ test "#3736: chaining after do IIFE", ->
     .a
   )
 
-  eq(
-    3
-    do (b = (c) -> c) ->
-      a: 3
-    ?.a
-  )
+  eq 3, (do (b = (c) -> c) -> a: 3)?.a
 
   b = 3
   eq(
@@ -15421,7 +15358,8 @@ id = (_) ->
     [arguments...]
 
 # helper to assert that a string should fail compilation
-cantCompile = (code) -> throws -> CoffeeScript.compile code
+cantCompile = (code) ->
+  throws -> CoffeeScript.compile code
 
 test "basic argument passing", ->
   a = {}
@@ -15444,7 +15382,9 @@ test "passing arguments on separate lines", ->
 test "optional parens can be used in a nested fashion", ->
   call = (func) -> func()
   add = (a, b) -> a + b
-  result = call -> inner = call -> add 5, 5
+  result = call ->
+    inner = call ->
+      add 5, 5
   ok result is 10
 
 test "hanging commas and semicolons in argument list", ->
@@ -15484,13 +15424,16 @@ test "More fun with optional parens.", ->
 
 test "chained function calls", ->
   nonce = {}
-  identityWrap = (x) -> -> x
+  identityWrap = (x) ->
+    -> x
   eq nonce, identityWrap(identityWrap nonce)()()
   eq nonce, identityWrap(identityWrap nonce)()()
 
 test "Multi-blocks with optional parens.", ->
   fn = (arg) -> arg
-  result = fn -> fn -> "Wrapped"
+  result = fn ->
+    fn ->
+      "Wrapped"
   ok result()() is "Wrapped"
 
 test "method calls", ->
@@ -15522,7 +15465,8 @@ test "\`@\` and \`this\` should both be able to invoke a method", ->
 test "Trying an implicit object call with a trailing function.", ->
   a = null
   meth = (arg, obj, func) -> a = [obj.a, arg, func()].join " "
-  meth "apple", b: 1, a: 13, -> "orange"
+  meth "apple", b: 1, a: 13, ->
+    "orange"
   ok a is "13 apple orange"
 
 test "Ensure that empty functions don't return mistaken values.", ->
@@ -15533,7 +15477,12 @@ test "Ensure that empty functions don't return mistaken values.", ->
 
 test "Passing multiple functions without paren-wrapping is legal, and should compile.", ->
   sum = (one, two) -> one() + two()
-  result = sum (-> 7 + 9), -> 1 + 3
+  result = sum(
+    ->
+      7 + 9
+    ->
+      1 + 3
+  )
   ok result is 20
 
 test "Implicit call with a trailing if statement as a param.", ->
@@ -15548,7 +15497,12 @@ test "Implicit call with a trailing if statement as a param.", ->
 test "Test more function passing:", ->
   sum = (one, two) -> one() + two()
 
-  result = sum (-> 1 + 2), -> 2 + 1
+  result = sum(
+    ->
+      1 + 2
+    ->
+      2 + 1
+  )
   ok result is 6
 
   sum = (a, b) -> a + b
@@ -15562,9 +15516,12 @@ test "Chained blocks, with proper indentation levels:", ->
       @results.push func()
       this
   counter
-    .tick -> 3
-    .tick -> 2
-    .tick -> 1
+    .tick ->
+      3
+    .tick ->
+      2
+    .tick ->
+      1
   arrayEq [3, 2, 1], counter.results
 
 test "This is a crazy one.", ->
@@ -15611,8 +15568,10 @@ test "Test newline-supressed call chains with nested functions.", ->
   obj = call: -> this
   func = ->
     obj
-      .call -> one two
-      .call -> three four
+      .call ->
+        one two
+      .call ->
+        three four
     101
   eq func(), 101
 
@@ -15712,14 +15671,14 @@ test "Issue 4631: left and right spread dots with preceding space", ->
 test "Issue 894: Splatting against constructor-chained functions.", ->
   x = null
   class Foo
-    bar: (y) ->
-      x = y
+    bar: (y) -> x = y
   new Foo().bar [101]...
   eq x, 101
 
 test "Functions with splats being called with too few arguments.", ->
   pen = null
-  method = (first, variable..., penultimate, ultimate) -> pen = penultimate
+  method = (first, variable..., penultimate, ultimate) ->
+    pen = penultimate
   method 1, 2, 3, 4, 5, 6, 7, 8, 9
   ok pen is 8
   method 1, 2, 3
@@ -15834,11 +15793,7 @@ test "usage of \`new\` is careful about where the invocation parens end up", ->
     typeof new (try
       Array)()
   )
-  eq(
-    "object"
-    typeof new (do ->
-      ->)()
-  )
+  eq "object", typeof new (do -> ->)()
 
 test "implicit call against control structures", ->
   result = null
@@ -15943,7 +15898,8 @@ test "#960: improved 'do'", ->
   eq ret, func
 
 test "#2617: implicit call before unrelated implicit object", ->
-  pass = -> true
+  pass = ->
+    true
 
   result =
     if pass 1
@@ -16140,20 +16096,16 @@ test "get and set can be used as variable and property names", ->
 
 test "get and set can be used as class method names", ->
   class A
-    get: ->
-      2
-    set: ->
-      3
+    get: -> 2
+    set: -> 3
 
   a = new A()
   eq 2, a.get()
   eq 3, a.set()
 
   class B
-    @get = ->
-      4
-    @set = ->
-      5
+    @get = -> 4
+    @set = -> 5
 
   eq 4, B.get()
   eq 5, B.set()
@@ -16164,18 +16116,14 @@ test "#4524: functions named get or set can be used without parentheses when att
     set: (x) -> x + 3
 
   class A
-    get: (x) ->
-      x + 4
-    set: (x) ->
-      x + 5
+    get: (x) -> x + 4
+    set: (x) -> x + 5
 
   a = new A()
 
   class B
-    get: (x) ->
-      x.value + 6
-    set: (x) ->
-      x.value + 7
+    get: (x) -> x.value + 6
+    set: (x) -> x.value + 7
 
   b = new B()
 
@@ -16848,9 +16796,16 @@ ok del() is 5
 # Bound Function Definition
 
 obj =
-  bound: -> (=> this)()
-  unbound: -> (-> this)()
-  nested: -> (=> (=> (=> this)())())()
+  bound: ->
+    (=> this)()
+  unbound: ->
+    (-> this)()
+  nested: ->
+    (=>
+      (=>
+        (=> this)()
+      )()
+    )()
 eq obj, obj.bound()
 ok obj isnt obj.unbound()
 eq obj, obj.nested()
@@ -16878,11 +16833,14 @@ test "arguments in bound functions inherit from parent function", ->
   arrayEq ((a...) -> a)([1, 2, 3]), ((a...) => a) [1, 2, 3]
 
   parent = (a, b, c) ->
-    (bound = => [arguments[0], arguments[1], arguments[2]])()
+    (bound = =>
+      [arguments[0], arguments[1], arguments[2]]
+    )()
   arrayEq [1, 2, 3], parent 1, 2, 3
 
 test "self-referencing functions", ->
-  changeMe = -> changeMe = 2
+  changeMe = ->
+    changeMe = 2
 
   changeMe()
   eq changeMe, 2
@@ -17089,7 +17047,8 @@ test "#156: parameter lists with expansion", ->
   throws (-> CoffeeScript.compile "(...) ->"), null, "prohibit lone expansion"
 
 test "#156: parameter lists with expansion in array destructuring", ->
-  expandArray = (..., [..., last]) -> last
+  expandArray = (..., [..., last]) ->
+    last
   eq 3, expandArray 1, 2, 3, [1, 2, 3]
 
 test "#3502: variable definitions and expansion", ->
@@ -17162,10 +17121,12 @@ test "#1859: inline function bodies shouldn't modify prior postfix ifs", ->
   ok no
 
 test "#2258: allow whitespace-style parameter lists in function definitions", ->
-  func = (a, b, c) -> c
+  func = (a, b, c) ->
+    c
   eq func(1, 2, 3), 3
 
-  func = (a, b, c) -> b
+  func = (a, b, c) ->
+    b
   eq func(1, 2, 3), 2
 
 test "#2621: fancy destructuring in parameter lists", ->
@@ -17185,7 +17146,8 @@ test "#1435 Indented property access", ->
   eq 1, do ->
     rec().rec ->
       rec()
-        .rec -> rec.rec()
+        .rec ->
+          rec.rec()
         .rec()
     1
 
@@ -17232,11 +17194,13 @@ test "Destructured parameter with default value, that itself has a default value
   eq output, "big-18-30-30"
 
 test "#4566: destructuring with nested default values", ->
-  f = ({ a: { b = 1 } }) -> b
+  f = ({ a: { b = 1 } }) ->
+    b
   eq 2, f a: b: 2
 
 test "#1043: comma after function glyph", ->
-  x = (a = ->, b = 2) -> a()
+  x = (a = ->, b = 2) ->
+    a()
   eq x(), undefined
 
   f = (a) -> a()
@@ -17656,11 +17620,11 @@ test "generator methods in classes", ->
 #
 # * Generator Definition
 
-test "most basic generator support", -> ok -> yield
+test "most basic generator support", ->
+  ok -> yield
 
 test "empty generator", ->
-  x = do ->
-    yield return
+  x = do -> yield return
 
   y = x.next()
   ok y.value is undefined and y.done is true
@@ -17934,7 +17898,8 @@ test "for-from loops over generators", ->
   arrayEq array4, []
 
 test "for-from comprehensions over generators", ->
-  gen = -> yield from [30, 41, 51, 60]
+  gen = ->
+    yield from [30, 41, 51, 60]
 
   iterator = gen()
   array1 = (x for x from iterator when x %% 2 is 1)
@@ -18007,10 +17972,8 @@ test "generator methods in classes", ->
   arrayEq [2], Array.from new Base().method()
 
   class Child extends Base
-    @static: ->
-      super()
-    method: ->
-      super()
+    @static: -> super()
+    method: -> super()
 
   arrayEq [1], Array.from Child.static()
   arrayEq [2], Array.from new Child().method()
@@ -18861,7 +18824,8 @@ test "NaN", ->
 # Binary Integer Literals
 # Binary notation is understood as would be decimal notation.
 
-test "Parser recognises binary numbers", -> eq 4, 0b100
+test "Parser recognises binary numbers", ->
+  eq 4, 0b100
 
 # Decimal Integer Literals
 
@@ -18933,7 +18897,8 @@ test "Infinity", ->
   eq Infinity, CoffeeScript.eval Array(500 + 1).join "9"
   eq Infinity, Infinity
 
-test "NaN", -> ok isNaN 1 / NaN
+test "NaN", ->
+  ok isNaN 1 / NaN
 
 `;
 
@@ -19779,10 +19744,12 @@ test "rest element destructuring in function definition", ->
   deepEqual [42, 43], f a: 42, b: 43
 
 test "#4673: complex destructured object spread variables", ->
-  f = ({ { a... }... }) -> a
+  f = ({ { a... }... }) ->
+    a
   eq f(c: 1).c, 1
 
-  g = ({ @y... }) -> eq @y.b, 1
+  g = ({ @y... }) ->
+    eq @y.b, 1
   g b: 1
 
 `;
@@ -20709,12 +20676,15 @@ ok { a: (num) -> num is 10 }.a 10
 
 moe =
   name: "Moe"
-  greet: (salutation) -> salutation + " " + @name
-  hello: -> @["greet"] "Hello"
+  greet: (salutation) ->
+    salutation + " " + @name
+  hello: ->
+    @["greet"] "Hello"
   10: "number"
 ok moe.hello() is "Hello Moe"
 ok moe[10] is "number"
-moe.hello = -> this["greet"] "Hello"
+moe.hello = ->
+  this["greet"] "Hello"
 ok moe.hello() is "Hello Moe"
 
 obj =
@@ -20774,8 +20744,10 @@ ok obj.fn() is null
 
 # Implicit objects with wacky indentation:
 obj =
-  reverse: (obj) -> Array.prototype.reverse.call obj
-  abc: -> @reverse @reverse @reverse ["a", "b", "c"].reverse()
+  reverse: (obj) ->
+    Array.prototype.reverse.call obj
+  abc: ->
+    @reverse @reverse @reverse ["a", "b", "c"].reverse()
   one: [1, 2, { a: "b" }, 3, 4]
   red:
     orange: yellow: green: "blue"
@@ -20875,7 +20847,9 @@ test "some weird indentation in YAML-style object literals", ->
   two = (a, b) -> b
   obj = two 1,
     1: 1
-    a: b: -> fn c, d: e
+    a:
+      b: ->
+        fn c, d: e
     f: 1
   eq 1, obj[1]
 
@@ -20987,7 +20961,14 @@ test "Implicit objects, functions and arrays", ->
   ,
     one: 1
     two: 2
-    three: first second (-> no), -> 3
+    three: first(
+      second(
+        ->
+          no
+        ->
+          3
+      )
+    )
   ,
     3
     4
@@ -21076,11 +21057,13 @@ test "#1871: implicit object closed by IMPLICIT_END in implicit returns", ->
   eq ob, undefined
 
   # instead these return an object
-  func = -> key: (i for i in [1, 2, 3])
+  func = ->
+    key: (i for i in [1, 2, 3])
 
   eq func().key.join(" "), "1 2 3"
 
-  func = -> key: (i for i in [1, 2, 3])
+  func = ->
+    key: (i for i in [1, 2, 3])
 
   eq func().key.join(" "), "1 2 3"
 
@@ -21464,10 +21447,8 @@ test "computed property keys: Class property", ->
   decrement_method = "decrement"
   class Obs
     constructor: (@count) ->
-    [increment_method]: ->
-      @count += 1
-    [decrement_method]: ->
-      @count -= 1
+    [increment_method]: -> @count += 1
+    [decrement_method]: -> @count -= 1
   ob = new Obs 2
   eq ob.increment(), 3
   eq ob.decrement(), 2
@@ -22064,7 +22045,8 @@ test "operators should respect new lines as spaced", ->
   b = "1#{2}3" + "456"
   eq "123456", b
 
-test "multiple operators should space themselves", -> eq +(+1), -(-1)
+test "multiple operators should space themselves", ->
+  eq +(+1), -(-1)
 
 test "compound operators on successive lines", ->
   a = 1
@@ -22164,9 +22146,11 @@ test "postfix existential operator only evaluates its operand once", ->
       false
   )
 
-test "negated postfix existential operator", -> ok !nothing?.value
+test "negated postfix existential operator", ->
+  ok !nothing?.value
 
-test "postfix existential operator on expressions", -> eq true, (1 or 0)?, true
+test "postfix existential operator on expressions", ->
+  eq true, (1 or 0)?, true
 
 # \`is\`,\`isnt\`,\`==\`,\`!=\`
 
@@ -22241,8 +22225,7 @@ test "#768: \`in\` should preserve evaluation order", ->
 
 test "#1099: empty array after \`in\` should compile to \`false\`", ->
   eq 1, [5 in []].length
-  eq false, do ->
-    return 0 in []
+  eq false, do -> return 0 in []
 
 test "#1354: optimized \`in\` checks should not happen when splats are present", ->
   a = [6, 9]
@@ -22275,8 +22258,7 @@ test "#1099: statically determined \`not in []\` reporting incorrect result", ->
 
 test "#1099: make sure expression tested gets evaluted when array is empty", ->
   a = 0
-  (do ->
-    a = 1) in []
+  (do -> a = 1) in []
   eq a, 1
 
 # Chained Comparison
@@ -22296,7 +22278,8 @@ test "different comparison operators (\`>\`,\`<\`,\`is\`,etc.) may be combined",
 test "some chainable operators can be negated by \`unless\`", ->
   ok (true unless 0 == 10 != 100)
 
-test "operator precedence: \`|\` lower than \`<\`", -> eq 1, 1 | (2 < 3 < 4)
+test "operator precedence: \`|\` lower than \`<\`", ->
+  eq 1, 1 | (2 < 3 < 4)
 
 test "preserve references", ->
   a = b = c = 1
@@ -22315,8 +22298,7 @@ test "#891: incorrect inversion of chained comparisons", ->
 test "#1234: Applying a splat to :: applies the splat to the wrong object", ->
   nonce = {}
   class C
-    method: ->
-      @nonce
+    method: -> @nonce
     nonce: nonce
 
   arr = []
@@ -22430,34 +22412,50 @@ test "#3598: Unary + and - coerce the operand once when it is an identifier", ->
   eq 1, 1 ? 0
   eq 1, +1 ? 0
   eq -1, -1 ? 0
-  assertOneCoercion (a) -> eq 1, +a ? 0
-  assertOneCoercion (a) -> eq -1, -a ? 0
-  assertOneCoercion (a) -> eq -2, ~a ? 0
-  assertOneCoercion (a) -> eq 0.5, a / 2 ? 0
+  assertOneCoercion (a) ->
+    eq 1, +a ? 0
+  assertOneCoercion (a) ->
+    eq -1, -a ? 0
+  assertOneCoercion (a) ->
+    eq -2, ~a ? 0
+  assertOneCoercion (a) ->
+    eq 0.5, a / 2 ? 0
 
   ok -2 <= 1 < 2
   ok -2 <= +1 < 2
   ok -2 <= -1 < 2
-  assertOneCoercion (a) -> ok -2 <= +a < 2
-  assertOneCoercion (a) -> ok -2 <= -a < 2
-  assertOneCoercion (a) -> ok -2 <= ~a < 2
-  assertOneCoercion (a) -> ok -2 <= a / 2 < 2
+  assertOneCoercion (a) ->
+    ok -2 <= +a < 2
+  assertOneCoercion (a) ->
+    ok -2 <= -a < 2
+  assertOneCoercion (a) ->
+    ok -2 <= ~a < 2
+  assertOneCoercion (a) ->
+    ok -2 <= a / 2 < 2
 
   arrayEq [0], (n for n in [0] by 1)
   arrayEq [0], (n for n in [0] by +1)
   arrayEq [0], (n for n in [0] by -1)
-  assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by +a)
-  assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by -a)
-  assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by ~a)
-  assertOneCoercion (a) -> arrayEq [0], (n for n in [0] by (a * 2) / 2)
+  assertOneCoercion (a) ->
+    arrayEq [0], (n for n in [0] by +a)
+  assertOneCoercion (a) ->
+    arrayEq [0], (n for n in [0] by -a)
+  assertOneCoercion (a) ->
+    arrayEq [0], (n for n in [0] by ~a)
+  assertOneCoercion (a) ->
+    arrayEq [0], (n for n in [0] by (a * 2) / 2)
 
   ok 1 in [0, 1]
   ok +1 in [0, 1]
   ok -1 in [0, -1]
-  assertOneCoercion (a) -> ok +a in [0, 1]
-  assertOneCoercion (a) -> ok -a in [0, -1]
-  assertOneCoercion (a) -> ok ~a in [0, -2]
-  assertOneCoercion (a) -> ok a / 2 in [0, 0.5]
+  assertOneCoercion (a) ->
+    ok +a in [0, 1]
+  assertOneCoercion (a) ->
+    ok -a in [0, -1]
+  assertOneCoercion (a) ->
+    ok ~a in [0, -2]
+  assertOneCoercion (a) ->
+    ok a / 2 in [0, 0.5]
 
 test "'new' target", ->
   nonce = {}
@@ -22932,7 +22930,8 @@ test "#2047: from, to and step as variables", ->
 
 test "#4884: Range not declaring var for the 'i'", ->
   "use strict"
-  [0..21].forEach (idx) -> idx + 1
+  [0..21].forEach (idx) ->
+    idx + 1
 
   eq global.i, undefined
 
@@ -23411,13 +23410,17 @@ test "division vs regex after a callable token", ->
     eq 2, @ / b / g
     eq 2, @ / b / g
   ).call 4
-  (-> eq true, @ /b/g).call r
+  (->
+    eq true, @ /b/g
+  ).call r
   (->
     eq 2, this / b / g
     eq 2, this / b / g
     eq 2, this / b / g
   ).call 4
-  (-> eq true, this /b/g).call r
+  (->
+    eq true, this /b/g
+  ).call r
   class A
     p: (regex) ->
       if regex
@@ -23561,7 +23564,8 @@ test "an empty heregex will compile to an empty, non-capturing group", ->
   eq /(?:)/ + "", ///  /// + ""
   eq /(?:)/ + "", ////// + ""
 
-test "heregex starting with slashes", -> ok /////a/\\////.test " //a// "
+test "heregex starting with slashes", ->
+  ok /////a/\\////.test " //a// "
 
 test "#2388: \`///\` in heregex interpolations", ->
   ok ///a#{///b///}c///.test " /a/b/c/ "
@@ -23585,7 +23589,8 @@ test "regexes are not callable", ->
        k: v
   '''
 
-test "backreferences", -> ok /(a)(b)\\2\\1/.test "abba"
+test "backreferences", ->
+  ok /(a)(b)\\2\\1/.test "abba"
 
 test "#3795: Escape otherwise invalid characters", ->
   ok (/ /).test "\\u2028"
@@ -23668,7 +23673,8 @@ test "dotall flag", ->
 # causes this test to load is adapted from
 # https://github.com/tc39/proposal-regexp-dotall-flag#proposed-solution.
 
-test "dotall flag", -> doesNotThrow -> /a.b/s.test "a\\nb"
+test "dotall flag", ->
+  doesNotThrow -> /a.b/s.test "a\\nb"
 
 `;
 
@@ -24746,7 +24752,8 @@ test "#4248: Unicode code point escapes", ->
 # * Strings
 # * Heredocs
 
-test "backslash escapes", -> eq "\\\\/\\\\\\\\", /\\/\\\\/.source
+test "backslash escapes", ->
+  eq "\\\\/\\\\\\\\", /\\/\\\\/.source
 
 eq "(((dollars)))", "\\(\\(\\(dollars\\)\\)\\)"
 eq "one two three", "one
@@ -25248,7 +25255,8 @@ eq "  <- keep these spaces ->  ", "  <- keep these spaces ->  "
 eq "undefined", "undefined"
 eq "undefined", "undefined"
 
-test "#1046, empty string interpolations", -> eq "#{}", ""
+test "#1046, empty string interpolations", ->
+  eq "#{}", ""
 
 test "strings are not callable", ->
   throws -> CoffeeScript.compile '"a"()'

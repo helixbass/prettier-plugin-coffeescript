@@ -317,7 +317,9 @@ exports[`expression.coffee 1`] = `
 </BookingIntroPanel>
 
 <Component>
-  {(key, value) -> @setState updatedTask: @state.updatedTask.set key, value}
+  {(key, value) ->
+    @setState updatedTask: @state.updatedTask.set key, value
+  }
 </Component>
 
 `;
