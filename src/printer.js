@@ -3523,4 +3523,7 @@ module.exports = {
   canAttachComment,
   printComment,
   isBlockComment: handleComments.isBlockComment,
+  handleComments: {
+    ownLine: handleComments.handleOwnLineComment,
+  },
 }

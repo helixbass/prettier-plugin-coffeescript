@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`assignment_comments.coffee 1`] = `
+fnString =
+  # Comment
+  'some' + 'long' + 'string'
+
+fnString =
+  # Comment
+  'some' + 'long' + 'string'
+
+fnString =
+  # Comment
+
+  'some' + 'long' + 'string'
+
+fnString =
+
+  # Comment
+
+  'some' + 'long' + 'string'
+
+fnString =
+  ### comment ###
+  'some' + 'long' + 'string'
+
+fnString =
+  ###*
+  # multi-line
+  ###
+  'some' + 'long' + 'string'
+
+fnString =
+  ### inline ### 'some' + 'long' + 'string' + 'some' + 'long' + 'string' + 'some' + 'long' + 'string' + 'some' + 'long' + 'string'
+
+fnString = # Comment
+  # Comment
+  'some' + 'long' + 'string'
+
+fnString = # Comment
+  'some' + 'long' + 'string'
+
+f = (
+  a =
+  #comment
+  b
+) => {}
+
+f = (
+  a = #comment
+  b
+) => {}
+
+f = (
+  a =
+  b #comment
+) => {}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fnString =
+  # Comment
+  "some" + "long" + "string"
+
+fnString =
+  # Comment
+  "some" + "long" + "string"
+
+fnString =
+  # Comment
+
+  "some" + "long" + "string"
+
+fnString =
+  # Comment
+
+  "some" + "long" + "string"
+
+fnString =
+  ### comment ###
+  "some" + "long" + "string"
+
+fnString =
+  ###*
+  # multi-line
+  ###
+  "some" + "long" + "string"
+
+fnString =
+  ### inline ### "some" + "long" + "string" + "some" + "long" + "string" + "some" + "long" + "string" + "some" + "long" + "string"
+
+fnString = # Comment
+  # Comment
+  "some" + "long" + "string"
+
+fnString = # Comment
+  "some" + "long" + "string"
+
+f = (
+  #comment
+  a = b
+) =>
+  {}
+
+f = (
+  a = b #comment
+) =>
+  {}
+
+f = (
+  a = b #comment
+) =>
+  {}
+
+`;
