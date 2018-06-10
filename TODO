@@ -47,6 +47,7 @@
   a =
     b: c, d: e
 - preserve switch then alignment?
+- can't safely unparenthesize calls (etc) if comma isn't none (since a trailing comma continues the line)
 - comments:
   - preserve herecomment spacing
   - a b, c # d is breaking, probably should preserve trailing inline comment formatting

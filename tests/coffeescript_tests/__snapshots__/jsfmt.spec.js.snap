@@ -13913,7 +13913,8 @@ test "#1492: Nested blocks don't cause double semicolons", ->
   eq -1, js.indexOf ";;"
 
 test "#1195 Ignore trailing semicolons (before newlines or as the last char in a program)", ->
-  preNewline = (numSemicolons) -> """
+  preNewline = (numSemicolons) ->
+    """
     nonce = {}; nonce2 = {}
     f = -> nonce#{Array(numSemicolons + 1).join ";"}
     nonce2
@@ -16810,12 +16811,10 @@ test "#1859: inline function bodies shouldn't modify prior postfix ifs", ->
   ok no
 
 test "#2258: allow whitespace-style parameter lists in function definitions", ->
-  func = (a, b, c) ->
-    c
+  func = (a, b, c) -> c
   eq func(1, 2, 3), 3
 
-  func = (a, b, c) ->
-    b
+  func = (a, b, c) -> b
   eq func(1, 2, 3), 2
 
 test "#2621: fancy destructuring in parameter lists", ->

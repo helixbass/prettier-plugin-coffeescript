@@ -112,7 +112,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return !(
             isDoFunc(node) &&
             path.call(
-              funcPath => functionWillBreak(funcPath, options),
+              funcPath => functionBodyWillBreak(funcPath, options),
               'argument'
             )
           )
@@ -245,6 +245,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         // return parent.right === node
         case 'JSXSpreadAttribute':
           return true
+        case 'IfStatement':
+        case 'ConditionalExpression':
+          return node === parent.test
         default:
           return false
       }
@@ -299,6 +302,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           }
         case 'For':
           return parent.postfix && node === parent.body
+        case 'BinaryExpression':
+        case 'LogicalExpression':
+          return node === parent.left
         default:
           return false
       }
@@ -1222,7 +1228,6 @@ function printPathNoParens(path, options, print) {
       const parent = path.getParentNode()
 
       const shouldInlineButStillClosingLinebreak =
-        n.expression.type === 'FunctionExpression' ||
         n.expression.type === 'BlockStatement' ||
         (isJSXNode(parent) &&
           ((isIf(n.expression) && !n.expression.postfix) ||
@@ -1234,6 +1239,7 @@ function printPathNoParens(path, options, print) {
               ))))
       const shouldInline =
         shouldInlineButStillClosingLinebreak ||
+        n.expression.type === 'FunctionExpression' ||
         n.expression.type === 'ArrayExpression' ||
         n.expression.type === 'ObjectExpression' ||
         n.expression.type === 'CallExpression' ||
@@ -1359,16 +1365,16 @@ function shouldBreakIf(node, options) {
   )
 }
 
-function functionWillBreak(path, options) {
+function functionBodyWillBreak(path, options) {
   const node = path.getValue()
   if (node.body.length > 1) {
     return true
   }
 
-  return functionShouldBreak(path, options)
+  return functionBodyShouldBreak(path, options)
 }
 
-function functionShouldBreak(path, options) {
+function functionBodyShouldBreak(path, options) {
   const node = path.getValue()
 
   const singleExpr = singleExpressionBlock(node.body)
@@ -1376,8 +1382,7 @@ function functionShouldBreak(path, options) {
   return (
     singleExpr &&
     (isIf(singleExpr, {postfix: true}) ||
-      (options.respectBreak.indexOf('functionBody') > -1 &&
-        !hasSameStartLine(node, node.body)))
+      (options.respectBreak.indexOf('functionBody') > -1 && node.body.indented))
   )
 }
 
@@ -1394,15 +1399,20 @@ function printFunction(path, options, print) {
     node.body,
     {withPath: true}
   )
+  const bodyShouldBreak = functionBodyShouldBreak(path, options)
+  const shouldInlineBody =
+    !bodyShouldBreak &&
+    singleExpr &&
+    (singleExpr.type === 'TaggedTemplateExpression' ||
+      isLinebreakingTemplateLiteral(singleExpr) ||
+      singleExpr.type === 'ArrayExpression' ||
+      singleExpr.type === 'FunctionExpression')
   const body = isEmptyBlock(node.body)
     ? ''
-    : singleExpr &&
-      (singleExpr.type === 'TaggedTemplateExpression' ||
-        isLinebreakingTemplateLiteral(singleExpr))
+    : shouldInlineBody
       ? concat([' ', path.call(print, 'body', ...singleExprPath)])
       : concat([ifBreak('', ' '), path.call(print, 'body')])
 
-  const shouldBreak = functionShouldBreak(path, options)
   // singleExpr.type === 'FunctionExpression' ||
   // grandparent.type === 'For'
   const needsParens =
@@ -1423,23 +1433,27 @@ function printFunction(path, options, print) {
       : callParensOptionalIfParentBreaks(path, options, {stackOffset: 1})
         ? {unlessParentBreaks: true}
         : true)
+  const bodyParts = concat([
+    body,
+    isChainedDoIife || parent.type === 'JSXExpressionContainer'
+      ? softline
+      : isOnlyCallArgWithParens
+        ? isOnlyCallArgWithParens.unlessParentBreaks
+          ? ifVisibleGroupBroke('', softline, {count: 1})
+          : softline
+        : needsParens
+          ? needsParens.unlessParentBreaks
+            ? ifVisibleGroupBroke('', softline)
+            : softline
+          : '',
+  ])
   return group(
     concat([
       concat(parts),
-      body,
-      isChainedDoIife
-        ? softline
-        : isOnlyCallArgWithParens
-          ? isOnlyCallArgWithParens.unlessParentBreaks
-            ? ifVisibleGroupBroke('', softline, {count: 1})
-            : softline
-          : needsParens
-            ? needsParens.unlessParentBreaks
-              ? ifVisibleGroupBroke('', softline)
-              : softline
-            : '',
-    ]),
-    {shouldBreak}
+      shouldInlineBody
+        ? bodyParts
+        : group(bodyParts, {shouldBreak: bodyShouldBreak}),
+    ])
   )
 }
 
@@ -2785,10 +2799,10 @@ function printArgumentsList(path, options, print) {
     const isLast = index === lastArgIndex
     const nextIsNonFinalObject =
       !isLast && isObjectish(args[index + 1]) && index !== lastArgIndex - 1
-    const consecutiveIf = !isLast && isIf(arg) && isIf(args[index + 1])
+    // const consecutiveIf = !isLast && isIf(arg) && isIf(args[index + 1])
     separatorParts = [
       ifBreak(
-        isObject || nextIsNonFinalObject || consecutiveIf
+        isObject || nextIsNonFinalObject // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
             ? ','
@@ -3326,7 +3340,7 @@ function printArrayItems(path, options, printPath, print) {
   const elements = node[printPath]
   const last = elements && elements.length && elements[elements.length - 1]
   const {locEnd} = options
-  let index = 0
+  // let index = 0
   path.each(childPath => {
     const child = childPath.getValue()
     let isObject
@@ -3339,15 +3353,15 @@ function printArrayItems(path, options, printPath, print) {
     printedElements.push(print(childPath))
 
     const isLast = child === last
-    const consecutiveIf =
-      child &&
-      !isLast &&
-      isIf(child) &&
-      elements[index + 1] &&
-      isIf(elements[index + 1])
+    // const consecutiveIf =
+    //   child &&
+    //   !isLast &&
+    //   isIf(child) &&
+    //   elements[index + 1] &&
+    //   isIf(elements[index + 1])
     separatorParts = [
       ifBreak(
-        isObject || consecutiveIf
+        isObject // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
             ? ','
@@ -3364,7 +3378,7 @@ function printArrayItems(path, options, printPath, print) {
     if (child && isNextLineEmpty(options.originalText, child, locEnd)) {
       separatorParts.push(softline)
     }
-    index++
+    // index++
   }, printPath)
 
   return concat(printedElements)

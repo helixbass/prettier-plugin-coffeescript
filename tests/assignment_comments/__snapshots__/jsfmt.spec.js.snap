@@ -97,17 +97,14 @@ fnString = # Comment
 f = (
   #comment
   a = b
-) =>
-  {}
+) => {}
 
 f = (
   a = b #comment
-) =>
-  {}
+) => {}
 
 f = (
   a = b #comment
-) =>
-  {}
+) => {}
 
 `;
