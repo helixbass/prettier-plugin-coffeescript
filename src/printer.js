@@ -1414,17 +1414,30 @@ function printFunction(path, options, print) {
     isDo(parent) &&
     grandparent.type === 'MemberExpression' &&
     parent === grandparent.object
+  const isOnlyCallArgWithParens =
+    parent.type === 'CallExpression' &&
+    parent.arguments.length === 1 &&
+    node === parent.arguments[0] &&
+    (callParensOptional(path, options, {stackOffset: 1})
+      ? false
+      : callParensOptionalIfParentBreaks(path, options, {stackOffset: 1})
+        ? {unlessParentBreaks: true}
+        : true)
   return group(
     concat([
       concat(parts),
       body,
       isChainedDoIife
         ? softline
-        : needsParens
-          ? needsParens.unlessParentBreaks
-            ? ifVisibleGroupBroke('', softline)
+        : isOnlyCallArgWithParens
+          ? isOnlyCallArgWithParens.unlessParentBreaks
+            ? ifVisibleGroupBroke('', softline, {count: 1})
             : softline
-          : '',
+          : needsParens
+            ? needsParens.unlessParentBreaks
+              ? ifVisibleGroupBroke('', softline)
+              : softline
+            : '',
     ]),
     {shouldBreak}
   )
@@ -2941,19 +2954,9 @@ function printArgumentsList(path, options, print) {
   }
 
   const printed = shouldntBreak
-    ? group(
-        concat([
-          openingParen,
-          concat(printedArguments),
-          parensUnnecessary
-            ? ''
-            : parensUnnecessaryIfParentBreaks
-              ? ifVisibleGroupBroke('', softline, {count: 1})
-              : softline,
-          closingParen,
-        ]),
-        {visible: true}
-      )
+    ? group(concat([openingParen, concat(printedArguments), closingParen]), {
+        visible: true,
+      })
     : group(
         concat([
           openingParen,
@@ -3359,7 +3362,7 @@ function printArrayItems(path, options, printPath, print) {
       separatorParts.push(breakParent)
     }
     if (child && isNextLineEmpty(options.originalText, child, locEnd)) {
-      separatorParts.push(line)
+      separatorParts.push(softline)
     }
     index++
   }, printPath)

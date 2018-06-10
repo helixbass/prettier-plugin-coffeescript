@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`arrays.coffee 1`] = `
+a = [
+  'a',
+  'b'
+]
+
+a = [
+  'a'
+  'b'
+  'c'
+  'd'
+  'e'
+  'f'
+  'g'
+  'hhhhhhhhhhhhhh'
+]
+
+a = ['aaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'cccccccccccccccccccccccccccc', 'dddddddddddddddddddddddddddd']
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a = ["a", "b"]
+
+a = ["a", "b", "c", "d", "e", "f", "g", "hhhhhhhhhhhhhh"]
+
+a = [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  "cccccccccccccccccccccccccccc"
+  "dddddddddddddddddddddddddddd"
+]
+
+`;
+
+exports[`empty.coffee 1`] = `
+a = someVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong.Expression || []
+a = someVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong.Expression || {}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a =
+  someVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong.Expression || []
+a =
+  someVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLong.Expression || {}
+
+`;
+
+exports[`last.coffee 1`] = `
+[,]
+[,,]
+[,,1,]
+[,,1,1]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[,]
+[, ,]
+[, , 1]
+[, , 1, 1]
+
+`;
+
+exports[`preserve_empty_lines.coffee 1`] = `
+a = [
+
+  1,
+  2,
+
+  3,
+
+
+  4,
+
+
+]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a = [1, 2, 3, 4]
+
+`;
