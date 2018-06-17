@@ -325,6 +325,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       return (
         parent.type === 'ExportDefaultDeclaration' ||
         parent.type === 'TaggedTemplateExpression' ||
+        parent.type === 'ExpressionStatement' ||
         (parent.type === 'BinaryExpression' &&
           parent.left === node &&
           node.superClass) ||
@@ -1338,19 +1339,21 @@ function printPathNoParens(path, options, print) {
       return '</>'
     }
     case 'ClassBody':
-      if (n.body.length === 0) {
+      if (!n.comments && n.body.length === 0) {
         return ''
       }
 
       return concat([
-        indent(
-          concat([
-            hardline,
-            path.call(bodyPath => {
-              return printStatementSequence(bodyPath, options, print)
-            }, 'body'),
-          ])
-        ),
+        n.body.length > 0
+          ? indent(
+              concat([
+                hardline,
+                path.call(bodyPath => {
+                  return printStatementSequence(bodyPath, options, print)
+                }, 'body'),
+              ])
+            )
+          : comments.printDanglingComments(path, options),
         // hardline,
       ])
     case 'ClassDeclaration':
@@ -1628,7 +1631,10 @@ function printObject(path, print, options) {
 }
 
 function isClass(node) {
-  return node.type === 'ClassExpression' || node.type === 'ClassDeclaration'
+  return (
+    node &&
+    (node.type === 'ClassExpression' || node.type === 'ClassDeclaration')
+  )
 }
 
 function printTemplateLiteral(path, print, {omitQuotes} = {}) {
@@ -1987,7 +1993,15 @@ function printClass(path, options, print) {
   }
 
   if (n.superClass) {
-    parts.push(' extends ', path.call(print, 'superClass'))
+    const printed = concat(['extends ', path.call(print, 'superClass')])
+    parts.push(
+      ' ',
+      path.call(
+        superClass =>
+          comments.printComments(superClass, () => printed, options),
+        'superClass'
+      )
+    )
   }
 
   parts.push(path.call(print, 'body'))
@@ -3549,10 +3563,18 @@ function hasDanglingComments(node) {
   )
 }
 
+function willPrintOwnComments(path) {
+  const node = path.getValue()
+  const parent = path.getParentNode()
+
+  return isClass(parent) && parent.superClass === node
+}
+
 module.exports = {
   print: genericPrint,
   embed,
   massageAstNode: clean,
+  willPrintOwnComments,
   canAttachComment,
   printComment,
   isBlockComment: handleComments.isBlockComment,
