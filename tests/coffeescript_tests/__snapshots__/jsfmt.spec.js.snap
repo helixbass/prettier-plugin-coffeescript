@@ -2786,7 +2786,7 @@ test "await precedence", ->
 
   promise = do ->
     # assert precedence between unary (new) and power (**) operators
-    out = 1 + await new Promise(fn) ** 2
+    out = 1 + (await new Promise(fn)) ** 2
 
   promise.then ->
     eq out, 10
@@ -5160,9 +5160,7 @@ test "executable class bodies", ->
 test "#2502: parenthesizing inner object values", ->
   class A
     category: type: "string"
-    sections:
-      type: "number"
-      default: 0
+    sections: type: "number", default: 0
 
   eq new A().category.type, "string"
 
@@ -8094,16 +8092,7 @@ test "implicit destructuring assignment in array of objects", ->
   d = {}
   e = {}
   f = {}
-  arr = [
-    a: a
-    b: c: b
-  ,
-    a: c
-    b: c: d
-  ,
-    a: e
-    b: c: f
-  ]
+  arr = [{ a: a, b: c: b }, { a: c, b: c: d }, { a: e, b: c: f }]
   result = ([y, z] for { a: y, b: { c: z } } in arr)
   arrayEq [[a, b], [c, d], [e, f]], result
 
@@ -15633,13 +15622,7 @@ test "#2297, Different behaviors on interpreting literal", ->
         three: 3
       d: 3
     four: 4
-    h: foo(
-      one: 1
-      two: 2
-      three: three: three: 3
-    ,
-      2
-    )
+    h: foo { one: 1, two: 2, three: three: three: 3 }, 2
 
   eq xyzzy.f.two, 2
   eq xyzzy.g.c.three, 3
@@ -16822,11 +16805,7 @@ test "#2621: fancy destructuring in parameter lists", ->
     eq key2, "key2"
     eq a, "a"
 
-  func
-    prop1: key1: "key1"
-    prop2:
-      key2: "key2"
-      key3: ["a", "b", "c"]
+  func prop1: { key1: "key1" }, prop2: key2: "key2", key3: ["a", "b", "c"]
 
 test "#1435 Indented property access", ->
   rec = -> rec: rec
@@ -17347,7 +17326,7 @@ test "last line yields are returned", ->
 
 test "yield return can be used anywhere in the function body", ->
   x = do ->
-    if 2 is yield 1
+    if 2 is (yield 1)
       yield return 42
     throw new Error "this code shouldn't be reachable"
 
@@ -17379,7 +17358,7 @@ test "\`yield from\` at the end of a function errors", ->
   throws -> CoffeeScript.compile "x = -> x = 1; yield from"
 
 test "yield in if statements", ->
-  x = do -> if 1 is yield 2 then 3 else 4
+  x = do -> if 1 is (yield 2) then 3 else 4
 
   y = x.next()
   ok y.value is 2 and y.done is false
@@ -19063,9 +19042,7 @@ test "destructuring assignment with splat with default value", ->
   deepEqual b, { val: 1 }
 
 test "destructuring assignment with multiple splats in different objects", ->
-  obj =
-    a: val: 1
-    b: val: 2
+  obj = a: { val: 1 }, b: val: 2
   { a: { a... }, b: { b... } } = obj
   deepEqual a, { val: 1 }
   deepEqual b, { val: 2 }
@@ -19087,10 +19064,7 @@ test "destructuring assignment with multiple splats in different objects", ->
   eq m, @props.p.m
   deepEqual r, { s: 6 }
 
-  { p: { m }, r... } = {
-    o.props...
-    p: m: 9
-  }
+  { p: { m }, r... } = { o.props..., p: m: 9 }
   eq m, 9
 
   # Should not trigger implicit call, e.g. rest ... => rest(...)
@@ -19160,9 +19134,7 @@ test "deep destructuring assignment with objects: ES2015", ->
 
 test "deep destructuring assignment with defaults: ES2015", ->
   obj =
-    b:
-      c: 1
-      baz: "qux"
+    b: c: 1, baz: "qux"
     foo: "bar"
   j = f: "world"
   i = some: "prop"
@@ -19211,14 +19183,7 @@ test "object spread properties: ES2015", ->
   eq obj2.c, 3
   eq obj.a, obj2.a
 
-  obj3 = {
-    obj...
-    b: 7
-    g: {
-      obj2...
-      c: 1
-    }
-  }
+  obj3 = { obj..., b: 7, g: { obj2..., c: 1 } }
   eq obj3.g.c, 1
   eq obj3.b, 7
   deepEqual obj3.g, { obj..., c: 1 }
@@ -19228,13 +19193,7 @@ test "object spread properties: ES2015", ->
     deepEqual r, { c: 3, d: 44, e: 55 }
   ) { obj2..., d: 44, e: 55 }
 
-  obj =
-    a: 1
-    b: 2
-    c:
-      d: 3
-      e: 4
-      f: g: 5
+  obj = a: 1, b: 2, c: d: 3, e: 4, f: g: 5
   obj4 = { a: 10, obj.c... }
   eq obj4.a, 10
   eq obj4.d, 3
@@ -19273,50 +19232,23 @@ test "object spread properties: ES2015", ->
   eq obj5.b, 99
   deepEqual obj5.c, obj.c
 
-  fn = ->
-    c:
-      d: 33
-      e: 44
-      f: g: 55
+  fn = -> c: d: 33, e: 44, f: g: 55
   obj6 = { obj..., fn()... }
   eq obj6.c.d, 33
-  deepEqual obj6.c,
-    d: 33
-    e: 44
-    f: g: 55
+  deepEqual obj6.c, { d: 33, e: 44, f: g: 55 }
 
-  obj7 = {
-    obj...
-    fn()...
-    {
-      c:
-        d: 55
-        e: 66
-        f: { 77 }
-    }...
-  }
+  obj7 = { obj..., fn()..., { c: d: 55, e: 66, f: { 77 } }... }
   eq obj7.c.d, 55
-  deepEqual obj6.c,
-    d: 33
-    e: 44
-    f: g: 55
+  deepEqual obj6.c, { d: 33, e: 44, f: g: 55 }
 
   # Should not trigger implicit call, e.g. rest ... => rest(...)
   obj7 = {
     obj...
     fn()...
-    {
-      c:
-        d: 55
-        e: 66
-        f: { 77 }
-    }...
+    { c: d: 55, e: 66, f: { 77 } }...
   }
   eq obj7.c.d, 55
-  deepEqual obj6.c,
-    d: 33
-    e: 44
-    f: g: 55
+  deepEqual obj6.c, { d: 33, e: 44, f: g: 55 }
 
   obj = a: b: c: d: e: {}
   obj9 = { a: 1, obj.a.b.c..., g: 3 }
@@ -20340,10 +20272,7 @@ test "#4579: Postfix for/while/until in first line of implicit object literals",
 # TODO: refactor object literal tests
 # TODO: add indexing and method invocation tests: {a}['a'] is a, {a}.a()
 
-trailingComma =
-  k1: "v1"
-  k2: 4
-  k3: -> true
+trailingComma = k1: "v1", k2: 4, k3: -> true
 ok trailingComma.k3() and trailingComma.k2 is 4 and trailingComma.k1 is "v1"
 
 ok { a: (num) -> num is 10 }.a 10
@@ -20617,17 +20546,7 @@ test "Implicit objects, functions and arrays", ->
     first(
       first(
         first(
-          second(
-            1
-          ,
-            one: 1
-            twoandthree:
-              twoandthree:
-                two: 2
-                three: 3
-          ,
-            2
-          )
+          second 1, { one: 1, twoandthree: twoandthree: two: 2, three: 3 }, 2
         )
       )
     )

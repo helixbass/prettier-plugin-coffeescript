@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`await_parse.coffee 1`] = `
+f = -> (await f()).length
+g = ->
+  invariant(
+    (await driver.navigator.getUrl()).substr(-7)
+  )
+f = ->
+  !(yield a)
+f = ->
+  a = !await f()
+() =>
+  new A(await x)
+  obj[await x]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = -> (await f()).length
+g = ->
+  invariant (await driver.navigator.getUrl()).substr -7
+f = ->
+  !(yield a)
+f = ->
+  a = !(await f())
+=>
+  new A await x
+  obj[await x]
+
+`;
+
+exports[`conditional-expression.coffee 1`] = `
+f = ->
+  result = if typeof fn is 'function' then await fn() else null
+
+(->
+  console.log(
+    await (if true then Promise.resolve("A") else Promise.resolve("B"))
+  )
+)()
+
+f = ->
+  await (spellcheck && spellcheck.setChecking(false))
+  await spellcheck && spellcheck.setChecking(false)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = ->
+  result = if typeof fn is "function" then await fn() else null
+
+(->
+  console.log await if true then Promise.resolve "A" else Promise.resolve "B"
+)()
+
+f = ->
+  await (spellcheck && spellcheck.setChecking false)
+  (await spellcheck) && spellcheck.setChecking false
+
+`;
+
+exports[`parens.coffee 1`] = `
+f = -> await (yield x)
+
+f = -> await (() => {})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = -> await (yield x)
+
+f = -> await => {}
+
+`;

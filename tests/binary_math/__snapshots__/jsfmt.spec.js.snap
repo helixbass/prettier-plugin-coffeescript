@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parens.coffee 1`] = `
+result = (a + b) >>> 1
+sizeIndex = ((index - 1) >>> level) & MASK
+from = if offset > left then 0 else (left - offset) >> level
+to = ((right - offset) >> level) + 1
+if (rawIndex < 1 << (list._level + SHIFT)) then ;
+res = if size < SIZE then 0 else (((size - 1) >>> SHIFT) << SHIFT)
+sign = 1 - (2 * (b[3] >> 7))
+exponent = (((b[3] << 1) & 0xff) | (b[2] >> 7)) - 127
+mantissa = ((b[2] & 0x7f) << 16) | (b[1] << 8) | b[0]
+
+2 / 3 * 10 / 2 + 2
+rotateX = ((RANGE / rect.height) * refY - RANGE / 2) * getXMultiplication(rect.width)
+rotateY = ((RANGE / rect.width) * refX - RANGE / 2) * getYMultiplication(rect.width)
+
+a % 10 - 5
+a * b % 10
+a % 10 > 5
+a % 10 == 0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+result = (a + b) >>> 1
+sizeIndex = ((index - 1) >>> level) & MASK
+from = if offset > left then 0 else (left - offset) >> level
+to = ((right - offset) >> level) + 1
+if rawIndex < 1 << (list._level + SHIFT)
+  ;
+res = if size < SIZE then 0 else ((size - 1) >>> SHIFT) << SHIFT
+sign = 1 - 2 * (b[3] >> 7)
+exponent = (((b[3] << 1) & 0xff) | (b[2] >> 7)) - 127
+mantissa = ((b[2] & 0x7f) << 16) | (b[1] << 8) | b[0]
+
+((2 / 3) * 10) / 2 + 2
+rotateX =
+  ((RANGE / rect.height) * refY - RANGE / 2) * getXMultiplication rect.width
+rotateY =
+  ((RANGE / rect.width) * refX - RANGE / 2) * getYMultiplication rect.width
+
+(a % 10) - 5
+(a * b) % 10
+a % 10 > 5
+a % 10 == 0
+
+`;

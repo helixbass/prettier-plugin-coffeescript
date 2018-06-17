@@ -48,6 +48,10 @@
     b: c, d: e
 - preserve switch then alignment?
 - can't safely unparenthesize calls (etc) if comma isn't none (since a trailing comma continues the line)
+- refine dedented comma logic so that if object is printing inline, don't print dedented comma
+- now that we're trying to inline objects, should probably default to adding braces around inline nested objects
+  - does that imply the need for a respect implicit object option? or should we just always try to respect what they did for nested objects?
+- linebreak on other binary operators eg +?
 - comments:
   - preserve herecomment spacing
   - a b, c # d is breaking, probably should preserve trailing inline comment formatting

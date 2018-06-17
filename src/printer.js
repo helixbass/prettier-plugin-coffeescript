@@ -141,6 +141,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
 
         case 'TaggedTemplateExpression':
         case 'UnaryExpression':
+        case 'AwaitExpression':
         case 'Existence':
         case 'Range':
           return true
@@ -167,6 +168,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
             return true
           }
 
+          if (pp < np && no === '%') {
+            return !shouldFlatten(parent, node)
+          }
+
           if (util.isBitwiseOperator(po)) {
             return true
           }
@@ -182,11 +187,19 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return true
       }
     case 'YieldExpression':
+      if (parent.type === 'AwaitExpression') {
+        return true
+      }
     // else fallthrough
     case 'AwaitExpression':
       switch (parent.type) {
         case 'TaggedTemplateExpression':
+        case 'UnaryExpression':
+        case 'BinaryExpression':
+        case 'LogicalExpression':
           return true
+        case 'MemberExpression':
+          return node === parent.object
         default:
           return false
       }
@@ -1520,21 +1533,20 @@ function printObject(path, print, options) {
     props.find(({shorthand}) => !shorthand) &&
     parent.type === 'ObjectProperty' &&
     node === parent.value
-  const isCallArg = props.length > 1 && isCallArgument(path)
+  // const isCallArg = props.length > 1 && isCallArgument(path)
   // const isNonTrailingCallArg =
   //   isCallArg && !isCallArgument(path, {last: 'orBeforeTrailingFunction'})
   const shouldBreak =
     isClassBody || // (shouldOmitBraces && n.properties.length > 1)
-    isNestedObject ||
+    // isNestedObject ||
     // isNonTrailingCallArg ||
     (props.length > 1 &&
       props.find(
         ({value}) =>
-          value &&
-          ((value.type === 'ObjectExpression' &&
-            value.properties.length >= 1) ||
-            value.type === 'FunctionExpression' ||
-            (value.type === 'ConditionalExpression' && value.postfix) ||
+          value && //(value.type === 'ObjectExpression' &&
+          // value.properties.length >= 1) ||
+          // value.type === 'FunctionExpression' ||
+          ((value.type === 'ConditionalExpression' && value.postfix) ||
             (value.type === 'For' && value.postfix))
       )) ||
     (node.type === 'ObjectExpression' &&
@@ -1545,8 +1557,8 @@ function printObject(path, print, options) {
         options.locStart(node),
         options.locEnd(node)
       ))
-  const shouldBreakIfParentBreaks =
-    isCallArg || (props.length > 1 && parent.type === 'ArrayExpression')
+  const shouldBreakIfParentBreaks = false
+  // isCallArg || (props.length > 1 && parent.type === 'ArrayExpression')
   if (shouldOmitBraces && (isClassBody || isNestedObject)) {
     dontIndent = true
   }
@@ -2896,7 +2908,11 @@ function printArgumentsList(path, options, print) {
       concat([
         openingParen,
         indent(concat([line, concat(printedArguments)])),
-        line,
+        parensUnnecessary
+          ? ''
+          : parensUnnecessaryIfParentBreaks
+            ? ifVisibleGroupBroke('', softline, {count: 1})
+            : softline,
         closingParen,
       ]),
       // {shouldBreak: true, visible: true}

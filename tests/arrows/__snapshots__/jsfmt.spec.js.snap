@@ -267,3 +267,110 @@ export bem = (block) =>
 />
 
 `;
+
+exports[`currying.coffee 1`] = `
+fn = (b) => (c) => (d) =>
+  return 3
+
+foo = (a, b) => (c) => (d) =>
+  return 3
+
+bar = (a) => (b) => (c) => a + b + c
+
+mw = (store) => (next) => (action) =>
+  return next(action)
+
+middleware = (options) => (req, res, next) =>
+  # ...
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fn = (b) => (c) => (d) =>
+  return 3
+
+foo = (a, b) => (c) => (d) =>
+  return 3
+
+bar = (a) => (b) => (c) => a + b + c
+
+mw = (store) => (next) => (action) =>
+  return next action
+
+middleware = (options) => (req, res, next) =>
+  # ...
+
+`;
+
+exports[`long-call-no-args.coffee 1`] = `
+veryLongCall(VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_LONG_CONSTANT, () => {})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+veryLongCall(
+  VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_LONG_CONSTANT
+  => {}
+)
+
+`;
+
+exports[`long-contents.coffee 1`] = `
+foo = () =>
+  expect(arg1, arg2, arg3).toEqual({message: 'test', messageType: 'SMS', status: 'Unknown', created: '11/01/2017 13:36'})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+foo = =>
+  expect(arg1, arg2, arg3).toEqual
+    message: "test"
+    messageType: "SMS"
+    status: "Unknown"
+    created: "11/01/2017 13:36"
+
+`;
+
+exports[`parens.coffee 1`] = `
+promise.then(
+  (result) => result,
+  (err) => err
+)
+
+promise.then(
+  (result) => f(); return result
+  (err) => f(); return err
+)
+
+foo((a) => b)
+foo((a) => return b)
+foo(c, (a) => b)
+foo(c, ((a) => b), d)
+foo(((a) => b), d)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+promise.then ((result) => result), (err) => err
+
+promise.then(
+  (result) =>
+    f()
+    return result
+  (err) =>
+    f()
+    return err
+)
+
+foo (a) => b
+foo (a) => return b
+foo c, (a) => b
+foo c, ((a) => b), d
+foo ((a) => b), d
+
+`;
+
+exports[`short_body.coffee 1`] = `
+initializeSnapshotState = (
+  testFile,
+  update,
+  testPath,
+  expandLongerLongerLongerLonger,
+) => new SnapshotState(testFile, update, testPath, expand)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+initializeSnapshotState = (
+  testFile
+  update
+  testPath
+  expandLongerLongerLongerLonger
+) => new SnapshotState testFile, update, testPath, expand
+
+`;
