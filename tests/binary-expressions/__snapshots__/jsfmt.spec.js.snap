@@ -54,7 +54,9 @@ a = (
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 a =
   # Comment 1
-  Math.random() * (yRange * (1 - minVerticalFraction)) + minVerticalFraction * yRange - offset
+  Math.random() * (yRange * (1 - minVerticalFraction)) +
+  minVerticalFraction * yRange -
+  offset
 
 `;
 
@@ -105,7 +107,7 @@ a ** (b * c)
 exports[`if.coffee 1`] = `
 if this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong then ;
 
-if @hasPlugin("dynamicImportsLonger") and @lookahead().typeLonger is tt.parenLeft then ;
+if @hasPlugin("dynamicImportsLonger") and @lookahead().typeLongerer is tt.parenLeft then ;
 
 if (this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong == tt.parenLeft.right) then ;
 
@@ -117,7 +119,7 @@ if this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong
   ;
 if (
   @hasPlugin("dynamicImportsLonger") and
-  @lookahead().typeLonger is tt.parenLeft
+  @lookahead().typeLongerer is tt.parenLeft
 )
   ;
 if (
@@ -126,11 +128,13 @@ if (
 )
   ;
 if (
-  VeryVeryVeryVeryVeryVeryVeryVeryLong is VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
+  VeryVeryVeryVeryVeryVeryVeryVeryLong is
+  VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
 )
   ;
 if (
-  VeryVeryVeryVeryVeryVeryVeryVeryLong == VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
+  VeryVeryVeryVeryVeryVeryVeryVeryLong ==
+  VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
 )
   ;
 
@@ -479,8 +483,8 @@ foo = ->
 foo = ->
   return (
     if (
-      this.calculate().compute().first
-        .numberOfThings > this.calculate().compute().last.numberOfThings
+      this.calculate().compute().first.numberOfThings >
+      this.calculate().compute().last.numberOfThings
     )
       true
     else
@@ -512,9 +516,8 @@ defaultContent.filter((defaultLocale) ->
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 this._cumulativeHeights &&
   Math.abs(
-    this._cachedItemHeight(
-      this._firstVisibleIndex + i
-    ) - this._provider.fastHeight i + this._firstVisibleIndex
+    this._cachedItemHeight(this._firstVisibleIndex + i) -
+      this._provider.fastHeight i + this._firstVisibleIndex
   ) > 1
 
 foooooooooooooooooooooooooooooooooooooooooooooooooooooooooo(
@@ -526,8 +529,7 @@ isPartOfPackageJSON =
 
 defaultContent.filter((defaultLocale) ->
   # ...
-)[0] ||
-  null
+)[0] || null
 
 `;
 
@@ -557,11 +559,22 @@ foo(if obj.property * new Class() && obj instanceof Class && longVariable then n
 
 x = longVariable + longVariable + longVariable
 x =
-  longVariable + longVariable + longVariable + longVariable - longVariable + longVariable
+  longVariable +
+  longVariable +
+  longVariable +
+  longVariable -
+  longVariable +
+  longVariable
 x =
-  longVariable + longVariable * longVariable + longVariable - longVariable + longVariable
+  longVariable +
+  longVariable * longVariable +
+  longVariable -
+  longVariable +
+  longVariable
 x =
-  longVariable + (longVariable * longVariable * longVariable) / longVariable + longVariable
+  longVariable +
+  (longVariable * longVariable * longVariable) / longVariable +
+  longVariable
 
 x =
   longVariable &&
@@ -586,8 +599,7 @@ x =
   call(
     firstItemWithAVeryLongNameThatKeepsGoing
     firstItemWithAVeryLongNameThatKeepsGoing
-  ) ||
-  []
+  ) || []
 
 x = longVariable * longint && longVariable >> 0 && longVariable + longVariable
 

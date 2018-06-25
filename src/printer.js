@@ -2669,21 +2669,25 @@ function printBinaryishExpressions(path, print, options, isNested) {
     }
 
     const {operator} = node
-    const canonicalOperator = getCanonicalOperator(node)
+    // const canonicalOperator = getCanonicalOperator(node)
 
     canBreak =
-      (canonicalOperator === '&&' ||
-        canonicalOperator === '||' ||
-        canonicalOperator === 'BIN?') &&
       !isIf(node.right) &&
-      !shouldInlineLogicalExpression(node, {notJSX: true})
+      !shouldInlineLogicalExpression(node, {notJSX: true}) &&
+      !isTemplateOnItsOwnLine(node.right, options.originalText, options)
     const right = concat([
       operator,
       canBreak ? line : ' ',
       path.call(print, 'right'),
     ])
 
-    parts.push(' ', right)
+    const parent = path.getParentNode()
+    const shouldGroup =
+      parent.type !== node.type &&
+      node.left.type !== node.type &&
+      node.right.type !== node.type
+
+    parts.push(' ', shouldGroup ? group(right) : right)
 
     if (isNested && node.comments) {
       parts = comments.printComments(path, () => concat(parts), options)

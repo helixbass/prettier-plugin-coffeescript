@@ -7129,8 +7129,8 @@ test "transpile option has merged source maps", ->
   untranspiledOutput.v3SourceMap = JSON.parse untranspiledOutput.v3SourceMap
   transpiledOutput.v3SourceMap = JSON.parse transpiledOutput.v3SourceMap
   ok(
-    untranspiledOutput.v3SourceMap.mappings isnt transpiledOutput.v3SourceMap
-      .mappings
+    untranspiledOutput.v3SourceMap.mappings isnt
+      transpiledOutput.v3SourceMap.mappings
   )
   # Babel adds \`'use strict';\` to the top of files with the modules transform.
   eq transpiledOutput.js.indexOf("use strict"), 1
@@ -15344,9 +15344,14 @@ test "Issue 4631: left and right spread dots with preceding space", ->
   f = (a) -> a
   eq(
     yes
-    f(...a) is f(...a) is f(a...) is f(a...) is f(a...) is f(...a) is f(
-      a...
-    ) is f ...a
+    f(...a) is
+      f(...a) is
+      f(a...) is
+      f(a...) is
+      f(a...) is
+      f(...a) is
+      f(a...) is
+      f ...a
   )
 
 test "Issue 894: Splatting against constructor-chained functions.", ->
@@ -18143,9 +18148,8 @@ ok "#{hello + " " + world + "!"}" is "Hello World!"
 
 list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 ok(
-  "values: #{list.join ", "}, length: #{
-    list.length
-  }." is "values: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, length: 10."
+  "values: #{list.join ", "}, length: #{list.length}." is
+    "values: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, length: 10."
 )
 ok "values: #{list.join " "}" is "values: 0 1 2 3 4 5 6 7 8 9"
 
@@ -25284,7 +25288,8 @@ test "tagged template literal with ES interpolation", ->
 test "tagged template literal with both ES and CoffeeScript interpolation", ->
   eq(
     "text: [ES template literals also look like this: \`3 + 5 = \${3+5}\` which equals |] expressions: [8]"
-    func"ES template literals also look like this: \`3 + 5 = \${3+5}\` which equals #{3 + 5}"
+    func"ES template literals also look like this: \`3 + 5 = \${3+5}\` which equals #{3 +
+      5}"
   )
 
 test "tagged template literal with escaped ES interpolation", ->

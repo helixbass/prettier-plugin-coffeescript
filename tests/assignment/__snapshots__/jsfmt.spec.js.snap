@@ -19,8 +19,7 @@ exports[`breaking.coffee 1`] = `
 someVariableThatsGotALongName = not (someCondition or someOtherVeryVeryLongConition)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 someVariableThatsGotALongName = not (
-  someCondition or
-  someOtherVeryVeryLongConition
+  someCondition or someOtherVeryVeryLongConition
 )
 
 `;
