@@ -101,7 +101,26 @@ function hasSameStartLine(node, other) {
   return node.loc.start.line === other.loc.start.line
 }
 
+function getNextNonSpaceNonCommentCharacterIndex(text, node, locEnd) {
+  let oldIdx = null
+  let idx = locEnd(node)
+  while (idx !== oldIdx) {
+    oldIdx = idx
+    idx = skipSpaces(text, idx)
+    idx = skipInlineComment(text, idx)
+    idx = skipNewline(text, idx)
+  }
+  return idx
+}
+
+function getNextNonSpaceNonCommentCharacter(text, node, locEnd) {
+  return text.charAt(
+    getNextNonSpaceNonCommentCharacterIndex(text, node, locEnd)
+  )
+}
+
 module.exports = {
   isNextLineEmpty,
   hasSameStartLine,
+  getNextNonSpaceNonCommentCharacter,
 }

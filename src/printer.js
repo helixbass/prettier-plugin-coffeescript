@@ -60,6 +60,28 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
     return false
   }
 
+  if (
+    isClass(parent) &&
+    parent.superClass === node &&
+    (node.type === 'FunctionExpression' ||
+      node.type === 'AssignmentExpression' ||
+      node.type === 'AwaitExpression' ||
+      node.type === 'BinaryExpression' ||
+      node.type === 'ConditionalExpression' ||
+      node.type === 'LogicalExpression' ||
+      node.type === 'NewExpression' ||
+      node.type === 'ObjectExpression' ||
+      node.type === 'SequenceExpression' ||
+      node.type === 'TemplateLiteral' ||
+      node.type === 'StringLiteral' ||
+      node.type === 'TaggedTemplateExpression' ||
+      node.type === 'UnaryExpression' ||
+      node.type === 'UpdateExpression' ||
+      node.type === 'YieldExpression')
+  ) {
+    return true
+  }
+
   switch (node.type) {
     case 'CallExpression': {
       let firstParentNotMemberExpression = parent
@@ -1976,6 +1998,8 @@ function printObjectMethod(path, options, print) {
   parts.push(
     objMethod.operator === '=' ? ' =' : ':',
     ' ',
+    comments.printDanglingComments(path, options, true),
+    hasDanglingComments(objMethod) ? ' ' : '',
     printFunction(path, options, print)
   )
 
@@ -3580,5 +3604,6 @@ module.exports = {
   isBlockComment: handleComments.isBlockComment,
   handleComments: {
     ownLine: handleComments.handleOwnLineComment,
+    remaining: handleComments.handleRemainingComment,
   },
 }

@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extends.coffee 1`] = `
+# "FunctionExpression"
+class a extends (() =>)
+
+# "AssignmentExpression"
+class a extends (b = c)
+
+# "AwaitExpression"
+f = ->
+  class a extends (await b)
+
+# "BinaryExpression"
+class a extends (b + c)
+
+# "CallExpression"
+class a extends b()
+
+# "ClassExpression"
+class a extends class
+
+# "ConditionalExpression"
+class a extends (if b then c else d)
+
+# "FunctionExpression"
+class a extends (->)
+
+# "LogicalExpression"
+class a extends (b || c)
+
+# "MemberExpression"
+class a extends b.c
+
+# "NewExpression"
+class a extends (new B())
+
+# "ObjectExpression"
+class a extends ({})
+
+# "SequenceExpression"
+class a extends (b; c)
+
+# "StringLiteral"
+class a extends ""
+
+# "TemplateLiteral"
+class a extends "#{}"
+
+# "TaggedTemplateExpression"
+class a extends b""
+
+# "UnaryExpression"
+class a extends (not b)
+
+# "UpdateExpression"
+class a extends (++b)
+
+# "YieldExpression"
+->
+  class a extends (yield 1)
+
+x = class extends (++b)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# "FunctionExpression"
+class a extends (=>)
+
+# "AssignmentExpression"
+class a extends (b = c)
+
+# "AwaitExpression"
+f = ->
+  class a extends (await b)
+
+# "BinaryExpression"
+class a extends (b + c)
+
+# "CallExpression"
+class a extends b()
+
+# "ClassExpression"
+class a extends (class)
+
+# "ConditionalExpression"
+class a extends (if b then c else d)
+
+# "FunctionExpression"
+class a extends (->)
+
+# "LogicalExpression"
+class a extends (b || c)
+
+# "MemberExpression"
+class a extends b.c
+
+# "NewExpression"
+class a extends (new B())
+
+# "ObjectExpression"
+class a extends ({})
+
+# "SequenceExpression"
+class a extends (b; c)
+
+# "StringLiteral"
+class a extends ("")
+
+# "TemplateLiteral"
+class a extends ("#{}")
+
+# "TaggedTemplateExpression"
+class a extends (b"")
+
+# "UnaryExpression"
+class a extends (not b)
+
+# "UpdateExpression"
+class a extends (++b)
+
+# "YieldExpression"
+->
+  class a extends (yield 1)
+
+x = class extends (++b)
+
+`;

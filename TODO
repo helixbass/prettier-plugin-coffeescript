@@ -56,3 +56,4 @@
   - preserve herecomment spacing
   - a b, c # d is breaking, probably should preserve trailing inline comment formatting
   - a(b, c) # d is losing the comment and not complaining
+  - get comment-only class body to print indented
