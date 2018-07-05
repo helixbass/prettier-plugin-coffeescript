@@ -465,7 +465,11 @@ function printPathNoParens(path, options, print) {
         }, 'body')
       )
 
-      if (n.body.length) {
+      parts.push(
+        comments.printDanglingComments(path, options, /* sameIndent */ true)
+      )
+
+      if (n.body.length || n.comments) {
         parts.push(hardline)
       }
 
@@ -1390,6 +1394,8 @@ function printPathNoParens(path, options, print) {
       return ''
     case 'TaggedTemplateExpression':
       return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
+    default:
+      throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
 }
 
@@ -3608,6 +3614,7 @@ module.exports = {
   isBlockComment: handleComments.isBlockComment,
   handleComments: {
     ownLine: handleComments.handleOwnLineComment,
+    endOfLine: handleComments.handleEndOfLineComment,
     remaining: handleComments.handleRemainingComment,
   },
 }
