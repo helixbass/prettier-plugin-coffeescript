@@ -92,7 +92,7 @@ name: ###comment### ->
 other: ###comment### (a) ->
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class C
-  name: ###comment### ->
+  name: () ###comment### ->
   other: ###comment### (a) ->
 
 name: ###comment### ->

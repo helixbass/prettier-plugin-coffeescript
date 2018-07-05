@@ -21,29 +21,46 @@ function handleOwnLineComment(comment, text, options, ast, isLastComment) {
 }
 
 function handleEndOfLineComment(comment, text, options, ast, isLastComment) {
-  // const precedingNode = comment.precedingNode
+  const precedingNode = comment.precedingNode
   const enclosingNode = comment.enclosingNode
   // const followingNode = comment.followingNode
-  if (handleOnlyComments(enclosingNode, comment, isLastComment)) {
+  if (
+    handleCallExpressionComments(precedingNode, enclosingNode, comment) ||
+    handleOnlyComments(enclosingNode, comment, isLastComment)
+  ) {
     return true
   }
   return false
 }
 
 function handleRemainingComment(comment, text, options, ast, isLastComment) {
-  const precedingNode = comment.precedingNode
+  // const precedingNode = comment.precedingNode
   const enclosingNode = comment.enclosingNode
   // const followingNode = comment.followingNode
   if (
+    handleCommentInEmptyParens(text, enclosingNode, comment, options) ||
     handleOnlyComments(enclosingNode, comment, isLastComment) ||
-    handleFunctionNameComments(
-      text,
-      enclosingNode,
-      precedingNode,
-      comment,
-      options
-    )
+    handleFunctionNameComments(text, enclosingNode, comment, options)
   ) {
+    return true
+  }
+  return false
+}
+
+function handleCommentInEmptyParens(text, enclosingNode, comment, options) {
+  if (
+    getNextNonSpaceNonCommentCharacter(text, comment, options.locEnd) !== ')'
+  ) {
+    return false
+  }
+
+  if (
+    enclosingNode &&
+    (enclosingNode.type === 'FunctionExpression' ||
+      enclosingNode.type === 'ClassMethod') &&
+    enclosingNode.params.length === 0
+  ) {
+    addDanglingComment(enclosingNode, comment)
     return true
   }
   return false
@@ -67,13 +84,7 @@ function handleOnlyComments(enclosingNode, comment, isLastComment) {
   return false
 }
 
-function handleFunctionNameComments(
-  text,
-  enclosingNode,
-  precedingNode,
-  comment,
-  options
-) {
+function handleFunctionNameComments(text, enclosingNode, comment, options) {
   const nextChar = getNextNonSpaceNonCommentCharacter(
     text,
     comment,
@@ -83,7 +94,11 @@ function handleFunctionNameComments(
     return false
   }
 
-  if (precedingNode && enclosingNode && enclosingNode.type === 'ClassMethod') {
+  if (
+    enclosingNode &&
+    (enclosingNode.type === 'FunctionExpression' ||
+      enclosingNode.type === 'ClassMethod')
+  ) {
     // addTrailingComment(precedingNode, comment)
     addDanglingComment(enclosingNode, comment)
     return true
@@ -93,6 +108,20 @@ function handleFunctionNameComments(
 function handleAssignmentPatternComments(enclosingNode, comment) {
   if (enclosingNode && enclosingNode.type === 'AssignmentPattern') {
     addLeadingComment(enclosingNode, comment)
+    return true
+  }
+  return false
+}
+
+function handleCallExpressionComments(precedingNode, enclosingNode, comment) {
+  if (
+    enclosingNode &&
+    enclosingNode.type === 'CallExpression' &&
+    precedingNode &&
+    enclosingNode.callee === precedingNode &&
+    enclosingNode.arguments.length > 0
+  ) {
+    addLeadingComment(enclosingNode.arguments[0], comment)
     return true
   }
   return false

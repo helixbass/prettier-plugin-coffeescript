@@ -2,7 +2,11 @@
 
 const util = require('prettier/src/common/util')
 const comments = require('prettier/src/main/comments')
-const {isNextLineEmpty, hasSameStartLine} = require('./util')
+const {
+  isNextLineEmpty,
+  hasSameStartLine,
+  getNextNonSpaceNonCommentCharacter,
+} = require('./util')
 const embed = require('./embed')
 const handleComments = require('./comments')
 const {
@@ -589,7 +593,17 @@ function printPathNoParens(path, options, print) {
     case 'ArrayExpression':
     case 'ArrayPattern': {
       if (n.elements.length === 0) {
-        return '[]'
+        if (!hasDanglingComments(n)) {
+          return '[]'
+        }
+        return group(
+          concat([
+            '[',
+            comments.printDanglingComments(path, options),
+            softline,
+            ']',
+          ])
+        )
       }
 
       const lastElem = util.getLast(n.elements)
@@ -798,7 +812,8 @@ function printPathNoParens(path, options, print) {
           parent.type === 'ConditionalExpression') &&
           n === parent.consequent &&
           !parent.alternate) ||
-          (parent.type === 'WhileStatement' && n === parent.body))
+          ((parent.type === 'WhileStatement' || parent.type === 'For') &&
+            n === parent.body))
       ) {
         return indent(concat([hardline, ';']))
       }
@@ -1435,7 +1450,40 @@ function printFunction(path, options, print) {
   const node = path.getValue()
   const parent = path.getParentNode()
   const grandparent = path.getParentNode(1)
+
+  const preParamsDanglingCommentFilter = comment =>
+    getNextNonSpaceNonCommentCharacter(
+      options.originalText,
+      comment,
+      options.locEnd
+    ) === '('
+  parts.push(
+    comments.printDanglingComments(
+      path,
+      options,
+      /* sameIndent */ true,
+      preParamsDanglingCommentFilter
+    ),
+    hasDanglingComments(node, preParamsDanglingCommentFilter) ? ' ' : ''
+  )
+
   parts.push(group(printFunctionParams(path, print, options)))
+
+  const postParamsDanglingCommentFilter = comment =>
+    getNextNonSpaceNonCommentCharacter(
+      options.originalText,
+      comment,
+      options.locEnd
+    ) === '-'
+  parts.push(
+    comments.printDanglingComments(
+      path,
+      options,
+      /* sameIndent */ true,
+      postParamsDanglingCommentFilter
+    ),
+    hasDanglingComments(node, postParamsDanglingCommentFilter) ? ' ' : ''
+  )
 
   parts.push(node.bound ? '=>' : '->')
 
@@ -1533,7 +1581,21 @@ function printObject(path, print, options) {
   })
 
   if (joinedProps.length === 0) {
-    return concat(['{', '}'])
+    if (!hasDanglingComments(node)) {
+      return concat(['{', '}'])
+    }
+
+    return {
+      content: group(
+        concat([
+          '{',
+          comments.printDanglingComments(path, options),
+          softline,
+          '}',
+        ])
+      ),
+      groupOptions: {},
+    }
   }
 
   const shouldOmitBraces =
@@ -2004,8 +2066,6 @@ function printObjectMethod(path, options, print) {
   parts.push(
     objMethod.operator === '=' ? ' =' : ':',
     ' ',
-    comments.printDanglingComments(path, options, true),
-    hasDanglingComments(objMethod) ? ' ' : '',
     printFunction(path, options, print)
   )
 
@@ -2057,12 +2117,32 @@ function isEmptyBlock(node) {
   )
 }
 
+function needsHardlineAfterDanglingComment(node) {
+  if (!node.comments) {
+    return false
+  }
+  const lastDanglingComment = util.getLast(
+    node.comments.filter(comment => !comment.leading && !comment.trailing)
+  )
+  return (
+    lastDanglingComment && !handleComments.isBlockComment(lastDanglingComment)
+  )
+}
+
 function printExportDeclaration(path, options, print) {
   const decl = path.getValue()
   const parts = ['export ']
 
   if (decl['default'] || decl.type === 'ExportDefaultDeclaration') {
     parts.push('default ')
+  }
+
+  parts.push(
+    comments.printDanglingComments(path, options, /* sameIndent */ true)
+  )
+
+  if (needsHardlineAfterDanglingComment(decl)) {
+    parts.push(hardline)
   }
 
   if (decl.declaration) {
@@ -3251,7 +3331,24 @@ function printFunctionParams(path, print, options) {
   const {params} = fun
 
   if (!(params && params.length)) {
-    return concat([]) // TODO: is this the right way to return "empty"?
+    if (!hasDanglingComments(fun)) {
+      return ''
+    }
+    return concat([
+      '(',
+      comments.printDanglingComments(
+        path,
+        options,
+        /* sameIndent */ true,
+        comment =>
+          getNextNonSpaceNonCommentCharacter(
+            options.originalText,
+            comment,
+            options.locEnd
+          ) === ')'
+      ),
+      ') ',
+    ])
   }
 
   const printed = path.map(print, 'params')
@@ -3590,10 +3687,15 @@ function canAttachComment(node) {
   )
 }
 
-function hasDanglingComments(node) {
+function hasDanglingComments(node, filter) {
   return (
     node.comments &&
-    node.comments.some(comment => !comment.leading && !comment.trailing)
+    node.comments.some(
+      comment =>
+        !comment.leading &&
+        !comment.trailing &&
+        (filter ? filter(comment) : true)
+    )
   )
 }
 

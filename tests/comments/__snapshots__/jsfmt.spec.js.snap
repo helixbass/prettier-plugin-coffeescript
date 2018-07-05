@@ -1,0 +1,323 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`assignment-pattern.coffee 1`] = `
+{ a ### comment ### = 1 } = b
+
+{ c = 1 ### comment ### } = d
+
+{a = #comment
+ b} = c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{ a ### comment ### = 1 } = b
+
+{ c = 1 ### comment ### } = d
+
+{
+  a = b #comment
+} = c
+
+`;
+
+exports[`before-comma.coffee 1`] = `
+foo = {
+  a: 'a' ### comment for this line ###,
+
+  ### Section B ###
+  b: 'b',
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+foo =
+  a: "a" ### comment for this line ###
+
+  ### Section B ###
+  b: "b"
+
+`;
+
+exports[`blank.coffee 1`] = `
+# This file only
+# has comments. This comment
+# should still exist
+#
+# when printed.
+
+###*
+# @typedef {DataDrivenMapping|ConstantMapping} Mapping
+###
+###*
+# @typedef {Object.<String, Mapping>} ConfigurationMapping
+###
+
+###*
+# @typedef {Function} D3Scale - a D3 scale
+# @property {Function} ticks
+# @property {Function} tickFormat
+###
+# comment
+
+# comment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# This file only
+# has comments. This comment
+# should still exist
+#
+# when printed.
+
+###*
+# @typedef {DataDrivenMapping|ConstantMapping} Mapping
+###
+###*
+# @typedef {Object.<String, Mapping>} ConfigurationMapping
+###
+
+###*
+# @typedef {Function} D3Scale - a D3 scale
+# @property {Function} ticks
+# @property {Function} tickFormat
+###
+# comment
+
+# comment
+
+`;
+
+exports[`break-continue-statements.coffee 1`] = `
+loop
+  break ### comment ###
+  continue ### comment ###
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+loop
+  break ### comment ###
+  continue ### comment ###
+
+`;
+
+exports[`call_comment.coffee 1`] = `
+render( # Warm any cache
+  <ChildUpdates renderAnchor={true} anchorClassOn={true} />,
+  container
+)
+
+React.render( # Warm any cache
+  <ChildUpdates renderAnchor={true} anchorClassOn={true} />,
+  container
+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+render(
+  # Warm any cache
+  <ChildUpdates renderAnchor={true} anchorClassOn={true} />
+  container
+)
+
+React.render(
+  # Warm any cache
+  <ChildUpdates renderAnchor={true} anchorClassOn={true} />
+  container
+)
+
+`;
+
+exports[`closure-compiler-type-cast.coffee 1`] = `
+# test to make sure comments are attached correctly
+inlineComment = ### some comment ### (
+  someReallyLongFunctionCall(withLots, ofArguments))
+
+object = {
+  key: ### some comment ### (someReallyLongFunctionCall(withLots, ofArguments))
+}
+
+# preserve parens only for type casts
+assignment = ###* @type {string} ### (getValue())
+
+functionCall(1 + ###* @type {string} ### (value), ###* @type {!Foo} ### ({}))
+
+returnValue = ->
+  return ###* @type {!Array.<string>} ### (['hello', 'you'])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# test to make sure comments are attached correctly
+inlineComment = ### some comment ### someReallyLongFunctionCall(
+  withLots
+  ofArguments
+)
+
+object =
+  key: ### some comment ### someReallyLongFunctionCall withLots, ofArguments
+
+# preserve parens only for type casts
+assignment = ###* @type {string} ### getValue()
+
+functionCall 1 + ###* @type {string} ### value, ###* @type {!Foo} ### {}
+
+returnValue = ->
+  return ###* @type {!Array.<string>} ### ["hello", "you"]
+
+`;
+
+exports[`dangling.coffee 1`] = `
+x = {### dangling ###}
+x = {
+  # dangling
+}
+x = [### dangling ###]
+x = ->
+  ### dangling ###
+class Foo extends Qux
+  ### dangling ###
+export ### dangling ###{}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+x = {
+  ### dangling ###
+}
+x = {
+  # dangling
+}
+x = [
+  ### dangling ###
+]
+x = ->
+  ### dangling ###
+class Foo extends Qux
+### dangling ###
+export ### dangling ###{}
+
+`;
+
+exports[`dangling_array.coffee 1`] = `
+expect(() => {}).toTriggerReadyStateChanges([
+  # Nothing.
+])
+
+[1 ### first comment ###, 2 ### second comment ###, 3]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+expect(=> {}).toTriggerReadyStateChanges [
+  # Nothing.
+]
+
+[1 ### first comment ###, 2 ### second comment ###, 3]
+
+`;
+
+exports[`export.coffee 1`] = `
+export ### comment ### {}
+
+export {
+  foo # comment
+}
+
+export {
+  # comment
+  bar
+}
+
+export {
+  fooo, # comment
+  barr, # comment
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export ### comment ###{}
+
+export {
+  foo # comment
+}
+
+export {
+  # comment
+  bar
+}
+
+export {
+  fooo # comment
+  barr # comment
+}
+
+`;
+
+exports[`first-line.coffee 1`] = `
+a # comment
+b
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a # comment
+b
+
+`;
+
+exports[`function-declaration.coffee 1`] = `
+a = (### comment ###) -> # comment
+b = -> # comment
+c = (### comment ### argA, argB, argC) -> # comment
+call((###object### row) => {})
+KEYPAD_NUMBERS.map((num) => ( # Buttons 0-9
+  <div />
+))
+
+f = ### f ###() ->
+f = (### args ###) ->
+f = () ### returns ### ->
+f = ### f ###(### args ###) ### returns ### ->
+
+f = ### f ###(### a ### a) ->
+f = ### f ###(a ### a ###) ->
+f = ### f ###(### a ### a) ### returns ### ->
+
+obj = {
+  f1: ### f ###() ->
+  f2: (### args ###) ->
+  f3: () ### returns ### ->
+  f4: ### f ###(### args ###) ### returns ### ->
+}
+
+(### f ###() ->)()
+((### args ###) ->)()
+(() ### returns ### ->)()
+(### f ###(### args ###) ### returns ### ->)()
+
+class C
+  f: ### f ###() ->
+class C
+  f: (### args ###) ->
+class C
+  f: () ### returns ### ->
+class C
+  f: ### f ###(### args ###) ### returns ### ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a = (### comment ###) ->
+  # comment
+b = ->
+  # comment
+c = (### comment ### argA, argB, argC) ->
+  # comment
+call (###object### row) => {}
+KEYPAD_NUMBERS.map (num) =>
+  # Buttons 0-9
+  <div />
+
+f = ### f ### ->
+f = (### args ###) ->
+f = () ### returns ### ->
+f = ### f ### (### args ###) ### returns ### ->
+
+f = ### f ### (### a ### a) ->
+f = ### f ### (a ### a ###) ->
+f = ### f ### (### a ### a) ### returns ### ->
+
+obj =
+  f1: ### f ### ->
+  f2: (### args ###) ->
+  f3: () ### returns ### ->
+  f4: ### f ### (### args ###) ### returns ### ->
+
+### f ### (->)()
+((### args ###) ->)()
+(() ### returns ### ->)()
+### f ### ((### args ###) ### returns ### ->)()
+
+class C
+  f: ### f ### () ->
+class C
+  f: (### args ###) ->
+class C
+  f: () ### returns ### ->
+class C
+  f: ### f ### (### args ###) ### returns ### ->
+
+`;
