@@ -267,6 +267,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'MemberExpression':
           return true
 
+        // case 'ExpressionStatement':
+        //   return !node.postfix
+
         case 'ObjectProperty':
           if (!node.postfix) {
             return false
@@ -994,13 +997,26 @@ function printPathNoParens(path, options, print) {
       parts.push(opening)
 
       if (n.alternate) {
+        const commentOnOwnLine =
+          (hasTrailingComment(n.consequent) &&
+            n.consequent.comments.some(
+              comment =>
+                comment.trailing && !handleComments.isBlockComment(comment)
+            )) ||
+          needsHardlineAfterDanglingComment(n)
+        if (hasDanglingComments(n)) {
+          parts.push(
+            commentOnOwnLine ? hardline : line,
+            comments.printDanglingComments(path, options, /* sameIndent */ true)
+          )
+        }
         const alternate = path.call(print, 'alternate')
         const hasChainedElseIf = isIf(n.alternate)
         const alt = hasChainedElseIf
           ? concat([' ', alternate])
           : adjustClause(n.alternate, alternate)
         parts.push(
-          line,
+          commentOnOwnLine ? hardline : line,
           'else',
           n.consequent.type === 'BlockStatement' && !hasChainedElseIf
             ? ' '
@@ -1328,7 +1344,10 @@ function printPathNoParens(path, options, print) {
       return elem
     }
     case 'JSXOpeningElement': {
-      if (n.selfClosing && !n.attributes.length) {
+      const nameHasComments =
+        n.name && n.name.comments && n.name.comments.length > 0
+
+      if (n.selfClosing && !n.attributes.length && !nameHasComments) {
         return concat(['<', path.call(print, 'name'), ' />'])
       }
 
@@ -1336,7 +1355,10 @@ function printPathNoParens(path, options, print) {
         n.attributes &&
         n.attributes.length === 1 &&
         n.attributes[0].value &&
-        isStringLiteral(n.attributes[0].value)
+        isStringLiteral(n.attributes[0].value) &&
+        // !n.attributes[0].value.value.includes("\n") &&
+        !nameHasComments &&
+        (!n.attributes[0].comments || !n.attributes[0].comments.length)
       ) {
         return group(
           concat([
@@ -1349,7 +1371,15 @@ function printPathNoParens(path, options, print) {
         )
       }
 
-      const bracketSameLine = options.jsxBracketSameLine
+      const lastAttrHasTrailingComments =
+        n.attributes.length && hasTrailingComment(getLast(n.attributes))
+
+      const bracketSameLine =
+        options.jsxBracketSameLine &&
+        (!nameHasComments || n.attributes.length) &&
+        !lastAttrHasTrailingComments
+
+      // const shouldBreak = n.attributes && n.attributes.some(attr => attr.value && isStringLiteral(attr.value) && attr.value.value.includes("\n"))
 
       return group(
         concat([
@@ -1364,7 +1394,9 @@ function printPathNoParens(path, options, print) {
             n.selfClosing ? line : bracketSameLine ? '>' : softline,
           ]),
           n.selfClosing ? '/>' : bracketSameLine ? '' : '>',
-        ])
+        ]),
+        // {shouldBreak}
+        {}
       )
     }
     case 'JSXClosingElement':
@@ -1378,6 +1410,19 @@ function printPathNoParens(path, options, print) {
       }
 
       return '</>'
+    }
+    case 'JSXEmptyExpression': {
+      const requiresHardline =
+        n.comments && !n.comments.every(handleComments.isBlockComment)
+
+      return concat([
+        comments.printDanglingComments(
+          path,
+          options,
+          /* sameIndent */ !requiresHardline
+        ),
+        requiresHardline ? hardline : '',
+      ])
     }
     case 'ClassBody':
       if (!n.comments && n.body.length === 0) {
@@ -2552,6 +2597,15 @@ function printMemberChain(path, options, print) {
     ) {
       printedNodes.unshift({
         node,
+        // printed: comments.printComments(
+        //     path,
+        //     () =>
+        //       concat([
+        //         printOptionalToken(path),
+        //         printArgumentsList(path, options, print),
+        //       ]),
+        //     options
+        //   ),
         printed: concat([
           printOptionalToken(path),
           printArgumentsList(path, options, print),
@@ -2561,7 +2615,11 @@ function printMemberChain(path, options, print) {
     } else if (isMemberish(node)) {
       printedNodes.unshift({
         node,
-        printed: printMemberLookup(path, options, print),
+        printed: comments.printComments(
+          path,
+          () => printMemberLookup(path, options, print),
+          options
+        ),
       })
       path.call(object => rec(object), 'object')
     } else {
@@ -2631,6 +2689,12 @@ function printMemberChain(path, options, print) {
       hasSeenCallExpression = true
     }
     currentGroup.push(printedNode)
+
+    // if (node.comments && node.comments.some(comment => comment.trailing)) {
+    //   groups.push(currentGroup)
+    //   currentGroup = []
+    //   hasSeenCallExpression = false
+    // }
   }
   if (currentGroup.length > 0) {
     groups.push(currentGroup)
@@ -2668,11 +2732,15 @@ function printMemberChain(path, options, print) {
   const oneLine = concat(printedGroups)
 
   const cutoff = shouldMerge ? 3 : 2
-  // const flatGroups = groups
-  //   .slice(0, cutoff)
-  //   .reduce((res, group) => res.concat(group), [])
+  const flatGroups = groups
+    .slice(0, cutoff)
+    .reduce((res, group) => res.concat(group), [])
 
-  if (groups.length <= cutoff) {
+  const hasComment = flatGroups
+    .slice(1, -1)
+    .some(node => hasLeadingComment(node.node))
+
+  if (groups.length <= cutoff && !hasComment) {
     return group(oneLine)
   }
 
@@ -2688,6 +2756,7 @@ function printMemberChain(path, options, print) {
   const callExpressionCount = callExpressions.length
 
   if (
+    hasComment ||
     callExpressionCount >= 3 ||
     (callExpressionCount === 2 &&
       callExpressions.some(({node}) =>
@@ -2985,7 +3054,8 @@ function printArgumentsList(path, options, print) {
       args[0].type === 'ArrayExpression' ||
       (args[0].type === 'ObjectExpression' &&
         path.call(objectRequiresBraces, 'arguments', '0')) ||
-      isDoFunc(args[0]))
+      isDoFunc(args[0])) &&
+    !hasTrailingComment(args[0])
   const firstArgIsObject =
     args.length >= 1 &&
     args[0].type === 'ObjectExpression' &&
@@ -3685,6 +3755,14 @@ function canAttachComment(node) {
     node.type !== 'CommentLine' &&
     node.type !== 'TemplateElement'
   )
+}
+
+function hasLeadingComment(node) {
+  return node.comments && node.comments.some(comment => comment.leading)
+}
+
+function hasTrailingComment(node) {
+  return node.comments && node.comments.some(comment => comment.trailing)
 }
 
 function hasDanglingComments(node, filter) {

@@ -4,14 +4,30 @@ const sharedUtil = require('prettier/src/common/util-shared')
 const {getNextNonSpaceNonCommentCharacter} = require('./util')
 
 const addLeadingComment = sharedUtil.addLeadingComment
-// const addTrailingComment = sharedUtil.addTrailingComment
+const addTrailingComment = sharedUtil.addTrailingComment
 const addDanglingComment = sharedUtil.addDanglingComment
 
 function handleOwnLineComment(comment, text, options, ast, isLastComment) {
-  // const precedingNode = comment.precedingNode
+  const precedingNode = comment.precedingNode
   const enclosingNode = comment.enclosingNode
-  // const followingNode = comment.followingNode
+  const followingNode = comment.followingNode
   if (
+    handleLastFunctionArgComments(
+      text,
+      precedingNode,
+      enclosingNode,
+      followingNode,
+      comment,
+      options
+    ) ||
+    handleMemberExpressionComments(enclosingNode, followingNode, comment) ||
+    handleIfStatementComments(
+      text,
+      precedingNode,
+      enclosingNode,
+      followingNode,
+      comment
+    ) ||
     handleOnlyComments(enclosingNode, comment, isLastComment) ||
     handleAssignmentPatternComments(enclosingNode, comment)
   ) {
@@ -23,8 +39,23 @@ function handleOwnLineComment(comment, text, options, ast, isLastComment) {
 function handleEndOfLineComment(comment, text, options, ast, isLastComment) {
   const precedingNode = comment.precedingNode
   const enclosingNode = comment.enclosingNode
-  // const followingNode = comment.followingNode
+  const followingNode = comment.followingNode
   if (
+    handleLastFunctionArgComments(
+      text,
+      precedingNode,
+      enclosingNode,
+      followingNode,
+      comment,
+      options
+    ) ||
+    handleIfStatementComments(
+      text,
+      precedingNode,
+      enclosingNode,
+      followingNode,
+      comment
+    ) ||
     handleCallExpressionComments(precedingNode, enclosingNode, comment) ||
     handleOnlyComments(enclosingNode, comment, isLastComment)
   ) {
@@ -34,14 +65,92 @@ function handleEndOfLineComment(comment, text, options, ast, isLastComment) {
 }
 
 function handleRemainingComment(comment, text, options, ast, isLastComment) {
-  // const precedingNode = comment.precedingNode
+  const precedingNode = comment.precedingNode
   const enclosingNode = comment.enclosingNode
-  // const followingNode = comment.followingNode
+  const followingNode = comment.followingNode
   if (
+    handleIfStatementComments(
+      text,
+      precedingNode,
+      enclosingNode,
+      followingNode,
+      comment
+    ) ||
     handleCommentInEmptyParens(text, enclosingNode, comment, options) ||
     handleOnlyComments(enclosingNode, comment, isLastComment) ||
     handleFunctionNameComments(text, enclosingNode, comment, options)
   ) {
+    return true
+  }
+  return false
+}
+
+function handleMemberExpressionComments(enclosingNode, followingNode, comment) {
+  if (
+    enclosingNode &&
+    enclosingNode.type === 'MemberExpression' &&
+    followingNode &&
+    followingNode.type === 'Identifier'
+  ) {
+    addLeadingComment(enclosingNode, comment)
+    return true
+  }
+
+  return false
+}
+
+// function handleIfStatementComments(text, precedingNode, enclosingNode, followingNode, comment, options) {
+function handleIfStatementComments(
+  text,
+  precedingNode,
+  enclosingNode,
+  followingNode,
+  comment
+) {
+  if (
+    !enclosingNode ||
+    !(
+      enclosingNode.type === 'IfStatement' ||
+      enclosingNode.type === 'ConditionalExpression'
+    ) ||
+    !followingNode
+  ) {
+    return false
+  }
+
+  if (
+    precedingNode === enclosingNode.consequent &&
+    followingNode === enclosingNode.alternate
+  ) {
+    // if (precedingNode.type === 'BlockStatement') {
+    //   addTrailingComment(precedingNode, comment)
+    // } else {
+    addDanglingComment(enclosingNode, comment)
+    // }
+    return true
+  }
+
+  return false
+}
+
+function handleLastFunctionArgComments(
+  text,
+  precedingNode,
+  enclosingNode,
+  followingNode,
+  comment,
+  options
+) {
+  if (
+    precedingNode &&
+    (precedingNode.type === 'Identifier' ||
+      precedingNode.type === 'AssignmentPattern') &&
+    enclosingNode &&
+    (enclosingNode.type === 'FunctionExpression' ||
+      enclosingNode.type === 'ClassMethod') &&
+    getNextNonSpaceNonCommentCharacter(text, comment, options.locEnd) === ')'
+  ) {
+    addTrailingComment(precedingNode, comment)
     return true
   }
   return false
