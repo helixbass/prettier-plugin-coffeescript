@@ -866,7 +866,16 @@ function printPathNoParens(path, options, print) {
       if (n.argument) {
         const shouldBreak =
           n.argument.type === 'JSXElement' || isBinaryish(n.argument)
-        if (shouldBreak) {
+        if (returnArgumentHasLeadingComment(options, n.argument)) {
+          parts.push(
+            concat([
+              ' (',
+              indent(concat([hardline, path.call(print, 'argument')])),
+              hardline,
+              ')',
+            ])
+          )
+        } else if (shouldBreak) {
           parts.push(
             group(
               concat([
@@ -1461,6 +1470,65 @@ function printPathNoParens(path, options, print) {
     default:
       throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
+}
+
+function returnArgumentHasLeadingComment(options, argument) {
+  if (hasLeadingOwnLineComment(options.originalText, argument, options)) {
+    return true
+  }
+
+  if (hasNakedLeftSide(argument)) {
+    let leftMost = argument
+    let newLeftMost
+    while ((newLeftMost = getLeftSide(leftMost))) {
+      leftMost = newLeftMost
+
+      if (hasLeadingOwnLineComment(options.originalText, leftMost, options)) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+function hasLeadingOwnLineComment(text, node, options) {
+  const res =
+    node.comments &&
+    node.comments.some(
+      comment =>
+        comment.leading && util.hasNewline(text, options.locEnd(comment))
+    )
+  return res
+}
+
+function hasNakedLeftSide(node) {
+  return (
+    node.type === 'AssignmentExpression' ||
+    node.type === 'BinaryExpression' ||
+    node.type === 'LogicalExpression' ||
+    node.type === 'Existence' ||
+    node.type === 'CallExpression' ||
+    node.type === 'MemberExpression' ||
+    node.type === 'SequenceExpression' ||
+    node.type === 'TaggedTemplateExpression' ||
+    (node.type === 'UpdateExpression' && !node.prefix)
+  )
+}
+
+function getLeftSide(node) {
+  if (node.expressions) {
+    return node.expressions[0]
+  }
+  return (
+    node.left ||
+    node.test ||
+    node.callee ||
+    node.object ||
+    node.tag ||
+    node.argument ||
+    node.expression
+  )
 }
 
 function shouldBreakIf(node, options) {
@@ -2601,19 +2669,15 @@ function printMemberChain(path, options, print) {
     ) {
       printedNodes.unshift({
         node,
-        // printed: comments.printComments(
-        //     path,
-        //     () =>
-        //       concat([
-        //         printOptionalToken(path),
-        //         printArgumentsList(path, options, print),
-        //       ]),
-        //     options
-        //   ),
-        printed: concat([
-          printOptionalToken(path),
-          printArgumentsList(path, options, print),
-        ]),
+        printed: comments.printComments(
+          path,
+          () =>
+            concat([
+              printOptionalToken(path),
+              printArgumentsList(path, options, print),
+            ]),
+          options
+        ),
       })
       path.call(callee => rec(callee), 'callee')
     } else if (isMemberish(node)) {
@@ -2710,6 +2774,7 @@ function printMemberChain(path, options, print) {
 
   const shouldMerge =
     groups.length >= 2 &&
+    // !groups[1][0].node.comments &&
     (groups[0].length === 1 &&
       (groups[0][0].node.type === 'ThisExpression' ||
         (groups[0][0].node.type === 'Identifier' &&
@@ -2740,9 +2805,10 @@ function printMemberChain(path, options, print) {
     .slice(0, cutoff)
     .reduce((res, group) => res.concat(group), [])
 
-  const hasComment = flatGroups
-    .slice(1, -1)
-    .some(node => hasLeadingComment(node.node))
+  const hasComment =
+    flatGroups.slice(1, -1).some(node => hasLeadingComment(node.node)) ||
+    // flatGroups.slice(0, -1).some(node => hasTrailingComment(node.node)) ||
+    (groups[cutoff] && hasLeadingComment(groups[cutoff][0].node))
 
   if (groups.length <= cutoff && !hasComment) {
     return group(oneLine)

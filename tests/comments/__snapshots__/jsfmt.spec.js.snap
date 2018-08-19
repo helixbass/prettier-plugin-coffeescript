@@ -831,3 +831,412 @@ exports[`jsx.coffee 1`] = `
 </Wrapper>
 
 `;
+
+exports[`last-arg.coffee 1`] = `
+f = (
+  currentRequest,
+  # TODO this is a very very very very long comment that makes it go > 80 columns
+) => {}
+
+class X
+  f: (
+    currentRequest,
+    # TODO this is a very very very very long comment that makes it go > 80 columns
+  ) ->
+
+f = (
+  a
+  # some comment here
+) ->
+  return a + 1
+
+x =
+  getSectionMode: (
+    pageMetaData
+    sectionMetaData
+    ### $FlowFixMe This error was exposed while converting keyMirror
+     * to keyMirrorRecursive ###
+  ) ->
+
+class X
+  getSectionMode: (
+    pageMetaData,
+    sectionMetaData = ['unknown'],
+    ### $FlowFixMe This error was exposed while converting keyMirror
+     * to keyMirrorRecursive ###
+  ) ->
+
+class Foo
+  a: (lol ###string###) ->
+
+  b: (lol ###string###
+  ) ->
+
+  d: (
+    lol ###string###,
+    lol2 ###string###,
+    lol3 ###string###,
+  ) ->
+
+  d: (
+    lol ###string###,
+    lol2 ###string###,
+    lol3 ###string###,
+    lol4 ###string###
+  ) ###string### ->
+
+  # prettier-ignore
+  c: (lol ###string###
+  ) ->
+
+  # prettier-ignore
+  d: (
+    lol ###string###,
+    lol2 ###string###,
+    lol3 ###string###,
+    lol4 ###string###
+  ) ->
+
+  # prettier-ignore
+  e: (
+    lol ###string###,
+    lol2 ###string###,
+    lol3 ###string###,
+    lol4 ###string###
+  ) -> ### string###
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = (
+  currentRequest
+  # TODO this is a very very very very long comment that makes it go > 80 columns
+) => {}
+
+class X
+  f: (
+    currentRequest
+    # TODO this is a very very very very long comment that makes it go > 80 columns
+  ) ->
+
+f = (
+  a
+  # some comment here
+) ->
+  return a + 1
+
+x =
+  getSectionMode: (
+    pageMetaData
+    sectionMetaData
+    ### $FlowFixMe This error was exposed while converting keyMirror
+ * to keyMirrorRecursive ###
+  ) ->
+
+class X
+  getSectionMode: (
+    pageMetaData
+    sectionMetaData = ["unknown"]
+    ### $FlowFixMe This error was exposed while converting keyMirror
+ * to keyMirrorRecursive ###
+  ) ->
+
+class Foo
+  a: (lol ###string###) ->
+
+  b: (lol ###string###) ->
+
+  d: (lol ###string###, lol2 ###string###, lol3 ###string###) ->
+
+  d: (
+    lol ###string###
+    lol2 ###string###
+    lol3 ###string###
+    lol4 ###string###
+  ) ###string### ->
+
+  # prettier-ignore
+  c: (lol ###string###) ->
+
+  # prettier-ignore
+  d: (
+    lol ###string###
+    lol2 ###string###
+    lol3 ###string###
+    lol4 ###string###
+  ) ->
+
+  # prettier-ignore
+  e: (
+    lol ###string###
+    lol2 ###string###
+    lol3 ###string###
+    lol4 ###string###
+  ) -> ### string###
+
+`;
+
+exports[`preserve-new-line-last.coffee 1`] = `
+f = ->
+  a
+  ### eslint-disable ###
+
+f = ->
+  a
+
+  ### eslint-disable ###
+
+name = ->
+  # comment1
+  func1()
+
+  # comment2
+  func2()
+
+  # comment3 why func3 commented
+  # func3()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = ->
+  a
+  ### eslint-disable ###
+
+f = ->
+  a
+
+  ### eslint-disable ###
+
+name = ->
+  # comment1
+  func1()
+
+  # comment2
+  func2()
+
+  # comment3 why func3 commented
+  # func3()
+
+`;
+
+exports[`return-statement.coffee 1`] = `
+jsx = ->
+  return (
+    # Comment
+    <div />
+  )
+
+unary = ->
+  return (
+    # Comment
+    !!x
+  )
+
+numericLiteralNoParen = ->
+  return 1337 # Comment
+
+logical = ->
+  return (
+    # Reason for 42
+    42
+  ) && 84
+
+binary = ->
+  return (
+    # Reason for 42
+    42
+  ) * 84
+
+binaryInBinaryLeft = ->
+  return (
+    # Reason for 42
+    42
+  ) * 84 + 2
+
+binaryInBinaryRight = ->
+  return (
+    # Reason for 42
+    42
+  ) + 84 * 2
+
+conditional = ->
+  return if (
+    # Reason for 42
+    42
+  ) then 1 else 2
+
+binaryInConditional = ->
+  return if (
+    # Reason for 42
+    42
+  ) * 3 then 1 else 2
+
+call = ->
+  return (
+    # Reason for a
+    a
+  )()
+
+memberInside = ->
+  return (
+    # Reason for a.b
+    a.b
+  ).c
+
+memberOutside = ->
+  return (
+    # Reason for a
+    a
+  ).b.c
+
+memberInAndOutWithCalls = ->
+  return (
+    # Reason for a
+    aFunction.b()
+  ).c.d()
+
+excessiveEverything = ->
+  return (
+    # Reason for stuff
+    if a.b() * 3 + 4 then if (a"hi"; 1) then 1 else 1 else 1
+  )
+
+# See https://github.com/prettier/prettier/issues/2392
+# function sequenceExpression() {
+#   return (
+#     // Reason for a
+#     a
+#   ), b
+# }
+
+sequenceExpressionInside = ->
+  return ( # Reason for a
+    a; b
+  )
+
+taggedTemplate = ->
+  return (
+    # Reason for a
+    a
+  )"b"
+
+inlineComment = ->
+  return (
+    ### hi ### 42
+  ) || 42
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+jsx = ->
+  return (
+    # Comment
+    <div />
+  )
+
+unary = ->
+  return (
+    # Comment
+    !!x
+  )
+
+numericLiteralNoParen = ->
+  return 1337 # Comment
+
+logical = ->
+  return (
+    # Reason for 42
+    42 && 84
+  )
+
+binary = ->
+  return (
+    # Reason for 42
+    42 * 84
+  )
+
+binaryInBinaryLeft = ->
+  return (
+    # Reason for 42
+    42 *
+      84 +
+    2
+  )
+
+binaryInBinaryRight = ->
+  return (
+    # Reason for 42
+    42 +
+    84 * 2
+  )
+
+conditional = ->
+  return (
+    if (
+      # Reason for 42
+      42
+    )
+      1
+    else
+      2
+  )
+
+binaryInConditional = ->
+  return (
+    if (
+      # Reason for 42
+      42 * 3
+    )
+      1
+    else
+      2
+  )
+
+call = ->
+  return (
+    # Reason for a
+    a()
+  )
+
+memberInside = ->
+  return (
+    # Reason for a.b
+    a.b.c
+  )
+
+memberOutside = ->
+  return (
+    # Reason for a
+    a.b.c
+  )
+
+memberInAndOutWithCalls = ->
+  return (
+    aFunction
+      .b()
+      # Reason for a
+      .c.d()
+  )
+
+excessiveEverything = ->
+  return (
+    # Reason for stuff
+    (if a.b() * 3 + 4 then if (a"hi"; 1) then 1 else 1 else 1)
+  )
+
+# See https://github.com/prettier/prettier/issues/2392
+# function sequenceExpression() {
+#   return (
+#     // Reason for a
+#     a
+#   ), b
+# }
+
+sequenceExpressionInside = ->
+  return (
+    # Reason for a
+    (a; b)
+  )
+
+taggedTemplate = ->
+  return (
+    # Reason for a
+    a"b"
+  )
+
+inlineComment = ->
+  return ### hi ### 42 || 42
+
+`;

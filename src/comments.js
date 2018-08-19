@@ -90,7 +90,8 @@ function handleMemberExpressionComments(enclosingNode, followingNode, comment) {
     enclosingNode &&
     enclosingNode.type === 'MemberExpression' &&
     followingNode &&
-    followingNode.type === 'Identifier'
+    (followingNode.type === 'Identifier' ||
+      followingNode.type === 'CallExpression') // TODO: this is so that eg memberInAndOutWithCalls test won't break, but should probably correctly print as leading comment (here and for JS)
   ) {
     addLeadingComment(enclosingNode, comment)
     return true
