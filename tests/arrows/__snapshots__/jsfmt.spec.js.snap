@@ -248,9 +248,9 @@ export bem = (block) =>
   ###
   (element) =>
     ###*
-  # @param {?String} [modifier] - the BEM Modifier for the Block or Element; if undefined, selects the Block or Element unmodified.
-  # @returns {String}
-  ###
+    # @param {?String} [modifier] - the BEM Modifier for the Block or Element; if undefined, selects the Block or Element unmodified.
+    # @returns {String}
+    ###
     (modifier) =>
       [
         "."

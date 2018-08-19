@@ -31,6 +31,7 @@ const {
   literalline,
   line,
   softline,
+  // lineSuffixBoundary,
 } = docBuilders
 const docUtils = doc.utils
 const {isEmpty, isLineNext, willBreak} = docUtils
@@ -1310,10 +1311,11 @@ function printPathNoParens(path, options, print) {
               ))))
       const shouldInline =
         shouldInlineButStillClosingLinebreak ||
-        n.expression.type === 'FunctionExpression' ||
         n.expression.type === 'ArrayExpression' ||
         n.expression.type === 'ObjectExpression' ||
         n.expression.type === 'CallExpression' ||
+        n.expression.type === 'FunctionExpression' ||
+        n.expression.type === 'JSXEmptyExpression' ||
         n.expression.type === 'TemplateLiteral' ||
         n.expression.type === 'TaggedTemplateExpression' ||
         (isJSXNode(parent) && (isIf(n.expression) || isBinaryish(n.expression)))
@@ -1324,6 +1326,7 @@ function printPathNoParens(path, options, print) {
             '{',
             path.call(print, 'expression'),
             shouldInlineButStillClosingLinebreak ? softline : '',
+            // lineSuffixBoundary,
             '}',
           ])
         )
@@ -1334,6 +1337,7 @@ function printPathNoParens(path, options, print) {
           '{',
           indent(concat([softline, path.call(print, 'expression')])),
           softline,
+          // lineSuffixBoundary,
           '}',
         ])
       )
@@ -3739,13 +3743,44 @@ function printComment(commentPath /*, options */) {
   const comment = commentPath.getValue()
 
   switch (comment.type) {
-    case 'CommentBlock':
+    case 'CommentBlock': {
+      if (isJsDocComment(comment)) {
+        const printed = printJsDocComment(comment)
+        return printed
+      }
       return '###' + comment.value + '###'
+    }
     case 'CommentLine':
       return '#' + comment.value.trimRight()
     default:
       throw new Error('Not a comment: ' + JSON.stringify(comment))
   }
+}
+
+function isJsDocComment(comment) {
+  const lines = comment.value.split('\n')
+  return (
+    lines.length > 1 &&
+    lines
+      .slice(0, lines.length - 1)
+      .every((line, index) => line.trim()[0] === (index === 0 ? '*' : '#'))
+  )
+}
+
+function printJsDocComment(comment) {
+  const lines = comment.value.split('\n')
+
+  return concat([
+    '###',
+    join(
+      hardline,
+      lines.map(
+        (line, index) =>
+          index < lines.length - 1 ? line.trim() : line.trimLeft()
+      )
+    ),
+    '###',
+  ])
 }
 
 function canAttachComment(node) {
