@@ -9709,8 +9709,8 @@ test "conditional bodies containing only comments", ->
   eq undefined,
     if true
       ###
-  block comment
-  ###
+      block comment
+      ###
     else
       # comment
 
@@ -9719,8 +9719,8 @@ test "conditional bodies containing only comments", ->
       # comment
     else if true
       ###
-  block comment
-  ###
+      block comment
+      ###
     else
 
 test "return value of if-else is from the proper body", ->
@@ -20623,8 +20623,8 @@ test "#1322: implicit call against implicit object with block comments", ->
     ok not arg
   )
     ###
-  x
-  ###
+    x
+    ###
     x: 2
     ### y ###
     y: 3

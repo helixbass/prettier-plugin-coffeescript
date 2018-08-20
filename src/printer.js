@@ -3814,6 +3814,9 @@ function printComment(commentPath /*, options */) {
         const printed = printJsDocComment(comment)
         return printed
       }
+      if (comment.value.indexOf('\n') > -1 && comment.indent) {
+        return printIndentedBlockComment(comment)
+      }
       return '###' + comment.value + '###'
     }
     case 'CommentLine':
@@ -3831,6 +3834,24 @@ function isJsDocComment(comment) {
       .slice(0, lines.length - 1)
       .every((line, index) => line.trim()[0] === (index === 0 ? '*' : '#'))
   )
+}
+
+function printIndentedBlockComment(comment) {
+  const indentRegex = new RegExp(`\n {${comment.indent}}`, 'g')
+  const withoutIndent = comment.value.replace(indentRegex, '\n')
+  const lines = withoutIndent.split('\n')
+
+  return concat([
+    '###',
+    join(
+      hardline,
+      lines.map(
+        (line, index) =>
+          index < lines.length - 1 ? line.trim() : line.trimLeft()
+      )
+    ),
+    '###',
+  ])
 }
 
 function printJsDocComment(comment) {

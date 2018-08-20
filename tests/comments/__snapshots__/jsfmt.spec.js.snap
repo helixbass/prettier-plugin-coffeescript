@@ -926,16 +926,16 @@ x =
   getSectionMode: (
     pageMetaData
     sectionMetaData
-    ### $FlowFixMe This error was exposed while converting keyMirror
- * to keyMirrorRecursive ###
+    ###$FlowFixMe This error was exposed while converting keyMirror
+    * to keyMirrorRecursive ###
   ) ->
 
 class X
   getSectionMode: (
     pageMetaData
     sectionMetaData = ["unknown"]
-    ### $FlowFixMe This error was exposed while converting keyMirror
- * to keyMirrorRecursive ###
+    ###$FlowFixMe This error was exposed while converting keyMirror
+    * to keyMirrorRecursive ###
   ) ->
 
 class Foo
