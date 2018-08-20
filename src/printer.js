@@ -1215,19 +1215,25 @@ function printPathNoParens(path, options, print) {
           kase.consequent.length !== 1 ||
           (options.respectBreak.indexOf('control') > -1 &&
             !hasSameStartLine(kase, kase.consequent[0]))
-        return group(
-          indent(
-            concat([
-              ifBreak(line, isElse ? ' ' : ' then '),
-              casePath.call(
-                consequentPath =>
-                  printStatementSequence(consequentPath, options, print),
-                'consequent'
-              ),
-            ])
+        return concat([
+          group(
+            indent(
+              concat([
+                ifBreak(line, isElse ? ' ' : ' then '),
+                casePath.call(
+                  consequentPath =>
+                    printStatementSequence(consequentPath, options, print),
+                  'consequent'
+                ),
+              ])
+            ),
+            {shouldBreak}
           ),
-          {shouldBreak}
-        )
+          n.cases.indexOf(kase) !== n.cases.length - 1 &&
+          isNextLineEmpty(options.originalText, kase, options.locEnd)
+            ? hardline
+            : '',
+        ])
       }
       path.map(casePath => {
         const kase = casePath.getValue()

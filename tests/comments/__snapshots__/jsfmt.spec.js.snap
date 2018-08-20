@@ -1246,3 +1246,68 @@ inlineComment = ->
   return ### hi ### 42 || 42
 
 `;
+
+exports[`switch.coffee 1`] = `
+switch node && node.type
+  when "Property", "MethodDefinition"
+    prop = node.key
+
+  when "MemberExpression"
+    prop = node.property
+
+  # no default
+
+switch foo
+  when "bar"
+    doThing()
+
+  # no default
+
+switch foo
+  when "bar" #comment
+    doThing() #comment
+
+  when "baz"
+    doOtherThing() #comment
+
+switch foo
+  when "bar"
+    doThing()
+  #comment
+
+  when "baz"
+    doThing()
+  #comment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+switch node && node.type
+  when "Property", "MethodDefinition"
+    prop = node.key
+
+  when "MemberExpression"
+    prop = node.property
+
+# no default
+
+switch foo
+  when "bar"
+    doThing()
+
+# no default
+
+switch foo
+  when "bar" #comment #comment
+    doThing()
+
+  when "baz"
+    doOtherThing() #comment
+
+switch foo
+  when "bar"
+    doThing()
+  #comment
+
+  when "baz"
+    doThing()
+#comment
+
+`;
