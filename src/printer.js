@@ -3814,8 +3814,8 @@ function printComment(commentPath /*, options */) {
         const printed = printJsDocComment(comment)
         return printed
       }
-      if (comment.value.indexOf('\n') > -1 && comment.indent) {
-        return printIndentedBlockComment(comment)
+      if (comment.value.indexOf('\n') > -1) {
+        return printMultilineBlockComment(comment)
       }
       return '###' + comment.value + '###'
     }
@@ -3836,22 +3836,21 @@ function isJsDocComment(comment) {
   )
 }
 
-function printIndentedBlockComment(comment) {
-  const indentRegex = new RegExp(`\n {${comment.indent}}`, 'g')
+function printMultilineBlockComment(comment) {
+  let indent
+  const lines = comment.value.split('\n')
+  lines.forEach((line, index) => {
+    if (index === 0) return
+    const leadingWhitespace = /^\s*/.exec(line)[0]
+    if (!indent || leadingWhitespace.length < indent.length) {
+      indent = leadingWhitespace
+    }
+  })
+  const indentRegex = new RegExp(`\n${indent}`, 'g')
   const withoutIndent = comment.value.replace(indentRegex, '\n')
-  const lines = withoutIndent.split('\n')
+  const linesWithoutIndent = withoutIndent.split('\n')
 
-  return concat([
-    '###',
-    join(
-      hardline,
-      lines.map(
-        (line, index) =>
-          index < lines.length - 1 ? line.trim() : line.trimLeft()
-      )
-    ),
-    '###',
-  ])
+  return concat(['###', join(hardline, linesWithoutIndent), '###'])
 }
 
 function printJsDocComment(comment) {

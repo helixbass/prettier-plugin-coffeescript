@@ -731,16 +731,22 @@ exports[`jsx.coffee 1`] = `
 
 <div>{### comment ###}</div>
 
-<div>{### comment
-###}</div>
+<div>
+  {### comment
+  ###}
+</div>
 
-<div>{a ### comment
-###}</div>
+<div>
+  {
+    a ### comment
+    ###
+  }
+</div>
 
 <div>
   {
     ### comment
-###
+    ###
     a
   }
 </div>
@@ -926,7 +932,7 @@ x =
   getSectionMode: (
     pageMetaData
     sectionMetaData
-    ###$FlowFixMe This error was exposed while converting keyMirror
+    ### $FlowFixMe This error was exposed while converting keyMirror
     * to keyMirrorRecursive ###
   ) ->
 
@@ -934,7 +940,7 @@ class X
   getSectionMode: (
     pageMetaData
     sectionMetaData = ["unknown"]
-    ###$FlowFixMe This error was exposed while converting keyMirror
+    ### $FlowFixMe This error was exposed while converting keyMirror
     * to keyMirrorRecursive ###
   ) ->
 
