@@ -1286,17 +1286,17 @@ switch node && node.type
   when "MemberExpression"
     prop = node.property
 
-# no default
+  # no default
 
 switch foo
   when "bar"
     doThing()
 
-# no default
+  # no default
 
 switch foo
-  when "bar" #comment #comment
-    doThing()
+  when "bar" #comment
+    doThing() #comment
 
   when "baz"
     doOtherThing() #comment
@@ -1308,6 +1308,6 @@ switch foo
 
   when "baz"
     doThing()
-#comment
+  #comment
 
 `;

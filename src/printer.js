@@ -1209,24 +1209,33 @@ function printPathNoParens(path, options, print) {
       const groupedCases = []
       let currentGroup = []
       let currentGroupPrintedLeadingComments = null
-      const printConsequent = (casePath, {isElse} = {}) => {
+      let currentGroupPrintedTrailingComments = null
+      let currentGroupCasePath = null
+      const printConsequent = (
+        casePath,
+        {isElse, printedTrailingComments} = {}
+      ) => {
         const kase = casePath.getValue()
         const shouldBreak =
           kase.consequent.length !== 1 ||
           (options.respectBreak.indexOf('control') > -1 &&
             !hasSameStartLine(kase, kase.consequent[0]))
+
         return concat([
           group(
-            indent(
-              concat([
-                ifBreak(line, isElse ? ' ' : ' then '),
-                casePath.call(
-                  consequentPath =>
-                    printStatementSequence(consequentPath, options, print),
-                  'consequent'
-                ),
-              ])
-            ),
+            concat([
+              indent(
+                concat([
+                  ifBreak(line, isElse ? ' ' : ' then '),
+                  casePath.call(
+                    consequentPath =>
+                      printStatementSequence(consequentPath, options, print),
+                    'consequent'
+                  ),
+                ])
+              ),
+              printedTrailingComments || '',
+            ]),
             {shouldBreak}
           ),
           n.cases.indexOf(kase) !== n.cases.length - 1 &&
@@ -1236,13 +1245,27 @@ function printPathNoParens(path, options, print) {
         ])
       }
       path.map(casePath => {
+        currentGroupCasePath = casePath
         const kase = casePath.getValue()
-        if (kase.comments && kase.comments.length) {
+        if (kase.comments && kase.comments.find(({leading}) => leading)) {
+          const allComments = kase.comments
+          kase.comments = kase.comments.filter(({leading}) => leading)
           currentGroupPrintedLeadingComments = comments.printComments(
             casePath,
             () => '',
             options
           )
+          kase.comments = allComments
+        }
+        if (kase.comments && kase.comments.find(({trailing}) => trailing)) {
+          const allComments = kase.comments
+          kase.comments = kase.comments.filter(({trailing}) => trailing)
+          currentGroupPrintedTrailingComments = comments.printComments(
+            casePath,
+            () => '',
+            options
+          )
+          kase.comments = allComments
         }
         if (kase.test) {
           currentGroup.push(casePath.call(print, 'test'))
@@ -1253,35 +1276,49 @@ function printPathNoParens(path, options, print) {
               //   kase.consequent,
               //   casePath.call(print, 'consequent')
               // ),
-              consequent: printConsequent(casePath),
+              consequent: printConsequent(casePath, {
+                printedTrailingComments: currentGroupPrintedTrailingComments,
+              }),
               printedLeadingComments: currentGroupPrintedLeadingComments,
+              casePath: currentGroupCasePath,
             })
             currentGroup = []
             currentGroupPrintedLeadingComments = null
+            currentGroupPrintedTrailingComments = null
           }
         } else {
           // default should be last case
           groupedCases.push({
-            consequent: printConsequent(casePath, {isElse: true}),
+            consequent: printConsequent(casePath, {
+              isElse: true,
+              printedTrailingComments: currentGroupPrintedTrailingComments,
+            }),
             printedLeadingComments: currentGroupPrintedLeadingComments,
+            casePath: currentGroupCasePath,
           })
         }
       }, 'cases')
       const body = []
       const lastIndex = groupedCases.length - 1
       groupedCases.forEach((groupedCase, i) => {
+        const caseBody = []
         if (groupedCase.printedLeadingComments) {
-          body.push(groupedCase.printedLeadingComments)
+          caseBody.push(groupedCase.printedLeadingComments)
         }
         if (groupedCase.cases) {
-          body.push('when ')
-          body.push(join(', ', groupedCase.cases))
+          caseBody.push('when ')
+          caseBody.push(join(', ', groupedCase.cases))
         } else {
-          body.push('else')
+          caseBody.push('else')
         }
-        body.push(
-          concat([groupedCase.consequent, i !== lastIndex ? hardline : ''])
+        caseBody.push(
+          // concat([groupedCase.consequent, i !== lastIndex ? hardline : ''])
+          groupedCase.consequent
         )
+        if (i !== lastIndex) {
+          caseBody.push(hardline)
+        }
+        body.push(...caseBody)
       })
       parts.push(group(indent(concat([hardline, ...body]))))
       return concat(parts)
