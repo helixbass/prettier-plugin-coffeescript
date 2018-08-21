@@ -18221,7 +18221,9 @@ test "heregex interpolation", ->
   eq(
     /\\\\#{}\\\\"/ + ""
     ///
-   #{"#{"\\\\"}"} # normal comment
+   #{
+      "#{"\\\\"}" # normal comment
+    }
    # regex comment
    \\#{}
    \\\\ "

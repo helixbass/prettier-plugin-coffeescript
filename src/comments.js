@@ -28,6 +28,7 @@ function handleOwnLineComment(comment, text, options, ast, isLastComment) {
       followingNode,
       comment
     ) ||
+    handleTryStatementComments(enclosingNode, followingNode, comment) ||
     handleOnlyComments(enclosingNode, comment, isLastComment) ||
     handleAssignmentPatternComments(enclosingNode, comment)
   ) {
@@ -57,7 +58,8 @@ function handleEndOfLineComment(comment, text, options, ast, isLastComment) {
       comment
     ) ||
     handleCallExpressionComments(precedingNode, enclosingNode, comment) ||
-    handleOnlyComments(enclosingNode, comment, isLastComment)
+    handleOnlyComments(enclosingNode, comment, isLastComment) ||
+    handleVariableDeclaratorComments(enclosingNode, followingNode, comment)
   ) {
     return true
   }
@@ -80,6 +82,27 @@ function handleRemainingComment(comment, text, options, ast, isLastComment) {
     handleOnlyComments(enclosingNode, comment, isLastComment) ||
     handleFunctionNameComments(text, enclosingNode, comment, options)
   ) {
+    return true
+  }
+  return false
+}
+
+function handleVariableDeclaratorComments(
+  enclosingNode,
+  followingNode,
+  comment
+) {
+  if (
+    enclosingNode &&
+    enclosingNode.type === 'AssignmentExpression' &&
+    followingNode &&
+    (followingNode.type === 'ObjectExpression' ||
+      followingNode.type === 'ArrayExpression' ||
+      followingNode.type === 'TemplateLiteral' ||
+      followingNode.type === 'StringLiteral' ||
+      followingNode.type === 'TaggedTemplateExpression')
+  ) {
+    addLeadingComment(followingNode, comment)
     return true
   }
   return false
@@ -132,6 +155,50 @@ function handleIfStatementComments(
   }
 
   return false
+}
+
+function handleTryStatementComments(enclosingNode, followingNode, comment) {
+  if (
+    !enclosingNode ||
+    enclosingNode.type !== 'TryStatement' ||
+    !followingNode
+  ) {
+    return false
+  }
+
+  if (followingNode.type === 'BlockStatement') {
+    addBlockStatementFirstComment(followingNode, comment)
+    return true
+  }
+
+  if (followingNode.type === 'TryStatement') {
+    addBlockOrNotComment(followingNode.finalizer, comment)
+    return true
+  }
+
+  if (followingNode.type === 'CatchClause') {
+    addBlockOrNotComment(followingNode.body, comment)
+    return true
+  }
+
+  return false
+}
+
+function addBlockStatementFirstComment(node, comment) {
+  const body = node.body.filter(n => n.type !== 'EmptyStatement')
+  if (body.length === 0) {
+    addDanglingComment(node, comment)
+  } else {
+    addLeadingComment(body[0], comment)
+  }
+}
+
+function addBlockOrNotComment(node, comment) {
+  if (node.type === 'BlockStatement') {
+    addBlockStatementFirstComment(node, comment)
+  } else {
+    addLeadingComment(node, comment)
+  }
 }
 
 function handleLastFunctionArgComments(

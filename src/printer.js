@@ -31,7 +31,7 @@ const {
   literalline,
   line,
   softline,
-  // lineSuffixBoundary,
+  lineSuffixBoundary,
 } = docBuilders
 const docUtils = doc.utils
 const {isEmpty, isLineNext, willBreak} = docUtils
@@ -1909,6 +1909,7 @@ function printTemplateLiteral(path, print, {omitQuotes} = {}) {
       let printed = expressions[i]
 
       if (
+        (node.expressions[i].comments && node.expressions[i].comments.length) ||
         node.expressions[i].type === 'MemberExpression' ||
         node.expressions[i].type === 'ConditionalExpression'
       ) {
@@ -1919,7 +1920,7 @@ function printTemplateLiteral(path, print, {omitQuotes} = {}) {
 
       // const aligned = addAlignmentToDoc(printed, indentSize, tabWidth)
 
-      parts.push(group(concat(['#{', printed, '}'])))
+      parts.push(group(concat(['#{', printed, lineSuffixBoundary, '}'])))
     }
   }, 'quasis')
 
@@ -3397,6 +3398,10 @@ function isStringLiteral(node) {
 }
 
 function printAssignmentRight(rightNode, printedRight, options, canBreak) {
+  if (hasLeadingOwnLineComment(options.originalText, rightNode, options)) {
+    return indent(concat([hardline, printedRight]))
+  }
+
   const broken = ifBreak(
     indent(concat([line, printedRight])),
     concat([line, printedRight])
@@ -3848,13 +3853,21 @@ function shouldFlatten(parent, node) {
 // const clean = (ast, newObj) => {}
 const clean = () => {}
 
-function printComment(commentPath /*, options */) {
+function printComment(commentPath, options) {
   const comment = commentPath.getValue()
 
   switch (comment.type) {
     case 'CommentBlock': {
       if (isJsDocComment(comment)) {
         const printed = printJsDocComment(comment)
+        if (
+          comment.trailing &&
+          !util.hasNewline(options.originalText, options.locStart(comment), {
+            backwards: true,
+          })
+        ) {
+          return concat([hardline, printed])
+        }
         return printed
       }
       if (comment.value.indexOf('\n') > -1) {
