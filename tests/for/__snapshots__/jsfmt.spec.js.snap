@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`breaking-when.coffee 1`] = `
+for a in b when llllllllllloooooooonnnnnnggggggggg and oooooooowwwwwwwwwweeeeeeeee
+  c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for a in b when (
+  llllllllllloooooooonnnnnnggggggggg and oooooooowwwwwwwwwweeeeeeeee
+)
+  c
+
+`;

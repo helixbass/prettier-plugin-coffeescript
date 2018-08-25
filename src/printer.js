@@ -1069,7 +1069,19 @@ function printPathNoParens(path, options, print) {
           : '',
         path.call(print, 'source'),
         n.step ? concat([' by ', path.call(print, 'step')]) : '',
-        n.guard ? concat([' when ', path.call(print, 'guard')]) : '',
+        n.guard
+          ? concat([
+              ' when ',
+              group(
+                concat([
+                  ifBreak('('),
+                  indent(concat([softline, path.call(print, 'guard')])),
+                  softline,
+                  ifBreak(')'),
+                ])
+              ),
+            ])
+          : '',
       ])
 
       if (n.postfix) {

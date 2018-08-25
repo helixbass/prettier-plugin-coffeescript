@@ -1920,7 +1920,9 @@ test "#1005: invalid identifiers allowed on LHS of destructuring assignment", ->
     "all disallowed as splats"
   )
   t = tSplat = null
-  for v in disallowed when v isnt "class" # \`class\` by itself is an expression
+  for v in disallowed when (
+    v isnt "class" # \`class\` by itself is an expression
+  )
     throws (-> CoffeeScript.compile t), null, (t = "[#{v}] = x")
     throws (-> CoffeeScript.compile tSplat), null, (tSplat = "[#{v}...] = x")
   doesNotThrow ->
