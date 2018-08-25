@@ -5,7 +5,6 @@
   "main": "src",
   "repository": "https://github.com/helixbass/prettier-plugin-coffeescript",
   "authors": [
-    "Geoffrey Booth",
     "Julian Rosse <@helixbass>"
   ],
   "license": "MIT",
@@ -21,8 +20,8 @@
     "node": ">= 6"
   },
   "dependencies": {
-    "coffeescript": "file:../coffeescript_orig",
-    "prettier": "file:../prettier"
+    "coffeescript": "github:helixbass/coffeescript#0805392",
+    "prettier": "github:helixbass/prettier#f5366a5"
   },
   "devDependencies": {
     "eslint": "^4.14.0",
