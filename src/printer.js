@@ -397,10 +397,12 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
 }
 
 function isAmbiguousRegex(node) {
+  const pattern =
+    node.originalPattern != null ? node.originalPattern : node.pattern
   return (
     node.type === 'RegExpLiteral' &&
-    node.pattern &&
-    /^=?\s+/.test(node.pattern) &&
+    pattern &&
+    /^=?\s+/.test(pattern) &&
     node.delimiter !== '///'
   )
 }
@@ -1970,7 +1972,9 @@ function printRegex(path, print) {
           printTemplateLiteral(patternPath, print, {omitQuotes: true}),
         'interpolatedPattern'
       )
-    : node.pattern
+    : node.originalPattern != null
+      ? node.originalPattern
+      : node.pattern
   return concat([delim, pattern, delim, flags])
 }
 

@@ -64,3 +64,14 @@
       foo: 123
     } if not condition
 - add arrays to respectBreak?
+- don't eg indent like this:
+  b not in
+    [
+      c
+      d
+    ]
+  instead:
+  b not in [
+    c
+    d
+  ]
