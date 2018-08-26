@@ -75,3 +75,7 @@
     c
     d
   ]
+- don't break heregex assignment eg
+  a =
+     ///
+     ///

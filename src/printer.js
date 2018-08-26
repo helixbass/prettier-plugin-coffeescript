@@ -668,6 +668,7 @@ function printPathNoParens(path, options, print) {
       return 'super'
     case 'NullLiteral':
       return 'null'
+    case 'InterpolatedRegExpLiteral':
     case 'RegExpLiteral':
       return printRegex(path, print)
     case 'PassthroughLiteral': {
