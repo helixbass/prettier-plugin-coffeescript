@@ -1850,7 +1850,9 @@ test "deep destructuring assignment with objects", ->
   d = {}
   obj = {
     a
-    b: c: d: [b, { e: c, f: d }]
+    b:
+      c:
+        d: [b, { e: c, f: d }]
   }
   { a: w, b: { c: { d: [x, { f: z, e: y }] } } } = obj
   eq a, w
@@ -2399,7 +2401,8 @@ test "destructuring assignment with an empty array in object", ->
   eq b1, 3
 
   obj =
-    a2: b2: [1, 2]
+    a2:
+      b2: [1, 2]
     c2: 3
 
   { a2: { b2: [] }, c2 } = obj
@@ -13889,14 +13892,18 @@ test "method call chaining inside objects", ->
   f = (x) -> c: 42
   result =
     a: f 1
-    b: f(a: 1).c
+    b:
+      f(a: 1).c
   eq 42, result.b
 
 test "#4568: refine sameLine implicit object tagging", ->
   condition = yes
   fn = -> yes
 
-  x = fn bar: foo: 123 if not condition
+  x =
+    fn
+      bar:
+        foo: 123 if not condition
   eq x, undefined
 
 # Nested blocks caused by paren unwrapping
@@ -15249,7 +15256,8 @@ test "Ensure that chained calls with indented implicit object literals below are
     method: (val) -> this
     second: (hash) -> result = hash.three
   obj.method(101).second
-    one: two: 2
+    one:
+      two: 2
     three: 3
   eq result, 3
 
@@ -16466,7 +16474,8 @@ ok func(1)(2)(3) is 3
 
 # Make incorrect indentation safe.
 func = ->
-  obj = key: 10
+  obj =
+    key: 10
   obj.key - 5
 eq func(), 5
 
@@ -18085,23 +18094,14 @@ eq "#{/'"/}", "/'\\"/"
 eq "#{"'/" + '/"' + /"'/}", "'//\\"/\\"'/"
 eq "#{"'/"}#{'/"'}#{/"'/}", "'//\\"/\\"'/"
 eq "#{6 / 2}", "3"
-eq(
-  "#{6 / 2}#{6 / 2}"
-  "33" # parsed as division
-)
-eq(
-  "#{6 + /2}#{6/ + 2}"
-  '6/2}#{6/2' # parsed as a regex
-)
+eq "#{6 / 2}#{6 / 2}", "33" # parsed as division
+eq "#{6 + /2}#{6/ + 2}", '6/2}#{6/2' # parsed as a regex
 eq(
   "#{6 / 2}
     #{6 / 2}"
-  "3 3" # newline cannot be part of a regex, so it's division
-)
-eq(
-  "#{/// "'/'"/" ///}"
-  '/"\\'\\\\/\\'"\\\\/"/' # heregex, stuffed with spicy characters
-)
+  "3 3"
+) # newline cannot be part of a regex, so it's division
+eq "#{/// "'/'"/" ///}", '/"\\'\\\\/\\'"\\\\/"/' # heregex, stuffed with spicy characters
 eq "#{/\\\\'/}", "/\\\\\\\\'/"
 
 # Issue #2321: Regex/division conflict in interpolation
@@ -18502,10 +18502,7 @@ eq Number::toString, 42["toString"]
 
 eq Number::toString, 42.toString
 
-eq(
-  Number::toString
-  Infinity["toString"] # Infinity
-)
+eq Number::toString, Infinity["toString"] # Infinity
 
 # Non-Integer Literals
 
@@ -19259,7 +19256,12 @@ test "object spread properties: ES2015", ->
   eq obj7.c.d, 55
   deepEqual obj6.c, { d: 33, e: 44, f: g: 55 }
 
-  obj = a: b: c: d: e: {}
+  obj =
+    a:
+      b:
+        c:
+          d:
+            e: {}
   obj9 = { a: 1, obj.a.b.c..., g: 3 }
   deepEqual obj9.d, { e: {} }
 
@@ -20347,7 +20349,8 @@ ok obj.b is 2
 
 # Implicit objects nesting.
 obj =
-  options: value: yes
+  options:
+    value: yes
   fn: ->
     {}
     null
@@ -20362,7 +20365,9 @@ obj =
     @reverse @reverse @reverse ["a", "b", "c"].reverse()
   one: [1, 2, { a: "b" }, 3, 4]
   red:
-    orange: yellow: green: "blue"
+    orange:
+      yellow:
+        green: "blue"
     indigo: "violet"
   misdent: [[], [], [], []]
 ok obj.abc().join(" ") is "a b c"
@@ -20430,7 +20435,8 @@ test "invoking functions with implicit object literals", ->
   eq undefined, result
 
   result = getA(
-    a: b: 2
+    a:
+      b: 2
     b: 1
   )
   eq 2, result.b
@@ -20596,16 +20602,21 @@ test "#2549, Brace-less Object Literal as a Second Operand on a New Line", ->
   eq baz.two, 2
 
 test "#2757, Nested", ->
-  foo = bar: one: 1
+  foo =
+    bar:
+      one: 1
   eq foo.bar.one, 1
 
   baz =
-    qux: one: 1
+    qux:
+      one: 1
     corge:
       two: 2
       three: three: three: 3
     xyzzy:
-      thud: four: four: 4
+      thud:
+        four:
+          four: 4
       five: 5
 
   eq baz.qux.one, 1
@@ -20616,7 +20627,8 @@ test "#2757, Nested", ->
 test "#1865, syntax regression 1.1.3", ->
   foo = (x, y) -> y
 
-  bar = a: foo (->), c: yes
+  bar =
+    a: foo (->), c: yes
   eq bar.a.c, yes
 
   baz = a: foo (->), c: yes
@@ -20660,7 +20672,8 @@ test "#1871: implicit object closed by IMPLICIT_END in implicit returns", ->
 
   # instead these return an object
   func = ->
-    key: (i for i in [1, 2, 3])
+    key:
+      (i for i in [1, 2, 3])
 
   eq func().key.join(" "), "1 2 3"
 
@@ -20831,8 +20844,12 @@ test "object keys with interpolations: more complicated case", ->
     "#{"interpolated"}":
       """
         #{"nested"}
-      """: 123: 456
-  deepEqual obj, { interpolated: nested: 123: 456 }
+      """:
+        123: 456
+  deepEqual obj,
+    interpolated:
+      nested:
+        123: 456
 
 test "#4324: Shorthand after interpolated key", ->
   a = 2
@@ -20953,8 +20970,14 @@ test "computed property keys: comments in implicit object", ->
   deepEqual obj, { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
 test "computed property keys: more complicated case", ->
-  obj = ["interpolated"]: ["nested"]: 123: 456
-  deepEqual obj, { interpolated: nested: 123: 456 }
+  obj =
+    ["interpolated"]:
+      ["nested"]:
+        123: 456
+  deepEqual obj,
+    interpolated:
+      nested:
+        123: 456
 
 test "computed property keys: empty array as key", ->
   o1 = { [[]] }
@@ -21089,7 +21112,8 @@ test "#4544: Postfix conditionals in first line of implicit object literals", ->
   eq 1337, three.foo.baz
 
   four = f(
-    foo: { bar: 42 } if yes
+    foo:
+      { bar: 42 } if yes
     baz: 1337
   )
   eq 42, four.foo.bar
@@ -21131,7 +21155,8 @@ test "#4579: Postfix for/while/until in first line of implicit object literals",
   eq 1337, three.foo.baz
 
   four = f(
-    foo: { "bar_#{x}": x } for x of a: 1, b: 2
+    foo:
+      { "bar_#{x}": x } for x of a: 1, b: 2
     baz: 1337
   )
   eq "a", four.foo[0].bar_a

@@ -58,3 +58,9 @@
   - a(b, c) # d is losing the comment and not complaining
   - get comment-only class body to print indented
 - update to support flow() etc formatting
+- nasty one from tests, should force call parens?:
+  x =
+    fn bar: {
+      foo: 123
+    } if not condition
+- add arrays to respectBreak?

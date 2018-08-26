@@ -130,7 +130,8 @@ class B
     this.props.foofoofoofoofoofoo && this.props.barbarbarbar
 
   someInstanceProperty2 =
-    foo: this.props.foofoofoofoofoofoo && this.props.barbarbarbar
+    foo:
+      this.props.foofoofoofoofoofoo && this.props.barbarbarbar
 
   someInstanceProperty3 = "foo"
 

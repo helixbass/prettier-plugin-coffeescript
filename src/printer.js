@@ -559,7 +559,8 @@ function printPathNoParens(path, options, print) {
       const {content, groupOptions} = ungrouped
       return group(content, groupOptions)
     }
-    case 'ObjectProperty':
+    case 'ObjectProperty': {
+      const parent = path.getParentNode()
       if (n.shorthand) {
         parts.push(path.call(print, 'value'))
         if (n.computed) {
@@ -580,12 +581,23 @@ function printPathNoParens(path, options, print) {
             ':',
             n.value,
             [path, print, 'value'],
-            options
+            options,
+            {
+              shouldBreak:
+                options.respectBreak.indexOf('object') > -1 &&
+                parent.type === 'ObjectExpression' &&
+                util.hasNewlineInRange(
+                  options.originalText,
+                  options.locStart(n),
+                  options.locEnd(n)
+                ),
+            }
           )
         )
       }
 
       return concat(parts)
+    }
     case 'ClassMethod':
       if (n.static) {
         parts.push(n.staticClassName ? `${n.staticClassName}.` : '@')
@@ -1816,7 +1828,7 @@ function printObject(path, print, options) {
       )) ||
     (node.type === 'ObjectExpression' &&
       options.respectBreak.indexOf('object') > -1 &&
-      props.length > 1 &&
+      // props.length > 1 &&
       util.hasNewlineInRange(
         options.originalText,
         options.locStart(node),
@@ -3434,7 +3446,8 @@ function printAssignment(
   operator,
   rightNode,
   [path, print, rightName],
-  options
+  options,
+  {shouldBreak} = {}
 ) {
   const printedRight = path.call(print, rightName)
   const dontBreak =
@@ -3469,11 +3482,15 @@ function printAssignment(
 
   const full = concat([printedLeft, operator, printed])
   if (
-    willBreak(printed) &&
-    !(
-      rightNode.type === 'CallExpression' &&
-      path.call(rightPath => shouldGroupLastArg(rightPath, options), rightName)
-    )
+    shouldBreak ||
+    (willBreak(printed) &&
+      !(
+        rightNode.type === 'CallExpression' &&
+        path.call(
+          rightPath => shouldGroupLastArg(rightPath, options),
+          rightName
+        )
+      ))
   ) {
     return group(full, {shouldBreak: true})
   }

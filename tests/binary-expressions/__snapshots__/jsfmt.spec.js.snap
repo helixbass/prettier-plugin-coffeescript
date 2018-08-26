@@ -26,7 +26,8 @@ f = ->
       entity &&
       entity.isInstallAvailable() &&
       !entity.isQueue() &&
-      entity.isDisabled() && id: entity.id
+      entity.isDisabled() &&
+        id: entity.id
   )
 
 `;
@@ -320,7 +321,8 @@ obj =
     stateIsOK &&
       loadState: LOADED
       opened: no
-  loadNext: (stateIsOK && hasNext) || skipNext: yes
+  loadNext: (stateIsOK && hasNext) ||
+    skipNext: yes
   loaded: yes
 
 `;
