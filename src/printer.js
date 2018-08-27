@@ -183,7 +183,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
             return true
           }
 
-          if ((po === '||' || po === 'BIN?') && no === '&&') {
+          if ((po === '||' || po === '??') && no === '&&') {
             return true
           }
 
@@ -2405,12 +2405,7 @@ function printExportDeclaration(path, options, print) {
 }
 
 function shouldInlineLogicalExpression(node, {notJSX} = {}) {
-  if (
-    !(
-      node.type === 'LogicalExpression' ||
-      (node.type === 'BinaryExpression' && node.operator === '?')
-    )
-  ) {
+  if (!(node.type === 'LogicalExpression')) {
     return false
   }
 
@@ -2930,8 +2925,8 @@ const operatorAliasMap = {
 }
 function getCanonicalOperator(node) {
   const {operator} = node
-  if (operator === '?' && node.type === 'BinaryExpression') {
-    return 'BIN?'
+  if (operator === '?' && node.type === 'LogicalExpression') {
+    return '??'
   }
   return operatorAliasMap[operator] || operator
 }
@@ -3834,7 +3829,7 @@ function printString(raw, options, isDirectiveLiteral) {
 
 const PRECEDENCE = {}
 ;[
-  ['BIN?'],
+  ['??'],
   ['||'],
   ['&&'],
   ['|'],
