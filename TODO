@@ -79,3 +79,9 @@
   a =
      ///
      ///
+- don't nest chained assignment eg not
+  a =
+    b = new X(
+      ...
+    )
+- safe to omit call parens in for when clause?

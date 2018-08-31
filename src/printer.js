@@ -266,7 +266,11 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'ThrowStatement':
         case 'Existence':
         case 'MemberExpression':
+        case 'SpreadElement':
           return true
+
+        case 'For':
+          return parent.postfix
 
         // case 'ExpressionStatement':
         //   return !node.postfix
