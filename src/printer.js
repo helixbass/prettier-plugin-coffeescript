@@ -3365,7 +3365,7 @@ function couldGroupArg(arg) {
   ) {
     return true
   }
-  if (arg.type === 'ConditionalExpression' || arg.type === 'TryStatement') {
+  if (isIf(arg) || arg.type === 'TryStatement') {
     return {indent: true}
   }
   return false
@@ -3483,7 +3483,9 @@ function printAssignment(
         rightName
       )) ||
     isDo(rightNode) ||
-    (isHeregex(rightNode) && rightNode.originalPattern.indexOf('\n') > -1) ||
+    (isHeregex(rightNode) &&
+      rightNode.originalPattern &&
+      rightNode.originalPattern.indexOf('\n') > -1) ||
     rightNode.type === 'NewExpression' ||
     (rightNode.type === 'AssignmentExpression' &&
       node.type === 'AssignmentExpression') ||

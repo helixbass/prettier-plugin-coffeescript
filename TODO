@@ -43,3 +43,4 @@
     } if not condition
 - add arrays to respectBreak?
 - safe to omit call parens in for when clause?
+- respectExplicit: ['callParens', 'objectBraces']
