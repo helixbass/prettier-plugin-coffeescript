@@ -1,25 +1,5 @@
-- guard against generating " when string contains #{
 - adjust heredoc/heregex indent with surrounding indentation level
-- preserve blank lines in switch cases?
-- can't generate a: b: c when the outer object might have following inline properties eg a: {b: c}, d: e can't generate a: b: c, d: e
-  similarly for eg a: -> someCall arg, b: c it needs to either always break the object if a prop value has something that could be sketchy to follow with a , or it needs to know to parenthesize the -> function
-  for eg [->, ->] it should generate [(->), ->] unless the array breaks - this would typically be the domain of pathNeedsParens() but we need to use ifParentGroupBroke()
-- would be nice if it was smart enough to not break call args where the last is the only one that breaks and is a callback-style eg:
-  eq '3', ->
-    something
-    else
-  or eg:
-  eq '3', do ->
-    something
-    else
-  could it check whether the call without the last arg wouldn't break and the last arg is a function or do (and the call doesn't need parens)?
 - preserve 2e308 (or anything else that would compile to Infinity)?
-- apply ifParentGroupBroke to pathNeedsParens eg this should be able to omit parens around the first arg if throws() breaks:
-	throws(
-	  (-> CoffeeScript.compile '(..., a, b...) ->')
-	  null
-	  'prohibit expansion and a splat'
-	)
 - how do elisions and breaking arrays interplay?
 - make comma option less naive (eg either omit or dedent comma if the arg has indentation eg breaking function or control)
 - where to draw the line with what to parenthesize when splatting - you can omit a lot of parens but it looks weird eg [(a if f)?.b ? []...]
@@ -53,10 +33,8 @@
   - does that imply the need for a respect implicit object option? or should we just always try to respect what they did for nested objects?
 - linebreak on other binary operators eg +?
 - comments:
-  - preserve herecomment spacing
-  - a b, c # d is breaking, probably should preserve trailing inline comment formatting
-  - a(b, c) # d is losing the comment and not complaining
   - get comment-only class body to print indented
+  - line comment at end of switch case body is outdenting to the next when line
 - update to support flow() etc formatting
 - nasty one from tests, should force call parens?:
   x =
@@ -64,24 +42,4 @@
       foo: 123
     } if not condition
 - add arrays to respectBreak?
-- don't eg indent like this:
-  b not in
-    [
-      c
-      d
-    ]
-  instead:
-  b not in [
-    c
-    d
-  ]
-- don't break heregex assignment eg
-  a =
-     ///
-     ///
-- don't nest chained assignment eg not
-  a =
-    b = new X(
-      ...
-    )
 - safe to omit call parens in for when clause?

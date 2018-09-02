@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`empty-case.coffee 1`] = `
+switch a
+  when b
+    ;
+  when c
+    d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+switch a
+  when b
+    ;
+  when c
+    d
+
+`;

@@ -1,0 +1,1 @@
+firstVar = secondVar = somethingLongEnoughToCauseTheOuterAssignmentToBreak(someArg)

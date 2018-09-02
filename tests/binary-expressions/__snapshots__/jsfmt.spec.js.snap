@@ -535,6 +535,31 @@ defaultContent.filter((defaultLocale) ->
 
 `;
 
+exports[`shouldnt-break-right.coffee 1`] = `
+somethingRatherLongOnTheLeftSide and [anArray, that, has, many, elements, indeed]
+
+somethingRatherLongOnTheLeftSide not in [anArray, that, has, many, elements, indeed]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+somethingRatherLongOnTheLeftSide and [
+  anArray
+  that
+  has
+  many
+  elements
+  indeed
+]
+
+somethingRatherLongOnTheLeftSide not in [
+  anArray
+  that
+  has
+  many
+  elements
+  indeed
+]
+
+`;
+
 exports[`test.coffee 1`] = `
 # It should always break the highest precedence operators first, and
 # break them all at the same time.

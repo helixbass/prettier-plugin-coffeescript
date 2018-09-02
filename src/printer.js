@@ -580,6 +580,18 @@ function printPathNoParens(path, options, print) {
         } else {
           printedLeft = printPropertyKey(path, options, print)
         }
+        const respectBreak =
+          options.respectBreak.indexOf('object') > -1 &&
+          parent.type === 'ObjectExpression' &&
+          util.hasNewlineInRange(
+            options.originalText,
+            options.locStart(n),
+            options.locEnd(n)
+          )
+        const unsafeInline =
+          n !== util.getLast(parent.properties) &&
+          n.value.type === 'FunctionExpression' // TODO: anything else that could end in a function or implicit call?
+        const shouldBreak = respectBreak || unsafeInline
         parts.push(
           printAssignment(
             n.key,
@@ -588,16 +600,7 @@ function printPathNoParens(path, options, print) {
             n.value,
             [path, print, 'value'],
             options,
-            {
-              shouldBreak:
-                options.respectBreak.indexOf('object') > -1 &&
-                parent.type === 'ObjectExpression' &&
-                util.hasNewlineInRange(
-                  options.originalText,
-                  options.locStart(n),
-                  options.locEnd(n)
-                ),
-            }
+            {shouldBreak}
           )
         )
       }
@@ -1258,11 +1261,17 @@ function printPathNoParens(path, options, print) {
               indent(
                 concat([
                   ifBreak(line, isElse ? ' ' : ' then '),
-                  casePath.call(
-                    consequentPath =>
-                      printStatementSequence(consequentPath, options, print),
-                    'consequent'
-                  ),
+                  !kase.consequent.length
+                    ? ';'
+                    : casePath.call(
+                        consequentPath =>
+                          printStatementSequence(
+                            consequentPath,
+                            options,
+                            print
+                          ),
+                        'consequent'
+                      ),
                 ])
               ),
               printedTrailingComments || '',
@@ -1300,7 +1309,7 @@ function printPathNoParens(path, options, print) {
         }
         if (kase.test) {
           currentGroup.push(casePath.call(print, 'test'))
-          if (kase.consequent && kase.consequent.length) {
+          if (kase.trailing || (kase.consequent && kase.consequent.length)) {
             groupedCases.push({
               cases: currentGroup,
               // consequent: adjustClause(
@@ -2970,6 +2979,7 @@ function printBinaryishExpressions(path, print, options, isNested) {
 
     canBreak =
       !isIf(node.right) &&
+      !(node.right.type === 'ArrayExpression' && node.right.elements.length) && // TODO: others?
       !shouldInlineLogicalExpression(node, {notJSX: true}) &&
       !isTemplateOnItsOwnLine(node.right, options.originalText, options)
     const right = concat([
@@ -3453,6 +3463,7 @@ function printAssignment(
   options,
   {shouldBreak} = {}
 ) {
+  const node = path.getValue()
   const printedRight = path.call(print, rightName)
   const dontBreak =
     shouldInlineLogicalExpression(rightNode) ||
@@ -3472,7 +3483,10 @@ function printAssignment(
         rightName
       )) ||
     isDo(rightNode) ||
+    (isHeregex(rightNode) && rightNode.originalPattern.indexOf('\n') > -1) ||
     rightNode.type === 'NewExpression' ||
+    (rightNode.type === 'AssignmentExpression' &&
+      node.type === 'AssignmentExpression') ||
     (rightNode.type === 'CallExpression' &&
       (rightNode.callee.type === 'Identifier' ||
         rightNode.callee.type === 'MemberExpression'))
@@ -3537,6 +3551,10 @@ function printAssignment(
     ],
     {firstBreakingIndex: 1}
   )
+}
+
+function isHeregex(node) {
+  return node.type === 'RegExpLiteral' && node.delimiter === '///'
 }
 
 function isDo(node) {

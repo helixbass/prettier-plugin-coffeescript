@@ -23,3 +23,28 @@ someVariableThatsGotALongName = not (
 )
 
 `;
+
+exports[`chained.coffee 1`] = `
+firstVar = secondVar = somethingLongEnoughToCauseTheOuterAssignmentToBreak(someArg)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+firstVar = secondVar = somethingLongEnoughToCauseTheOuterAssignmentToBreak(
+  someArg
+)
+
+`;
+
+exports[`heregex.coffee 1`] = `
+thisAssignmentShouldntBreak = ///
+  a heregex containing a long enough line to cause a break (?:[abcdefghijklmnopqrs])
+///
+
+butThisOneShould = /// an inline heregex containing a long enough line to cause a break (?:[abcdefghijklmnopqrs]) ///
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+thisAssignmentShouldntBreak = ///
+  a heregex containing a long enough line to cause a break (?:[abcdefghijklmnopqrs])
+///
+
+butThisOneShould =
+  /// an inline heregex containing a long enough line to cause a break (?:[abcdefghijklmnopqrs]) ///
+
+`;
