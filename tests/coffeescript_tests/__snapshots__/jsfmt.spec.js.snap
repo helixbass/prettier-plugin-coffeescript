@@ -7985,25 +7985,22 @@ test "Lenient on pure statements not trying to reach out of the closure", ->
       i
   ok val[0] is i
 
-test(
-  "Comprehensions only wrap their last line in a closure, allowing other lines
-  to have pure expressions in them."
-  ->
-    func = ->
-      for i in [1]
-        break if i is 2
-        j for j in [1]
+test "Comprehensions only wrap their last line in a closure, allowing other lines
+  to have pure expressions in them.", ->
+  func = ->
+    for i in [1]
+      break if i is 2
+      j for j in [1]
 
-    ok func()[0][0] is 1
+  ok func()[0][0] is 1
 
-    i = 6
-    odds =
-      while i--
-        continue unless i & 1
-        i
+  i = 6
+  odds =
+    while i--
+      continue unless i & 1
+      i
 
-    ok odds.join(", ") is "5, 3, 1"
-)
+  ok odds.join(", ") is "5, 3, 1"
 
 test "Issue #897: Ensure that plucked function variables aren't leaked.", ->
   facets = {}
@@ -8275,67 +8272,64 @@ test "#156: expansion in destructuring in comprehensions", ->
   list = [[0, 1, 2], [2, 3, 4], [4, 5, 6]]
   arrayEq (last for [..., last] in list), [2, 4, 6]
 
-test(
-  "#3778: Consistently always cache for loop range boundaries and steps, even
-      if they are simple identifiers"
-  ->
-    a = 1
-    arrayEq(
-      [1, 2, 3]
-      for n in [1, 2, 3] by a
-        a = 4
-        n
-    )
-    a = 1
-    arrayEq(
-      [1, 2, 3]
-      for n in [1, 2, 3] by +a
-        a = 4
-        n
-    )
-    a = 1
-    arrayEq(
-      [1, 2, 3]
-      for n in [a..3]
-        a = 4
-        n
-    )
-    a = 1
-    arrayEq(
-      [1, 2, 3]
-      for n in [+a..3]
-        a = 4
-        n
-    )
-    a = 3
-    arrayEq(
-      [1, 2, 3]
-      for n in [1..a]
-        a = 4
-        n
-    )
-    a = 3
-    arrayEq(
-      [1, 2, 3]
-      for n in [1..+a]
-        a = 4
-        n
-    )
-    a = 1
-    arrayEq(
-      [1, 2, 3]
-      for n in [1..3] by a
-        a = 4
-        n
-    )
-    a = 1
-    arrayEq(
-      [1, 2, 3]
-      for n in [1..3] by +a
-        a = 4
-        n
-    )
-)
+test "#3778: Consistently always cache for loop range boundaries and steps, even
+      if they are simple identifiers", ->
+  a = 1
+  arrayEq(
+    [1, 2, 3]
+    for n in [1, 2, 3] by a
+      a = 4
+      n
+  )
+  a = 1
+  arrayEq(
+    [1, 2, 3]
+    for n in [1, 2, 3] by +a
+      a = 4
+      n
+  )
+  a = 1
+  arrayEq(
+    [1, 2, 3]
+    for n in [a..3]
+      a = 4
+      n
+  )
+  a = 1
+  arrayEq(
+    [1, 2, 3]
+    for n in [+a..3]
+      a = 4
+      n
+  )
+  a = 3
+  arrayEq(
+    [1, 2, 3]
+    for n in [1..a]
+      a = 4
+      n
+  )
+  a = 3
+  arrayEq(
+    [1, 2, 3]
+    for n in [1..+a]
+      a = 4
+      n
+  )
+  a = 1
+  arrayEq(
+    [1, 2, 3]
+    for n in [1..3] by a
+      a = 4
+      n
+  )
+  a = 1
+  arrayEq(
+    [1, 2, 3]
+    for n in [1..3] by +a
+      a = 4
+      n
+  )
 
 `;
 
@@ -24338,110 +24332,62 @@ eq "(((dollars)))", "\\(\\(\\(dollars\\)\\)\\)"
 eq "one two three", "one
  two
  three"
-eq "four five", 'four
+eq "four five", "four
 
- five'
+ five"
 
 test "#3229, multiline strings", ->
   # Separate lines by default by a single space in literal strings.
-  eq(
-    'one
-      two'
-    "one two"
-  )
-  eq(
-    "one
-      two"
-    "one two"
-  )
-  eq(
-    '
+  eq "one
+      two", "one two"
+  eq "one
+      two", "one two"
+  eq "
         a
         b
-    '
-    "a b"
-  )
-  eq(
-    "
+    ", "a b"
+  eq "
         a
         b
-    "
-    "a b"
-  )
-  eq(
-    'one
+    ", "a b"
+  eq "one
 
-        two'
-    "one two"
-  )
-  eq(
-    "one
+        two", "one two"
+  eq "one
 
-        two"
-    "one two"
-  )
-  eq(
-    '
+        two", "one two"
+  eq "
     indentation
-      doesn\\'t
-  matter'
-    "indentation doesn't matter"
-  )
-  eq(
-    'trailing ws      
-    doesn\\'t matter'
-    "trailing ws doesn't matter"
-  )
+      doesn't
+  matter", "indentation doesn't matter"
+  eq "trailing ws      
+    doesn't matter", "trailing ws doesn't matter"
 
   # Use backslashes at the end of a line to specify whitespace between lines.
-  eq(
-    'a \\
+  eq "a \\
       b\\
       c  \\
-      d'
-    "a bc  d"
-  )
-  eq(
-    "a \\
+      d", "a bc  d"
+  eq "a \\
       b\\
       c  \\
-      d"
-    "a bc  d"
-  )
-  eq(
-    'ignore  \\  
-      trailing whitespace'
-    "ignore  trailing whitespace"
-  )
+      d", "a bc  d"
+  eq "ignore  \\  
+      trailing whitespace", "ignore  trailing whitespace"
 
   # Backslash at the beginning of a literal string.
-  eq(
-    '\\
-      ok'
-    "ok"
-  )
-  eq(
-    '  \\
-      ok'
-    "  ok"
-  )
+  eq "\\
+      ok", "ok"
+  eq "  \\
+      ok", "  ok"
 
   # #1273, empty strings.
-  eq(
-    '\\
-     '
-    ""
-  )
-  eq(
-    '
-     '
-    ""
-  )
-  eq(
-    '
-          '
-    ""
-  )
+  eq "\\
+     ", ""
+  eq "
+     ", ""
+  eq "
+          ", ""
   eq "   ", "   "
 
   # Same behavior in interpolated strings.
@@ -24467,102 +24413,72 @@ test "#3229, multiline strings", ->
   # Handle escaped backslashes correctly.
   eq "\\\\", \`'\\\\'\`
   eq(
-    'escaped backslash at EOL\\\\
-      next line'
+    "escaped backslash at EOL\\\\
+      next line"
     "escaped backslash at EOL\\\\ next line"
   )
-  eq(
-    '\\\\
-      next line'
-    "\\\\ next line"
-  )
-  eq(
-    '\\\\
-     '
-    "\\\\"
-  )
-  eq(
-    '\\\\\\\\\\\\
-     '
-    "\\\\\\\\\\\\"
-  )
+  eq "\\\\
+      next line", "\\\\ next line"
+  eq "\\\\
+     ", "\\\\"
+  eq "\\\\\\\\\\\\
+     ", "\\\\\\\\\\\\"
   eq(
     "#{1}\\\\
       after interpolation"
     "1\\\\ after interpolation"
   )
   eq(
-    'escaped backslash before slash\\\\  \\
-      next line'
+    "escaped backslash before slash\\\\  \\
+      next line"
     "escaped backslash before slash\\\\  next line"
   )
+  eq "triple backslash\\\\\\
+      next line", "triple backslash\\\\next line"
   eq(
-    'triple backslash\\\\\\
-      next line'
-    "triple backslash\\\\next line"
-  )
-  eq(
-    'several escaped backslashes\\\\\\\\\\\\
-      ok'
+    "several escaped backslashes\\\\\\\\\\\\
+      ok"
     "several escaped backslashes\\\\\\\\\\\\ ok"
   )
   eq(
-    'several escaped backslashes slash\\\\\\\\\\\\\\
-      ok'
+    "several escaped backslashes slash\\\\\\\\\\\\\\
+      ok"
     "several escaped backslashes slash\\\\\\\\\\\\ok"
   )
   eq(
-    'several escaped backslashes with trailing ws \\\\\\\\\\\\   
-      ok'
+    "several escaped backslashes with trailing ws \\\\\\\\\\\\   
+      ok"
     "several escaped backslashes with trailing ws \\\\\\\\\\\\ ok"
   )
 
   # Backslashes at beginning of lines.
-  eq(
-    'first line
-      \\   backslash at BOL'
-    "first line \\   backslash at BOL"
-  )
-  eq(
-    'first line\\
-      \\   backslash at BOL'
-    "first line\\   backslash at BOL"
-  )
+  eq "first line
+      \\   backslash at BOL", "first line \\   backslash at BOL"
+  eq "first line\\
+      \\   backslash at BOL", "first line\\   backslash at BOL"
 
   # Backslashes at end of strings.
   eq "first line \\ ", "first line  "
-  eq(
-    'first line
+  eq "first line
       second line \\
-      '
-    "first line second line "
-  )
-  eq(
-    'first line
+      ", "first line second line "
+  eq "first line
       second line
       \\
-      '
-    "first line second line"
-  )
-  eq(
-    'first line
+      ", "first line second line"
+  eq "first line
       second line
 
         \\
 
-      '
-    "first line second line"
-  )
+      ", "first line second line"
 
   # Edge case.
-  eq(
-    'lone
+  eq "lone
 
         \\
 
-        backslash'
-    "lone backslash"
-  )
+        backslash", "lone backslash"
 
 test "#3249, escape newlines in heredocs with backslashes", ->
   # Ignore escaped newlines
@@ -24854,29 +24770,23 @@ test "strings are not callable", ->
   '''
 
 test "#3795: Escape otherwise invalid characters", ->
-  eq "\\u2028", "\\u2028"
-  eq "\\u2029", "\\u2029"
-  eq(
-    '\\0\\
-      1'
-    "\\x001"
-  )
-  eq "\\u2028", "\\u2028"
-  eq "\\u2029", "\\u2029"
-  eq(
-    "\\0\\
-      1"
-    "\\x001"
-  )
-  eq "\\u2028", "\\u2028"
-  eq "\\u2029", "\\u2029"
+  eq " ", "\\u2028"
+  eq " ", "\\u2029"
+  eq "\\0\\
+      1", "\\x001"
+  eq " ", "\\u2028"
+  eq " ", "\\u2029"
+  eq "\\0\\
+      1", "\\x001"
+  eq " ", "\\u2028"
+  eq " ", "\\u2029"
   eq(
     '''\\0\\
       1'''
     "\\x001"
   )
-  eq "\\u2028", "\\u2028"
-  eq "\\u2029", "\\u2029"
+  eq " ", "\\u2028"
+  eq " ", "\\u2029"
   eq(
     """\\0\\
       1"""

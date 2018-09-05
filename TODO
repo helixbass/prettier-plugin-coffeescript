@@ -44,3 +44,39 @@
 - add arrays to respectBreak?
 - safe to omit call parens in for when clause?
 - respectExplicit: ['callParens', 'objectBraces']
+- this:
+  operatorToken = sourceCode.getFirstTokenBetween node.left, node.right, (
+    token
+  ) -> token.value is node.operator
+  should break differently
+- double parens:
+  return unless (
+    (consequentIdentifierName = justIdentifierName node.consequent)
+  )
+- prefer not to break postfix if in certain cases? eg this is nicer
+  a {
+    ...
+  } if b
+  than this
+  a {...} if (
+    b
+  )
+- output isn't stable when it generates a dedented-comma object in a broken array with a spacing line (before?)
+- this:
+  [
+    ...
+  ].map (code) ->
+    {
+      code
+      errors: ...
+    }
+  should be:
+  [
+    ...
+  ].map (code) -> {
+    code
+    errors: ...
+  }
+- comment was disappearing:
+  loop # eslint-disable-line no-constant-condition
+    switch currentName.type

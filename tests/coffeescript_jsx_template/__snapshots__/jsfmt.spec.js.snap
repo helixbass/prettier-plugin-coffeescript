@@ -33,12 +33,10 @@ exports[`styled-components.coffee 1`] = `
   }
 "}</style>
 
-<style jsx>
-  {"
+<style jsx>{"
     p {
       color: red;
     }
-  "}
-</style>
+  "}</style>
 
 `;
