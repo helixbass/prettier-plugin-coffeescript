@@ -3791,13 +3791,14 @@ function rawText(node) {
 }
 
 function nodeStr(node, options) {
-  return printString(node, options)
+  const raw = rawText(node)
+  return printString(raw, options)
 }
 
-function printString(node, options, isDirectiveLiteral) {
+function printString(raw, options, isDirectiveLiteral) {
   // `rawContent` is the string exactly like it appeared in the input source
   // code, without its enclosing quotes.
-  const rawContent = node.value
+  const rawContent = raw.slice(1, -1)
 
   const double = {quote: '"', regex: /"/g}
   const single = {quote: "'", regex: /'/g}
@@ -3840,7 +3841,7 @@ function printString(node, options, isDirectiveLiteral) {
     if (canChangeDirectiveQuotes) {
       return enclosingQuote + rawContent + enclosingQuote
     }
-    return rawText(node)
+    return raw
   }
 
   // It might sound unnecessary to use `makeString` even if the string already

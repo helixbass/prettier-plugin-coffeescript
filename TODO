@@ -80,3 +80,10 @@
 - comment was disappearing:
   loop # eslint-disable-line no-constant-condition
     switch currentName.type
+- another unstable output:
+  generates:
+  schema: [
+    enum: ['object', 'property']
+  ]
+  which it wants to convert to:
+  schema: [enum: ['object', 'property']]
