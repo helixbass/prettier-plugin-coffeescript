@@ -87,3 +87,119 @@
   ]
   which it wants to convert to:
   schema: [enum: ['object', 'property']]
+- if singleQuote, prefer ''' to """ for TemplateLiterals with no interpolations
+- this is broken:
+  if a.some((b) ->
+    c
+    d
+  )
+    e
+  formats as:
+  if a.some (b) ->
+    c
+    d
+    e
+- unnecessary parens:
+  currentNode[(
+    if a
+      ...
+    else
+      ...
+  )]
+  also:
+  unless (
+    (
+      if a
+        ...
+      else
+       ...
+    )
+  )
+    ...
+- postfix if can break:
+  return Object.assign state,
+    inCharClass: yes, startingCharClass: yes if (
+    condition...
+  )
+- postfix if should avoid breaking similar to calls, eg
+  return unless call.parent.type in [
+    ...
+  ]
+  rather than
+  return unless call.parent.type in (
+    [
+      ...
+    ]
+  )
+- this:
+  [
+    ...
+  ].map (invalidCase) ->
+    {
+      errors: [
+        ...
+      ]
+      ...invalidCase
+    }
+  should be
+  ].map (invalidCase) -> {
+    ...
+  }
+- why is it deleting the blank line here?
+  nestFunctions = (times) ->
+    openings = ''
+    closings = ''
+
+    i = 0
+    while i < times
+      ...
+- don't choke on ''' opening "directive" (has no raw?)
+- don't break value to next line:
+  code: String.raw'''
+    ...
+  '''
+  shouldn't become
+  code:
+    String.raw'''
+    ...
+  '''
+- postfix if (or anything else) has to trigger parens if the body breaks eg
+  (a ->
+    b
+    c
+  ) if d
+  can't become
+  a ->
+    b
+    c if d
+- this should not put closing paren right after body (should probably indent the whole thing?):
+  ...(for ...
+    [
+      ...
+    ])
+- no parens here: @_list[getId(node)]
+- don't escape " in """
+- this doesn't preserve intended formatting:
+  ### eslint-disable-quotes ### # For better readability ...
+  # ------------------------
+  # Requirements
+  # ------------------------
+
+
+  rule = ...
+- why is this adding call parens at the end? initial version from es2coffee doesn't have them
+  [
+    ...
+    ,
+      code: ['<App foo bar />'].join('\n')
+    ,
+    ...
+  ]
+- could there be a case where not using call parens in if test could be a problem? eg if its last arg ended with a postfix if and it's an inline if?
+  if a(b if c) then d
+- shouldn't have parens/nesting:
+  if (
+    x in [
+      ...
+    ]
+  )

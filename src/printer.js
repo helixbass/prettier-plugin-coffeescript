@@ -171,7 +171,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'AwaitExpression':
         case 'Existence':
         case 'Range':
+        case 'SpreadElement':
           return true
+        case 'MemberExpression':
+          return parent.object === node
         case 'BinaryExpression':
         case 'LogicalExpression': {
           const po = getCanonicalOperator(parent)
@@ -880,6 +883,13 @@ function printPathNoParens(path, options, print) {
 
       parts.push(comments.printDanglingComments(path, options))
 
+      if (
+        !hasContent &&
+        ((parent.type === 'WhileStatement' || parent.type === 'For') &&
+          n === parent.body)
+      ) {
+        parts.push(indent(concat([hardline, ';'])))
+      }
       return concat(parts)
     }
     case 'ReturnStatement':
