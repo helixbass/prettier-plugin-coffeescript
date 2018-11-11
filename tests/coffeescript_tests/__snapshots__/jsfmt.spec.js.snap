@@ -7900,7 +7900,7 @@ test "Even a convoluted one.", ->
 
 test "Naked ranges are expanded into arrays.", ->
   array = [0..10]
-  ok (num % 2 is 0 for num in array by 2)
+  ok ((num % 2) is 0 for num in array by 2)
 
 test "Nested shared scopes.", ->
   foo = ->
@@ -9871,7 +9871,7 @@ test "basic \`while\` loops", ->
 
   i = 10
   results =
-    while i -= 1 when i % 2 is 0
+    while i -= 1 when (i % 2) is 0
       i * 2
   ok results.join(" ") is "16 12 8 4"
 
@@ -13851,7 +13851,7 @@ test "#1495, method call chaining", ->
   # Single line function arguments
   result = [1..6]
     .map (x) -> x * x
-    .filter (x) -> x % 2 is 0
+    .filter (x) -> (x % 2) is 0
     .reverse()
   arrayEq [36, 16, 4], result
 

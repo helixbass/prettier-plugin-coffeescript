@@ -25,7 +25,7 @@ const {
   group,
   hardline,
   ifBreak,
-  ifVisibleGroupBroke,
+  blockVisible,
   indent,
   join,
   literalline,
@@ -427,7 +427,9 @@ function genericPrint(path, options, print) {
   const parts = []
   if (needsParens) {
     parts.unshift(
-      needsParens.unlessParentBreaks ? ifVisibleGroupBroke('', '(') : '('
+      needsParens.unlessParentBreaks
+        ? ifBreak('', '(', {visibleType: 'visible'})
+        : '('
     )
   }
 
@@ -435,7 +437,9 @@ function genericPrint(path, options, print) {
 
   if (needsParens) {
     parts.push(
-      needsParens.unlessParentBreaks ? ifVisibleGroupBroke('', ')') : ')'
+      needsParens.unlessParentBreaks
+        ? ifBreak('', ')', {visibleType: 'visible'})
+        : ')'
     )
   }
 
@@ -650,12 +654,12 @@ function printPathNoParens(path, options, print) {
             needsForcedTrailingComma
               ? ','
               : options.comma !== 'all'
-                ? ''
-                : ifBreak(',', ''),
+              ? ''
+              : ifBreak(',', ''),
             softline,
             ']',
           ]),
-          {visible: true}
+          {visibleType: 'visible'}
         )
       )
       return concat(parts)
@@ -1712,8 +1716,8 @@ function printFunction(path, options, print) {
   const body = isEmptyBlock(node.body)
     ? ''
     : shouldInlineBody
-      ? concat([' ', path.call(print, 'body', ...singleExprPath)])
-      : concat([ifBreak('', ' '), path.call(print, 'body')])
+    ? concat([' ', path.call(print, 'body', ...singleExprPath)])
+    : concat([ifBreak('', ' '), path.call(print, 'body')])
 
   // singleExpr.type === 'FunctionExpression' ||
   // grandparent.type === 'For'
@@ -1733,21 +1737,21 @@ function printFunction(path, options, print) {
     (callParensOptional(path, options, {stackOffset: 1})
       ? false
       : callParensOptionalIfParentBreaks(path, options, {stackOffset: 1})
-        ? {unlessParentBreaks: true}
-        : true)
+      ? {unlessParentBreaks: true}
+      : true)
   const bodyParts = concat([
     body,
     isChainedDoIife || parent.type === 'JSXExpressionContainer'
       ? softline
       : isOnlyCallArgWithParens
-        ? isOnlyCallArgWithParens.unlessParentBreaks
-          ? ifVisibleGroupBroke('', softline, {count: 1})
-          : softline
-        : needsParens
-          ? needsParens.unlessParentBreaks
-            ? ifVisibleGroupBroke('', softline)
-            : softline
-          : '',
+      ? isOnlyCallArgWithParens.unlessParentBreaks
+        ? ifBreak('', softline, {visibleType: 'visible', offset: 1})
+        : softline
+      : needsParens
+      ? needsParens.unlessParentBreaks
+        ? ifBreak('', softline, {visibleType: 'visible'})
+        : softline
+      : '',
   ])
   return group(
     concat([
@@ -1878,54 +1882,51 @@ function printObject(path, print, options) {
         ? ''
         : softline
       : shouldOmitBracesIfParentBreaks
-        ? ifVisibleGroupBroke(
-            dontIndent.ifParentBreaks ? '' : softline,
-            bracketSpacingLine,
-            {count: 1}
-          )
-        : bracketSpacingLine,
+      ? ifBreak(dontIndent.ifParentBreaks ? '' : softline, bracketSpacingLine, {
+          visibleType: 'visible',
+          offset: 1,
+        })
+      : bracketSpacingLine,
     concat(joinedProps),
   ])
   const content = concat([
     shouldOmitBracesIfParentBreaks
-      ? ifVisibleGroupBroke('', '{', {count: 1})
+      ? ifBreak('', '{', {visibleType: 'visible', offset: 1})
       : shouldOmitBraces
-        ? ''
-        : shouldOmitBracesUnlessBreaks
-          ? ifVisibleGroupBroke('{', '')
-          : '{',
+      ? ''
+      : shouldOmitBracesUnlessBreaks
+      ? ifBreak('{', '', {visibleType: 'visible'})
+      : '{',
     dontIndent === true
       ? concat(joinedProps)
       : dontIndent.ifParentBreaks
-        ? propsChunk
-        : indent(propsChunk),
+      ? propsChunk
+      : indent(propsChunk),
     concat([
       dontIndent === true || !trailingLine
         ? ''
         : shouldOmitBraces || !options.bracketSpacing
-          ? dontIndent
-            ? ''
-            : softline
-          : shouldOmitBracesIfParentBreaks
-            ? ifVisibleGroupBroke('', line, {
-                count: 1,
-              })
-            : line,
-      shouldOmitBracesIfParentBreaks
-        ? ifVisibleGroupBroke('', '}', {count: 1})
-        : shouldOmitBraces
+        ? dontIndent
           ? ''
-          : shouldOmitBracesUnlessBreaks
-            ? ifVisibleGroupBroke('}', '')
-            : '}',
+          : softline
+        : shouldOmitBracesIfParentBreaks
+        ? ifBreak('', line, {visibleType: 'visible', offset: 1})
+        : line,
+      shouldOmitBracesIfParentBreaks
+        ? ifBreak('', '}', {visibleType: 'visible', offset: 1})
+        : shouldOmitBraces
+        ? ''
+        : shouldOmitBracesUnlessBreaks
+        ? ifBreak('}', '', {visibleType: 'visible'})
+        : '}',
     ]),
   ])
   return {
     content,
     groupOptions: {
       shouldBreak,
-      visible: true,
-      shouldBreakIfVisibleGroupBroke: shouldBreakIfParentBreaks,
+      visibleType: 'visible',
+      shouldBreakIfVisibleTypeBroke: shouldBreakIfParentBreaks,
     },
   }
 }
@@ -1997,8 +1998,8 @@ function printRegex(path, print) {
         'interpolatedPattern'
       )
     : node.originalPattern != null
-      ? node.originalPattern
-      : node.pattern
+    ? node.originalPattern
+    : node.pattern
   return concat([delim, pattern, delim, flags])
 }
 
@@ -2871,8 +2872,9 @@ function printMemberChain(path, options, print) {
         (groups[0][0].node.type === 'Identifier' &&
           isFactory(groups[0][0].node.name))))
 
-  function printGroup(printedGroup, {blockVisible} = {}) {
-    return concat(printedGroup.map(tuple => tuple.printed), {blockVisible})
+  function printGroup(printedGroup, {shouldBlockVisible} = {}) {
+    const printed = concat(printedGroup.map(tuple => tuple.printed))
+    return shouldBlockVisible ? blockVisible(printed) : printed
   }
 
   function printIndentedGroup(groups) {
@@ -2887,7 +2889,7 @@ function printMemberChain(path, options, print) {
 
   const lastIndex = groups.length - 1
   const printedGroups = groups.map((group, i) =>
-    printGroup(group, {blockVisible: i !== lastIndex})
+    printGroup(group, {shouldBlockVisible: i !== lastIndex})
   )
   const oneLine = concat(printedGroups)
 
@@ -2925,12 +2927,12 @@ function printMemberChain(path, options, print) {
       )) ||
     printedGroups.slice(0, -1).some(willBreak)
   ) {
-    return group(expanded, {visible: true})
+    return group(expanded, {visibleType: 'visible'})
   }
 
   return concat([
     willBreak(oneLine) ? breakParent : '',
-    conditionalGroup([oneLine, expanded], {visible: true}),
+    conditionalGroup([oneLine, expanded], {visibleType: 'visible'}),
   ])
 }
 
@@ -3176,8 +3178,8 @@ function printArgumentsList(path, options, print) {
         isObject || nextIsNonFinalObject // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
-            ? ','
-            : '',
+          ? ','
+          : '',
         ','
       ),
       line,
@@ -3241,27 +3243,25 @@ function printArgumentsList(path, options, print) {
   const openingParen = parensUnnecessary
     ? ' '
     : parensOptionalIfParentBreaks
-      ? ifVisibleGroupBroke(
-          parensUnnecessaryIfParentBreaks ? ' ' : ifBreak('(', ' '),
-          '(',
-          {count: parensOptionalIfParentBreaks.breakingParentCount || 1}
-        )
-      : parensOptional
-        ? ifBreak('(', ' ')
-        : '('
+    ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak('(', ' '), '(', {
+        visibleType: 'visible',
+        offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
+      })
+    : parensOptional
+    ? ifBreak('(', ' ')
+    : '('
   const closingParen = parensUnnecessary
     ? closingLinebreakAnyway
       ? softline
       : ''
     : parensOptionalIfParentBreaks
-      ? ifVisibleGroupBroke(
-          parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'),
-          ')',
-          {count: parensOptionalIfParentBreaks.breakingParentCount || 1}
-        )
-      : parensOptional
-        ? ifBreak(')')
-        : ')'
+    ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'), ')', {
+        visibleType: 'visible',
+        offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
+      })
+    : parensOptional
+    ? ifBreak(')')
+    : ')'
 
   function allArgsBrokenOut() {
     return group(
@@ -3271,11 +3271,11 @@ function printArgumentsList(path, options, print) {
         parensUnnecessary
           ? ''
           : parensUnnecessaryIfParentBreaks
-            ? ifVisibleGroupBroke('', softline, {count: 1})
-            : softline,
+          ? ifBreak('', softline, {visibleType: 'visible', offset: 1})
+          : softline,
         closingParen,
       ]),
-      // {shouldBreak: true, visible: true}
+      // {shouldBreak: true, visibleType: 'visible'}
       {shouldBreak: true}
     )
   }
@@ -3297,7 +3297,7 @@ function printArgumentsList(path, options, print) {
           .concat(
             (lastArg.type === 'ObjectExpression' &&
               shouldOmitObjectBraces(argPath, options)) ||
-            shouldGroupLast.indent
+              shouldGroupLast.indent
               ? indent(concat([softline, printedLastArg]))
               : printedLastArg
           )
@@ -3316,7 +3316,7 @@ function printArgumentsList(path, options, print) {
       concat(nonLastArgs),
       group(util.getLast(printedExpanded), {
         shouldBreak: true,
-        visible: true,
+        visibleType: 'visible',
       }),
       closingParen,
     ])
@@ -3334,7 +3334,7 @@ function printArgumentsList(path, options, print) {
         : '',
       conditionalGroup(conditionalGroups, {
         shouldBreak,
-        visible: true,
+        visibleType: 'visible',
         firstBreakingIndex,
       }),
     ])
@@ -3345,7 +3345,7 @@ function printArgumentsList(path, options, print) {
 
   const printed = shouldntBreak
     ? group(concat([openingParen, concat(printedArguments), closingParen]), {
-        visible: true,
+        visibleType: 'visible',
       })
     : group(
         concat([
@@ -3354,14 +3354,14 @@ function printArgumentsList(path, options, print) {
           parensUnnecessary
             ? ''
             : parensUnnecessaryIfParentBreaks
-              ? ifVisibleGroupBroke('', softline, {count: 1})
-              : softline,
+            ? ifBreak('', softline, {visibleType: 'visible', offset: 1})
+            : softline,
           closingParen,
         ]),
-        {visible: true, shouldBreak}
+        {visibleType: 'visible', shouldBreak}
       )
   return groupLastPrinted
-    ? ifVisibleGroupBroke(groupLastPrinted, printed)
+    ? ifBreak(groupLastPrinted, printed, {visibleType: 'visible'})
     : printed
 }
 
@@ -3457,7 +3457,7 @@ function printAssignmentRight(rightNode, printedRight, options, canBreak) {
   const nonbroken = concat([' ', printedRight])
   if (canBreak) {
     return canBreak.ifParentBreaks
-      ? ifVisibleGroupBroke(broken, nonbroken)
+      ? ifBreak(broken, nonbroken, {visibleType: 'visible'})
       : broken
   }
 
@@ -3776,8 +3776,8 @@ function printArrayItems(path, options, printPath, print) {
         isObject // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
-            ? ','
-            : '',
+          ? ','
+          : '',
         ','
       ),
       line,
@@ -3979,9 +3979,8 @@ function printJsDocComment(comment) {
     '###',
     join(
       hardline,
-      lines.map(
-        (line, index) =>
-          index < lines.length - 1 ? line.trim() : line.trimLeft()
+      lines.map((line, index) =>
+        index < lines.length - 1 ? line.trim() : line.trimLeft()
       )
     ),
     '###',
