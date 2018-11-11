@@ -537,6 +537,7 @@ function printPathNoParens(path, options, print) {
         isOnlyExpressionInFunctionBody(path)
       const shouldIndentIfInlining =
         parent.type === 'AssignmentExpression' ||
+        parent.type === 'ClassProperty' ||
         parent.type === 'ObjectProperty'
 
       const samePrecedenceSubExpression =
@@ -1552,6 +1553,38 @@ function printPathNoParens(path, options, print) {
           : comments.printDanglingComments(path, options),
         // hardline,
       ])
+    case 'ClassProperty': {
+      const leftParts = []
+      if (n.static) {
+        leftParts.push('@')
+      }
+
+      if (n.computed) {
+        leftParts.push('[', path.call(print, 'key'), ']')
+      } else {
+        leftParts.push(printPropertyKey(path, options, print))
+      }
+      if (n.operator === '=') leftParts.push(' ')
+      const printedLeft = concat(leftParts)
+
+      parts.push(
+        printAssignment(
+          n.key,
+          printedLeft,
+          n.operator,
+          n.value,
+          [path, print, 'value'],
+          options
+        )
+      )
+      // parts.push(
+      //   n.operator === ':' ? ':' : ' =',
+      //   printAssignmentRight(n.value, path.call(print, 'value'), options, true)
+      // )
+
+      // return group(concat(parts))
+      return concat(parts)
+    }
     case 'ClassDeclaration':
     case 'ClassExpression':
       parts.push(concat(printClass(path, options, print)))
@@ -2175,6 +2208,7 @@ function isRightmostInStatement(
         ((parent.body && parent.body.body.length) ||
           isBlockLevel(parent, grandparent))) ||
       parent.type === 'SequenceExpression' ||
+      (parent.type === 'ClassProperty' && node === parent.value) ||
       (parent.type === 'ArrayExpression' && parent.elements.length === 1)
     ) {
       return {indent, trailingLine}
@@ -3226,7 +3260,8 @@ function printArgumentsList(path, options, print) {
     !path.call(objectRequiresBraces, 'arguments', '0')
   const isRightSideOfAssignment =
     (parent.type === 'AssignmentExpression' && node === parent.right) ||
-    (parent.type === 'ObjectProperty' && node === parent.value)
+    ((parent.type === 'ObjectProperty' || parent.type === 'ClassProperty') &&
+      node === parent.value)
   const isIfTest = isIf(parent) && node === parent.test
 
   const unnecessary =

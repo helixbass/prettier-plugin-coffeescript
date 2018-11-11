@@ -118,21 +118,25 @@ if (VeryVeryVeryVeryVeryVeryVeryVeryLong == VeryVeryVeryVeryVeryVeryVeryVeryVery
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong
   ;
+
 if (
   @hasPlugin("dynamicImportsLonger") and
   @lookahead().typeLongerer is tt.parenLeft
 )
   ;
+
 if (
   this.hasPlugin("dynamicImportsLong") &&
   this.lookahead().typeLong == tt.parenLeft.right
 )
   ;
+
 if (
   VeryVeryVeryVeryVeryVeryVeryVeryLong is
   VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
 )
   ;
+
 if (
   VeryVeryVeryVeryVeryVeryVeryVeryLong ==
   VeryVeryVeryVeryVeryVeryVeryVeryVeryLong
