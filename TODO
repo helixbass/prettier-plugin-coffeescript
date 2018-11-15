@@ -203,3 +203,10 @@
       ...
     ]
   )
+- unnecessary parens:
+  currentNode[(
+    if ...
+      a
+    else
+      b
+  )]

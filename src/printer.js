@@ -169,7 +169,6 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'TaggedTemplateExpression':
         case 'UnaryExpression':
         case 'AwaitExpression':
-        case 'Existence':
         case 'Range':
         case 'SpreadElement':
           return true
@@ -267,7 +266,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'Range':
         case 'ReturnStatement':
         case 'ThrowStatement':
-        case 'Existence':
+        case 'UnaryExpression':
         case 'MemberExpression':
         case 'SpreadElement':
           return true
@@ -980,21 +979,20 @@ function printPathNoParens(path, options, print) {
     case 'DirectiveLiteral':
       return nodeStr(n, options)
     case 'UnaryExpression': {
-      const {operator} = n
-      parts.push(operator)
+      const {operator, prefix} = n
+      if (prefix) {
+        parts.push(operator)
 
-      if (/[a-z]$/.test(operator)) {
-        parts.push(' ')
+        if (/[a-z]$/.test(operator)) {
+          parts.push(' ')
+        }
       }
 
       parts.push(path.call(print, 'argument'))
+      if (!prefix) parts.push(operator)
 
       return concat(parts)
     }
-    case 'Existence':
-      parts.push(path.call(print, 'argument'), '?')
-
-      return concat(parts)
     case 'UpdateExpression':
       parts.push(path.call(print, 'argument'), n.operator)
 
@@ -1637,7 +1635,7 @@ function hasNakedLeftSide(node) {
     node.type === 'AssignmentExpression' ||
     node.type === 'BinaryExpression' ||
     node.type === 'LogicalExpression' ||
-    node.type === 'Existence' ||
+    (node.type === 'UnaryExpression' && node.prefix) ||
     node.type === 'CallExpression' ||
     node.type === 'MemberExpression' ||
     node.type === 'SequenceExpression' ||
