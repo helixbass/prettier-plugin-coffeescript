@@ -118,12 +118,6 @@
   ]
 - could there be a case where not using call parens in if test could be a problem? eg if its last arg ended with a postfix if and it's an inline if?
   if a(b if c) then d
-- shouldn't have parens/nesting:
-  if (
-    x in [
-      ...
-    ]
-  )
 - unnecessary parens:
   currentNode[(
     if ...
@@ -131,9 +125,3 @@
     else
       b
   )]
-- this shouldn't want to linebreak the {:
-  addProps = (updater) -> (props) -> {
-    ...props
-    ...(if isFunction updater then updater props else updater)
-  }
-- options for no implicit parens/objects
