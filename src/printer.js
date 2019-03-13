@@ -2215,6 +2215,9 @@ function isRightmostInStatement(
           isBlockLevel(parent, grandparent))) ||
       parent.type === 'SequenceExpression' ||
       (parent.type === 'ClassProperty' && node === parent.value) ||
+      (parent.type === 'MemberExpression' &&
+        prevParent === parent.property &&
+        parent.computed) ||
       (parent.type === 'ArrayExpression' && parent.elements.length === 1)
     ) {
       return {

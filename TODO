@@ -1,4 +1,3 @@
-- adjust heredoc/heregex indent with surrounding indentation level
 - how do elisions and breaking arrays interplay?
 - make comma option less naive (eg either omit or dedent comma if the arg has indentation eg breaking function or control)
 - where to draw the line with what to parenthesize when splatting - you can omit a lot of parens but it looks weird eg [(a if f)?.b ? []...]
@@ -95,21 +94,11 @@
     while i < times
       ...
 - don't choke on ''' opening "directive" (has no raw?)
-- postfix if (or anything else) has to trigger parens if the body breaks eg
-  (a ->
-    b
-    c
-  ) if d
-  can't become
-  a ->
-    b
-    c if d
 - this should not put closing paren right after body (should probably indent the whole thing?):
   ...(for ...
     [
       ...
     ])
-- no parens here: @_list[getId(node)]
 - don't escape " in """
 - this doesn't preserve intended formatting:
   ### eslint-disable-quotes ### # For better readability ...

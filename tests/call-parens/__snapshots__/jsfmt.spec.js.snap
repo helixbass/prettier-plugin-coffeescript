@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`index.coffee 1`] = `
+a[b c]
+
+@_list[getId node]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a[b c]
+
+@_list[getId node]
+
+`;
+
 exports[`trailing-call-in-condition.coffee 1`] = `
 if a((b) ->
   c
