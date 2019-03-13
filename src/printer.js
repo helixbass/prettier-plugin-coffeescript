@@ -1746,6 +1746,8 @@ function printFunction(path, options, print) {
     (singleExpr.type === 'TaggedTemplateExpression' ||
       isLinebreakingTemplateLiteral(singleExpr) ||
       singleExpr.type === 'ArrayExpression' ||
+      (singleExpr.type === 'ObjectExpression' &&
+        path.call(objectRequiresBraces, 'body', ...singleExprPath)) ||
       singleExpr.type === 'FunctionExpression')
   const body = isEmptyBlock(node.body)
     ? ''
