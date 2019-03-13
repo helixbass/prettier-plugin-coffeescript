@@ -3549,6 +3549,7 @@ function printAssignment(
     shouldInlineLogicalExpression(rightNode) ||
     rightNode.type === 'ArrayExpression' ||
     rightNode.type === 'TemplateLiteral' ||
+    rightNode.type === 'TaggedTemplateExpression' ||
     rightNode.type === 'FunctionExpression' ||
     rightNode.type === 'ClassExpression' ||
     rightNode.type === 'UnaryExpression' ||
