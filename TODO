@@ -1,5 +1,4 @@
 - adjust heredoc/heregex indent with surrounding indentation level
-- preserve 2e308 (or anything else that would compile to Infinity)?
 - how do elisions and breaking arrays interplay?
 - make comma option less naive (eg either omit or dedent comma if the arg has indentation eg breaking function or control)
 - where to draw the line with what to parenthesize when splatting - you can omit a lot of parens but it looks weird eg [(a if f)?.b ? []...]
@@ -88,17 +87,6 @@
   which it wants to convert to:
   schema: [enum: ['object', 'property']]
 - if singleQuote, prefer ''' to """ for TemplateLiterals with no interpolations
-- this is broken:
-  if a.some((b) ->
-    c
-    d
-  )
-    e
-  formats as:
-  if a.some (b) ->
-    c
-    d
-    e
 - unnecessary parens:
   currentNode[(
     if a
@@ -210,3 +198,9 @@
     else
       b
   )]
+- this shouldn't want to linebreak the {:
+  addProps = (updater) -> (props) -> {
+    ...props
+    ...(if isFunction updater then updater props else updater)
+  }
+- options for no implicit parens/objects

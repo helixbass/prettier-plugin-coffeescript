@@ -1241,17 +1241,20 @@ function printPathNoParens(path, options, print) {
     case 'SwitchStatement': {
       parts.push('switch')
       if (n.discriminant) {
-        parts.push(
-          ' ',
-          group(
-            concat([
-              ifBreak('('),
-              indent(concat([softline, path.call(print, 'discriminant')])),
-              softline,
-              ifBreak(')'),
-            ])
-          )
+        const simpleDiscriminant = path.call(print, 'discriminant')
+        const breakingDiscriminant = group(
+          concat([
+            ifBreak('('),
+            indent(concat([softline, simpleDiscriminant])),
+            softline,
+            ifBreak(')'),
+          ])
         )
+        const dontBreakDiscriminant = n.discriminant.type === 'CallExpression'
+        const discriminant = dontBreakDiscriminant
+          ? simpleDiscriminant
+          : breakingDiscriminant
+        parts.push(' ', discriminant)
       }
       const groupedCases = []
       let currentGroup = []
@@ -2209,7 +2212,17 @@ function isRightmostInStatement(
       (parent.type === 'ClassProperty' && node === parent.value) ||
       (parent.type === 'ArrayExpression' && parent.elements.length === 1)
     ) {
-      return {indent, trailingLine}
+      return {
+        indent,
+        trailingLine,
+        isFollowedByIndentedBody:
+          (isIf(parent) ||
+            parent.type === 'WhileStatement' ||
+            parent.type === 'SwitchStatement' ||
+            parent.type === 'ClassExpression' ||
+            parent.type === 'For') &&
+          !parent.postfix,
+      }
     }
     if (
       ifParentBreaks &&
@@ -3228,8 +3241,8 @@ function printArgumentsList(path, options, print) {
   }, 'arguments')
 
   const parent = path.getParentNode()
-  const parensNecessary = callParensNecessary(path)
-  const parensOptional =
+  let parensNecessary = callParensNecessary(path)
+  let parensOptional =
     !parensNecessary &&
     node.arguments.length &&
     (callParensOptional(path, options) ||
@@ -3252,6 +3265,17 @@ function printArgumentsList(path, options, print) {
         path.call(objectRequiresBraces, 'arguments', '0')) ||
       isDoFunc(args[0])) &&
     !hasTrailingComment(args[0])
+  const doesntHaveExplicitEndingBrace =
+    shouldntBreak &&
+    (args[0].type === 'FunctionExpression' || isDoFunc(args[0]))
+  if (
+    doesntHaveExplicitEndingBrace &&
+    parensOptional.isFollowedByIndentedBody
+  ) {
+    parensNecessary = true
+    parensOptional = false
+  }
+
   const firstArgIsObject =
     args.length >= 1 &&
     args[0].type === 'ObjectExpression' &&
@@ -3377,9 +3401,17 @@ function printArgumentsList(path, options, print) {
   }
 
   const printed = shouldntBreak
-    ? group(concat([openingParen, concat(printedArguments), closingParen]), {
-        visibleType: 'visible',
-      })
+    ? group(
+        concat([
+          openingParen,
+          concat(printedArguments),
+          doesntHaveExplicitEndingBrace && parensNecessary ? softline : '',
+          closingParen,
+        ]),
+        {
+          visibleType: 'visible',
+        }
+      )
     : group(
         concat([
           openingParen,
