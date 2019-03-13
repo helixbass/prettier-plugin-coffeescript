@@ -86,30 +86,6 @@
     inCharClass: yes, startingCharClass: yes if (
     condition...
   )
-- postfix if should avoid breaking similar to calls, eg
-  return unless call.parent.type in [
-    ...
-  ]
-  rather than
-  return unless call.parent.type in (
-    [
-      ...
-    ]
-  )
-- this:
-  [
-    ...
-  ].map (invalidCase) ->
-    {
-      errors: [
-        ...
-      ]
-      ...invalidCase
-    }
-  should be
-  ].map (invalidCase) -> {
-    ...
-  }
 - why is it deleting the blank line here?
   nestFunctions = (times) ->
     openings = ''

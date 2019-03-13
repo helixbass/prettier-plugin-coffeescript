@@ -1015,7 +1015,10 @@ function printPathNoParens(path, options, print) {
       )
       const keyword = n.inverted ? 'unless ' : 'if '
       const dontBreakTest =
-        n.test.type === 'CallExpression' || (isDoFunc(n.test) && n.postfix)
+        n.test.type === 'CallExpression' ||
+        (isDoFunc(n.test) && n.postfix) ||
+        (n.test.type === 'BinaryExpression' &&
+          n.test.right.type === 'ArrayExpression')
       const test = dontBreakTest ? simpleTest : breakingTest
 
       if (n.postfix) {
