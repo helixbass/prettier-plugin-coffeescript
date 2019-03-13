@@ -95,15 +95,6 @@
     while i < times
       ...
 - don't choke on ''' opening "directive" (has no raw?)
-- don't break value to next line:
-  code: String.raw'''
-    ...
-  '''
-  shouldn't become
-  code:
-    String.raw'''
-    ...
-  '''
 - postfix if (or anything else) has to trigger parens if the body breaks eg
   (a ->
     b

@@ -48,3 +48,30 @@ butThisOneShould =
   /// an inline heregex containing a long enough line to cause a break (?:[abcdefghijklmnopqrs]) ///
 
 `;
+
+exports[`tagged-template-literal.coffee 1`] = `
+a = '''
+  b
+'''
+
+a: """
+  b
+"""
+
+code: String.raw'''
+  x + y
+'''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a = '''
+  b
+'''
+
+a: """
+  b
+"""
+
+code: String.raw'''
+  x + y
+'''
+
+`;
