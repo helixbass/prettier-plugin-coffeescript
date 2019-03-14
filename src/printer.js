@@ -320,6 +320,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'ReturnStatement':
         case 'MemberExpression':
         case 'SpreadElement':
+        case 'JSXSpreadAttribute':
           return true
         default:
           return false
@@ -328,6 +329,17 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       switch (parent.type) {
         case 'AssignmentExpression':
           return node.postfix
+        case 'SpreadElement':
+        case 'JSXSpreadAttribute':
+          return true
+        default:
+          return false
+      }
+    case 'SwitchStatement':
+      switch (parent.type) {
+        case 'SpreadElement':
+        case 'JSXSpreadAttribute':
+          return true
         default:
           return false
       }
@@ -390,6 +402,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'NewExpression':
         case 'CallExpression':
           return node === parent.callee
+        case 'SpreadElement':
+        case 'JSXSpreadAttribute':
+          return true
         default:
           return false
       }
@@ -1142,6 +1157,13 @@ function printPathNoParens(path, options, print) {
         parts.push(opening)
         return concat(parts)
       }
+
+      const needsParens = pathNeedsParens(path, options)
+      const shouldIndent = needsParens && !needsParens.unlessParentBreaks
+
+      if (shouldIndent) {
+        parts.push(softline)
+      }
       parts.push(opening)
 
       const {expr: singleExpr, path: singleExprPath} = singleExpressionBlock(
@@ -1158,7 +1180,11 @@ function printPathNoParens(path, options, print) {
       parts.push(shouldBreak ? '' : ' then ')
       parts.push(body)
 
-      return group(concat(parts), {shouldBreak})
+      const indentedContent = concat([indent(concat(parts)), softline])
+      const unindentedContent = concat(parts)
+      const content = shouldIndent ? indentedContent : unindentedContent
+
+      return group(content, {shouldBreak})
     }
     case 'Range':
       parts.push(
@@ -1196,9 +1222,11 @@ function printPathNoParens(path, options, print) {
         !singleExpressionBlock(n.body) ||
         (options.respectBreak.indexOf('control') > -1 &&
           !hasSameStartLine(n, n.body))
-      const shouldIndent = !shouldBreak
 
       const body = adjustClause(n.body, path.call(print, 'body'))
+
+      const needsParens = pathNeedsParens(path, options)
+      const shouldIndent = needsParens && !needsParens.unlessParentBreaks
 
       parts.push(
         concat([
@@ -1222,27 +1250,32 @@ function printPathNoParens(path, options, print) {
       return 'continue'
     case 'TryStatement': {
       const text = options.originalText
+      const needsParens = pathNeedsParens(path, options)
+      const shouldIndent = needsParens && !needsParens.unlessParentBreaks
+
+      const content = concat([
+        shouldIndent ? softline : '',
+        'try',
+        path.call(print, 'block'),
+        isNextLineEmpty(text, n.block, locEnd) && (n.handler || n.finalizer)
+          ? hardline
+          : '',
+        n.handler
+          ? concat([
+              hardline,
+              path.call(print, 'handler'),
+              isNextLineEmpty(text, n.handler, locEnd) && n.finalizer
+                ? hardline
+                : '',
+            ])
+          : '',
+        n.finalizer
+          ? concat([hardline, 'finally', path.call(print, 'finalizer')])
+          : '',
+      ])
 
       return group(
-        concat([
-          'try',
-          path.call(print, 'block'),
-          isNextLineEmpty(text, n.block, locEnd) && (n.handler || n.finalizer)
-            ? hardline
-            : '',
-          n.handler
-            ? concat([
-                hardline,
-                path.call(print, 'handler'),
-                isNextLineEmpty(text, n.handler, locEnd) && n.finalizer
-                  ? hardline
-                  : '',
-              ])
-            : '',
-          n.finalizer
-            ? concat([hardline, 'finally', path.call(print, 'finalizer')])
-            : '',
-        ]),
+        shouldIndent ? concat([indent(content), softline]) : content,
         {shouldBreak: true}
       )
     }
@@ -1258,6 +1291,12 @@ function printPathNoParens(path, options, print) {
     case 'ThrowStatement':
       return concat(['throw ', path.call(print, 'argument')])
     case 'SwitchStatement': {
+      const needsParens = pathNeedsParens(path, options)
+      const shouldIndent = needsParens && !needsParens.unlessParentBreaks
+
+      if (shouldIndent) {
+        parts.push(softline)
+      }
       parts.push('switch')
       if (n.discriminant) {
         const simpleDiscriminant = path.call(print, 'discriminant')
@@ -1397,7 +1436,9 @@ function printPathNoParens(path, options, print) {
         body.push(...caseBody)
       })
       parts.push(group(indent(concat([hardline, ...body]))))
-      return concat(parts)
+      const indentedContent = concat([indent(concat(parts)), softline])
+      const unindentedContent = concat(parts)
+      return shouldIndent ? indentedContent : unindentedContent
     }
     case 'JSXAttribute':
       parts.push(path.call(print, 'name'))

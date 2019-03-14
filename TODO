@@ -59,13 +59,6 @@
   which it wants to convert to:
   schema: [enum: ['object', 'property']]
 - if singleQuote, prefer ''' to """ for TemplateLiterals with no interpolations
-- unnecessary parens:
-  currentNode[(
-    if a
-      ...
-    else
-      ...
-  )]
 - postfix if can break:
   return Object.assign state,
     inCharClass: yes, startingCharClass: yes if (
@@ -80,11 +73,6 @@
     while i < times
       ...
 - don't choke on ''' opening "directive" (has no raw?)
-- this should not put closing paren right after body (should probably indent the whole thing?):
-  ...(for ...
-    [
-      ...
-    ])
 - don't escape " in """
 - this doesn't preserve intended formatting:
   ### eslint-disable-quotes ### # For better readability ...
@@ -104,10 +92,3 @@
   ]
 - could there be a case where not using call parens in if test could be a problem? eg if its last arg ended with a postfix if and it's an inline if?
   if a(b if c) then d
-- unnecessary parens:
-  currentNode[(
-    if ...
-      a
-    else
-      b
-  )]
