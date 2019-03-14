@@ -264,6 +264,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
       return true
     case 'ConditionalExpression':
+      if (isCondition(node, parent)) {
+        return {unlessParentBreaks: true}
+      }
       switch (parent.type) {
         case 'TaggedTemplateExpression':
         case 'Range':
@@ -297,9 +300,6 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         // return parent.right === node
         case 'JSXSpreadAttribute':
           return true
-        case 'IfStatement':
-        case 'ConditionalExpression':
-          return node === parent.test
         default:
           return false
       }
@@ -1042,7 +1042,8 @@ function printPathNoParens(path, options, print) {
       }
 
       const shouldBreak = shouldBreakIf(n, options)
-      const shouldIndent = pathNeedsParens(path, options)
+      const needsParens = pathNeedsParens(path, options)
+      const shouldIndent = needsParens && !needsParens.unlessParentBreaks
 
       const con = adjustClause(n.consequent, path.call(print, 'consequent'))
 
@@ -1088,9 +1089,9 @@ function printPathNoParens(path, options, print) {
       }
 
       const isChainedElseIf = parent.type === n.type && n === parent.alternate
-      const content = shouldIndent
-        ? concat([indent(concat(parts)), softline])
-        : concat(parts)
+      const indentedContent = concat([indent(concat(parts)), softline])
+      const unindentedContent = concat(parts)
+      const content = shouldIndent ? indentedContent : unindentedContent
       if (isChainedElseIf) {
         return content
       }
