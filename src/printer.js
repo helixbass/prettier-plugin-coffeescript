@@ -259,6 +259,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       ) {
         return false
       }
+      if (isCondition(node, parent)) {
+        return {unlessParentBreaks: true}
+      }
       return true
     case 'ConditionalExpression':
       switch (parent.type) {
@@ -358,6 +361,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'ClassExpression':
+      if (isCondition(node, parent)) {
+        return {unlessParentBreaks: true}
+      }
       return (
         parent.type === 'ExportDefaultDeclaration' ||
         parent.type === 'TaggedTemplateExpression' ||
@@ -370,8 +376,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           parent.callee === node) ||
         (isClass(parent) && parent.superClass === node) ||
         (parent.type === 'MemberExpression' && parent.object === node) ||
-        (parent.type === 'UnaryExpression' && parent.operator === 'typeof') ||
-        (isIf(parent) && parent.test === node)
+        (parent.type === 'UnaryExpression' && parent.operator === 'typeof')
       )
     case 'ObjectExpression':
       switch (parent.type) {
@@ -400,6 +405,14 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   }
 
   return false
+}
+
+function isCondition(node, parent) {
+  return (
+    ((isIf(parent) || parent.type === 'WhileStatement') &&
+      parent.test === node) ||
+    (parent.type === 'SwitchStatement' && parent.discriminant === node)
+  )
 }
 
 function isAmbiguousRegex(node) {
@@ -1011,7 +1024,8 @@ function printPathNoParens(path, options, print) {
           indent(concat([softline, simpleTest])),
           softline,
           ifBreak(')'),
-        ])
+        ]),
+        {visibleType: 'visible'}
       )
       const keyword = n.inverted ? 'unless ' : 'if '
       const dontBreakTest =
@@ -1162,7 +1176,8 @@ function printPathNoParens(path, options, print) {
           indent(concat([softline, simpleTest])),
           softline,
           ifBreak(')'),
-        ])
+        ]),
+        {visibleType: 'visible'}
       )
       const dontBreakTest = n.test.type === 'CallExpression'
       const test = dontBreakTest ? simpleTest : breakingTest
@@ -1251,7 +1266,8 @@ function printPathNoParens(path, options, print) {
             indent(concat([softline, simpleDiscriminant])),
             softline,
             ifBreak(')'),
-          ])
+          ]),
+          {visibleType: 'visible'}
         )
         const dontBreakDiscriminant = n.discriminant.type === 'CallExpression'
         const discriminant = dontBreakDiscriminant

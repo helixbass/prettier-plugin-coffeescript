@@ -39,10 +39,6 @@
     token
   ) -> token.value is node.operator
   should break differently
-- double parens:
-  return unless (
-    (consequentIdentifierName = justIdentifierName node.consequent)
-  )
 - prefer not to break postfix if in certain cases? eg this is nicer
   a {
     ...
