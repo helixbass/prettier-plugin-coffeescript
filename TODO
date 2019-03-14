@@ -58,7 +58,6 @@
   ]
   which it wants to convert to:
   schema: [enum: ['object', 'property']]
-- if singleQuote, prefer ''' to """ for TemplateLiterals with no interpolations
 - postfix if can break:
   return Object.assign state,
     inCharClass: yes, startingCharClass: yes if (

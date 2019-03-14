@@ -712,7 +712,7 @@ function printPathNoParens(path, options, print) {
       return 'null'
     case 'InterpolatedRegExpLiteral':
     case 'RegExpLiteral':
-      return printRegex(path, print)
+      return printRegex(path, options, print)
     case 'PassthroughLiteral': {
       const quote = n.here ? '```' : '`'
       parts.push(quote, n.value, quote)
@@ -1654,7 +1654,7 @@ function printPathNoParens(path, options, print) {
     case 'TemplateElement':
       return join(literalline, n.value.raw.split(/\r?\n/g))
     case 'TemplateLiteral':
-      return printTemplateLiteral(path, print)
+      return printTemplateLiteral(path, options, print)
     case 'EmptyInterpolation':
       return ''
     case 'TaggedTemplateExpression':
@@ -2035,11 +2035,30 @@ function isClass(node) {
   )
 }
 
-function printTemplateLiteral(path, print, {omitQuotes} = {}) {
+function printTemplateLiteral(path, options, print, {omitQuotes} = {}) {
   const parts = []
   const node = path.getValue()
   const expressions = path.map(print, 'expressions')
-  const quote = omitQuotes ? '' : node.quote || '"'
+  const quote = omitQuotes
+    ? ''
+    : options.singleQuote &&
+      node.quote === '"""' &&
+      node.expressions.length === 0 &&
+      !node.quasis.find(quasi => /'''/.test(quasi.value.raw)) &&
+      !(
+        node.quasis.length &&
+        /'$/.test(node.quasis[node.quasis.length - 1].value.raw)
+      )
+    ? "'''"
+    : !options.singleQuote &&
+      node.quote === "'''" &&
+      !node.quasis.find(quasi => /("""|#\{)/.test(quasi.value.raw)) &&
+      !(
+        node.quasis.length &&
+        /"$/.test(node.quasis[node.quasis.length - 1].value.raw)
+      )
+    ? '"""'
+    : node.quote || '"'
   parts.push(quote)
 
   path.each(childPath => {
@@ -2081,7 +2100,7 @@ function isChainableCall(node) {
   return node.type === 'CallExpression' && isMemberish(node.callee)
 }
 
-function printRegex(path, print) {
+function printRegex(path, options, print) {
   const node = path.getValue()
   const delim = node.delimiter || '/'
   const flags = node.flags
@@ -2091,7 +2110,7 @@ function printRegex(path, print) {
   const pattern = node.interpolatedPattern
     ? path.call(
         patternPath =>
-          printTemplateLiteral(patternPath, print, {omitQuotes: true}),
+          printTemplateLiteral(patternPath, options, print, {omitQuotes: true}),
         'interpolatedPattern'
       )
     : node.originalPattern != null
