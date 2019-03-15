@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`last-line-0.coffee 1`] = `
+'use strict'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'use strict'
+
+`;
+
+exports[`last-line-1.coffee 1`] = `
+'use strict'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'use strict'
+
+`;
+
+exports[`last-line-2.coffee 1`] = `
+'use strict'
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'use strict'
+
+`;
+
+exports[`newline.coffee 1`] = `
+### @flow ###
+
+"use strict"
+
+import a from "a"
+
+a()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### @flow ###
+
+'use strict'
+
+import a from 'a'
+
+a()
+
+`;
+
+exports[`no-newline.coffee 1`] = `
+"use strict"
+a
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'use strict'
+a
+
+`;
+
+exports[`test.coffee 1`] = `
+"use strict"
+
+fn = ->
+  "use strict"
+
+f = =>
+  'ngInject'
+  Object.assign(this, { $log, $uibModal })
+
+f = ->
+
+  'ngInject'
+
+  Object.assign(this, { $log, $uibModal })
+
+f = ->
+  'ngInject'
+
+
+  Object.assign(this, { $log, $uibModal })
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'use strict'
+
+fn = ->
+  'use strict'
+
+f = =>
+  'ngInject'
+  Object.assign this, { $log, $uibModal }
+
+f = ->
+  'ngInject'
+
+  Object.assign this, { $log, $uibModal }
+
+f = ->
+  'ngInject'
+
+  Object.assign this, { $log, $uibModal }
+
+`;
