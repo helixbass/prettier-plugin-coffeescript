@@ -15,8 +15,8 @@ import {
   multiLine
   andMore
   soWeCanGetItTo80Columns
-} from "."
-import { fitsIn, oneLine } from "."
+} from '.'
+import { fitsIn, oneLine } from '.'
 
 `;
 
@@ -35,22 +35,22 @@ import {
   multiLine
   andMore
   soWeCanGetItTo80Columns
-} from "."
-import {fitsIn, oneLine} from "."
+} from '.'
+import {fitsIn, oneLine} from '.'
 
 `;
 
 exports[`empty-import.coffee 1`] = `
 import { } from '@types/googlemaps'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import {} from "@types/googlemaps"
+import {} from '@types/googlemaps'
 
 `;
 
 exports[`empty-import.coffee 2`] = `
 import { } from '@types/googlemaps'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import {} from "@types/googlemaps"
+import {} from '@types/googlemaps'
 
 `;
 
@@ -60,15 +60,15 @@ import {somethingSuperLongsomethingSuperLong1} from 'somethingSuperLongsomething
 import a, {somethingSuperLongsomethingSuperLong2} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 import {a1, somethingSuperLongsomethingSuperLong3} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import somethingSuperLongsomethingSuperLong from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
-import { somethingSuperLongsomethingSuperLong1 } from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
+import somethingSuperLongsomethingSuperLong from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
+import { somethingSuperLongsomethingSuperLong1 } from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 import a, {
   somethingSuperLongsomethingSuperLong2
-} from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
+} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 import {
   a1
   somethingSuperLongsomethingSuperLong3
-} from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
+} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 
 `;
 
@@ -78,42 +78,42 @@ import {somethingSuperLongsomethingSuperLong1} from 'somethingSuperLongsomething
 import a, {somethingSuperLongsomethingSuperLong2} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 import {a1, somethingSuperLongsomethingSuperLong3} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import somethingSuperLongsomethingSuperLong from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
-import {somethingSuperLongsomethingSuperLong1} from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
+import somethingSuperLongsomethingSuperLong from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
+import {somethingSuperLongsomethingSuperLong1} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 import a, {
   somethingSuperLongsomethingSuperLong2
-} from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
+} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 import {
   a1
   somethingSuperLongsomethingSuperLong3
-} from "somethingSuperLongsomethingSuperLongsomethingSuperLong"
+} from 'somethingSuperLongsomethingSuperLongsomethingSuperLong'
 
 `;
 
 exports[`long-line.coffee 1`] = `
 import someCoolUtilWithARatherLongName from '../../../../utils/someCoolUtilWithARatherLongName'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import someCoolUtilWithARatherLongName from "../../../../utils/someCoolUtilWithARatherLongName"
+import someCoolUtilWithARatherLongName from '../../../../utils/someCoolUtilWithARatherLongName'
 
 `;
 
 exports[`long-line.coffee 2`] = `
 import someCoolUtilWithARatherLongName from '../../../../utils/someCoolUtilWithARatherLongName'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import someCoolUtilWithARatherLongName from "../../../../utils/someCoolUtilWithARatherLongName"
+import someCoolUtilWithARatherLongName from '../../../../utils/someCoolUtilWithARatherLongName'
 
 `;
 
 exports[`multiple_standalones.coffee 1`] = `
 import a, * as b from 'a'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import a, * as b from "a"
+import a, * as b from 'a'
 
 `;
 
 exports[`multiple_standalones.coffee 2`] = `
 import a, * as b from 'a'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import a, * as b from "a"
+import a, * as b from 'a'
 
 `;

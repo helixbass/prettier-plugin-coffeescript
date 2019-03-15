@@ -103,7 +103,7 @@ class a extends ({})
 class a extends (b; c)
 
 # "StringLiteral"
-class a extends ("")
+class a extends ('')
 
 # "TemplateLiteral"
 class a extends ("#{}")

@@ -42,10 +42,10 @@ f = ->
   await spellcheck && spellcheck.setChecking(false)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 f = ->
-  result = if typeof fn is "function" then await fn() else null
+  result = if typeof fn is 'function' then await fn() else null
 
 (->
-  console.log await if true then Promise.resolve "A" else Promise.resolve "B"
+  console.log await if true then Promise.resolve 'A' else Promise.resolve 'B'
 )()
 
 f = ->

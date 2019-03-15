@@ -139,6 +139,12 @@ const options = {
     default: [{value: []}],
     description: "Don't use implicit constructs",
   },
+  singleQuote: {
+    type: 'boolean',
+    category: 'Common',
+    default: true,
+    description: 'Use single quotes instead of double quotes.',
+  },
 }
 
 module.exports = {

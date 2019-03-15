@@ -58,9 +58,9 @@ foo = "such a long template string #{
 
 x = "mdl-textfield mdl-js-textfield #{className} #{
   if content.length > 0
-    "is-dirty"
+    'is-dirty'
   else
-    ""
+    ''
 } combo-box__input"
 
 testing = ->
@@ -71,7 +71,7 @@ testing = ->
         process.env.OPENID_URL
       }/something/something/something?#{Object.keys p
         .map (k) -> "#{encodeURIComponent k}=#{encodeURIComponent p[k]}"
-        .join "&"}"
+        .join '&'}"
 
 console.log(
   "Trying update appcast for #{app.name} (#{app.cask.appcast}) -> (#{
@@ -80,7 +80,7 @@ console.log(
 )
 
 console.log(
-  "brew cask audit --download #{_.map(definitions, "caskName").join " "}"
+  "brew cask audit --download #{_.map(definitions, 'caskName').join ' '}"
 )
 
 console.log(
@@ -89,7 +89,7 @@ console.log(
   }.\\n"
 )
 
-describe "something", ->
+describe 'something', ->
   test "{pass: false} expect(#{small}).toBeGreaterThanOrEqual(#{big})", ->
 
 throw new Error(
