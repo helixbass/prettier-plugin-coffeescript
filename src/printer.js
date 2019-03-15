@@ -1808,7 +1808,11 @@ function printFunction(path, options, print) {
       isLinebreakingTemplateLiteral(singleExpr) ||
       singleExpr.type === 'ArrayExpression' ||
       (singleExpr.type === 'ObjectExpression' &&
-        path.call(objectRequiresBraces, 'body', ...singleExprPath)) ||
+        path.call(
+          objectPath => objectRequiresBraces(objectPath, options),
+          'body',
+          ...singleExprPath
+        )) ||
       singleExpr.type === 'FunctionExpression')
   const body = isEmptyBlock(node.body)
     ? ''
@@ -1911,7 +1915,7 @@ function printObject(path, print, options) {
 
   const shouldOmitBraces =
     shouldOmitObjectBraces(path, options) ||
-    (!objectRequiresBraces(path) &&
+    (!objectRequiresBraces(path, options) &&
       isCallArgument(path, {beforeTrailingFunction: true}))
   const shouldOmitBracesIfParentBreaks =
     !shouldOmitBraces &&
@@ -2171,7 +2175,10 @@ function isTemplateOnItsOwnLine(n, text, {locStart}) {
   )
 }
 
-function objectRequiresBraces(path, {stackOffset = 0} = {}) {
+function objectRequiresBraces(path, options, {stackOffset = 0} = {}) {
+  if (options.noImplicit.indexOf('objectBraces') > -1) {
+    return true
+  }
   const node = path.getParentNode(stackOffset - 1)
   if (node.type === 'ObjectPattern') {
     return true
@@ -2205,7 +2212,7 @@ function shouldOmitObjectBraces(
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
 
-  if (objectRequiresBraces(path, {stackOffset})) {
+  if (objectRequiresBraces(path, options, {stackOffset})) {
     return false
   }
 
@@ -3213,6 +3220,10 @@ function callParensOptionalIfParentBreaks(
   options,
   {stackOffset = 0} = {}
 ) {
+  if (callParensNecessary(path, options, {stackOffset})) {
+    return false
+  }
+
   return isRightmostInStatement(path, options, {
     stackOffset,
     ifParentBreaks: true,
@@ -3243,10 +3254,14 @@ function isFirstCallInChain(path, {stackOffset = 0} = {}) {
   )
 }
 
-function callParensNecessary(path, {stackOffset = 0} = {}) {
+function callParensNecessary(path, options, {stackOffset = 0} = {}) {
+  if (options.noImplicit.indexOf('callParens') > -1) {
+    return true
+  }
   const node = path.getParentNode(stackOffset - 1)
 
   if (
+    node.arguments &&
     node.arguments.length &&
     node.arguments[0].type === 'RegExpLiteral' &&
     isAmbiguousRegex(node.arguments[0])
@@ -3254,6 +3269,7 @@ function callParensNecessary(path, {stackOffset = 0} = {}) {
     return true
   }
   if (
+    node.callee &&
     node.callee.type === 'Identifier' &&
     (node.callee.name === 'get' || node.callee.name === 'set')
   ) {
@@ -3266,6 +3282,10 @@ function callParensOptional(path, options, {stackOffset = 0} = {}) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
+
+  if (callParensNecessary(path, options, {stackOffset})) {
+    return false
+  }
 
   return (
     pathNeedsParens(path, options) ||
@@ -3326,7 +3346,7 @@ function printArgumentsList(path, options, print) {
   }, 'arguments')
 
   const parent = path.getParentNode()
-  let parensNecessary = callParensNecessary(path)
+  let parensNecessary = callParensNecessary(path, options)
   let parensOptional =
     !parensNecessary &&
     node.arguments.length &&
@@ -3347,7 +3367,11 @@ function printArgumentsList(path, options, print) {
     (args[0].type === 'FunctionExpression' ||
       args[0].type === 'ArrayExpression' ||
       (args[0].type === 'ObjectExpression' &&
-        path.call(objectRequiresBraces, 'arguments', '0')) ||
+        path.call(
+          objectPath => objectRequiresBraces(objectPath, options),
+          'arguments',
+          '0'
+        )) ||
       isDoFunc(args[0])) &&
     !hasTrailingComment(args[0])
   const doesntHaveExplicitEndingBrace =
@@ -3364,7 +3388,11 @@ function printArgumentsList(path, options, print) {
   const firstArgIsObject =
     args.length >= 1 &&
     args[0].type === 'ObjectExpression' &&
-    !path.call(objectRequiresBraces, 'arguments', '0')
+    !path.call(
+      objectPath => objectRequiresBraces(objectPath, options),
+      'arguments',
+      '0'
+    )
   const isRightSideOfAssignment =
     (parent.type === 'AssignmentExpression' && node === parent.right) ||
     ((parent.type === 'ObjectProperty' || parent.type === 'ClassProperty') &&

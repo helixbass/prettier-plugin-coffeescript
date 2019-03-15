@@ -120,8 +120,24 @@ const options = {
     ],
     category: 'Global',
     default: [{value: ['control', 'functionBody', 'object']}],
-    description:
-      'Include commas when breaking call args, function params or arrays',
+    description: "Don't inline multiline constructs",
+  },
+  noImplicit: {
+    array: true,
+    type: 'choice',
+    choices: [
+      {
+        value: 'callParens',
+        description: "Don't ever use implicit call parentheses",
+      },
+      {
+        value: 'objectBraces',
+        description: "Don't ever use implicit object braces",
+      },
+    ],
+    category: 'Global',
+    default: [{value: []}],
+    description: "Don't use implicit constructs",
   },
 }
 
