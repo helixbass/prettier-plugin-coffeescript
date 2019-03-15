@@ -14,7 +14,7 @@ foo ? baz || baz
 (foo && baz) ? baz
 foo and (baz ? baz)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-obj.foo ? "default"
+obj.foo ? 'default'
 
 x = (foo, bar = foo ? bar) ->
 

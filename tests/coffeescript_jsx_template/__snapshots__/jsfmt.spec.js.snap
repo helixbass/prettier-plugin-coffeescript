@@ -21,11 +21,11 @@ exports[`styled-components.coffee 1`] = `
   "}
 </style>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<style jsx>{"
+<style jsx>{'
   p {
     color: red;
   }
-"}</style>
+'}</style>
 
 <style jsx>{tpl"
   p {
@@ -33,10 +33,10 @@ exports[`styled-components.coffee 1`] = `
   }
 "}</style>
 
-<style jsx>{"
+<style jsx>{'
     p {
       color: red;
     }
-  "}</style>
+  '}</style>
 
 `;

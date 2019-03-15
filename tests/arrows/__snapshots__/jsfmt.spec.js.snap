@@ -193,7 +193,7 @@ render = ->
     </View>
   )
 
-jest.mock "../SearchSource", =>
+jest.mock '../SearchSource', =>
   class
     findMatchingTests: (pattern) ->
       return paths: []
@@ -253,11 +253,11 @@ export bem = (block) =>
     ###
     (modifier) =>
       [
-        "."
+        '.'
         css block
-        if element then "__#{css element}" else ""
-        if modifier then "--#{css modifier}" else ""
-      ].join ""
+        if element then "__#{css element}" else ''
+        if modifier then "--#{css modifier}" else ''
+      ].join ''
 
 <FlatList
   renderItem={(
@@ -315,10 +315,10 @@ foo = () =>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 foo = =>
   expect(arg1, arg2, arg3).toEqual
-    message: "test"
-    messageType: "SMS"
-    status: "Unknown"
-    created: "11/01/2017 13:36"
+    message: 'test'
+    messageType: 'SMS'
+    status: 'Unknown'
+    created: '11/01/2017 13:36'
 
 `;
 

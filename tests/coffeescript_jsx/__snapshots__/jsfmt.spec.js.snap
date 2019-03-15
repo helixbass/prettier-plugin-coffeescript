@@ -43,11 +43,11 @@ if cable then <div><span>thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToe
   )}
 </div>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if <div /> then jsxModeFromElementNonBreaking else "a"
+if <div /> then jsxModeFromElementNonBreaking else 'a'
 
-if jsxModeFromElementNonBreaking then <div /> else "a"
+if jsxModeFromElementNonBreaking then <div /> else 'a'
 
-if jsxModeFromElementNonBreaking then "a" else <div />
+if jsxModeFromElementNonBreaking then 'a' else <div />
 
 if (
   <div>
@@ -56,21 +56,21 @@ if (
     </span>
   </div>
 )
-  "jsx mode from element breaking"
+  'jsx mode from element breaking'
 else
-  "a"
+  'a'
 
-if "jsx mode from element breaking"
+if 'jsx mode from element breaking'
   <div>
     <span>
       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
     </span>
   </div>
 else
-  "a"
+  'a'
 
-if "jsx mode from element breaking"
-  "a"
+if 'jsx mode from element breaking'
+  'a'
 else
   <div>
     <span>
@@ -78,21 +78,21 @@ else
     </span>
   </div>
 
-<div>{if a then "a" else if b then "b" else "c"}</div>
+<div>{if a then 'a' else if b then 'b' else 'c'}</div>
 
 if cable
-  "satellite"
+  'satellite'
 else if publiq
-  "affairs"
+  'affairs'
 else if network
   <span id="c" />
 else
-  "dunno"
+  'dunno'
 
 if cable
-  "satellite"
+  'satellite'
 else if publiq
-  "affairs"
+  'affairs'
 else if network
   <div>
     <span>
@@ -100,7 +100,7 @@ else if network
     </span>
   </div>
 else
-  "dunno"
+  'dunno'
 
 if cable
   <div>
@@ -109,11 +109,11 @@ if cable
     </span>
   </div>
 else if sateline
-  "public"
+  'public'
 else if affairs
-  "network"
+  'network'
 else
-  "dunno"
+  'dunno'
 
 <div>
   {properties.length > 1 or (
@@ -214,19 +214,19 @@ exports[`expression.coffee 1`] = `
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <View
   style={
-    someVeryLongStyle1: "true"
-    someVeryLongStyle2: "true"
-    someVeryLongStyle3: "true"
-    someVeryLongStyle4: "true"
+    someVeryLongStyle1: 'true'
+    someVeryLongStyle2: 'true'
+    someVeryLongStyle3: 'true'
+    someVeryLongStyle4: 'true'
   }
 />
 
 <View
   style={[
-    someVeryLongStyle1: "true"
-    someVeryLongStyle2: "true"
-    someVeryLongStyle3: "true"
-    someVeryLongStyle4: "true"
+    someVeryLongStyle1: 'true'
+    someVeryLongStyle2: 'true'
+    someVeryLongStyle3: 'true'
+    someVeryLongStyle4: 'true'
   ]}
 />
 
@@ -270,14 +270,14 @@ exports[`expression.coffee 1`] = `
 
 <BookingIntroPanel
   prop="long_string_make_to_force_break"
-  logClick={(data) -> doLogClick "short", "short", data}
+  logClick={(data) -> doLogClick 'short', 'short', data}
 />
 
 <BookingIntroPanel
   logClick={(data) ->
     doLogClick(
-      "long_name_long_name_long_name"
-      "long_name_long_name_long_name"
+      'long_name_long_name_long_name'
+      'long_name_long_name_long_name'
       data
     )
   }
@@ -292,8 +292,8 @@ exports[`expression.coffee 1`] = `
 <BookingIntroPanel>
   {(data) ->
     doLogClick(
-      "long_name_long_name_long_name"
-      "long_name_long_name_long_name"
+      'long_name_long_name_long_name'
+      'long_name_long_name_long_name'
       data
     )
   }
@@ -366,7 +366,7 @@ exports[`hug.coffee 1`] = `
         <MatchAsync
           key={"#{route.to}-async"}
           pattern={route.to}
-          exactly={route.to is "/"}
+          exactly={route.to is '/'}
           getComponent={routeES6Modules[route.value]}
         />
       }
@@ -381,7 +381,7 @@ exports[`hug.coffee 1`] = `
         <MatchAsync
           key={"#{route.to}-async"}
           pattern={route.to}
-          exactly={route.to is "/"}
+          exactly={route.to is '/'}
           getComponent={routeES6Modules[route.value]}
         />
       }
@@ -392,9 +392,9 @@ exports[`hug.coffee 1`] = `
 <div>
   {member.memberName.memberSomething + (
     if member.memberDef.memberSomething.signatures
-      "()"
+      '()'
     else
-      ""
+      ''
   )}
 </div>
 
@@ -457,9 +457,9 @@ exports[`logical-expression.coffee 1`] = `
   </span>}
 </div>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<div>{a || "b"}</div>
+<div>{a || 'b'}</div>
 
-<div>{a && "b"}</div>
+<div>{a && 'b'}</div>
 
 <div>{a || <span />}</div>
 
@@ -530,7 +530,7 @@ tabs = [
 ]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 tabs = [
-  title: "General Info"
+  title: 'General Info'
   content:
     <GeneralForm
       long-attribute="i-need-long-value-here"
@@ -601,7 +601,7 @@ exports[`quotes.coffee 1`] = `
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <div id="&quot;'<>&amp;&quot;" />
 <div id="&quot;&#39;<>&amp;&quot;" />
-<div id={"'\\"&quot;<>&amp;&quot;"} />
+<div id={'\\'"&quot;<>&amp;&quot;'} />
 
 `;
 

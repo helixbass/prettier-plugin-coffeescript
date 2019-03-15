@@ -9,13 +9,13 @@ exports[`arrow.coffee 1`] = `
 	a
 "
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
--> a"""
+-> a'''
 	a
-"""
+'''
 
--> "
+-> '
 	a
-"
+'
 
 `;
 
@@ -33,18 +33,18 @@ new Error formatErrorMessage'''
   Which has more than one line.
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-insertRule """*, *:before, *:after {
+insertRule '''*, *:before, *:after {
   box-sizing: inherit;
-}"""
+}'''
 
 insertRule'*, *:before, *:after {
   box-sizing: inherit;
 }'
 
-new Error formatErrorMessage"""
+new Error formatErrorMessage'''
   This a really bad error.
   Which has more than one line.
-"""
+'''
 
 `;
 
@@ -94,14 +94,14 @@ this._pipe.write "
   \\n\\n Pattern matches #{total} #{pluralizeTest} but that's looooong
 "
 
--> "
+-> '
   a
-"
+'
 
 ->
-  "
+  '
     a
-  "
+  '
 
 `;
 
@@ -164,7 +164,7 @@ new B()""
 
 (b; c)""
 
-("")""
+('')""
 ("#{b}")""
 
 (++b)""

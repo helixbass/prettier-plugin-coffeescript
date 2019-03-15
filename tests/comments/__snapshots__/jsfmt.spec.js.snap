@@ -27,10 +27,10 @@ foo = {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 foo =
-  a: "a" ### comment for this line ###
+  a: 'a' ### comment for this line ###
 
   ### Section B ###
-  b: "b"
+  b: 'b'
 
 `;
 
@@ -149,7 +149,7 @@ assignment = ###* @type {string} ### getValue()
 functionCall 1 + ###* @type {string} ### value, ###* @type {!Foo} ### {}
 
 returnValue = ->
-  return ###* @type {!Array.<string>} ### ["hello", "you"]
+  return ###* @type {!Array.<string>} ### ['hello', 'you']
 
 `;
 
@@ -554,16 +554,16 @@ rootEpic = (actions, store) =>
 
 # optional trailing comma gets moved all the way to the beginning
 regex = new RegExp(
-  "^\\\\s*" + # beginning of the line
-  "name\\\\s*=\\\\s*" + # name =
-  "['\\"]" + # opening quotation mark
+  '^\\\\s*' + # beginning of the line
+  'name\\\\s*=\\\\s*' + # name =
+  '[\\'"]' + # opening quotation mark
   escapeStringRegExp(target.name) + # target name
-  "['\\"]" + # closing quotation mark
-    ",?$" # optional trailing comma
+  '[\\'"]' + # closing quotation mark
+    ',?$' # optional trailing comma
 )
 
 # The comment is moved and doesn't trigger the eslint rule anymore
-import path from "path" # eslint-disable-line nuclide-internal/prefer-nuclide-uri
+import path from 'path' # eslint-disable-line nuclide-internal/prefer-nuclide-uri
 
 # Comments disappear in-between MemberExpressions
 Observable.of process
@@ -592,7 +592,7 @@ if 1
 else
 
 # The comment makes the line break in a weird way
-result = asyncExecute "non_existing_command", ### args ### []
+result = asyncExecute 'non_existing_command', ### args ### []
 
 # The closing paren is printed on the same line as the comment
 foo(
@@ -936,7 +936,7 @@ x =
 class X
   getSectionMode: (
     pageMetaData
-    sectionMetaData = ["unknown"]
+    sectionMetaData = ['unknown']
     ### $FlowFixMe This error was exposed while converting keyMirror
     * to keyMirrorRecursive ###
   ) ->
@@ -1277,33 +1277,33 @@ switch foo
   #comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 switch node && node.type
-  when "Property", "MethodDefinition"
+  when 'Property', 'MethodDefinition'
     prop = node.key
 
-  when "MemberExpression"
+  when 'MemberExpression'
     prop = node.property
 
   # no default
 
 switch foo
-  when "bar"
+  when 'bar'
     doThing()
 
   # no default
 
 switch foo
-  when "bar" #comment
+  when 'bar' #comment
     doThing() #comment
 
-  when "baz"
+  when 'baz'
     doOtherThing() #comment
 
 switch foo
-  when "bar"
+  when 'bar'
     doThing()
   #comment
 
-  when "baz"
+  when 'baz'
     doThing()
   #comment
 
@@ -1365,10 +1365,10 @@ CONNECTION_STATUS = exports.CONNECTION_STATUS = {
 ###
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CONNECTION_STATUS = exports.CONNECTION_STATUS =
-  CLOSED: Object.freeze kind: "CLOSED"
-  CONNECTED: Object.freeze kind: "CONNECTED"
-  CONNECTING: Object.freeze kind: "CONNECTING"
-  NOT_CONNECTED: Object.freeze kind: "NOT_CONNECTED"
+  CLOSED: Object.freeze kind: 'CLOSED'
+  CONNECTED: Object.freeze kind: 'CONNECTED'
+  CONNECTING: Object.freeze kind: 'CONNECTING'
+  NOT_CONNECTED: Object.freeze kind: 'NOT_CONNECTED'
 
 ### A comment ###
 ###*
@@ -1465,40 +1465,40 @@ val
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 obj =
   # Comment
-  key: "val"
+  key: 'val'
 
 obj =
   # Comment
-  key: "val"
+  key: 'val'
 
 obj =
   # Comment
-  key: "val"
+  key: 'val'
 
 obj =
   # Comment
-  ["val"]
+  ['val']
 
 obj = [
   # Comment
-  "val"
+  'val'
 ]
 
 obj = [
   # Comment
-  "val"
+  'val'
 ]
 
 obj =
   # Comment
-  "val"
+  'val'
 
 obj =
   # Comment
-  "
+  '
 val
 val
-"
+'
 
 obj =
   # Comment

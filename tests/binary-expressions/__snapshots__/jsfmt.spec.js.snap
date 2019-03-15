@@ -116,17 +116,17 @@ if (VeryVeryVeryVeryVeryVeryVeryVeryLong is VeryVeryVeryVeryVeryVeryVeryVeryVery
 
 if (VeryVeryVeryVeryVeryVeryVeryVeryLong == VeryVeryVeryVeryVeryVeryVeryVeryVeryLong) then ;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if this.hasPlugin("dynamicImportsLong") && this.lookahead().typeLong
+if this.hasPlugin('dynamicImportsLong') && this.lookahead().typeLong
   ;
 
 if (
-  @hasPlugin("dynamicImportsLonger") and
+  @hasPlugin('dynamicImportsLonger') and
   @lookahead().typeLongerer is tt.parenLeft
 )
   ;
 
 if (
-  this.hasPlugin("dynamicImportsLong") &&
+  this.hasPlugin('dynamicImportsLong') &&
   this.lookahead().typeLong == tt.parenLeft.right
 )
   ;
@@ -259,7 +259,7 @@ prevState = prevState ||
   catalogs: []
   loadState: LOADED
   opened: false
-  searchQuery: ""
+  searchQuery: ''
   selectedCatalog: null
 
 prevState = prevState or
@@ -267,7 +267,7 @@ prevState = prevState or
     catalogs: []
     loadState: LOADED
     opened: no
-    searchQuery: ""
+    searchQuery: ''
     selectedCatalog: null
 
 prevState =
@@ -276,7 +276,7 @@ prevState =
     catalogs: []
     loadState: LOADED
     opened: false
-    searchQuery: ""
+    searchQuery: ''
     selectedCatalog: null
   )
 
@@ -285,38 +285,38 @@ prevState = prevState ||
     catalogs: []
     loadState: LOADED
     opened: false
-    searchQuery: ""
+    searchQuery: ''
     selectedCatalog: null
 
 this.steps = steps || [
-  name: "mock-module"
-  path: "/nux/mock-module"
+  name: 'mock-module'
+  path: '/nux/mock-module'
 ]
 
 @steps =
   steps ||
   (checkStep && [
-    name: "mock-module"
-    path: "/nux/mock-module"
+    name: 'mock-module'
+    path: '/nux/mock-module'
   ])
 
 this.steps = (steps && checkStep) || [
-  name: "mock-module"
-  path: "/nux/mock-module"
+  name: 'mock-module'
+  path: '/nux/mock-module'
 ]
 
 create = ->
   result = doSomething()
   shouldReturn &&
     result.ok &&
-      status: "ok"
+      status: 'ok'
       createdAt: result.createdAt
       updatedAt: result.updatedAt
 
 create = ->
   result = doSomething()
   (shouldReturn && result.ok && result) ||
-    status: "ok"
+    status: 'ok'
     createdAt: result.createdAt
     updatedAt: result.updatedAt
 
@@ -386,7 +386,7 @@ exports[`jsx_parent.coffee 1`] = `
     !isJellyfishEnabled &&
     diffUpdateMessageInput && {
       fontSize: 14
-      color: "#fff"
+      color: '#fff'
     }
   }
 />
@@ -471,14 +471,14 @@ foo = ->
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 foo = ->
   return (
-    this.hasPlugin("dynamicImports") &&
+    this.hasPlugin('dynamicImports') &&
     this.lookahead().type is tt.parenLeft.right
   )
 
 foo = ->
   return (
     if (
-      @hasPlugin("dynamicImports") and
+      @hasPlugin('dynamicImports') and
       @lookahead().type is tt.parenLeft.right.left.right
     )
       yes
@@ -531,7 +531,7 @@ foooooooooooooooooooooooooooooooooooooooooooooooooooooooooo(
 ) + a
 
 isPartOfPackageJSON =
-  dependenciesArray.indexOf(dependencyWithOutRelativePath.split("/")[0]) != -1
+  dependenciesArray.indexOf(dependencyWithOutRelativePath.split('/')[0]) != -1
 
 defaultContent.filter((defaultLocale) ->
   # ...

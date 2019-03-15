@@ -20,7 +20,7 @@ delete a?.b
 a?.b[3].c?(x).d.e?.f[3].g?(y).h
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 street = user.address?.street
-fooValue = myForm.querySelector("input[name=foo]")?.value
+fooValue = myForm.querySelector('input[name=foo]')?.value
 
 obj?.prop
 obj?[expr]
