@@ -58,11 +58,6 @@
   ]
   which it wants to convert to:
   schema: [enum: ['object', 'property']]
-- postfix if can break:
-  return Object.assign state,
-    inCharClass: yes, startingCharClass: yes if (
-    condition...
-  )
 - why is it deleting the blank line here?
   nestFunctions = (times) ->
     openings = ''
