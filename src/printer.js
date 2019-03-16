@@ -6,6 +6,7 @@ const {
   isNextLineEmpty,
   hasSameStartLine,
   getNextNonSpaceNonCommentCharacter,
+  isFunction,
 } = require('./util')
 const embed = require('./embed')
 const handleComments = require('./comments')
@@ -51,6 +52,7 @@ function isStatement(node) {
 function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
+  const greatgrandparent = path.getParentNode(stackOffset + 2)
   if (!parent) {
     return false
   }
@@ -68,7 +70,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   if (
     isClass(parent) &&
     parent.superClass === node &&
-    (node.type === 'FunctionExpression' ||
+    (isFunction(node) ||
       node.type === 'AssignmentExpression' ||
       node.type === 'AwaitExpression' ||
       node.type === 'BinaryExpression' ||
@@ -233,6 +235,18 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'StringLiteral':
+      if (
+        parent.type === 'ExpressionStatement' &&
+        !node.returns &&
+        grandparent.body &&
+        (grandparent.type !== 'BlockStatement' ||
+          (grandparent === greatgrandparent.body &&
+            grandparent.body.length > 1)) &&
+        parent === grandparent.body[0]
+      ) {
+        return true
+      }
+    // fallthrough
     case 'TemplateLiteral':
     case 'NumericLiteral':
       return (
@@ -344,6 +358,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'FunctionExpression':
+    case 'ArrowFunctionExpression':
       switch (parent.type) {
         case 'TaggedTemplateExpression':
         case 'MemberExpression':
@@ -624,8 +639,7 @@ function printPathNoParens(path, options, print) {
             options.locEnd(n)
           )
         const unsafeInline =
-          n !== util.getLast(parent.properties) &&
-          n.value.type === 'FunctionExpression' // TODO: anything else that could end in a function or implicit call?
+          n !== util.getLast(parent.properties) && isFunction(n.value) // TODO: anything else that could end in a function or implicit call?
         const shouldBreak = respectBreak || unsafeInline
         parts.push(
           printAssignment(
@@ -742,6 +756,7 @@ function printPathNoParens(path, options, print) {
         n.postfix ? '...' : '',
       ])
     case 'FunctionExpression':
+    case 'ArrowFunctionExpression':
       return printFunction(path, options, print)
     case 'YieldExpression':
       parts.push('yield')
@@ -1051,7 +1066,15 @@ function printPathNoParens(path, options, print) {
       const test = dontBreakTest ? simpleTest : breakingTest
 
       if (n.postfix) {
-        parts.push(path.call(print, 'consequent'), ' ')
+        const {path: singleExprPath} = singleExpressionBlock(n.consequent, {
+          withPath: true,
+        })
+        parts.push(
+          singleExprPath
+            ? path.call(print, 'consequent', ...singleExprPath)
+            : path.call(print, 'consequent'),
+          ' '
+        )
         parts.push(keyword, test)
         return concat(parts)
       }
@@ -1483,7 +1506,7 @@ function printPathNoParens(path, options, print) {
         n.expression.type === 'ArrayExpression' ||
         n.expression.type === 'ObjectExpression' ||
         n.expression.type === 'CallExpression' ||
-        n.expression.type === 'FunctionExpression' ||
+        isFunction(n.expression) ||
         n.expression.type === 'JSXEmptyExpression' ||
         n.expression.type === 'TemplateLiteral' ||
         n.expression.type === 'TaggedTemplateExpression' ||
@@ -1794,7 +1817,9 @@ function printFunction(path, options, print) {
     hasDanglingComments(node, postParamsDanglingCommentFilter) ? ' ' : ''
   )
 
-  parts.push(node.bound ? '=>' : '->')
+  parts.push(
+    node.bound || node.type === 'ArrowFunctionExpression' ? '=>' : '->'
+  )
 
   const {expr: singleExpr, path: singleExprPath} = singleExpressionBlock(
     node.body,
@@ -1813,7 +1838,7 @@ function printFunction(path, options, print) {
           'body',
           ...singleExprPath
         )) ||
-      singleExpr.type === 'FunctionExpression')
+      isFunction(singleExpr))
   const body = isEmptyBlock(node.body)
     ? ''
     : shouldInlineBody
@@ -2125,7 +2150,7 @@ function printRegex(path, options, print) {
 
 function singleExpressionBlock(node, {withPath} = {}) {
   if (!(node.type === 'BlockStatement' && node.body.length === 1)) {
-    return false
+    return withPath ? {} : false
   }
   const singleStatement = node.body[0]
   if (singleStatement.type === 'ExpressionStatement') {
@@ -2157,7 +2182,7 @@ function isOnlyExpressionInFunctionBody(path) {
     parent.type === 'ExpressionStatement' &&
     grandparent.type === 'BlockStatement' &&
     grandparent.body.length === 1 &&
-    greatgrandparent.type === 'FunctionExpression' &&
+    isFunction(greatgrandparent) &&
     grandparent === greatgrandparent.body
   )
 }
@@ -2211,16 +2236,27 @@ function shouldOmitObjectBraces(
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
+  const greatgrandparent = path.getParentNode(stackOffset + 2)
 
   if (objectRequiresBraces(path, options, {stackOffset})) {
     return false
   }
 
-  if (isIf(parent, {postfix: true})) {
+  if (
+    isIf(parent, {postfix: true}) ||
+    (parent.type === 'ExpressionStatement' &&
+      singleExpressionBlock(grandparent) &&
+      isIf(greatgrandparent, {postfix: true}))
+  ) {
     return false
   }
 
-  if (parent.type === 'ReturnStatement' && isIf(grandparent, {postfix: true})) {
+  if (
+    parent.type === 'ReturnStatement' &&
+    (isIf(grandparent, {postfix: true}) ||
+      (singleExpressionBlock(grandparent) &&
+        isIf(greatgrandparent, {postfix: true})))
+  ) {
     return unlessBreaks
   }
 
@@ -3060,7 +3096,7 @@ function printMemberChain(path, options, print) {
     callExpressionCount >= 3 ||
     (callExpressionCount === 2 &&
       callExpressions.some(({node}) =>
-        node.arguments.some(({type}) => type === 'FunctionExpression')
+        node.arguments.some(argument => isFunction(argument))
       )) ||
     printedGroups.slice(0, -1).some(willBreak)
   ) {
@@ -3184,7 +3220,7 @@ function isCallArgument(
     return node !== getLast(args)
   }
   const isBeforeTrailingFunction =
-    node === getPenultimate(args) && getLast(args).type === 'FunctionExpression'
+    node === getPenultimate(args) && isFunction(getLast(args))
   if (last) {
     if (node === getLast(args)) {
       return true
@@ -3364,7 +3400,7 @@ function printArgumentsList(path, options, print) {
 
   const shouldntBreak =
     args.length === 1 &&
-    (args[0].type === 'FunctionExpression' ||
+    (isFunction(args[0]) ||
       args[0].type === 'ArrayExpression' ||
       (args[0].type === 'ObjectExpression' &&
         path.call(
@@ -3375,8 +3411,7 @@ function printArgumentsList(path, options, print) {
       isDoFunc(args[0])) &&
     !hasTrailingComment(args[0])
   const doesntHaveExplicitEndingBrace =
-    shouldntBreak &&
-    (args[0].type === 'FunctionExpression' || isDoFunc(args[0]))
+    shouldntBreak && (isFunction(args[0]) || isDoFunc(args[0]))
   if (
     doesntHaveExplicitEndingBrace &&
     parensOptional.isFollowedByIndentedBody
@@ -3547,7 +3582,7 @@ function couldGroupArg(arg) {
   if (
     (arg.type === 'ObjectExpression' && arg.properties.length > 0) ||
     (arg.type === 'ArrayExpression' && arg.elements.length > 0) ||
-    arg.type === 'FunctionExpression' ||
+    isFunction(arg) ||
     isLinebreakingTemplateLiteral(arg) ||
     isDoFunc(arg)
   ) {
@@ -3586,8 +3621,8 @@ function shouldGroupLastArg(path, options) {
     args.length > 1 &&
     couldGroup &&
     (!penultimateArg ||
-      (lastArg.type === 'FunctionExpression'
-        ? penultimateArg.type !== 'FunctionExpression'
+      (isFunction(lastArg)
+        ? !isFunction(penultimateArg)
         : !couldGroupArg(penultimateArg)))
   ) {
     return {
@@ -3607,16 +3642,10 @@ function isTestCall(n) {
       unitTestRe.test(n.callee.name) &&
       isStringLiteral(n.arguments[0])
     ) {
-      return (
-        isFunction(n.arguments[1].type) && n.arguments[1].params.length <= 1
-      )
+      return isFunction(n.arguments[1]) && n.arguments[1].params.length <= 1
     }
   }
   return false
-}
-
-function isFunction(type) {
-  return type === 'FunctionExpression'
 }
 
 function isStringLiteral(node) {
@@ -3658,7 +3687,7 @@ function printAssignment(
     rightNode.type === 'ArrayExpression' ||
     rightNode.type === 'TemplateLiteral' ||
     rightNode.type === 'TaggedTemplateExpression' ||
-    rightNode.type === 'FunctionExpression' ||
+    isFunction(rightNode) ||
     rightNode.type === 'ClassExpression' ||
     rightNode.type === 'UnaryExpression' ||
     rightNode.type === 'SequenceExpression' ||
@@ -3753,7 +3782,7 @@ function isDo(node) {
 }
 
 function isDoFunc(node) {
-  return isDo(node) && node.argument.type === 'FunctionExpression'
+  return isDo(node) && isFunction(node.argument)
 }
 
 function printFunctionParams(path, print, options) {
@@ -3961,8 +3990,7 @@ function printArrayItems(path, options, printPath, print) {
       ),
       line,
     ]
-    const shouldBreakArray =
-      !isLast && child && child.type === 'FunctionExpression'
+    const shouldBreakArray = !isLast && child && isFunction(child)
     if (shouldBreakArray) {
       separatorParts.push(breakParent)
     }

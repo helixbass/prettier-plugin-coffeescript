@@ -119,8 +119,17 @@ function getNextNonSpaceNonCommentCharacter(text, node, locEnd) {
   )
 }
 
+function isFunction(node) {
+  return (
+    node &&
+    (node.type === 'FunctionExpression' ||
+      node.type === 'ArrowFunctionExpression')
+  )
+}
+
 module.exports = {
   isNextLineEmpty,
   hasSameStartLine,
   getNextNonSpaceNonCommentCharacter,
+  isFunction,
 }

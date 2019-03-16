@@ -91,3 +91,11 @@
   ]
 - could there be a case where not using call parens in if test could be a problem? eg if its last arg ended with a postfix if and it's an inline if?
   if a(b if c) then d
+
+tests to copy from JS:
+comments/while (add-more-comments branch)
+comments_jsx_same_line/
+cursor/
+directives/escaped
+dynamic_import/
+empty_paren_comment/

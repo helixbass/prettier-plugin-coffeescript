@@ -9682,8 +9682,9 @@ test 'nested conditionals', ->
       unless false
         if false
           false
-        else if true
-          nonce
+        else
+          if true
+            nonce
 
 test 'nested single-line conditionals', ->
   nonce = {}
@@ -10118,12 +10119,14 @@ test '#2343: if / then / if / then / else', ->
       if b
         if c
           d
-        else if e
-          f
-        else if g
-          h
         else
-          i
+          if e
+            f
+          else
+            if g
+              h
+            else
+              i
 
   t = ->
     if a
@@ -10161,10 +10164,8 @@ test '#2343: if / then / if / then / else', ->
           d
         else if e
           f
-        else if g
-          h
         else
-          i
+          if g then h else i
 
   x = ->
     if a then if b then if c then d else if e then f else if g then h else i
@@ -10217,10 +10218,11 @@ test '#2343: if / then / if / then / else / else', ->
           e
           if e
             f
-          else if g
-            h
           else
-            i
+            if g
+              h
+            else
+              i
       else
         j
     else
@@ -10274,10 +10276,8 @@ test '#2343: if / then / if / then / else / else', ->
           d
         else if e
           f
-        else if g
-          h
         else
-          i
+          if g then h else i
       else
         j
     else
@@ -10344,12 +10344,14 @@ test '#2343: switch / when / then / if / then / else', ->
         if b
           if c
             d
-          else if e
-            f
-          else if g
-            h
           else
-            i
+            if e
+              f
+            else
+              if g
+                h
+              else
+                i
 
   t = ->
     switch
