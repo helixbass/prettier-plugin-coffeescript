@@ -2228,6 +2228,36 @@ function trailingObjectIsntOptions(callee) {
   return false
 }
 
+function isPostfixIfConsequent(path, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
+  const greatgrandparent = path.getParentNode(stackOffset + 2)
+
+  if (isIf(parent, {postfix: true}) && node === parent.consequent) {
+    return true
+  }
+
+  if (
+    singleExpressionBlock(parent) &&
+    isIf(grandparent, {postfix: true}) &&
+    parent === grandparent.consequent
+  ) {
+    return true
+  }
+
+  if (
+    parent.type === 'ExpressionStatement' &&
+    singleExpressionBlock(grandparent) &&
+    isIf(greatgrandparent, {postfix: true}) &&
+    grandparent === greatgrandparent.consequent
+  ) {
+    return true
+  }
+
+  return false
+}
+
 function shouldOmitObjectBraces(
   path,
   options,
@@ -2236,26 +2266,18 @@ function shouldOmitObjectBraces(
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
-  const greatgrandparent = path.getParentNode(stackOffset + 2)
 
   if (objectRequiresBraces(path, options, {stackOffset})) {
     return false
   }
 
-  if (
-    isIf(parent, {postfix: true}) ||
-    (parent.type === 'ExpressionStatement' &&
-      singleExpressionBlock(grandparent) &&
-      isIf(greatgrandparent, {postfix: true}))
-  ) {
+  if (isPostfixIfConsequent(path, {stackOffset})) {
     return false
   }
 
   if (
     parent.type === 'ReturnStatement' &&
-    (isIf(grandparent, {postfix: true}) ||
-      (singleExpressionBlock(grandparent) &&
-        isIf(greatgrandparent, {postfix: true})))
+    isPostfixIfConsequent(path, {stackOffset: stackOffset + 1})
   ) {
     return unlessBreaks
   }
@@ -2314,6 +2336,7 @@ function isRightmostInStatement(
   let prevParent = node
   let parentLevel = 0
   let parent
+  let setIndent = false
   let indent = false
   let trailingLine
   let breakingParentCount = 0
@@ -2382,7 +2405,9 @@ function isRightmostInStatement(
         return false
       }
       if (parent.type !== 'AssignmentExpression') {
-        indent = true
+        if (!setIndent) {
+          indent = true
+        }
         if (
           pathNeedsParens(path, options, {
             stackOffset: stackOffset + parentLevel,
@@ -2397,7 +2422,9 @@ function isRightmostInStatement(
       parent.type === 'ReturnStatement' ||
       parent.type === 'ThrowStatement'
     ) {
-      indent = true
+      if (!setIndent) {
+        indent = true
+      }
       trailingLine = grandparent.type !== 'BlockStatement'
     } else if (
       isCallArgument(path, {
@@ -2406,6 +2433,7 @@ function isRightmostInStatement(
       })
     ) {
       indent = false
+      setIndent = true
       trailingLine = false
       breakingParentCount++
     } else if (
@@ -3433,9 +3461,18 @@ function printArgumentsList(path, options, print) {
     ((parent.type === 'ObjectProperty' || parent.type === 'ClassProperty') &&
       node === parent.value)
   const isIfTest = isIf(parent) && node === parent.test
+  const isPostfixIfBody =
+    isPostfixIfConsequent(path) ||
+    (parent.type === 'ReturnStatement' &&
+      isPostfixIfConsequent(path, {stackOffset: 1}))
 
   const unnecessary =
-    shouldntBreak || (firstArgIsObject && !isRightSideOfAssignment && !isIfTest)
+    shouldntBreak ||
+    (firstArgIsObject &&
+      !isRightSideOfAssignment &&
+      !isIfTest &&
+      !isPostfixIfBody)
+
   const parensUnnecessary = unnecessary && parensOptional
   const parensUnnecessaryIfParentBreaks =
     unnecessary && parensOptionalIfParentBreaks

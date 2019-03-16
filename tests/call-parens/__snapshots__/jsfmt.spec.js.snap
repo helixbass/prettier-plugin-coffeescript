@@ -26,6 +26,29 @@ exports[`last-object-property.coffee 1`] = `
 
 `;
 
+exports[`postfix-if.coffee 1`] = `
+g {
+  a: b
+  c: d
+} if e
+
+return g {
+  a: b
+  c: d
+} if e
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+g(
+  a: b
+  c: d
+) if e
+
+return g(
+  a: b
+  c: d
+) if e
+
+`;
+
 exports[`trailing-call-in-condition.coffee 1`] = `
 if a((b) ->
   c

@@ -13899,9 +13899,10 @@ test '#4568: refine sameLine implicit object tagging', ->
   fn = -> yes
 
   x =
-    fn
+    fn(
       bar:
-        foo: 123 if not condition
+        foo: 123
+    ) if not condition
   eq x, undefined
 
 # Nested blocks caused by paren unwrapping
