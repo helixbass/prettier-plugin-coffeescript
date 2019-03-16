@@ -97,3 +97,5 @@ comments/while (add-more-comments branch)
 comments_jsx_same_line/
 cursor/
 directives/escaped
+dynamic_import/
+empty_paren_comment/

@@ -1,7 +1,7 @@
 'use strict'
 
 const sharedUtil = require('prettier/src/common/util-shared')
-const {getNextNonSpaceNonCommentCharacter} = require('./util')
+const {getNextNonSpaceNonCommentCharacter, isFunction} = require('./util')
 
 const addLeadingComment = sharedUtil.addLeadingComment
 const addTrailingComment = sharedUtil.addTrailingComment
@@ -214,8 +214,7 @@ function handleLastFunctionArgComments(
     (precedingNode.type === 'Identifier' ||
       precedingNode.type === 'AssignmentPattern') &&
     enclosingNode &&
-    (enclosingNode.type === 'FunctionExpression' ||
-      enclosingNode.type === 'ClassMethod') &&
+    (isFunction(enclosingNode) || enclosingNode.type === 'ClassMethod') &&
     getNextNonSpaceNonCommentCharacter(text, comment, options.locEnd) === ')'
   ) {
     addTrailingComment(precedingNode, comment)
@@ -233,8 +232,7 @@ function handleCommentInEmptyParens(text, enclosingNode, comment, options) {
 
   if (
     enclosingNode &&
-    (enclosingNode.type === 'FunctionExpression' ||
-      enclosingNode.type === 'ClassMethod') &&
+    (isFunction(enclosingNode) || enclosingNode.type === 'ClassMethod') &&
     enclosingNode.params.length === 0
   ) {
     addDanglingComment(enclosingNode, comment)
@@ -273,8 +271,7 @@ function handleFunctionNameComments(text, enclosingNode, comment, options) {
 
   if (
     enclosingNode &&
-    (enclosingNode.type === 'FunctionExpression' ||
-      enclosingNode.type === 'ClassMethod')
+    (isFunction(enclosingNode) || enclosingNode.type === 'ClassMethod')
   ) {
     // addTrailingComment(precedingNode, comment)
     addDanglingComment(enclosingNode, comment)
