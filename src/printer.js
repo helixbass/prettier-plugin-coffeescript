@@ -2360,7 +2360,7 @@ function isRightmostInStatement(
       }) ||
         isObjectPropertyValue(path, {
           stackOffset: stackOffset + parentLevel,
-          // nonLast: true,
+          nonLast: true,
         }) ||
         parent.type === 'ArrayExpression' ||
         (isChainableCall(prevParent) &&

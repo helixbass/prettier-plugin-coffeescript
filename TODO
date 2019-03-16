@@ -71,7 +71,6 @@
     i = 0
     while i < times
       ...
-- don't escape " in """
 - this doesn't preserve intended formatting:
   ### eslint-disable-quotes ### # For better readability ...
   # ------------------------
@@ -80,14 +79,6 @@
 
 
   rule = ...
-- why is this adding call parens at the end? initial version from es2coffee doesn't have them
-  [
-    ...
-    ,
-      code: ['<App foo bar />'].join('\n')
-    ,
-    ...
-  ]
 - could there be a case where not using call parens in if test could be a problem? eg if its last arg ended with a postfix if and it's an inline if?
   if a(b if c) then d
 

@@ -11,6 +11,21 @@ a[b c]
 
 `;
 
+exports[`last-object-property.coffee 1`] = `
+[
+  code: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.join '\\n'
+,
+  b
+]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[
+  code: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.join '\\n'
+,
+  b
+]
+
+`;
+
 exports[`trailing-call-in-condition.coffee 1`] = `
 if a((b) ->
   c
