@@ -71,7 +71,6 @@
     i = 0
     while i < times
       ...
-- don't choke on ''' opening "directive" (has no raw?)
 - don't escape " in """
 - this doesn't preserve intended formatting:
   ### eslint-disable-quotes ### # For better readability ...
