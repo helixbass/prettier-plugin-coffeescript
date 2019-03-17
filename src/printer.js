@@ -3198,16 +3198,20 @@ function printBinaryishExpressions(path, print, options, isNested) {
     }
 
     const {operator} = node
-    // const canonicalOperator = getCanonicalOperator(node)
+    const canonicalOperator = getCanonicalOperator(node)
 
     canBreak =
       !isIf(node.right) &&
       !(node.right.type === 'ArrayExpression' && node.right.elements.length) && // TODO: others?
       !shouldInlineLogicalExpression(node, {notJSX: true}) &&
       !isTemplateOnItsOwnLine(node.right, options.originalText, options)
+    const leadingLogical =
+      options.lineContinuingLeadingOperators.indexOf('logical') > -1 &&
+      (canonicalOperator === '&&' || canonicalOperator === '||')
     const right = concat([
+      canBreak && leadingLogical ? line : ' ',
       operator,
-      canBreak ? line : ' ',
+      canBreak && !leadingLogical ? line : ' ',
       path.call(print, 'right'),
     ])
 
@@ -3217,7 +3221,7 @@ function printBinaryishExpressions(path, print, options, isNested) {
       node.left.type !== node.type &&
       node.right.type !== node.type
 
-    parts.push(' ', shouldGroup ? group(right) : right)
+    parts.push(shouldGroup ? group(right) : right)
 
     if (isNested && node.comments) {
       parts = comments.printComments(path, () => concat(parts), options)

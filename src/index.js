@@ -162,6 +162,20 @@ const options = {
     default: [{value: []}],
     description: "Don't make explicit constructs implicit",
   },
+  lineContinuingLeadingOperators: {
+    array: true,
+    type: 'choice',
+    choices: [
+      {
+        value: 'logical',
+        description: 'Try and use leading logical operators when breaking',
+      },
+    ],
+    category: 'Global',
+    default: [{value: ['logical']}],
+    description:
+      'Use allowed leading operators when breaking binary expressions',
+  },
 }
 
 module.exports = {
