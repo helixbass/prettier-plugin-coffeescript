@@ -18503,7 +18503,7 @@ eq Number::toString, 42['toString']
 
 eq Number::toString, 42.toString
 
-eq Number::toString, Infinity['toString'] # Infinity
+eq Number::toString, 2e308['toString'] # Infinity
 
 # Non-Integer Literals
 
@@ -18555,7 +18555,7 @@ test 'Infinity', ->
   eq Infinity, CoffeeScript.eval "0o#{Array(342 + 1).join '7'}"
   eq Infinity, CoffeeScript.eval "0x#{Array(256 + 1).join 'f'}"
   eq Infinity, CoffeeScript.eval Array(500 + 1).join '9'
-  eq Infinity, Infinity
+  eq Infinity, 2e308
 
 test 'NaN', ->
   ok isNaN 1 / NaN

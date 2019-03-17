@@ -20,7 +20,7 @@
     "node": ">= 6"
   },
   "dependencies": {
-    "coffeescript": "github:helixbass/coffeescript#696df151",
+    "coffeescript": "github:helixbass/coffeescript#3c20530d",
     "prettier": "github:helixbass/prettier#395e5d5c"
   },
   "devDependencies": {
