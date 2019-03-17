@@ -2200,6 +2200,10 @@ function isTemplateOnItsOwnLine(n, text, {locStart}) {
   )
 }
 
+function isExplicitObject(node, options) {
+  return options.originalText.charAt(options.locStart(node)) === '{'
+}
+
 function objectRequiresBraces(path, options, {stackOffset = 0} = {}) {
   if (options.noImplicit.indexOf('objectBraces') > -1) {
     return true
@@ -2215,6 +2219,12 @@ function objectRequiresBraces(path, options, {stackOffset = 0} = {}) {
     node.properties.find(
       ({shorthand, type}) => shorthand || type === 'SpreadElement'
     )
+  ) {
+    return true
+  }
+  if (
+    options.respectExplicit.indexOf('objectBraces') > -1 &&
+    isExplicitObject(node, options)
   ) {
     return true
   }
@@ -3318,11 +3328,22 @@ function isFirstCallInChain(path, {stackOffset = 0} = {}) {
   )
 }
 
+function isExplicitCall(node, options) {
+  return options.originalText.charAt(options.locEnd(node.callee)) === '('
+}
+
 function callParensNecessary(path, options, {stackOffset = 0} = {}) {
   if (options.noImplicit.indexOf('callParens') > -1) {
     return true
   }
   const node = path.getParentNode(stackOffset - 1)
+
+  if (
+    options.respectExplicit.indexOf('callParens') > -1 &&
+    isExplicitCall(node, options)
+  ) {
+    return true
+  }
 
   if (
     node.arguments &&
