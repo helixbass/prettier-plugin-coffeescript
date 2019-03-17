@@ -6,3 +6,4 @@ indentChain: false
 # comma: 'nonTrailing'
 # respectBreak: ['object']
 # noImplicit: ['objectBraces', 'callParens']
+# respectExplicit: ['objectBraces', 'callParens']

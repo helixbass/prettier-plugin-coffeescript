@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`respect-explicit.coffee 1`] = `
+a b: c
+
+a(b: c)
+
+a {b: c}
+
+a({b: c})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a b: c
+
+a b: c
+
+a b: c
+
+a b: c
+
+`;
+
+exports[`respect-explicit.coffee 2`] = `
+a b: c
+
+a(b: c)
+
+a {b: c}
+
+a({b: c})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a b: c
+
+a(b: c)
+
+a b: c
+
+a(b: c)
+
+`;
+
+exports[`respect-explicit.coffee 3`] = `
+a b: c
+
+a(b: c)
+
+a {b: c}
+
+a({b: c})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a b: c
+
+a b: c
+
+a { b: c }
+
+a { b: c }
+
+`;
+
+exports[`respect-explicit.coffee 4`] = `
+a b: c
+
+a(b: c)
+
+a {b: c}
+
+a({b: c})
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a b: c
+
+a(b: c)
+
+a { b: c }
+
+a({ b: c })
+
+`;

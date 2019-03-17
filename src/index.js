@@ -145,6 +145,23 @@ const options = {
     default: true,
     description: 'Use single quotes instead of double quotes.',
   },
+  respectExplicit: {
+    array: true,
+    type: 'choice',
+    choices: [
+      {
+        value: 'callParens',
+        description: "Don't make explicit call parentheses implicit",
+      },
+      {
+        value: 'objectBraces',
+        description: "Don't make explicit object braces implicit",
+      },
+    ],
+    category: 'Global',
+    default: [{value: []}],
+    description: "Don't make explicit constructs implicit",
+  },
 }
 
 module.exports = {
