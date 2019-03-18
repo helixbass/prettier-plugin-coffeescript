@@ -3,7 +3,7 @@ singleQuote: true
 trailingComma: 'es5'
 bracketSpacing: false
 indentChain: false
-# comma: 'nonTrailing'
+# comma: 'all'
 # respectBreak: ['object']
 # noImplicit: ['objectBraces', 'callParens']
 # respectExplicit: ['objectBraces', 'callParens']

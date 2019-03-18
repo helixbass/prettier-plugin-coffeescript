@@ -777,9 +777,9 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-"coffeescript@github:helixbass/coffeescript#3c20530d":
+"coffeescript@github:helixbass/coffeescript#bb034dc0":
   version "2.3.2"
-  resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/3c20530d278c2b3505f5e5627e648e368951dfdd"
+  resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/bb034dc018f7b126a88893397247e6d54c842629"
   dependencies:
     babel-eslint "^7.2.2"
     babylon "^7.0.0-beta.44"

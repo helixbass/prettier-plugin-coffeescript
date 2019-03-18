@@ -21164,7 +21164,7 @@ test '#4579: Postfix for/while/until in first line of implicit object literals',
   eq 'b', four.foo[1].bar_b
   eq 1337, four.baz
 
-  (x = { bar: 42 }) for y in [1]
+  (x = bar: 42) for y in [1]
   baz: 1337
   eq x.bar, 42
 

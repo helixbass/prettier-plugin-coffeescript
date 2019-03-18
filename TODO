@@ -18,7 +18,7 @@
   a:
     b if c
 - preserve switch then alignment?
-- can't safely unparenthesize calls (etc) if comma isn't none (since a trailing comma continues the line)
+- places where can't safely use implicit object when comma isnt 'none'? eg when followed by another (implicit) object
 - refine dedented comma logic so that if object is printing inline, don't print dedented comma
 - now that we're trying to inline objects, should probably default to adding braces around inline nested objects
   - does that imply the need for a respect implicit object option? or should we just always try to respect what they did for nested objects?
@@ -34,14 +34,6 @@
     token
   ) -> token.value is node.operator
   should break differently
-- prefer not to break postfix if in certain cases? eg this is nicer
-  a {
-    ...
-  } if b
-  than this
-  a {...} if (
-    b
-  )
 - output isn't stable when it generates a dedented-comma object in a broken array with a spacing line (before?)
 - comment was disappearing:
   loop # eslint-disable-line no-constant-condition
@@ -53,24 +45,13 @@
   ]
   which it wants to convert to:
   schema: [enum: ['object', 'property']]
-- why is it deleting the blank line here?
-  nestFunctions = (times) ->
-    openings = ''
-    closings = ''
-
-    i = 0
-    while i < times
-      ...
-- this doesn't preserve intended formatting:
-  ### eslint-disable-quotes ### # For better readability ...
-  # ------------------------
-  # Requirements
-  # ------------------------
-
-
-  rule = ...
 - could there be a case where not using call parens in if test could be a problem? eg if its last arg ended with a postfix if and it's an inline if?
   if a(b if c) then d
+- print postfix body sequence like block eg
+  (
+    a b
+    c
+  ) for a in b
 
 tests to copy from JS:
 comments/while (add-more-comments branch)

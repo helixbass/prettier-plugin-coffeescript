@@ -254,6 +254,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         (parent.type === 'CallExpression' && node === parent.callee)
       )
     case 'AssignmentExpression':
+      if (isPostfixForBody(path)) {
+        return true
+      }
       if (
         parent.type === 'ExpressionStatement' ||
         parent.type === 'AssignmentExpression' ||
@@ -359,6 +362,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
     case 'FunctionExpression':
     case 'ArrowFunctionExpression':
+      if (isPostfixForBody(path)) {
+        return true
+      }
       switch (parent.type) {
         case 'TaggedTemplateExpression':
         case 'MemberExpression':
@@ -379,8 +385,6 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           } else {
             return {unlessParentBreaks: true}
           }
-        case 'For':
-          return parent.postfix && node === parent.body
         case 'BinaryExpression':
         case 'LogicalExpression':
           return node === parent.left
@@ -432,6 +436,11 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           node === parent.arguments[0]
         )
       )
+    case 'ReturnStatement':
+      if (isPostfixForBody(path)) {
+        return true
+      }
+      return false
   }
 
   return false
@@ -1176,7 +1185,15 @@ function printPathNoParens(path, options, print) {
       ])
 
       if (n.postfix) {
-        parts.push(path.call(print, 'body'), ' ')
+        const {path: singleExprPath} = singleExpressionBlock(n.body, {
+          withPath: true,
+        })
+        parts.push(
+          singleExprPath
+            ? path.call(print, 'body', ...singleExprPath)
+            : path.call(print, 'body'),
+          ' '
+        )
         parts.push(opening)
         return concat(parts)
       }
@@ -2268,6 +2285,36 @@ function isPostfixIfConsequent(path, {stackOffset = 0} = {}) {
   return false
 }
 
+function isPostfixForBody(path, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
+  const greatgrandparent = path.getParentNode(stackOffset + 2)
+
+  if (isFor(parent, {postfix: true}) && node === parent.body) {
+    return true
+  }
+
+  if (
+    singleExpressionBlock(parent) &&
+    isFor(grandparent, {postfix: true}) &&
+    parent === grandparent.body
+  ) {
+    return true
+  }
+
+  if (
+    parent.type === 'ExpressionStatement' &&
+    singleExpressionBlock(grandparent) &&
+    isFor(greatgrandparent, {postfix: true}) &&
+    grandparent === greatgrandparent.body
+  ) {
+    return true
+  }
+
+  return false
+}
+
 function shouldOmitObjectBraces(
   path,
   options,
@@ -2290,6 +2337,10 @@ function shouldOmitObjectBraces(
     isPostfixIfConsequent(path, {stackOffset: stackOffset + 1})
   ) {
     return unlessBreaks
+  }
+
+  if (isPostfixForBody(path, {stackOffset})) {
+    return false
   }
 
   if (
@@ -2350,6 +2401,7 @@ function isRightmostInStatement(
   let indent = false
   let trailingLine
   let breakingParentCount = 0
+  let isFollowedByComma = false
   while ((parent = path.getParentNode(stackOffset + parentLevel))) {
     const grandparent = path.getParentNode(stackOffset + parentLevel + 1)
     if (
@@ -2383,6 +2435,7 @@ function isRightmostInStatement(
             parent.type === 'ClassExpression' ||
             parent.type === 'For') &&
           !parent.postfix,
+        isFollowedByComma,
       }
     }
     if (
@@ -2408,7 +2461,21 @@ function isRightmostInStatement(
           })))
     ) {
       breakingParentCount++
-      return {indent, trailingLine, ifParentBreaks: true, breakingParentCount}
+      return {
+        indent,
+        trailingLine,
+        ifParentBreaks: true,
+        breakingParentCount,
+        isFollowedByComma:
+          (isCallArgument(path, {
+            nonLast: true,
+            stackOffset: stackOffset + parentLevel,
+          }) &&
+            options.comma !== 'none') ||
+          (parent.type === 'ArrayExpression' &&
+            options.comma !== 'none' &&
+            (node !== getLast(parent.elements) || options.comma === 'all')),
+      }
     }
     if (parent.type === 'AssignmentExpression' || isBinaryish(parent)) {
       if (prevParent !== parent.right) {
@@ -2445,6 +2512,9 @@ function isRightmostInStatement(
       indent = false
       setIndent = true
       trailingLine = false
+      if (options.comma === 'all') {
+        isFollowedByComma = true
+      }
       breakingParentCount++
     } else if (
       isObjectPropertyValue(path, {
@@ -2474,6 +2544,10 @@ function isIf(node, {postfix} = {}) {
     (node.type === 'IfStatement' || node.type === 'ConditionalExpression') &&
     (!postfix || node.postfix)
   )
+}
+
+function isFor(node, {postfix} = {}) {
+  return node && node.type === 'For' && (!postfix || node.postfix)
 }
 
 function printObjectMethod(path, options, print) {
@@ -3298,10 +3372,15 @@ function callParensOptionalIfParentBreaks(
     return false
   }
 
-  return isRightmostInStatement(path, options, {
-    stackOffset,
-    ifParentBreaks: true,
-  })
+  let isRightmost
+  return (
+    (isRightmost = isRightmostInStatement(path, options, {
+      stackOffset,
+      ifParentBreaks: true,
+    })) &&
+    !isRightmost.isFollowedByComma &&
+    isRightmost
+  )
 }
 
 function followedByComputedAccess(path, {stackOffset = 0} = {}) {
@@ -3372,10 +3451,12 @@ function callParensOptional(path, options, {stackOffset = 0} = {}) {
     return false
   }
 
+  const isRightmost = isRightmostInStatement(path, options, {stackOffset})
+  if (isRightmost.isFollowedByComma) return {unlessParentBreaks: true}
+  if (isRightmost) return isRightmost
   return (
     pathNeedsParens(path, options) ||
     isBlockLevel(node, parent) ||
-    isRightmostInStatement(path, options, {stackOffset}) ||
     (parent.type === 'AssignmentExpression' &&
       isBlockLevel(parent, grandparent)) ||
     parent.type === 'JSXExpressionContainer' ||
@@ -3436,9 +3517,9 @@ function printArgumentsList(path, options, print) {
     !parensNecessary &&
     node.arguments.length &&
     (callParensOptional(path, options) ||
-      (parent.type === 'CallExpression' &&
-        node === parent.arguments[parent.arguments.length - 1] &&
-        callParensOptional(path, options, {stackOffset: 1})) ||
+      // (parent.type === 'CallExpression' &&
+      //   node === parent.arguments[parent.arguments.length - 1] &&
+      //   callParensOptional(path, options, {stackOffset: 1})) ||
       (isBinaryish(parent) &&
         node === parent.right &&
         callParensOptional(path, options, {stackOffset: 1})))
@@ -3446,6 +3527,11 @@ function printArgumentsList(path, options, print) {
     !parensNecessary &&
     !parensOptional &&
     callParensOptionalIfParentBreaks(path, options)
+  let parensOptionalUnlessParentBreaks = false
+  if (parensOptional.unlessParentBreaks) {
+    parensOptional = false
+    parensOptionalUnlessParentBreaks = true
+  }
 
   const shouldntBreak =
     args.length === 1 &&
@@ -3497,6 +3583,8 @@ function printArgumentsList(path, options, print) {
   const parensUnnecessary = unnecessary && parensOptional
   const parensUnnecessaryIfParentBreaks =
     unnecessary && parensOptionalIfParentBreaks
+  const parensUnnecessaryUnlessParentBreaks =
+    unnecessary && parensOptionalUnlessParentBreaks
   // const nonFinalArgs = args.slice(0, args.length - 1)
   const shouldBreak = false
   // args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
@@ -3505,6 +3593,15 @@ function printArgumentsList(path, options, print) {
 
   const openingParen = parensUnnecessary
     ? ' '
+    : parensOptionalUnlessParentBreaks
+    ? ifBreak(
+        '(',
+        parensUnnecessaryUnlessParentBreaks ? ' ' : ifBreak('(', ' '),
+        {
+          visibleType: 'visible',
+          offset: parensOptionalUnlessParentBreaks.breakingParentCount || 1,
+        }
+      )
     : parensOptionalIfParentBreaks
     ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak('(', ' '), '(', {
         visibleType: 'visible',
@@ -3517,6 +3614,11 @@ function printArgumentsList(path, options, print) {
     ? closingLinebreakAnyway
       ? softline
       : ''
+    : parensOptionalUnlessParentBreaks
+    ? ifBreak(')', parensUnnecessaryUnlessParentBreaks ? ' ' : ifBreak(')'), {
+        visibleType: 'visible',
+        offset: parensOptionalUnlessParentBreaks.breakingParentCount || 1,
+      })
     : parensOptionalIfParentBreaks
     ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'), ')', {
         visibleType: 'visible',
