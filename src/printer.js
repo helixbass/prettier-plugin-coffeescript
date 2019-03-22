@@ -436,11 +436,6 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           node === parent.arguments[0]
         )
       )
-    case 'ReturnStatement':
-      if (isPostfixForBody(path)) {
-        return true
-      }
-      return false
   }
 
   return false
@@ -3657,15 +3652,13 @@ function printArgumentsList(path, options, print) {
       if (i === args.length - 1) {
         const lastArg = argPath.getValue()
         const printedLastArg = printedArguments[i]
-        printedExpanded = printedArguments
-          .slice(0, -1)
-          .concat(
-            (lastArg.type === 'ObjectExpression' &&
-              shouldOmitObjectBraces(argPath, options)) ||
-              shouldGroupLast.indent
-              ? indent(concat([softline, printedLastArg]))
-              : printedLastArg
-          )
+        printedExpanded = nonLastArgs.concat(
+          (lastArg.type === 'ObjectExpression' &&
+            shouldOmitObjectBraces(argPath, options)) ||
+            shouldGroupLast.indent
+            ? indent(concat([softline, printedLastArg]))
+            : printedLastArg
+        )
       }
       i++
     }, 'arguments')
