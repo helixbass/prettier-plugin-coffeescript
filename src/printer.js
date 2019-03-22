@@ -310,6 +310,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return {unlessParentBreaks: true}
         case 'NewExpression':
         case 'CallExpression':
+          if (node !== parent.callee && node !== getLast(parent.arguments)) {
+            return {unlessParentBreaks: true}
+          }
           return parent.callee === node || node.postfix
         case 'BinaryExpression':
         case 'LogicalExpression':
