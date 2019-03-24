@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`existence.coffee 1`] = `
+a(b)?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a(b)?
+
+`;
+
 exports[`implicit-object-arg-followed-by-indent.coffee 1`] = `
 if a b: ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
   d

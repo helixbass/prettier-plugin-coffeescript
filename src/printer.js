@@ -2556,7 +2556,7 @@ function isRightmostInStatement(
       breakingParentCount++
     } else if (
       parent.type === 'ObjectExpression' ||
-      parent.type === 'UnaryExpression' ||
+      (parent.type === 'UnaryExpression' && parent.prefix) ||
       parent.type === 'YieldExpression' ||
       parent.type === 'AwaitExpression'
     ) {
@@ -3563,6 +3563,12 @@ function printArgumentsList(path, options, print) {
     parensOptional = false
     parensOptionalUnlessParentBreaks = true
   }
+  // console.log({
+  //   parensOptional,
+  //   parensNecessary,
+  //   parensOptionalIfParentBreaks,
+  //   parensOptionalUnlessParentBreaks,
+  // })
 
   const shouldntBreak =
     args.length === 1 &&
