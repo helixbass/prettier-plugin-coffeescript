@@ -164,6 +164,27 @@ switch (if a then b)
 
 `;
 
+exports[`if-as-postfix-body.coffee 1`] = `
+method.ctor = (if @parent then 'derived' else 'base') if methodName.value is 'constructor'
+
+(if @parent then 'derived' else 'base') if methodName.value is 'constructor'
+
+(if @parent then 'derived' else 'base') for a in b
+
+(if @parent then 'derived' else 'base') while x
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+method.ctor = (if @parent then 'derived' else 'base') if (
+  methodName.value is 'constructor'
+)
+
+(if @parent then 'derived' else 'base') if methodName.value is 'constructor'
+
+(if @parent then 'derived' else 'base') for a in b
+
+(if @parent then 'derived' else 'base') while x
+
+`;
+
 exports[`if-call-arg.coffee 1`] = `
 @tokens.splice (if @tag(i - 1) is ',' then i - 1 else i), 0, outdent
 @tokens.splice 0, outdent, (if @tag(i - 1) is ',' then i - 1 else i)

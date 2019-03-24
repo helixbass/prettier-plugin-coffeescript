@@ -281,6 +281,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
       return true
     case 'ConditionalExpression':
+      if (isPostfixBody(path)) {
+        return true
+      }
       if (isCondition(node, parent)) {
         return {unlessParentBreaks: true}
       }
@@ -320,6 +323,8 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         // return parent.right === node
         case 'JSXSpreadAttribute':
           return true
+        case 'AssignmentExpression':
+          return isPostfixBody(path, {stackOffset: 1})
         default:
           return false
       }
@@ -2341,6 +2346,44 @@ function isPostfixForBody(path, {stackOffset = 0} = {}) {
   return false
 }
 
+function isPostfixWhileBody(path, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
+  const greatgrandparent = path.getParentNode(stackOffset + 2)
+
+  if (isWhile(parent, {postfix: true}) && node === parent.body) {
+    return true
+  }
+
+  if (
+    singleExpressionBlock(parent) &&
+    isWhile(grandparent, {postfix: true}) &&
+    parent === grandparent.body
+  ) {
+    return true
+  }
+
+  if (
+    parent.type === 'ExpressionStatement' &&
+    singleExpressionBlock(grandparent) &&
+    isWhile(greatgrandparent, {postfix: true}) &&
+    grandparent === greatgrandparent.body
+  ) {
+    return true
+  }
+
+  return false
+}
+
+function isPostfixBody(path, {stackOffset = 0} = {}) {
+  return (
+    isPostfixIfConsequent(path, {stackOffset}) ||
+    isPostfixForBody(path, {stackOffset}) ||
+    isPostfixWhileBody(path, {stackOffset})
+  )
+}
+
 function shouldOmitObjectBraces(
   path,
   options,
@@ -2579,6 +2622,10 @@ function isIf(node, {postfix} = {}) {
 
 function isFor(node, {postfix} = {}) {
   return node && node.type === 'For' && (!postfix || node.postfix)
+}
+
+function isWhile(node, {postfix} = {}) {
+  return node && node.type === 'WhileStatement' && (!postfix || node.postfix)
 }
 
 function printObjectMethod(path, options, print) {
