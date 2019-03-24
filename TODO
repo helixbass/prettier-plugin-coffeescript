@@ -28,7 +28,6 @@
   - line comment at end of switch case body is outdenting to the next when line
 - update to support flow() etc formatting
 - add arrays to respectBreak?
-- safe to omit call parens in for when clause?
 - this:
   operatorToken = sourceCode.getFirstTokenBetween node.left, node.right, (
     token
