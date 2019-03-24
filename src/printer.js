@@ -747,7 +747,13 @@ function printPathNoParens(path, options, print) {
     case 'Identifier':
       return concat([n.name])
     case 'MemberExpression': {
-      const shouldInline = n.computed || isThisLookup(n)
+      const parent = path.getParentNode()
+      const shouldInline =
+        n.computed ||
+        isThisLookup(n) ||
+        (n.object.type === 'Identifier' &&
+          n.property.type === 'Identifier' &&
+          parent.type !== 'MemberExpression')
 
       return concat([
         path.call(print, 'object'),
