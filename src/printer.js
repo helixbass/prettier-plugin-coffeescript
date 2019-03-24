@@ -2498,7 +2498,8 @@ function isRightmostInStatement(
           prevParent === parent.alternate)) ||
       (parent.type === 'SwitchStatement' &&
         prevParent === parent.discriminant) ||
-      (parent.type === 'For' && prevParent === parent.source) ||
+      (parent.type === 'For' &&
+        (prevParent === parent.source || prevParent === parent.guard)) ||
       (parent.type === 'WhileStatement' && prevParent === parent.test) ||
       (parent.type === 'ClassExpression' &&
         prevParent === parent.superClass &&

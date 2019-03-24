@@ -7,6 +7,33 @@ a(b)?
 
 `;
 
+exports[`for-when.coffee 1`] = `
+for a in b when c d
+  e
+
+e for a in b when c d
+
+for a in b when c dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+  e
+
+for a in b when c d by -1
+  e
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for a in b when c d
+  e
+
+e for a in b when c d
+
+for a in b when (
+  c dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+)
+  e
+
+for a in b by -1 when c d
+  e
+
+`;
+
 exports[`implicit-object-arg-followed-by-indent.coffee 1`] = `
 if a b: ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
   d
