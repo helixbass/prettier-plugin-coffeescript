@@ -1143,6 +1143,22 @@ function printPathNoParens(path, options, print) {
       return group(content, {shouldBreak})
     }
     case 'For': {
+      const printedSource = path.call(print, 'source')
+
+      const sourceClosesOwnIndentWhenBreaking = path.call(
+        sourcePath => closesOwnIndentWhenBreaking(sourcePath),
+        'source'
+      )
+      const source = sourceClosesOwnIndentWhenBreaking
+        ? printedSource
+        : group(
+            concat([
+              ifBreak('('),
+              indent(concat([softline, printedSource])),
+              softline,
+              ifBreak(')'),
+            ])
+          )
       const opening = concat([
         'for ',
         n.await ? 'await ' : '',
@@ -1165,7 +1181,7 @@ function printPathNoParens(path, options, print) {
               ' ',
             ])
           : '',
-        path.call(print, 'source'),
+        source,
         n.step ? concat([' by ', path.call(print, 'step')]) : '',
         n.guard
           ? concat([
@@ -1700,6 +1716,18 @@ function printPathNoParens(path, options, print) {
     default:
       throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
+}
+
+function closesOwnIndentWhenBreaking(path) {
+  const node = path.getValue()
+  switch (node.type) {
+    case 'ArrayExpression':
+    case 'CallExpression':
+      return true
+    case 'MemberExpression':
+      return node.computed && node.property.type !== 'Range'
+  }
+  return false
 }
 
 function returnArgumentHasLeadingComment(options, argument) {
@@ -2386,6 +2414,17 @@ function shouldOmitObjectBraces(
   return false
 }
 
+function isFollowedByIndentedBody(node, parent) {
+  return (
+    (isIf(parent) ||
+      parent.type === 'WhileStatement' ||
+      parent.type === 'SwitchStatement' ||
+      parent.type === 'ClassExpression' ||
+      parent.type === 'For') &&
+    !parent.postfix
+  )
+}
+
 function isRightmostInStatement(
   path,
   options,
@@ -2426,13 +2465,7 @@ function isRightmostInStatement(
       return {
         indent,
         trailingLine,
-        isFollowedByIndentedBody:
-          (isIf(parent) ||
-            parent.type === 'WhileStatement' ||
-            parent.type === 'SwitchStatement' ||
-            parent.type === 'ClassExpression' ||
-            parent.type === 'For') &&
-          !parent.postfix,
+        isFollowedByIndentedBody: isFollowedByIndentedBody(node, parent),
         isFollowedByComma,
       }
     }
@@ -3565,7 +3598,6 @@ function printArgumentsList(path, options, print) {
     (parent.type === 'AssignmentExpression' && node === parent.right) ||
     ((parent.type === 'ObjectProperty' || parent.type === 'ClassProperty') &&
       node === parent.value)
-  const isIfTest = isIf(parent) && node === parent.test
   const isPostfixIfBody =
     isPostfixIfConsequent(path) ||
     (parent.type === 'ReturnStatement' &&
@@ -3575,7 +3607,7 @@ function printArgumentsList(path, options, print) {
     shouldntBreak ||
     (firstArgIsObject &&
       !isRightSideOfAssignment &&
-      !isIfTest &&
+      !isFollowedByIndentedBody(node, parent) &&
       !isPostfixIfBody)
 
   const parensUnnecessary = unnecessary && parensOptional
@@ -4021,15 +4053,19 @@ function printMemberLookup(path, options, print) {
   parts.push(optional)
 
   if (n.computed) {
-    if (n.property.type !== 'Range') {
-      parts.push('[')
-    }
     const property = path.call(print, 'property')
-    parts.push(property)
-    if (n.property.type !== 'Range') {
-      parts.push(']')
+    if (n.property.type === 'Range') {
+      return property
     }
-    return concat(parts)
+    parts.push(
+      '[',
+      ifBreak('('),
+      indent(concat([softline, property])),
+      softline,
+      ifBreak(')'),
+      ']'
+    )
+    return group(concat(parts))
   }
 
   if (isShorthandPrototypeLookup(n)) {
