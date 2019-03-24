@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`implicit-object-arg-followed-by-indent.coffee 1`] = `
+if a b: ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if a(
+  b: ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+)
+  d
+
+`;
+
 exports[`index.coffee 1`] = `
 a[b c]
 
