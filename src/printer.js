@@ -889,6 +889,8 @@ function printPathNoParens(path, options, print) {
 
       return concat(parts)
     }
+    case 'Import':
+      return 'import'
     case 'BlockStatement': {
       const naked = path.call(bodyPath => {
         return printStatementSequence(bodyPath, options, print)
@@ -3515,6 +3517,9 @@ function callParensNecessary(path, options, {stackOffset = 0} = {}) {
     node.arguments[0].type === 'RegExpLiteral' &&
     isAmbiguousRegex(node.arguments[0])
   ) {
+    return true
+  }
+  if (node.callee && node.callee.type === 'Import') {
     return true
   }
   if (
