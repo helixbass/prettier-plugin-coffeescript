@@ -325,6 +325,8 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return true
         case 'AssignmentExpression':
           return isPostfixBody(path, {stackOffset: 1})
+        case 'SwitchCase':
+          return parent.test === node
         default:
           return false
       }
@@ -2500,6 +2502,7 @@ function isRightmostInStatement(
           prevParent === parent.alternate)) ||
       (parent.type === 'SwitchStatement' &&
         prevParent === parent.discriminant) ||
+      (parent.type === 'SwitchCase' && prevParent === parent.test) ||
       (parent.type === 'For' &&
         (prevParent === parent.source || prevParent === parent.guard)) ||
       (parent.type === 'WhileStatement' && prevParent === parent.test) ||
