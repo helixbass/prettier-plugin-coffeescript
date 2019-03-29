@@ -75,6 +75,31 @@ b while (
 
 `;
 
+exports[`conditional-computed-access.coffee 1`] = `
+a[if b then c]
+
+a[if b then c] = yes
+
+a[(
+  if b
+    c
+)]
+
+a[b if c]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a[if b then c]
+
+a[if b then c] = yes
+
+a[(
+  if b
+    c
+)]
+
+a[b if c]
+
+`;
+
 exports[`conditional-condition.coffee 1`] = `
 if (
   if a
