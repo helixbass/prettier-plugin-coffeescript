@@ -277,7 +277,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         return false
       }
       if (isCondition(node, parent)) {
-        return {unlessParentBreaks: true}
+        return false
       }
       return true
     case 'ConditionalExpression':
