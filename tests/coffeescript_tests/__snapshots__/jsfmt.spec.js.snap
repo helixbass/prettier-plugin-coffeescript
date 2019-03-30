@@ -9733,9 +9733,9 @@ test 'return value of unless-else is from the proper body', ->
 
 test 'assign inside the condition of a conditional statement', ->
   nonce = {}
-  if (a = nonce) then 1
+  if a = nonce then 1
   eq nonce, a
-  1 if (b = nonce)
+  1 if b = nonce
   eq nonce, b
 
 # Interactions With Functions
