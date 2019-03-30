@@ -2432,6 +2432,14 @@ function shouldOmitObjectBraces(
     return ifParentBreaks
   }
 
+  if (
+    parent.type === 'ArrayExpression' &&
+    node === getLast(parent.elements) &&
+    parent.elements.length > 1
+  ) {
+    return ifParentBreaks ? {indent: false} : false
+  }
+
   let isRightmost
   if (
     (isRightmost = isRightmostInStatement(path, options, {
@@ -2517,7 +2525,7 @@ function isRightmostInStatement(
       (parent.type === 'MemberExpression' &&
         prevParent === parent.property &&
         parent.computed) ||
-      (parent.type === 'ArrayExpression' && parent.elements.length === 1)
+      (parent.type === 'ArrayExpression' && node === getLast(parent.elements))
     ) {
       return {
         indent,
