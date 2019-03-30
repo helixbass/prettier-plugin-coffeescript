@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`array.coffee 1`] = `
+[
+  a b
+  c d
+]
+
+[a(bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb), c(ddddddddddddddddddddddddddddddddddddddd)]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[a(b), c d]
+
+[
+  a bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  c ddddddddddddddddddddddddddddddddddddddd
+]
+
+`;
+
 exports[`existence.coffee 1`] = `
 a(b)?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
