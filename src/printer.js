@@ -3699,24 +3699,37 @@ function printArgumentsList(path, options, print) {
   const closingLinebreakAnyway =
     parensUnnecessary && parent.type === 'JSXExpressionContainer'
 
+  const openingImplicitSpace =
+    args.length === 1 &&
+    path.call(argPath => pathNeedsParens(argPath, options), 'arguments', '0')
+      ? ''
+      : ' '
   const openingParen = parensUnnecessary
-    ? ' '
+    ? openingImplicitSpace
     : parensOptionalUnlessParentBreaks
     ? ifBreak(
         '(',
-        parensUnnecessaryUnlessParentBreaks ? ' ' : ifBreak('(', ' '),
+        parensUnnecessaryUnlessParentBreaks
+          ? openingImplicitSpace
+          : ifBreak('(', openingImplicitSpace),
         {
           visibleType: 'visible',
           offset: parensOptionalUnlessParentBreaks.breakingParentCount || 1,
         }
       )
     : parensOptionalIfParentBreaks
-    ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak('(', ' '), '(', {
-        visibleType: 'visible',
-        offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
-      })
+    ? ifBreak(
+        parensUnnecessaryIfParentBreaks
+          ? openingImplicitSpace
+          : ifBreak('(', openingImplicitSpace),
+        '(',
+        {
+          visibleType: 'visible',
+          offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
+        }
+      )
     : parensOptional
-    ? ifBreak('(', ' ')
+    ? ifBreak('(', openingImplicitSpace)
     : '('
   const closingParen = parensUnnecessary
     ? closingLinebreakAnyway
