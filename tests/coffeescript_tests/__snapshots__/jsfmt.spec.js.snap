@@ -1624,11 +1624,7 @@ test 'context property assignment (using @)', ->
 test 'unassignable values', ->
   nonce = {}
   for nonref in ['', '""', '0', 'f()'].concat CoffeeScript.RESERVED
-    eq nonce,
-      try
-        CoffeeScript.compile "#{nonref} = v"
-      catch e
-        nonce
+    eq nonce, try CoffeeScript.compile "#{nonref} = v" catch e then nonce
 
 # Compound Assignment
 
@@ -2170,11 +2166,7 @@ test '#1348, #1216: existential assignment compilation', ->
 test '#1591, #1101: splatted expressions in destructuring assignment must be assignable', ->
   nonce = {}
   for nonref in ['', '""', '0', 'f()', '(->)'].concat CoffeeScript.RESERVED
-    eq nonce,
-      try
-        CoffeeScript.compile "[#{nonref}...] = v"
-      catch e
-        nonce
+    eq nonce, try CoffeeScript.compile "[#{nonref}...] = v" catch e then nonce
 
 test '#1643: splatted accesses in destructuring assignments should not be declared as variables', ->
   nonce = {}
@@ -2201,12 +2193,7 @@ test '#1643: splatted accesses in destructuring assignments should not be declar
         unless #{access}[0] is nonce and #{access}[1] is nonce2 and #{access}[2] is nonce3 then throw new Error('[...]')
         """
       eq nonce,
-        unless (
-          try
-            CoffeeScript.run code, bare: true
-          catch e
-            true
-        )
+        unless (try CoffeeScript.run code, bare: true catch e then true)
           nonce
   # subpatterns like \`[[a]...]\` and \`[{a}...]\`
   subpatterns = ['[sub, sub2, sub3]', '{0: sub, 1: sub2, 2: sub3}']
@@ -2220,12 +2207,7 @@ test '#1643: splatted accesses in destructuring assignments should not be declar
         unless sub is nonce and sub2 is nonce2 and sub3 is nonce3 then throw new Error('[sub...]')
         """
       eq nonce,
-        unless (
-          try
-            CoffeeScript.run code, bare: true
-          catch e
-            true
-        )
+        unless (try CoffeeScript.run code, bare: true catch e then true)
           nonce
 
 test '#1838: Regression with variable assignment', ->
@@ -5463,10 +5445,7 @@ test "#1534: class then 'use strict'", ->
   error = 'do -> ok this'
   strictTest = "do ->'use strict';#{error}"
   return unless (
-    try
-      CoffeeScript.run strictTest, bare: yes
-    catch e
-      nonce is nonce
+    (try CoffeeScript.run strictTest, bare: yes catch e then nonce) is nonce
   )
 
   throws -> CoffeeScript.run "class then 'use strict';#{error}", bare: yes
@@ -10073,16 +10052,8 @@ test '#2555, strange function if bodies', ->
   )
 
 test '#1057: \`catch\` or \`finally\` in single-line functions', ->
-  ok do ->
-    try
-      throw 'up'
-    catch
-      yes
-  ok do ->
-    try
-      yes
-    finally
-      'nothing'
+  ok do -> try throw 'up' catch then yes
+  ok do -> try yes finally 'nothing'
 
 test '#2367: super in for-loop', ->
   class Foo
@@ -12977,8 +12948,7 @@ test 'try/catch with empty try, empty catch', ->
     # nothing
 
 test 'single-line try/catch with empty try, empty catch', ->
-  try
-  catch err
+  try catch err
 
 test 'try/finally with empty try, empty finally', ->
   try
@@ -12987,8 +12957,7 @@ test 'try/finally with empty try, empty finally', ->
     # nothing
 
 test 'single-line try/finally with empty try, empty finally', ->
-  try
-  finally
+  try finally
 
 test 'try/catch/finally with empty try, empty catch, empty finally', ->
   try
@@ -12996,9 +12965,7 @@ test 'try/catch/finally with empty try, empty catch, empty finally', ->
   finally
 
 test 'single-line try/catch/finally with empty try, empty catch, empty finally', ->
-  try
-  catch err
-  finally
+  try catch err finally
 
 # Try/Catch/Finally as an Expression
 
@@ -13013,11 +12980,7 @@ test 'return the result of try when no exception is thrown', ->
   eq nonce, result
 
 test 'single-line result of try when no exception is thrown', ->
-  result =
-    try
-      nonce
-    catch err
-      undefined
+  result = try nonce catch err then undefined
   eq nonce, result
 
 test 'return the result of catch when an exception is thrown', ->
@@ -13031,17 +12994,13 @@ test 'return the result of catch when an exception is thrown', ->
 
 test 'single-line result of catch when an exception is thrown', ->
   fn = ->
-    try
-      throw ->
-    catch err
-      nonce
+    try throw -> catch err then nonce
   doesNotThrow fn
   eq nonce, fn()
 
 test 'optional catch', ->
   fn = ->
-    try
-      throw ->
+    try throw ->
     nonce
   doesNotThrow fn
   eq nonce, fn()
@@ -13078,23 +13037,13 @@ test 'Try catch finally as implicit arguments', ->
 
   foo = no
   try
-    first(
-      try
-        iamwhoiam()
-      finally
-        foo = yes
-    )
+    first try iamwhoiam() finally foo = yes
   catch e
   eq foo, yes
 
   bar = no
   try
-    first(
-      try
-        iamwhoiam()
-      catch e
-      finally
-    )
+    first try iamwhoiam() catch e finally
     bar = yes
   catch e
   eq bar, yes
@@ -13106,18 +13055,9 @@ test '#2900: parameter-less catch clause', ->
   catch
     ok true
 
-  try
-    throw new Error 'failed'
-  catch
-  finally
-    ok true
+  try throw new Error 'failed' catch finally ok true
 
-  ok(
-    try
-      throw new Error 'failed'
-    catch
-      true
-  )
+  ok try throw new Error 'failed' catch then true
 
 test '#3709: throwing an if statement', ->
   # \`throw if\` should return a closure around the \`if\` block, so that the
@@ -15482,13 +15422,7 @@ test "don't wrap 'pure' statements in a closure", ->
   eq nonce, fn items
 
 test 'usage of \`new\` is careful about where the invocation parens end up', ->
-  eq(
-    'object'
-    typeof new (
-      try
-        Array
-    )()
-  )
+  eq 'object', typeof new (try Array)()
   eq 'object', typeof new (do -> ->)()
 
 test 'implicit call against control structures', ->
@@ -15532,12 +15466,7 @@ test 'implicit call against control structures', ->
 
   eq result, 'caught'
 
-  save(
-    try
-      doesnt exist
-    catch error
-      'caught2'
-  )
+  save try doesnt exist catch error then 'caught2'
 
   eq result, 'caught2'
 
@@ -17442,9 +17371,7 @@ test 'yielding switch expressions', ->
 
 test 'yield in try expressions', ->
   x = do ->
-    try
-      yield 1
-    catch
+    try yield 1 catch
 
   y = x.next()
   ok y.value is 1 and y.done is false
@@ -17454,8 +17381,7 @@ test 'yield in try expressions', ->
 
 test 'yielding try expressions', ->
   x = do ->
-    yield try
-      1
+    yield try 1
 
   y = x.next()
   ok y.value is 1 and y.done is false
@@ -17501,8 +17427,7 @@ test "yield handles 'this' correctly", ->
         yield => this
     yield array
     yield if true then yield => this
-    yield try
-      throw yield => this
+    yield try throw yield => this
     throw yield => this
 
   y = x.call [1, 2, 3]

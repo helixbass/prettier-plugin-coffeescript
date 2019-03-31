@@ -392,3 +392,135 @@ exports[`spread-control-structure.coffee 1`] = `
 />
 
 `;
+
+exports[`try-as-condition.coffee 1`] = `
+if (try a)
+  b
+
+if (try a) then b
+
+b if try a
+
+b if (try a catch b then c)
+
+if (
+  try
+    b
+)
+  c
+
+c unless (
+  try
+    b
+)
+
+while (try a)
+  b
+
+while (try a) then b
+
+b while try a
+
+b while (try a catch b then c)
+
+while (
+  try
+    b
+)
+  c
+
+c until (
+  try
+    b
+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if (try a)
+  b
+
+if (try a) then b
+
+b if try a
+
+b if (try a catch b then c)
+
+if (
+  try
+    b
+)
+  c
+
+c unless (
+  try
+    b
+)
+
+while (try a)
+  b
+
+while (try a) then b
+
+b while try a
+
+b while (try a catch b then c)
+
+while (
+  try
+    b
+)
+  c
+
+c until (
+  try
+    b
+)
+
+`;
+
+exports[`try-as-operand.coffee 1`] = `
+(try a) is b
+
+(try a catch then b) + c
+
+a + try b
+
+(try b)?
+
+not try b
+
+(try a) and b
+
+(try
+  a
+) is b
+
+a is (
+  try
+    b
+  catch
+    c
+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(try a) is b
+
+(try a catch then b) + c
+
+a + try b
+
+(try b)?
+
+not try b
+
+(try a) and b
+
+(
+  try
+    a
+) is b
+
+a is
+  try
+    b
+  catch
+    c
+
+`;
