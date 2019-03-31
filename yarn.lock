@@ -74,9 +74,9 @@
   integrity sha512-SPBKHUHvaFINuzmxFgtVC+Yj3w2qAzS3+gsm9M0M2NkbTGdL/xz3SKWUeyhrGNMJ7sb2l49BzdLbAKFq+5DIZw==
 
 "@types/node@*":
-  version "11.12.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.12.1.tgz#d90123f6c61fdf2f7cddd286ddae891586dd3488"
-  integrity sha512-sKDlqv6COJrR7ar0+GqqhrXQDzQlMcqMnF2iEU6m9hLo8kxozoAGUazwPyELHlRVmjsbvlnGXjnzyptSXVmceA==
+  version "11.12.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.12.2.tgz#d7f302e74b10e9801d52852137f652d9ee235da8"
+  integrity sha512-c82MtnqWB/CqqK7/zit74Ob8H1dBdV7bK+BcErwtXbe0+nUGkgzq5NTDmRW/pAv2lFtmeNmW95b0zK2hxpeklg==
 
 "@types/node@^10.11.7":
   version "10.14.4"
@@ -777,9 +777,9 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-"coffeescript@github:helixbass/coffeescript#cdafa540":
+"coffeescript@github:helixbass/coffeescript#cd55888b":
   version "2.3.2"
-  resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/cdafa540cc04b482da17b5a5809ac60379ed5353"
+  resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/cd55888b4848a0a29a6cb14b1b712db818a9dfde"
   dependencies:
     babel-eslint "^7.2.2"
     babylon "^7.0.0-beta.44"
