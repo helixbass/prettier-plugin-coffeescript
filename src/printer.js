@@ -436,6 +436,23 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'SpreadElement':
         case 'JSXSpreadAttribute':
           return true
+        case 'BinaryExpression':
+        case 'LogicalExpression':
+          return node === parent.left
+        case 'UnaryExpression':
+          return !parent.prefix
+        case 'IfStatement':
+        case 'ConditionalExpression':
+        case 'WhileStatement':
+          if (node === parent.test) {
+            if (!parent.postfix) {
+              return {unlessParentBreaks: true}
+            }
+            if (node.handler) {
+              return {unlessParentBreaks: true}
+            }
+          }
+          return false
         default:
           return false
       }
@@ -1327,13 +1344,19 @@ function printPathNoParens(path, options, print) {
       const content = concat([
         shouldIndent ? softline : '',
         'try',
+        ifBreak(
+          '',
+          (!n.block || isEmptyBlock(n.block)) && (n.handler || n.finalizer)
+            ? ''
+            : ' '
+        ),
         path.call(print, 'block'),
         isNextLineEmpty(text, n.block, locEnd) && (n.handler || n.finalizer)
           ? hardline
           : '',
         n.handler
           ? concat([
-              hardline,
+              line,
               path.call(print, 'handler'),
               isNextLineEmpty(text, n.handler, locEnd) && n.finalizer
                 ? hardline
@@ -1341,24 +1364,40 @@ function printPathNoParens(path, options, print) {
             ])
           : '',
         n.finalizer
-          ? concat([hardline, 'finally', path.call(print, 'finalizer')])
+          ? concat([
+              line,
+              'finally',
+              ifBreak('', ' '),
+              path.call(print, 'finalizer'),
+            ])
           : '',
       ])
 
+      const shouldBreak =
+        options.respectBreak.indexOf('control') > -1 &&
+        (!hasSameStartLine(n, n.block) ||
+          (n.handler && !hasSameStartLine(n, n.handler)))
+
       return group(
         shouldIndent ? concat([indent(content), softline]) : content,
-        {shouldBreak: true}
+        {shouldBreak}
       )
     }
-    case 'CatchClause':
+    case 'CatchClause': {
+      const shouldBreak =
+        options.respectBreak.indexOf('control') > -1 &&
+        !hasSameStartLine(n, n.body)
+
       return group(
         concat([
           'catch',
           n.param ? concat([' ', path.call(print, 'param')]) : '',
+          ifBreak('', n.body && !isEmptyBlock(n.body) ? ' then ' : ''),
           path.call(print, 'body'),
         ]),
-        {shouldBreak: true}
+        {shouldBreak}
       )
+    }
     case 'ThrowStatement':
       return concat(['throw ', path.call(print, 'argument')])
     case 'SwitchStatement': {
@@ -2394,6 +2433,37 @@ function isPostfixBody(path, {stackOffset = 0} = {}) {
     isPostfixForBody(path, {stackOffset}) ||
     isPostfixWhileBody(path, {stackOffset})
   )
+}
+
+// eslint-disable-next-line no-unused-vars
+function isTryBody(path, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
+  const grandparent = path.getParentNode(stackOffset + 1)
+  const greatgrandparent = path.getParentNode(stackOffset + 2)
+
+  if (parent.type === 'TryStatement' && node === parent.block) {
+    return true
+  }
+
+  if (
+    singleExpressionBlock(parent) &&
+    grandparent.type === 'TryStatement' &&
+    parent === grandparent.block
+  ) {
+    return true
+  }
+
+  if (
+    parent.type === 'ExpressionStatement' &&
+    singleExpressionBlock(grandparent) &&
+    greatgrandparent.type === 'TryStatement' &&
+    grandparent === greatgrandparent.block
+  ) {
+    return true
+  }
+
+  return false
 }
 
 function shouldOmitObjectBraces(
