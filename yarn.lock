@@ -34,10 +34,10 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@babel/parser@7.1.2":
-  version "7.1.2"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.1.2.tgz#85c5c47af6d244fab77bce6b9bd830e38c978409"
-  integrity sha512-x5HFsW+E/nQalGMw7hu+fvPqnBeBaIr0lWJ2SG0PPL2j+Pm9lYvCrsZJGIgauPIENx0v10INIyFjmSNUD/gSqQ==
+"@babel/parser@7.1.5":
+  version "7.1.5"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.1.5.tgz#20b7d5e7e1811ba996f8a868962ea7dd2bfcd2fc"
+  integrity sha512-WXKf5K5HT6X0kKiCOezJZFljsfxKV1FpU8Tf1A7ZpGvyd/Q4hlrJm2EwoH2onaUq3O4tLDp+4gk0hHPsMyxmOg==
 
 "@glimmer/interfaces@^0.30.3":
   version "0.30.5"
@@ -74,9 +74,9 @@
   integrity sha512-SPBKHUHvaFINuzmxFgtVC+Yj3w2qAzS3+gsm9M0M2NkbTGdL/xz3SKWUeyhrGNMJ7sb2l49BzdLbAKFq+5DIZw==
 
 "@types/node@*":
-  version "11.12.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.12.2.tgz#d7f302e74b10e9801d52852137f652d9ee235da8"
-  integrity sha512-c82MtnqWB/CqqK7/zit74Ob8H1dBdV7bK+BcErwtXbe0+nUGkgzq5NTDmRW/pAv2lFtmeNmW95b0zK2hxpeklg==
+  version "11.13.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.13.0.tgz#b0df8d6ef9b5001b2be3a94d909ce3c29a80f9e1"
+  integrity sha512-rx29MMkRdVmzunmiA4lzBYJNnXsW/PhG4kMBy2ATsYaDjGGR75dCFEVVROKpNwlVdcUX3xxlghKQOeDPBJobng==
 
 "@types/node@^10.11.7":
   version "10.14.4"
@@ -157,10 +157,10 @@ ajv@^6.0.1, ajv@^6.5.5:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-angular-estree-parser@1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/angular-estree-parser/-/angular-estree-parser-1.1.3.tgz#679b7a1ab57e56cd484b5c44e380bcec7633df58"
-  integrity sha512-2kUtrcvjb2ZMW/FWXeGxpttwY2Ax4SE8RErmfai2Gq5+cEzKdfSerEnOplQyWSL1cTN8i67h+vccElBSravWDg==
+angular-estree-parser@1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/angular-estree-parser/-/angular-estree-parser-1.1.5.tgz#f278e03e648a2bfb6c5dcdf17ba3273f3251b74a"
+  integrity sha512-M82O7HGwgS6mBfQq9ijCwuP4uYgSgycmNWQOHomToWRAdfX/c2pAwpCYdbVG9lc6Go8mr5+A2bRQnykdCVdpuA==
   dependencies:
     lines-and-columns "^1.1.6"
     tslib "^1.9.3"
@@ -679,7 +679,7 @@ chalk@^1.1.3:
     strip-ansi "^3.0.0"
     supports-color "^2.0.0"
 
-chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.4.1:
+chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.4.1, chalk@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
   integrity sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==
@@ -1070,6 +1070,11 @@ editorconfig-to-prettier@0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/editorconfig-to-prettier/-/editorconfig-to-prettier-0.0.6.tgz#d79bc1a2574e0a94315dd43da3275f92f9331b27"
   integrity sha512-Ysw+hBdwhPFruYmLapKRm7Or5XgMzhasbqu4AN07V2l/AkqpgooWm2xtTQPzTD6S0tq54A+WbSxNt6qmsO3hoA==
+
+editorconfig-to-prettier@0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/editorconfig-to-prettier/-/editorconfig-to-prettier-0.1.0.tgz#c31d2ceea2ef922835c53f6ca0e5ba2930b8940d"
+  integrity sha512-qm9q2KRUYXjSzAYTfnitukCZkbXJLFylIs3c51YEZ+rViQmnrAQSsAJaG3cBWsoSZRo6wSMYYMiHSIaMD0gKjw==
 
 editorconfig@0.14.2:
   version "0.14.2"
@@ -3520,12 +3525,12 @@ postcss-scss@1.0.2:
   dependencies:
     postcss "^6.0.3"
 
-postcss-scss@1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/postcss-scss/-/postcss-scss-1.0.6.tgz#ab903f3bb20161bc177896462293a53d4bff5f7a"
-  integrity sha512-4EFYGHcEw+H3E06PT/pQQri06u/1VIIPjeJQaM8skB80vZuXMhp4cSNV5azmdNkontnOID/XYWEvEEELLFB1ww==
+postcss-scss@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/postcss-scss/-/postcss-scss-2.0.0.tgz#248b0a28af77ea7b32b1011aba0f738bda27dea1"
+  integrity sha512-um9zdGKaDZirMm+kZFKKVsnKPF7zF7qBAtIfTSnZXD1jZ0JNZIxdB6TxQOjCnlSzLRInVl2v3YdBh/M881C4ug==
   dependencies:
-    postcss "^6.0.23"
+    postcss "^7.0.0"
 
 postcss-selector-parser@2.2.3:
   version "2.2.3"
@@ -3564,7 +3569,7 @@ postcss@^5.2.16:
     source-map "^0.5.6"
     supports-color "^3.2.3"
 
-postcss@^6.0.23, postcss@^6.0.3:
+postcss@^6.0.3:
   version "6.0.23"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-6.0.23.tgz#61c82cc328ac60e677645f979054eb98bc0e3324"
   integrity sha512-soOk1h6J3VMTZtVeVpv15/Hpdl2cBLX3CAw4TAbkpTJiNPk9YP/zWcD1ND+xEtvyuuvKzbxliTOIyvkSeSJ6ag==
@@ -3572,6 +3577,15 @@ postcss@^6.0.23, postcss@^6.0.3:
     chalk "^2.4.1"
     source-map "^0.6.1"
     supports-color "^5.4.0"
+
+postcss@^7.0.0:
+  version "7.0.14"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.14.tgz#4527ed6b1ca0d82c53ce5ec1a2041c2346bbd6e5"
+  integrity sha512-NsbD6XUUMZvBxtQAJuWDJeeC4QFsmWsfozWxCJPWf3M55K9iu2iMDaKqyoOdTJ1R4usBXuxlVFAIo8rZPQD4Bg==
+  dependencies:
+    chalk "^2.4.2"
+    source-map "^0.6.1"
+    supports-color "^6.1.0"
 
 prelude-ls@~1.1.2:
   version "1.1.2"
@@ -3583,16 +3597,16 @@ preserve@^0.2.0:
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
   integrity sha1-gV7R9uvGWSb4ZbMQwHE7yzMVzks=
 
-"prettier@github:helixbass/prettier#395e5d5c":
-  version "1.15.0-dev"
-  resolved "https://codeload.github.com/helixbass/prettier/tar.gz/395e5d5cc1b4e833b0d8c9460641ac48e9f8e379"
+"prettier@github:helixbass/prettier#de38bc19":
+  version "1.16.0-dev"
+  resolved "https://codeload.github.com/helixbass/prettier/tar.gz/de38bc19410e195dfdf618a7b407d42283e139fb"
   dependencies:
     "@angular/compiler" "6.1.10"
     "@babel/code-frame" "7.0.0-beta.46"
-    "@babel/parser" "7.1.2"
+    "@babel/parser" "7.1.5"
     "@glimmer/syntax" "0.30.3"
     "@iarna/toml" "2.0.0"
-    angular-estree-parser "1.1.3"
+    angular-estree-parser "1.1.5"
     angular-html-parser "1.0.0"
     camelcase "4.1.0"
     chalk "2.1.0"
@@ -3602,7 +3616,7 @@ preserve@^0.2.0:
     dedent "0.7.0"
     diff "3.2.0"
     editorconfig "0.15.2"
-    editorconfig-to-prettier "0.0.6"
+    editorconfig-to-prettier "0.1.0"
     emoji-regex "6.5.1"
     escape-string-regexp "1.0.5"
     esutils "2.0.2"
@@ -3630,7 +3644,7 @@ preserve@^0.2.0:
     parse-srcset ikatyang/parse-srcset#54eb9c1cb21db5c62b4d0e275d7249516df6f0ee
     postcss-less "1.1.5"
     postcss-media-query-parser "0.2.3"
-    postcss-scss "1.0.6"
+    postcss-scss "2.0.0"
     postcss-selector-parser "2.2.3"
     postcss-values-parser "1.5.0"
     regexp-util "1.2.2"
@@ -4400,6 +4414,13 @@ supports-color@^5.3.0, supports-color@^5.4.0:
   dependencies:
     has-flag "^3.0.0"
 
+supports-color@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-6.1.0.tgz#0764abc69c63d5ac842dd4867e8d025e880df8f3"
+  integrity sha512-qe1jfm1Mg7Nq/NSh6XE24gPXROEVsWHxC1LIx//XNlD9iw7YZQGjZNjYN7xGaEG6iKdA8EtNFW6R0gjnVXp+wQ==
+  dependencies:
+    has-flag "^3.0.0"
+
 symbol-tree@^3.2.1:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.2.tgz#ae27db38f660a7ae2e1c3b7d1bc290819b8519e6"
@@ -4607,9 +4628,9 @@ typescript@3.0.1:
   integrity sha512-zQIMOmC+372pC/CCVLqnQ0zSBiY7HHodU7mpQdjiZddek4GMj31I3dUJ7gAs9o65X7mnRma6OokOkc6f9jjfBg==
 
 uglify-js@^3.1.4:
-  version "3.5.2"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.5.2.tgz#dc0c7ac2da0a4b7d15e84266818ff30e82529474"
-  integrity sha512-imog1WIsi9Yb56yRt5TfYVxGmnWs3WSGU73ieSOlMVFwhJCA9W8fqFFMMj4kgDqiS/80LGdsYnWL7O9UcjEBlg==
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.5.3.tgz#d490bb5347f23025f0c1bc0dee901d98e4d6b063"
+  integrity sha512-rIQPT2UMDnk4jRX+w4WO84/pebU2jiLsjgIyrCktYgSvx28enOE3iYQMr+BD1rHiitWnDmpu0cY/LfIEpKcjcw==
   dependencies:
     commander "~2.19.0"
     source-map "~0.6.1"
