@@ -1,6 +1,6 @@
 {
   "name": "prettier-plugin-coffeescript",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Prettier Coffeescript Plugin",
   "main": "src",
   "repository": "https://github.com/helixbass/prettier-plugin-coffeescript",
