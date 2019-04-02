@@ -2907,6 +2907,10 @@ function shouldInlineLogicalExpression(node, {notJSX} = {}) {
     return true
   }
 
+  if (isFunction(node.right)) {
+    return true
+  }
+
   if (!notJSX && isJSXNode(node.right)) {
     return true
   }

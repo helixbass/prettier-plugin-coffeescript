@@ -145,6 +145,27 @@ if (
 
 `;
 
+exports[`inline-function.coffee 1`] = `
+a = b ? ->
+  c
+
+a = b or ->
+  c
+
+exports.some = Array::some ? (fn) ->
+  b
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a = b ? ->
+  c
+
+a = b or ->
+  c
+
+exports.some = Array::some ? (fn) ->
+  b
+
+`;
+
 exports[`inline-jsx.coffee 1`] = `
 user = renderedUser or <div><User name={@state.user.name} age={@state.user.age} /></div>
 
