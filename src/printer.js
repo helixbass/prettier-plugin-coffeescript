@@ -306,13 +306,14 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         //   return !node.postfix
 
         case 'ObjectProperty':
-          if (!node.postfix) {
-            return false
+          if (
+            node.postfix &&
+            node === parent.value &&
+            grandparent.properties.length === 1
+          ) {
+            return {unlessParentBreaks: {visibleType: 'assignment'}}
           }
-          if (grandparent.properties.length === 1) {
-            return true
-          }
-          return {unlessParentBreaks: true}
+          return false
         case 'NewExpression':
         case 'CallExpression':
           if (node !== parent.callee && node !== getLast(parent.arguments)) {
@@ -348,13 +349,14 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           }
           return false
         case 'ObjectProperty':
-          if (!node.postfix) {
-            return false
+          if (
+            node.postfix &&
+            node === parent.value &&
+            grandparent.properties.length === 1
+          ) {
+            return {unlessParentBreaks: {visibleType: 'assignment'}}
           }
-          if (grandparent.properties.length === 1) {
-            return true
-          }
-          return {unlessParentBreaks: true}
+          return false
         case 'ReturnStatement':
         case 'MemberExpression':
         case 'SpreadElement':
@@ -367,6 +369,18 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       switch (parent.type) {
         case 'AssignmentExpression':
           if (node.postfix) {
+            return {unlessParentBreaks: {visibleType: 'assignment'}}
+          }
+          return false
+        case 'ObjectProperty':
+          if (
+            node.postfix &&
+            node === parent.value &&
+            grandparent.properties.length === 1
+          ) {
+            return {unlessParentBreaks: {visibleType: 'assignment'}}
+          }
+          if (!node.postfix) {
             return {unlessParentBreaks: {visibleType: 'assignment'}}
           }
           return false

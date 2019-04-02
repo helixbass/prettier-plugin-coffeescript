@@ -20599,7 +20599,7 @@ test '#1871: implicit object closed by IMPLICIT_END in implicit returns', ->
   # instead these return an object
   func = ->
     key:
-      (i for i in [1, 2, 3])
+      i for i in [1, 2, 3]
 
   eq func().key.join(' '), '1 2 3'
 
