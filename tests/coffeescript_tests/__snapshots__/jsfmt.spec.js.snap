@@ -848,7 +848,7 @@ test 'for-from comprehensions over Array', ->
   ok array1.join(' ') is '35 55'
 
   array2 =
-    (a + b for [a, b] from [[10, 20], [30, 40], [50, 60]] when a + b >= 70)
+    a + b for [a, b] from [[10, 20], [30, 40], [50, 60]] when a + b >= 70
   ok array2.join(' ') is '70 110'
 
 `;

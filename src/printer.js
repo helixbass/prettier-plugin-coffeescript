@@ -343,7 +343,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'CallExpression':
           return parent.callee === node || node.postfix
         case 'AssignmentExpression':
-          return node.postfix
+          if (node.postfix) {
+            return {unlessParentBreaks: {visibleType: 'assignment'}}
+          }
+          return false
         case 'ObjectProperty':
           if (!node.postfix) {
             return false
@@ -363,7 +366,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
     case 'WhileStatement':
       switch (parent.type) {
         case 'AssignmentExpression':
-          return node.postfix
+          if (node.postfix) {
+            return {unlessParentBreaks: {visibleType: 'assignment'}}
+          }
+          return false
         case 'SpreadElement':
         case 'JSXSpreadAttribute':
           return true
