@@ -326,7 +326,13 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'JSXSpreadAttribute':
           return true
         case 'AssignmentExpression':
-          return isPostfixBody(path, {stackOffset: 1})
+          if (isPostfixBody(path, {stackOffset: 1})) {
+            return true
+          }
+          if (node.postfix) {
+            return {unlessParentBreaks: {visibleType: 'assignment'}}
+          }
+          return false
         case 'SwitchCase':
           return parent.test === node
         default:
@@ -503,7 +509,10 @@ function genericPrint(path, options, print) {
   if (needsParens) {
     parts.unshift(
       needsParens.unlessParentBreaks
-        ? ifBreak('', '(', {visibleType: 'visible'})
+        ? ifBreak('', '(', {
+            visibleType:
+              needsParens.unlessParentBreaks.visibleType || 'visible',
+          })
         : '('
     )
   }
@@ -513,7 +522,10 @@ function genericPrint(path, options, print) {
   if (needsParens) {
     parts.push(
       needsParens.unlessParentBreaks
-        ? ifBreak('', ')', {visibleType: 'visible'})
+        ? ifBreak('', ')', {
+            visibleType:
+              needsParens.unlessParentBreaks.visibleType || 'visible',
+          })
         : ')'
     )
   }
@@ -4088,14 +4100,14 @@ function printAssignment(
         )
       ))
   ) {
-    return group(full, {shouldBreak: true})
+    return group(full, {shouldBreak: true, visibleType: 'assignment'})
   }
   const tryAndBreakLeftOnly = !(
     leftNode.type === 'Identifier' ||
     isStringLiteral(leftNode) ||
     leftNode.type === 'MemberExpression'
   )
-  const singleGroup = group(full)
+  const singleGroup = group(full, {visibleType: 'assignment'})
   if (!tryAndBreakLeftOnly) {
     return singleGroup
   }
@@ -4127,7 +4139,7 @@ function printAssignment(
       ]),
       singleGroup,
     ],
-    {firstBreakingIndex: 1}
+    {firstBreakingIndex: 1, visibleType: 'assignment'}
   )
 }
 

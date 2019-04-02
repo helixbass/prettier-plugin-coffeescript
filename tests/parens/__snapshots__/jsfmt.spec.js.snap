@@ -101,6 +101,19 @@ c while a = b
 
 `;
 
+exports[`assignment-to-postfix-if.coffee 1`] = `
+a = (b if c)
+
+a =
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb if ccccccccc
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a = (b if c)
+
+a =
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb if ccccccccc
+
+`;
+
 exports[`conditional-computed-access.coffee 1`] = `
 a[if b then c]
 
