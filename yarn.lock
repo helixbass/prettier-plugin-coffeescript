@@ -748,9 +748,9 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-"coffeescript@github:helixbass/coffeescript#4658a269":
+"coffeescript@github:helixbass/coffeescript#cfba4f8e":
   version "2.3.2"
-  resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/4658a2691fb254a81f42dd04598b6dcb651a30bd"
+  resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/cfba4f8e3b45c51bab654f4dc7ba66ce93a9df9d"
   dependencies:
     babel-eslint "^7.2.2"
     babylon "^7.0.0-beta.44"
@@ -761,7 +761,6 @@ code-point-at@^1.0.0:
     eslint-plugin-node "^6.0.1"
     eslint-plugin-promise "^3.7.0"
     eslint-plugin-standard "^3.0.1"
-    prettier "github:helixbass/prettier#de38bc19"
 
 collapse-white-space@^1.0.2:
   version "1.0.4"
