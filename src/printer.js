@@ -776,14 +776,19 @@ function printPathNoParens(path, options, print) {
           n.property.type === 'Identifier' &&
           parent.type !== 'MemberExpression')
 
+      const nonInlinedContent = concat([
+        softline,
+        printMemberLookup(path, options, print),
+      ])
+
       return concat([
         path.call(print, 'object'),
         shouldInline
           ? printMemberLookup(path, options, print)
           : group(
-              indent(
-                concat([softline, printMemberLookup(path, options, print)])
-              )
+              options.indentChain
+                ? indent(nonInlinedContent)
+                : nonInlinedContent
             ),
       ])
     }
