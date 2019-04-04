@@ -49,6 +49,21 @@ butThisOneShould =
 
 `;
 
+exports[`member-expression.coffee 1`] = `
+aaaaaaaaaaaaa = bbbbbbbbbbbbbbb[if ccccccccccccccc then ddddddddddd else eeeeeeeee]
+
+aaaaaaaaaaaaa: bbbbbbbbbbbbbbb[if ccccccccccccccc then ddddddddddd else eeeeeeeee]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+aaaaaaaaaaaaa = bbbbbbbbbbbbbbb[
+  if ccccccccccccccc then ddddddddddd else eeeeeeeee
+]
+
+aaaaaaaaaaaaa: bbbbbbbbbbbbbbb[
+  if ccccccccccccccc then ddddddddddd else eeeeeeeee
+]
+
+`;
+
 exports[`tagged-template-literal.coffee 1`] = `
 a = '''
   b
