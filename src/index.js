@@ -162,6 +162,19 @@ const options = {
     default: [{value: []}],
     description: "Don't make explicit constructs implicit",
   },
+  inlineAssignmentsTo: {
+    array: true,
+    type: 'choice',
+    choices: [
+      {
+        value: 'control',
+        description: 'Inline right sides of assignments to control structures',
+      },
+    ],
+    category: 'Global',
+    default: [{value: ['control']}],
+    description: 'Inline right sides of assignments',
+  },
 }
 
 module.exports = {

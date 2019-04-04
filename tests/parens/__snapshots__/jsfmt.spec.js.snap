@@ -263,9 +263,8 @@ d: e
 
 BREAK
 
-a:
-  while b
-    c
+a: while b
+  c
 
 BREAK
 
