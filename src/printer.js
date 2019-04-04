@@ -4259,14 +4259,7 @@ function printMemberLookup(path, options, print) {
     if (n.property.type === 'Range') {
       return property
     }
-    parts.push(
-      '[',
-      ifBreak('('),
-      indent(concat([softline, property])),
-      softline,
-      ifBreak(')'),
-      ']'
-    )
+    parts.push('[', indent(concat([softline, property])), softline, ']')
     return group(concat(parts))
   }
 

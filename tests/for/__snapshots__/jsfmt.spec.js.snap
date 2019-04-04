@@ -24,9 +24,9 @@ for pastFragment, pastFragmentIndex in (
 ) by -111
   b
 
-for pastFragment, pastFragmentIndex in fragments[(
+for pastFragment, pastFragmentIndex in fragments[
   fragmentIndex + 1
-)] by -111111111
+] by -111111111
   b
 
 for pastFragment, pastFragmentIndex in (
