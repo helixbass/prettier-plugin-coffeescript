@@ -4101,6 +4101,13 @@ function printAssignment(
       rightNode.originalPattern &&
       rightNode.originalPattern.indexOf('\n') > -1) ||
     rightNode.type === 'NewExpression' ||
+    (options.inlineAssignmentsTo.indexOf('control') > -1 &&
+      (rightNode.type === 'For' ||
+        rightNode.type === 'WhileStatement' ||
+        rightNode.type === 'ConditionalExpression' ||
+        rightNode.type === 'SwitchStatement' ||
+        rightNode.type === 'TryStatement') &&
+      !rightNode.postfix) ||
     (rightNode.type === 'AssignmentExpression' &&
       node.type === 'AssignmentExpression') ||
     (rightNode.type === 'MemberExpression' &&

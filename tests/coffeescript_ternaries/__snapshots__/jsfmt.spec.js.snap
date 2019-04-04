@@ -14,15 +14,14 @@ room = room.map (row, rowIndex) ->
     else
       0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-funnelSnapshotCard =
-  if (
-    (report is MY_OVERVIEW and not ReportGK.xar_metrics_active_capitol_v2) or
-    (report is COMPANY_OVERVIEW and
-      not ReportGK.xar_metrics_active_capitol_v2_company_metrics)
-  )
-    <ReportMetricsFunnelSnapshotCard metrics={metrics} />
-  else
-    null
+funnelSnapshotCard = if (
+  (report is MY_OVERVIEW and not ReportGK.xar_metrics_active_capitol_v2) or
+  (report is COMPANY_OVERVIEW and
+    not ReportGK.xar_metrics_active_capitol_v2_company_metrics)
+)
+  <ReportMetricsFunnelSnapshotCard metrics={metrics} />
+else
+  null
 
 room = room.map (row, rowIndex) ->
   row.map (col, colIndex) ->
@@ -39,11 +38,9 @@ icecream = if what is 'cone'
 else
   (p) -> "here's your #{p} #{what}"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-icecream =
-  if what is 'cone'
-    (p) ->
-      if !!p then "here's your #{p} cone" else 'just the empty cone for you'
-  else
-    (p) -> "here's your #{p} #{what}"
+icecream = if what is 'cone'
+  (p) -> if !!p then "here's your #{p} cone" else 'just the empty cone for you'
+else
+  (p) -> "here's your #{p} #{what}"
 
 `;

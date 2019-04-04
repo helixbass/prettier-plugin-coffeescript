@@ -2354,22 +2354,20 @@ test '#4878: Compile error when using destructuring with a splat or expansion in
   arrayEq f4(arr), ['b', 'c', 'd']
 
   foo = (list) ->
-    ret =
-      if list?.length > 0
-        [first, ..., last] = list
-        [first, last]
-      else
-        []
+    ret = if list?.length > 0
+      [first, ..., last] = list
+      [first, last]
+    else
+      []
 
   arrayEq foo(arr), ['a', 'd']
 
   bar = (list) ->
-    ret =
-      if list?.length > 0
-        [first, rest...] = list
-        [first, rest]
-      else
-        []
+    ret = if list?.length > 0
+      [first, rest...] = list
+      [first, rest]
+    else
+      []
 
   arrayEq bar(arr), ['a', ['b', 'c', 'd']]
 
@@ -2782,29 +2780,26 @@ test '\`await\` inside IIFEs', ->
   [x, y, z] = new Array 3
 
   a = do ->
-    x =
-      switch (
-        4 # switch 4
-      )
-        when 2
-          await winning 1
-        when 4
-          await winning 5
-        when 7
-          await winning 2
-
-    y =
-      try
-        text = 'this should be caught'
-        throw new Error text
+    x = switch (
+      4 # switch 4
+    )
+      when 2
         await winning 1
-      catch e
-        await winning 4
+      when 4
+        await winning 5
+      when 7
+        await winning 2
 
-    z =
-      for i in [0..5]
-        a = i * i
-        await winning a
+    y = try
+      text = 'this should be caught'
+      throw new Error text
+      await winning 1
+    catch e
+      await winning 4
+
+    z = for i in [0..5]
+      a = i * i
+      await winning a
 
   a.then ->
     eq x, 5
@@ -7803,11 +7798,10 @@ test 'Range comprehension gymnastics.', ->
   eq "#{i for i in [a..b] by c}", '6,4,2,0'
 
 test 'Multiline array comprehension with filter.', ->
-  evens =
-    for num in [1, 2, 3, 4, 5, 6] when not (num & 1)
-      num *= -1
-      num -= 2
-      num * -1
+  evens = for num in [1, 2, 3, 4, 5, 6] when not (num & 1)
+    num *= -1
+    num -= 2
+    num * -1
   eq evens + '', '4,6,8'
 
   test 'The in operator still works, standalone.', ->
@@ -7835,10 +7829,9 @@ test 'Index values at the end of a loop.', ->
   ok i is 4
 
 test 'Ensure that local variables are closed over for range comprehensions.', ->
-  funcs =
-    for i in [1..3]
-      do (i) ->
-        -> -i
+  funcs = for i in [1..3]
+    do (i) ->
+      -> -i
 
   eq (func() for func in funcs).join(' '), '-1 -2 -3'
   ok i is 4
@@ -7846,10 +7839,9 @@ test 'Ensure that local variables are closed over for range comprehensions.', ->
 test 'Even when referenced in the filter.', ->
   list = ['one', 'two', 'three']
 
-  methods =
-    for num, i in list when num isnt 'two' and i isnt 1
-      do (num, i) ->
-        -> num + ' ' + i
+  methods = for num, i in list when num isnt 'two' and i isnt 1
+    do (num, i) ->
+      -> num + ' ' + i
 
   ok methods.length is 2
   ok methods[0]() is 'one 0'
@@ -7869,11 +7861,10 @@ test 'Even a convoluted one.', ->
 
   funcs = []
 
-  results =
-    for i in [1..3]
-      do (i) ->
-        z = (x * 3 for x in [1..i])
-        ((a, b, c) -> [a, b, c].join ' ').apply this, z
+  results = for i in [1..3]
+    do (i) ->
+      z = (x * 3 for x in [1..i])
+      ((a, b, c) -> [a, b, c].join ' ').apply this, z
 
   ok results.join(', ') is '3  , 3 6 , 3 6 9'
 
@@ -7903,10 +7894,9 @@ test 'Scoped loop pattern matching.', ->
   eq funcs[1](), 1
 
 test 'Nested comprehensions.', ->
-  multiLiner =
-    for x in [3..5]
-      for y in [3..5]
-        [x, y]
+  multiLiner = for x in [3..5]
+    for y in [3..5]
+      [x, y]
 
   singleLiner = ([x, y] for y in [3..5] for x in [3..5])
 
@@ -7958,10 +7948,9 @@ test 'Loop variables should be able to reference outer variables', ->
   eq outer, 3
 
 test 'Lenient on pure statements not trying to reach out of the closure', ->
-  val =
-    for i in [1]
-      for j in [] then break
-      i
+  val = for i in [1]
+    for j in [] then break
+    i
   ok val[0] is i
 
 test 'Comprehensions only wrap their last line in a closure, allowing other lines
@@ -7974,10 +7963,9 @@ test 'Comprehensions only wrap their last line in a closure, allowing other line
   ok func()[0][0] is 1
 
   i = 6
-  odds =
-    while i--
-      continue unless i & 1
-      i
+  odds = while i--
+    continue unless i & 1
+    i
 
   ok odds.join(', ') is '5, 3, 1'
 
@@ -8013,11 +8001,10 @@ test 'Issue #948. Capturing loop variables.', ->
   eq funcs[1](), 'y is 2 and z is 2'
 
 test "Cancel the comprehension if there's a jump inside the loop.", ->
-  result =
-    try
-      for i in [0...10]
-        continue if i < 5
-      i
+  result = try
+    for i in [0...10]
+      continue if i < 5
+    i
 
   eq result, 10
 
@@ -8037,10 +8024,9 @@ test 'Comprehensions over function literals.', ->
 
 test 'Comprehensions that mention arguments.', ->
   list = [arguments: 10]
-  args =
-    for f in list
-      do (f) ->
-        f.arguments
+  args = for f in list
+    do (f) ->
+      f.arguments
   eq args[0], 10
 
 test 'expression conversion under explicit returns', ->
@@ -8116,31 +8102,28 @@ test '#1326: \`by\` value is uncached', ->
   eq "#{i for i in [0..2] by h()}", '0,1,2'
 
 test '#1669: break/continue should skip the result only for that branch', ->
-  ns =
-    for n in [0..99]
-      if n > 9
-        break
-      else if n & 1
-        continue
-      else
-        n
+  ns = for n in [0..99]
+    if n > 9
+      break
+    else if n & 1
+      continue
+    else
+      n
   eq "#{ns}", '0,2,4,6,8'
 
   # \`else undefined\` is implied.
-  ns =
-    for n in [1..9]
-      if n % 2
-        continue unless n % 5
-        n
+  ns = for n in [1..9]
+    if n % 2
+      continue unless n % 5
+      n
   eq "#{ns}", '1,,3,,,7,,9'
 
   # Ditto.
-  ns =
-    for n in [1..9]
-      switch
-        when n % 2
-          continue unless n % 5
-          n
+  ns = for n in [1..9]
+    switch
+      when n % 2
+        continue unless n % 5
+        n
   eq "#{ns}", '1,,3,,,7,,9'
 
 test '#1850: inner \`for\` should not be expression-ized if \`return\`ing', ->
@@ -8175,17 +8158,15 @@ test '#1910: loop index should be mutable within a loop iteration and immutable 
   eq 5, iterations
 
 test '#2007: Return object literal from comprehension', ->
-  y =
-    for x in [1, 2]
-      foo: 'foo' + x
+  y = for x in [1, 2]
+    foo: 'foo' + x
   eq 2, y.length
   eq 'foo1', y[0].foo
   eq 'foo2', y[1].foo
 
   x = 2
-  y =
-    while x
-      x: --x
+  y = while x
+    x: --x
   eq 2, y.length
   eq 1, y[0].x
   eq 0, y[1].x
@@ -9766,26 +9747,24 @@ test 'if-to-ternary as part of a larger operation requires parentheses', ->
 
 test 'if-else indented within an assignment', ->
   nonce = {}
-  result =
-    if false
-      undefined
-    else
-      nonce
+  result = if false
+    undefined
+  else
+    nonce
   eq nonce, result
 
 test 'suppressed indentation via assignment', ->
   nonce = {}
-  result =
-    if false
-      undefined
-    else if no
-      undefined
-    else if 0
-      undefined
-    else if 1 < 0
-      undefined
-    else
-      id if false then undefined else nonce
+  result = if false
+    undefined
+  else if no
+    undefined
+  else if 0
+    undefined
+  else if 1 < 0
+    undefined
+  else
+    id if false then undefined else nonce
   eq nonce, result
 
 test 'tight formatting with leading \`then\`', ->
@@ -9804,9 +9783,8 @@ test '#738: inline function defintion', ->
 test '#748: trailing reserved identifiers', ->
   nonce = {}
   obj = delete: true
-  result =
-    if obj.delete
-      nonce
+  result = if obj.delete
+    nonce
   eq nonce, result
 
 test 'if-else within an assignment, condition parenthesized', ->
@@ -9831,9 +9809,8 @@ test '#3056: multiple postfix conditionals', ->
 
 test 'basic \`while\` loops', ->
   i = 5
-  list =
-    while i -= 1
-      i * 2
+  list = while i -= 1
+    i * 2
   ok list.join(' ') is '8 6 4 2'
 
   i = 5
@@ -9843,16 +9820,14 @@ test 'basic \`while\` loops', ->
   i = 5
   func = (num) -> i -= num
   assert = -> ok i < 5 > 0
-  results =
-    while func 1
-      assert()
-      i
+  results = while func 1
+    assert()
+    i
   ok results.join(' ') is '4 3 2 1'
 
   i = 10
-  results =
-    while i -= 1 when (i % 2) is 0
-      i * 2
+  results = while i -= 1 when (i % 2) is 0
+    i * 2
   ok results.join(' ') is '16 12 8 4'
 
 test 'Issue 759: \`if\` within \`while\` condition', ->
@@ -9870,27 +9845,24 @@ test 'assignment inside the condition of a \`while\` loop', ->
 
 test 'While over break.', ->
   i = 0
-  result =
-    while i < 10
-      i++
-      break
+  result = while i < 10
+    i++
+    break
   arrayEq result, []
 
 test 'While over continue.', ->
   i = 0
-  result =
-    while i < 10
-      i++
-      continue
+  result = while i < 10
+    i++
+    continue
   arrayEq result, []
 
 test 'Basic \`until\`', ->
   value = false
   i = 0
-  results =
-    until value
-      value = true if i is 5
-      i++
+  results = until value
+    value = true if i is 5
+    i++
   ok i is 6
 
 test 'Basic \`loop\`', ->
@@ -9922,19 +9894,18 @@ test 'break *not* at the top level', ->
 
 test 'basic \`switch\`', ->
   num = 10
-  result =
-    switch num
-      when 5 then false
-      when 'a'
-        true
-        true
-        false
-      when 10 then true
+  result = switch num
+    when 5 then false
+    when 'a'
+      true
+      true
+      false
+    when 10 then true
 
-      # Mid-switch comment with whitespace
-      # and multi line
-      when 11 then false
-      else false
+    # Mid-switch comment with whitespace
+    # and multi line
+    when 11 then false
+    else false
 
   ok result
 
@@ -9972,17 +9943,16 @@ test "Ensure that trailing switch elses don't get rewritten.", ->
   ok result
 
 test 'Should be able to handle switches sans-condition.', ->
-  result =
-    switch
-      when null then 0
-      when !1 then 1
-      when '' not of { '' } then 2
-      when [] not instanceof Array then 3
-      when true is false then 4
-      when 'x' < 'y' > 'z' then 5
-      when 'a' in ['b', 'c'] then 6
-      when 'd' in ['e', 'f'] then 7
-      else ok
+  result = switch
+    when null then 0
+    when !1 then 1
+    when '' not of { '' } then 2
+    when [] not instanceof Array then 3
+    when true is false then 4
+    when 'x' < 'y' > 'z' then 5
+    when 'a' in ['b', 'c'] then 6
+    when 'd' in ['e', 'f'] then 7
+    else ok
 
   eq result, ok
 
@@ -10000,22 +9970,20 @@ test 'Should be able to use \`@properties\` within the switch cases.', ->
   obj =
     num: 101
     func: (yesOrNo) ->
-      result =
-        switch yesOrNo
-          when yes then @num
-          else 'other'
+      result = switch yesOrNo
+        when yes then @num
+        else 'other'
       result
 
   ok obj.func(yes) is 101
 
 test 'Switch with break as the return value of a loop.', ->
   i = 10
-  results =
-    while i > 0
-      i--
-      switch i % 2
-        when 1 then i
-        when 0 then break
+  results = while i > 0
+    i--
+    switch i % 2
+      when 1 then i
+      when 0 then break
 
   eq results.join(', '), '9, 7, 5, 3, 1'
 
@@ -10704,51 +10672,46 @@ test '#3921: \`post if\`', ->
 test 'Issue 3921: \`while\` & \`until\`', ->
   i = 5
   assert = (a) -> ok 5 > a > 0
-  result1 =
-    while do (num = 1) -> i -= num
-      assert i
-      i
+  result1 = while do (num = 1) -> i -= num
+    assert i
+    i
   ok result1.join(' ') is '4 3 2 1'
 
   j = 5
-  result2 =
-    until do (num = 1) -> (j -= num) < 1
-      assert j
-      j
+  result2 = until do (num = 1) -> (j -= num) < 1
+    assert j
+    j
   ok result2.join(' ') is '4 3 2 1'
 
 test '#3921: \`switch\`', ->
   i = 1
-  a =
-    switch do (m = 2) -> i * m
-      when 5 then 'five'
-      when 4 then 'four'
-      when 3 then 'three'
-      when 2 then 'two'
-      when 1 then 'one'
-      else 'none'
+  a = switch do (m = 2) -> i * m
+    when 5 then 'five'
+    when 4 then 'four'
+    when 3 then 'three'
+    when 2 then 'two'
+    when 1 then 'one'
+    else 'none'
   eq 'two', a
 
   j = 12
-  b =
-    switch do (m = 3) -> j / m
-      when 5 then 'five'
-      when 4 then 'four'
-      when 3 then 'three'
-      when 2 then 'two'
-      when 1 then 'one'
-      else 'none'
+  b = switch do (m = 3) -> j / m
+    when 5 then 'five'
+    when 4 then 'four'
+    when 3 then 'three'
+    when 2 then 'two'
+    when 1 then 'one'
+    else 'none'
   eq 'four', b
 
   k = 20
-  c =
-    switch do (m = 4) -> k / m
-      when 5 then 'five'
-      when 4 then 'four'
-      when 3 then 'three'
-      when 2 then 'two'
-      when 1 then 'one'
-      else 'none'
+  c = switch do (m = 4) -> k / m
+    when 5 then 'five'
+    when 4 then 'four'
+    when 3 then 'three'
+    when 2 then 'two'
+    when 1 then 'one'
+    else 'none'
   eq 'five', c
 
 # Issue #3909: backslash to break line in \`for\` loops throw syntax error
@@ -12970,13 +12933,12 @@ test 'single-line try/catch/finally with empty try, empty catch, empty finally',
 # Try/Catch/Finally as an Expression
 
 test 'return the result of try when no exception is thrown', ->
-  result =
-    try
-      nonce
-    catch err
-      undefined
-    finally
-      undefined
+  result = try
+    nonce
+  catch err
+    undefined
+  finally
+    undefined
   eq nonce, result
 
 test 'single-line result of try when no exception is thrown', ->
@@ -13024,11 +12986,10 @@ test '#1595: try/catch with a reused variable name', ->
   eq typeof inner, 'undefined'
 
 test '#2580: try/catch with destructuring the exception object', ->
-  result =
-    try
-      missing.object
-    catch { message }
-      message
+  result = try
+    missing.object
+  catch { message }
+    message
 
   eq message, 'missing is not defined'
 
@@ -13931,12 +13892,11 @@ test 'tabs and spaces cannot be mixed for indentation', ->
     eq 'mixed indentation', e.message
 
 test '#4487: Handle unusual outdentation', ->
-  a =
-    switch 1
-      when 2
-        no
-      when 3 then no
-      when 1 then yes
+  a = switch 1
+    when 2
+      no
+    when 3 then no
+    when 1 then yes
   eq yes, a
 
   b = do ->
@@ -15403,13 +15363,12 @@ test 'preserve context when generating closure wrappers for expression conversio
   obj =
     property: nonce
     method: ->
-      this.result =
-        if false
-          10
-        else
-          'a'
-          'b'
-          this.property
+      this.result = if false
+        10
+      else
+        'a'
+        'b'
+        this.property
   eq nonce, obj.method()
   eq nonce, obj.property
 
@@ -15526,9 +15485,8 @@ test '#2617: implicit call before unrelated implicit object', ->
   pass = ->
     true
 
-  result =
-    if pass 1
-      one: 1
+  result = if pass 1
+    one: 1
   eq result.one, 1
 
 test '#2292, b: f (z),(x)', ->
@@ -15649,29 +15607,26 @@ test 'implicit invocation with implicit object literal', ->
   f = (obj) -> eq 1, obj.a
 
   f a: 1
-  obj =
-    if f
-      a: 2
-    else
-      a: 1
+  obj = if f
+    a: 2
+  else
+    a: 1
   eq 2, obj.a
 
   f a: 1
-  obj =
-    if f
-      a: 2
-    else
-      a: 1
+  obj = if f
+    a: 2
+  else
+    a: 1
   eq 2, obj.a
 
   # #3935: Implicit call when the first key of an implicit object has interpolation.
   a = 'a'
   f "#{a}": 1
-  obj =
-    if f
-      "#{a}": 2
-    else
-      "#{a}": 1
+  obj = if f
+    "#{a}": 2
+  else
+    "#{a}": 1
   eq 2, obj.a
 
 test 'get and set can be used as function names when not ambiguous with \`get\`/\`set\` keywords', ->
@@ -17324,9 +17279,8 @@ test 'yielding if statements', ->
 
 test 'yield in for loop expressions', ->
   x = do ->
-    y =
-      for i in [1..3]
-        yield i * 2
+    y = for i in [1..3]
+      yield i * 2
 
   z = x.next()
   ok z.value is 2 and z.done is false
@@ -17343,10 +17297,9 @@ test 'yield in for loop expressions', ->
 
 test 'yield in switch expressions', ->
   x = do ->
-    y =
-      switch yield 1
-        when 2 then yield 1337
-        else 1336
+    y = switch yield 1
+      when 2 then yield 1337
+      else 1336
 
   z = x.next()
   ok z.value is 1 and z.done is false
@@ -17422,9 +17375,8 @@ test "yield handles 'this' correctly", ->
   x = ->
     yield switch
       when true then yield => this
-    array =
-      for item in [1]
-        yield => this
+    array = for item in [1]
+      yield => this
     yield array
     yield if true then yield => this
     yield try throw yield => this
