@@ -4097,6 +4097,9 @@ function printAssignment(
     rightNode.type === 'NewExpression' ||
     (rightNode.type === 'AssignmentExpression' &&
       node.type === 'AssignmentExpression') ||
+    (rightNode.type === 'MemberExpression' &&
+      rightNode.computed &&
+      rightNode.object.type === 'Identifier') ||
     (rightNode.type === 'CallExpression' &&
       (rightNode.callee.type === 'Identifier' ||
         rightNode.callee.type === 'MemberExpression'))
