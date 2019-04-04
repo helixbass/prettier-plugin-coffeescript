@@ -824,6 +824,12 @@ function printPathNoParens(path, options, print) {
             ),
       ])
     }
+    case 'MetaProperty':
+      return concat([
+        path.call(print, 'meta'),
+        '.',
+        path.call(print, 'property'),
+      ])
     case 'SpreadElement':
     case 'RestElement':
       return concat([
