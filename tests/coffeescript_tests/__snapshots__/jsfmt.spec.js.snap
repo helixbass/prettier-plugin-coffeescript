@@ -5468,7 +5468,7 @@ test "#1534: class then 'use strict'", ->
     #{error}
     ### comment 3 ###"""
   ]
-  throws -> CoffeeScript.run comment, bare: yes for comment in comments
+  (throws -> CoffeeScript.run comment, bare: yes) for comment in comments
 
   # [ES5 §14.1](http://es5.github.com/#x14.1) allows for other directives
   directives = [
@@ -5496,7 +5496,7 @@ test "#1534: class then 'use strict'", ->
     'use strict'
     #{error}"""
   ]
-  throws -> CoffeeScript.run directive, bare: yes for directive in directives
+  (throws -> CoffeeScript.run directive, bare: yes) for directive in directives
 
 test '#2052: classes should work in strict mode', ->
   try

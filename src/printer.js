@@ -107,6 +107,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       ) {
         return true
       }
+      if (isPostfixBody(path, {stackOffset}) && endsWithFunction(node)) {
+        return true
+      }
       switch (parent.type) {
         case 'Range':
           return node.arguments && node.arguments.length > 0
@@ -124,6 +127,13 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
     // else fallthrough
     case 'UnaryExpression':
+      if (
+        node.prefix &&
+        isPostfixBody(path, {stackOffset}) &&
+        endsWithFunction(node)
+      ) {
+        return true
+      }
       switch (parent.type) {
         case 'UnaryExpression':
           return (
@@ -139,11 +149,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
             return true
           }
           return !(
-            isDoFunc(node) &&
-            path.call(
-              funcPath => functionBodyWillBreak(funcPath, options),
-              'argument'
-            )
+            isDoFunc(node) && functionBodyWillBreak(node.argument, options)
           )
 
         case 'TaggedTemplateExpression':
@@ -254,7 +260,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         (parent.type === 'CallExpression' && node === parent.callee)
       )
     case 'AssignmentExpression':
-      if (isPostfixForBody(path)) {
+      if (isPostfixForBody(path, {stackOffset})) {
+        return true
+      }
+      if (isPostfixBody(path, {stackOffset}) && endsWithFunction(node)) {
         return true
       }
       if (
@@ -400,7 +409,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
     case 'FunctionExpression':
     case 'ArrowFunctionExpression':
-      if (isPostfixForBody(path)) {
+      if (isPostfixBody(path)) {
         return true
       }
       switch (parent.type) {
@@ -496,6 +505,52 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   return false
 }
 
+function endsWithFunction(node, ret = true) {
+  switch (node.type) {
+    case 'CallExpression': {
+      if (!node.arguments.length) {
+        return false
+      }
+      const lastArg = getLast(node.arguments)
+      if (isFunction(lastArg)) {
+        return {isCall: true}
+      }
+      return endsWithFunction(lastArg, {isCall: true})
+    }
+    case 'AssignmentExpression':
+      if (isFunction(node.right)) {
+        return ret
+      }
+      return endsWithFunction(node.right, ret)
+    case 'UnaryExpression':
+      if (!node.prefix) {
+        return false
+      }
+      if (isFunction(node.argument)) {
+        return ret
+      }
+      return endsWithFunction(node.argument, ret)
+    default:
+      return false
+  }
+}
+
+function isEndingFunction(path) {
+  let offset = 0
+  let ofCall = false
+  let endsWith
+  while ((endsWith = endsWithFunction(path.getParentNode(offset)))) {
+    if (endsWith.isCall) {
+      ofCall = true
+    }
+    offset++
+  }
+  if (offset === 0) {
+    return false
+  }
+  return {stackOffset: offset, ofCall}
+}
+
 function isCondition(node, parent) {
   return (
     ((isIf(parent) || parent.type === 'WhileStatement') &&
@@ -518,6 +573,7 @@ function isAmbiguousRegex(node) {
 function genericPrint(path, options, print) {
   const node = path.getValue()
   const linesWithoutParens = printPathNoParens(path, options, print)
+  // dump({linesWithoutParens})
 
   if (!node || isEmpty(linesWithoutParens)) {
     return linesWithoutParens
@@ -1898,18 +1954,15 @@ function shouldBreakIf(node, options) {
   )
 }
 
-function functionBodyWillBreak(path, options) {
-  const node = path.getValue()
+function functionBodyWillBreak(node, options) {
   if (node.body.length > 1) {
     return true
   }
 
-  return functionBodyShouldBreak(path, options)
+  return functionBodyShouldBreak(node, options)
 }
 
-function functionBodyShouldBreak(path, options) {
-  const node = path.getValue()
-
+function functionBodyShouldBreak(node, options) {
   const singleExpr = singleExpressionBlock(node.body)
 
   return (
@@ -1967,7 +2020,7 @@ function printFunction(path, options, print) {
     node.body,
     {withPath: true}
   )
-  const bodyShouldBreak = functionBodyShouldBreak(path, options)
+  const bodyShouldBreak = functionBodyShouldBreak(node, options)
   const shouldInlineBody =
     !bodyShouldBreak &&
     singleExpr &&
@@ -1989,11 +2042,21 @@ function printFunction(path, options, print) {
 
   // singleExpr.type === 'FunctionExpression' ||
   // grandparent.type === 'For'
-  const needsParens =
-    pathNeedsParens(path, options) ||
-    (parent.type === 'AssignmentExpression' &&
-      node === parent.right &&
-      pathNeedsParens(path, options, {stackOffset: 1}))
+  let needsParens = pathNeedsParens(path, options)
+  if (!needsParens) {
+    const isEnding = isEndingFunction(path)
+    if (isEnding) {
+      needsParens = pathNeedsParens(path, options, {
+        stackOffset: isEnding.stackOffset,
+      })
+      if (isEnding.ofCall && needsParens) {
+        needsParens = {unlessParentBreaks: true}
+      }
+    }
+  }
+  // (parent.type === 'AssignmentExpression' &&
+  //   node === parent.right &&
+  //   pathNeedsParens(path, options, {stackOffset: 1}))
   const isChainedDoIife =
     isDo(parent) &&
     grandparent.type === 'MemberExpression' &&
@@ -2017,7 +2080,7 @@ function printFunction(path, options, print) {
         : softline
       : needsParens
       ? needsParens.unlessParentBreaks
-        ? ifBreak('', softline, {visibleType: 'visible'})
+        ? ifBreak('', softline, {visibleType: 'visible', offset: 0})
         : softline
       : '',
   ])
