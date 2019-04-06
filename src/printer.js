@@ -2028,11 +2028,7 @@ function printFunction(path, options, print) {
       isLinebreakingTemplateLiteral(singleExpr) ||
       singleExpr.type === 'ArrayExpression' ||
       (singleExpr.type === 'ObjectExpression' &&
-        path.call(
-          objectPath => objectRequiresBraces(objectPath, options),
-          'body',
-          ...singleExprPath
-        )) ||
+        objectRequiresBraces(singleExpr, options)) ||
       isFunction(singleExpr))
   const body = isEmptyBlock(node.body)
     ? ''
@@ -2076,7 +2072,7 @@ function printFunction(path, options, print) {
       ? softline
       : isOnlyCallArgWithParens
       ? isOnlyCallArgWithParens.unlessParentBreaks
-        ? ifBreak('', softline, {visibleType: 'visible', offset: 1})
+        ? ifBreak('', softline, {visibleType: 'visible', offset: 0})
         : softline
       : needsParens
       ? needsParens.unlessParentBreaks
@@ -2145,7 +2141,7 @@ function printObject(path, print, options) {
 
   const shouldOmitBraces =
     shouldOmitObjectBraces(path, options) ||
-    (!objectRequiresBraces(path, options) &&
+    (!objectRequiresBraces(node, options) &&
       isCallArgument(path, {beforeTrailingFunction: true}))
   const shouldOmitBracesIfParentBreaks =
     !shouldOmitBraces &&
@@ -2409,11 +2405,10 @@ function isExplicitObject(node, options) {
   return options.originalText.charAt(options.locStart(node)) === '{'
 }
 
-function objectRequiresBraces(path, options, {stackOffset = 0} = {}) {
+function objectRequiresBraces(node, options) {
   if (options.noImplicit.indexOf('objectBraces') > -1) {
     return true
   }
-  const node = path.getParentNode(stackOffset - 1)
   if (node.type === 'ObjectPattern') {
     return true
   }
@@ -2581,7 +2576,7 @@ function shouldOmitObjectBraces(
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
 
-  if (objectRequiresBraces(path, options, {stackOffset})) {
+  if (objectRequiresBraces(node, options)) {
     return false
   }
 
@@ -2732,7 +2727,17 @@ function isRightmostInStatement(
             stackOffset: stackOffset + parentLevel,
           })))
     ) {
-      breakingParentCount++
+      if (
+        !(
+          isChainableCall(prevParent) &&
+          parent.type === 'MemberExpression' &&
+          grandparent.type === 'CallExpression' &&
+          parent === grandparent.callee &&
+          callArgumentsShouldntBreak(prevParent, options)
+        )
+      ) {
+        breakingParentCount++
+      }
       return {
         indent,
         trailingLine,
@@ -3755,6 +3760,20 @@ function callParensOptional(path, options, {stackOffset = 0} = {}) {
   )
 }
 
+function callArgumentsShouldntBreak(node, options) {
+  const args = node.arguments
+
+  return (
+    args.length === 1 &&
+    (isFunction(args[0]) ||
+      args[0].type === 'ArrayExpression' ||
+      (args[0].type === 'ObjectExpression' &&
+        objectRequiresBraces(args[0], options)) ||
+      isDoFunc(args[0])) &&
+    !hasTrailingComment(args[0])
+  )
+}
+
 function printArgumentsList(path, options, print) {
   const node = path.getValue()
   const args = node.arguments
@@ -3822,18 +3841,8 @@ function printArgumentsList(path, options, print) {
   //   parensOptionalUnlessParentBreaks,
   // })
 
-  const shouldntBreak =
-    args.length === 1 &&
-    (isFunction(args[0]) ||
-      args[0].type === 'ArrayExpression' ||
-      (args[0].type === 'ObjectExpression' &&
-        path.call(
-          objectPath => objectRequiresBraces(objectPath, options),
-          'arguments',
-          '0'
-        )) ||
-      isDoFunc(args[0])) &&
-    !hasTrailingComment(args[0])
+  const shouldntBreak = callArgumentsShouldntBreak(node, options)
+
   const doesntHaveExplicitEndingBrace =
     shouldntBreak && (isFunction(args[0]) || isDoFunc(args[0]))
   if (
@@ -3847,11 +3856,7 @@ function printArgumentsList(path, options, print) {
   const firstArgIsObject =
     args.length >= 1 &&
     args[0].type === 'ObjectExpression' &&
-    !path.call(
-      objectPath => objectRequiresBraces(objectPath, options),
-      'arguments',
-      '0'
-    )
+    !objectRequiresBraces(args[0], options)
   const isRightSideOfAssignment =
     (parent.type === 'AssignmentExpression' && node === parent.right) ||
     ((parent.type === 'ObjectProperty' || parent.type === 'ClassProperty') &&
@@ -3894,7 +3899,10 @@ function printArgumentsList(path, options, print) {
           : ifBreak('(', openingImplicitSpace),
         {
           visibleType: 'visible',
-          offset: parensOptionalUnlessParentBreaks.breakingParentCount || 1,
+          offset:
+            parensOptionalUnlessParentBreaks.breakingParentCount != null
+              ? parensOptionalUnlessParentBreaks.breakingParentCount
+              : 1,
         }
       )
     : parensOptionalIfParentBreaks
@@ -3905,7 +3913,10 @@ function printArgumentsList(path, options, print) {
         '(',
         {
           visibleType: 'visible',
-          offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
+          offset:
+            parensOptionalIfParentBreaks.breakingParentCount != null
+              ? parensOptionalIfParentBreaks.breakingParentCount
+              : 1,
         }
       )
     : parensOptional
@@ -3918,12 +3929,18 @@ function printArgumentsList(path, options, print) {
     : parensOptionalUnlessParentBreaks
     ? ifBreak(')', parensUnnecessaryUnlessParentBreaks ? ' ' : ifBreak(')'), {
         visibleType: 'visible',
-        offset: parensOptionalUnlessParentBreaks.breakingParentCount || 1,
+        offset:
+          parensOptionalUnlessParentBreaks.breakingParentCount != null
+            ? parensOptionalUnlessParentBreaks.breakingParentCount
+            : 1,
       })
     : parensOptionalIfParentBreaks
     ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'), ')', {
         visibleType: 'visible',
-        offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
+        offset:
+          parensOptionalIfParentBreaks.breakingParentCount != null
+            ? parensOptionalIfParentBreaks.breakingParentCount
+            : 1,
       })
     : parensOptional
     ? ifBreak(')')
@@ -4014,10 +4031,11 @@ function printArgumentsList(path, options, print) {
           concat(printedArguments),
           doesntHaveExplicitEndingBrace && parensNecessary ? softline : '',
           closingParen,
-        ]),
-        {
-          visibleType: 'visible',
-        }
+        ])
+        // ,
+        //   {
+        //     visibleType: 'visible',
+        //   }
       )
     : group(
         concat([
