@@ -3971,9 +3971,10 @@ function printArgumentsList(path, options, print) {
 
     let printedExpanded
     let i = 0
+    let lastArg
     path.each(argPath => {
       if (i === args.length - 1) {
-        const lastArg = argPath.getValue()
+        lastArg = argPath.getValue()
         const printedLastArg = printedArguments[i]
         printedExpanded = nonLastArgs.concat(
           (lastArg.type === 'ObjectExpression' &&
@@ -3997,7 +3998,7 @@ function printArgumentsList(path, options, print) {
       concat(nonLastArgs),
       group(util.getLast(printedExpanded), {
         shouldBreak: true,
-        visibleType: 'visible',
+        visibleType: lastArg.type === 'ObjectExpression' ? 'visible' : null,
       }),
       closingParen,
     ])

@@ -558,7 +558,8 @@ a b if c
 )) if d
 
 (a e, ->
-  c) if d
+  c
+) if d
 
 (a(
   e
