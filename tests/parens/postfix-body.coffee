@@ -48,9 +48,8 @@ a b if c
   c
 ) if d
 
-(a -> '''
+(test 'a', ->
   b
-  '''
 ) if c
 
 (
