@@ -48,6 +48,11 @@ a b if c
   c
 ) if d
 
+(a -> '''
+  b
+  '''
+) if c
+
 (
   if a
     b

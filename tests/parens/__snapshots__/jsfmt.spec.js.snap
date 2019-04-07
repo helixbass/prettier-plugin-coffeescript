@@ -490,6 +490,11 @@ a b if c
   c
 ) if d
 
+(a -> '''
+  b
+  '''
+) if c
+
 (
   if a
     b
@@ -548,16 +553,16 @@ a b if c
   y
 ) if z
 
-(a(
+a(
   do b = ->
     c
-)) if d
+) if d
 
-(a(
+a(
   e
   do b = ->
     c
-)) if d
+) if d
 
 (a e, ->
   c
@@ -565,12 +570,17 @@ a b if c
 
 (a e, -> c) if d
 
-(a(
+a(
   e
   (b = ->
     c
   )
-)) if d
+) if d
+
+(a -> '''
+  b
+  '''
+) if c
 
 (
   if a

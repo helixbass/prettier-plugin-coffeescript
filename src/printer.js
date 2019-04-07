@@ -108,7 +108,8 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         return true
       }
       if (isPostfixBody(path, {stackOffset}) && endsWithFunction(node)) {
-        return true
+        // let "normal" calls parenthesize themselves (so that they can only add parens if they don't break)
+        return !!(shouldInlineCall(node, options) || isChainableCall(node))
       }
       switch (parent.type) {
         case 'Range':
@@ -1126,15 +1127,7 @@ function printPathNoParens(path, options, print) {
 
       const optional = printOptionalToken(path)
 
-      if (
-        (n.arguments.length === 1 &&
-          isTemplateOnItsOwnLine(
-            n.arguments[0],
-            options.originalText,
-            options
-          )) ||
-        (!isNew && isTestCall(n))
-      ) {
+      if (shouldInlineCall(n, options)) {
         return concat([
           isNew ? 'new ' : '',
           path.call(print, 'callee'),
@@ -1147,12 +1140,24 @@ function printPathNoParens(path, options, print) {
         return printMemberChain(path, options, print)
       }
 
-      return concat([
+      const content = concat([
         isNew ? 'new ' : '',
         path.call(print, 'callee'),
         optional,
         printArgumentsList(path, options, print),
       ])
+
+      if (isPostfixBody(path) && endsWithFunction(n)) {
+        if (
+          shouldGroupLastArg(path, options) ||
+          callArgumentsShouldntBreak(n, options)
+        ) {
+          return concat(['(', content, ')'])
+        }
+        return group(concat([ifBreak('', '('), content, ifBreak('', ')')]))
+      }
+
+      return content
     }
     case 'NumericLiteral':
       return util.printNumber(n.extra.raw)
@@ -1882,6 +1887,20 @@ function printPathNoParens(path, options, print) {
   }
 }
 
+function shouldInlineCall(node, options) {
+  const isNew = node.type === 'NewExpression'
+
+  return (
+    (node.arguments.length === 1 &&
+      isTemplateOnItsOwnLine(
+        node.arguments[0],
+        options.originalText,
+        options
+      )) ||
+    (!isNew && isTestCall(node))
+  )
+}
+
 function closesOwnIndentWhenBreaking(path) {
   const node = path.getValue()
   switch (node.type) {
@@ -2051,9 +2070,14 @@ function printFunction(path, options, print) {
   if (!isFollowedByClosingParen) {
     const isEnding = isEndingFunction(path, options)
     if (isEnding) {
-      isFollowedByClosingParen = pathNeedsParens(path, options, {
-        stackOffset: isEnding.stackOffset,
-      })
+      const isEndingNode = path.getParentNode(isEnding.stackOffset - 1)
+      isFollowedByClosingParen =
+        pathNeedsParens(path, options, {
+          stackOffset: isEnding.stackOffset,
+        }) ||
+        (isPostfixBody(path, {stackOffset: isEnding.stackOffset}) &&
+          endsWithFunction(isEndingNode) &&
+          !isChainableCall(isEndingNode))
       if (isEnding.ofCall && isFollowedByClosingParen) {
         isFollowedByClosingParen = {unlessParentBreaks: true}
       }
