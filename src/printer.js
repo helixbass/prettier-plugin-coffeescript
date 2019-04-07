@@ -505,7 +505,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   return false
 }
 
-function endsWithFunction(node, ret = true) {
+function endsWithFunction(node, ret) {
+  if (!ret) {
+    ret = node.type === 'AssignmentExpression' ? {isAssignment: true} : true
+  }
   switch (node.type) {
     case 'CallExpression': {
       if (!node.arguments.length) {
@@ -535,20 +538,26 @@ function endsWithFunction(node, ret = true) {
   }
 }
 
-function isEndingFunction(path) {
-  let offset = 0
+function isEndingFunction(path, options) {
+  let stackOffset = 0
   let ofCall = false
   let endsWith
-  while ((endsWith = endsWithFunction(path.getParentNode(offset)))) {
+  while ((endsWith = endsWithFunction(path.getParentNode(stackOffset)))) {
+    stackOffset++
+    if (
+      endsWith.isAssignment &&
+      pathNeedsParens(path, options, {stackOffset})
+    ) {
+      return {stackOffset}
+    }
     if (endsWith.isCall) {
       ofCall = true
     }
-    offset++
   }
-  if (offset === 0) {
+  if (stackOffset === 0) {
     return false
   }
-  return {stackOffset: offset, ofCall}
+  return {stackOffset, ofCall}
 }
 
 function isCondition(node, parent) {
@@ -2038,15 +2047,15 @@ function printFunction(path, options, print) {
 
   // singleExpr.type === 'FunctionExpression' ||
   // grandparent.type === 'For'
-  let needsParens = pathNeedsParens(path, options)
-  if (!needsParens) {
-    const isEnding = isEndingFunction(path)
+  let isFollowedByClosingParen = pathNeedsParens(path, options)
+  if (!isFollowedByClosingParen) {
+    const isEnding = isEndingFunction(path, options)
     if (isEnding) {
-      needsParens = pathNeedsParens(path, options, {
+      isFollowedByClosingParen = pathNeedsParens(path, options, {
         stackOffset: isEnding.stackOffset,
       })
-      if (isEnding.ofCall && needsParens) {
-        needsParens = {unlessParentBreaks: true}
+      if (isEnding.ofCall && isFollowedByClosingParen) {
+        isFollowedByClosingParen = {unlessParentBreaks: true}
       }
     }
   }
@@ -2074,8 +2083,8 @@ function printFunction(path, options, print) {
       ? isOnlyCallArgWithParens.unlessParentBreaks
         ? ifBreak('', softline, {visibleType: 'visible', offset: 0})
         : softline
-      : needsParens
-      ? needsParens.unlessParentBreaks
+      : isFollowedByClosingParen
+      ? isFollowedByClosingParen.unlessParentBreaks
         ? ifBreak('', softline, {visibleType: 'visible', offset: 0})
         : softline
       : '',

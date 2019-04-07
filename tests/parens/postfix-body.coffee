@@ -42,6 +42,8 @@ a b if c
   c
 ) if d
 
+(a e, -> c) if d
+
 (a e, b = ->
   c
 ) if d
