@@ -411,7 +411,7 @@ method.ctor = (if @parent then 'derived' else 'base') if methodName.value is 'co
 
 (if @parent then 'derived' else 'base') while x
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-method.ctor = (if @parent then 'derived' else 'base') if (
+(method.ctor = if @parent then 'derived' else 'base') if (
   methodName.value is 'constructor'
 )
 
@@ -647,9 +647,8 @@ a b if c
   y
 ) if z
 
-a(
-  do b = ->
-    c
+(a do b = ->
+  c
 ) if d
 
 (a b, do ->
@@ -694,57 +693,54 @@ a(
 
 (if a then b else c) if d
 
-a if b then c if d
+(a if b then c) if d
 
 a(
   if b
     c
 ) if d
 
-x = (if a then b else c) if d
+(x = if a then b else c) if d
 
-x = (
-  if a
-    b
+(x = if a
+  b
+else
+  c
+) if d
+
+(x = a if b then c) if d
+
+(x = a(
+  if b
+    c
+)) if d
+
+(a do (if b then c else d)) if e
+
+(a do (
+  if b
+    c
   else
-    c
-) if d
+    d
+)) if e
 
-x = a if b then c if d
+(do a = if b then c else d) if e
 
-x = a(
-  if b
-    c
-) if d
-
-a do (if b then c else d) if e
-
-a(
-  do (
-    if b
-      c
-    else
-      d
-  )
-) if e
-
-do a = if b then c else d if e
-
-do a = if b
+(do a = if b
   c
 else
-  d if e
+  d
+) if e
 
-a do b = if c then d else e if f
+(a do b = if c then d else e) if f
 
-a(
-  do b = if c
-    d
-  else
-    e
+(a do b = if c
+  d
+else
+  e
 ) if f
 
-a g, do b = if c then d else e if f
+(a g, do b = if c then d else e) if f
 
 a(
   g
@@ -754,21 +750,23 @@ a(
     e
 ) if f
 
-a b, if c then d if f
+(a b, if c then d) if f
 
-a b,
+(a b,
   if c
-    d if f
+    d
+  ) if f
 
-a b, (x = if c then d) if e
+(a b, (x = if c then d)) if e
 
 a(
   b
   (x = if c
-    d)
+    d
+  )
 ) if e
 
-a b, do (if c then d else e) if f
+(a b, do (if c then d else e)) if f
 
 a(
   b
