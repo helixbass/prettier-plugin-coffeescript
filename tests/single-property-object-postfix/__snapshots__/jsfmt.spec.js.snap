@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test.coffee 1`] = `
+a: b if c
+
+BREAK
+
+a:
+  b if c
+
+BREAK
+
+a: b while c
+
+BREAK
+
+a:
+  b while c
+
+BREAK
+
+a: b for c in d
+
+BREAK
+
+a:
+  b for c in d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{ a: b } if c
+
+BREAK
+
+a:
+  b if c
+
+BREAK
+
+a: b while c
+
+BREAK
+
+a:
+  b while c
+
+BREAK
+
+{ a: b } for c in d
+
+BREAK
+
+a:
+  b for c in d
+
+`;
+
+exports[`test.coffee 2`] = `
+a: b if c
+
+BREAK
+
+a:
+  b if c
+
+BREAK
+
+a: b while c
+
+BREAK
+
+a:
+  b while c
+
+BREAK
+
+a: b for c in d
+
+BREAK
+
+a:
+  b for c in d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{ a: b } if c
+
+BREAK
+
+a: (b if c)
+
+BREAK
+
+a: b while c
+
+BREAK
+
+a: (b while c)
+
+BREAK
+
+{ a: b } for c in d
+
+BREAK
+
+a: (b for c in d)
+
+`;
