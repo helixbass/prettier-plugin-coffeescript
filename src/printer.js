@@ -382,6 +382,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'WhileStatement':
+      if (isPostfixBody(path) && !node.postfix) {
+        return true
+      }
       switch (parent.type) {
         case 'AssignmentExpression':
           if (node.postfix) {
