@@ -404,6 +404,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'SwitchStatement':
+      if (isPostfixBody(path)) {
+        return true
+      }
       switch (parent.type) {
         case 'SpreadElement':
         case 'JSXSpreadAttribute':
@@ -1684,9 +1687,12 @@ function printPathNoParens(path, options, print) {
         body.push(...caseBody)
       })
       parts.push(group(indent(concat([hardline, ...body]))))
-      const indentedContent = concat([indent(concat(parts)), softline])
-      const unindentedContent = concat(parts)
-      return shouldIndent ? indentedContent : unindentedContent
+      return possiblyIndentedContent({
+        path,
+        options,
+        content: concat(parts),
+        shouldIndent,
+      })
     }
     case 'JSXAttribute':
       parts.push(path.call(print, 'name'))
