@@ -468,6 +468,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'TryStatement':
+      if (isPostfixBody(path)) {
+        return true
+      }
       switch (parent.type) {
         case 'NewExpression':
         case 'CallExpression':

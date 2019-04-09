@@ -787,6 +787,494 @@ catch
 
 `;
 
+exports[`postfix-if-body-function.coffee 1`] = `
+(x ->
+  a
+) if b
+
+(y ->) if b
+
+a b if c
+
+(a b ->) if c
+
+(->) if b
+
+(->
+  a
+) if b
+
+(a = ->) if b
+
+(a = ->
+  c
+) if b
+
+(a = b ->) if c
+
+(a = b ->
+  c
+) if d
+
+(a do ->
+  b
+) if c
+
+(x = do ->
+  y
+) if z
+
+(do x = ->
+  y
+) if z
+
+(a do b = ->
+  c
+) if d
+
+(a b, do ->
+  c
+) if d
+
+(a e, do b = ->
+  c
+) if d
+
+(a e, ->
+  c
+) if d
+
+(a e, -> c) if d
+
+(a b = ->
+  c
+) if d
+
+(a e, b = ->
+  c
+) if d
+
+(test 'a', ->
+  b
+) if c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(x ->
+  a
+) if b
+
+(y ->) if b
+
+a b if c
+
+(a b ->) if c
+
+(->) if b
+
+(->
+  a
+) if b
+
+(a = ->) if b
+
+(a = ->
+  c
+) if b
+
+(a = b ->) if c
+
+(a = b ->
+  c
+) if d
+
+(a do ->
+  b
+) if c
+
+(x = do ->
+  y
+) if z
+
+(do x = ->
+  y
+) if z
+
+(a do b = ->
+  c
+) if d
+
+(a b, do ->
+  c
+) if d
+
+a(
+  e
+  do b = ->
+    c
+) if d
+
+(a e, ->
+  c
+) if d
+
+(a e, -> c) if d
+
+a(
+  (b = ->
+    c
+  )
+) if d
+
+a(
+  e
+  (b = ->
+    c
+  )
+) if d
+
+(test 'a', ->
+  b
+) if c
+
+`;
+
+exports[`postfix-if-body-if.coffee 1`] = `
+(
+  if a
+    b
+  else
+    c
+) if d
+
+(if a then b else c) if d
+
+(a if b then c) if d
+
+a(
+  if b
+    c
+) if d
+
+(x = if a then b else c) if d
+
+(x = if a
+  b
+else
+  c
+) if d
+
+(x = a if b then c) if d
+
+(x = a(
+  if b
+    c
+)) if d
+
+(a do if b then c else d) if e
+
+(a do if b
+  c
+else
+  d
+) if e
+
+(do a = if b then c else d) if e
+
+(do a =
+  if b
+    c
+  else
+    d
+) if e
+
+(a do b = if c then d else e) if f
+
+(a do b =
+  if c
+    d
+  else
+    e
+) if f
+
+(a g, do b = if c then d else e) if f
+
+(a g, do b =
+  if c
+    d
+  else
+    e
+) if f
+
+(a b, if c then d) if f
+
+(a b,
+  if c
+    d
+) if f
+
+(a b, x = if c then d) if e
+
+(a b,
+  x = if c
+    d
+) if e
+
+(a b, do if c then d else e) if f
+
+(a b, do if c
+  d
+else
+  e
+) if f
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(
+  if a
+    b
+  else
+    c
+) if d
+
+(if a then b else c) if d
+
+(a if b then c) if d
+
+a(
+  if b
+    c
+) if d
+
+(x = if a then b else c) if d
+
+(x = if a
+  b
+else
+  c
+) if d
+
+(x = a if b then c) if d
+
+(x = a(
+  if b
+    c
+)) if d
+
+(a do (if b then c else d)) if e
+
+(a do (
+  if b
+    c
+  else
+    d
+)) if e
+
+(do a = if b then c else d) if e
+
+(do a = if b
+  c
+else
+  d
+) if e
+
+(a do b = if c then d else e) if f
+
+(a do b = if c
+  d
+else
+  e
+) if f
+
+(a g, do b = if c then d else e) if f
+
+a(
+  g
+  do b = if c
+    d
+  else
+    e
+) if f
+
+(a b, if c then d) if f
+
+(a b,
+  if c
+    d
+) if f
+
+(a b, (x = if c then d)) if e
+
+a(
+  b
+  (x = if c
+    d
+  )
+) if e
+
+(a b, do (if c then d else e)) if f
+
+a(
+  b
+  do (
+    if c
+      d
+    else
+      e
+  )
+) if f
+
+`;
+
+exports[`postfix-if-body-try.coffee 1`] = `
+(
+  try
+    a
+  catch
+    d
+) if b
+
+(try a) if b
+
+(a try b) if c
+
+a(
+  try
+    b
+) if c
+
+(x = try a) if b
+
+(x =
+  try
+    a
+) if b
+
+(x = a try b) if d
+
+(x = a(
+  try
+    b
+)) if c
+
+(a do try b) if c
+
+(a do try
+  b
+) if c
+
+(do a = try b) if c
+
+(do a =
+  try
+    b
+) if c
+
+(a do b = try c) if d
+
+(a do b =
+  try
+    c
+) if d
+
+(a e, do b = try c) if d
+
+(a e, do b =
+  try
+    c
+) if d
+
+(a b, try c) if d
+
+(a b,
+  try
+    c
+) if d
+
+(a b, x = try c) if d
+
+(a b,
+  x = try
+    c
+) if d
+
+(a b, do try c) if d
+
+(a b, do try
+  c
+) if d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(
+  try
+    a
+  catch
+    d
+) if b
+
+(try a) if b
+
+(a try b) if c
+
+a(
+  try
+    b
+) if c
+
+(x = try a) if b
+
+(x = try
+  a) if b
+
+(x = a try b) if d
+
+(x = a(
+  try
+    b
+)) if c
+
+(a do try b) if c
+
+(a do try
+  b) if c
+
+(do a = try b) if c
+
+(do a = try
+  b) if c
+
+(a do b = try c) if d
+
+(a do b = try
+  c) if d
+
+(a e, do b = try c) if d
+
+a(
+  e
+  do b = try
+    c
+) if d
+
+(a b, try c) if d
+
+(a b,
+  try
+    c) if d
+
+(a b, (x = try c)) if d
+
+a(
+  b
+  (x = try
+    c)
+) if d
+
+(a b, do try c) if d
+
+a(
+  b
+  do try
+    c
+) if d
+
+`;
+
 exports[`spread-control-structure.coffee 1`] = `
 {
   ...(
