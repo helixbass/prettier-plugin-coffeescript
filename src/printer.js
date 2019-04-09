@@ -1304,20 +1304,7 @@ function printPathNoParens(path, options, print) {
 
       let isFollowedByClosingParen = false
       if (!shouldIndent) {
-        const isEnding = isEndingFunctionOrControl(path, options)
-        if (isEnding) {
-          const isEndingNode = path.getParentNode(isEnding.stackOffset - 1)
-          isFollowedByClosingParen =
-            pathNeedsParens(path, options, {
-              stackOffset: isEnding.stackOffset,
-            }) ||
-            (isPostfixBody(path, {stackOffset: isEnding.stackOffset}) &&
-              !shouldInlineCall(isEndingNode, options) &&
-              !isChainableCall(isEndingNode))
-          if (isEnding.ofCall && isFollowedByClosingParen) {
-            isFollowedByClosingParen = {unlessParentBreaks: true}
-          }
-        }
+        isFollowedByClosingParen = followedByClosingParen(path, options)
       }
       const unindentedContent = concat(parts)
       const indentedContent = concat([indent(unindentedContent), softline])
@@ -1541,13 +1528,34 @@ function printPathNoParens(path, options, print) {
           : '',
       ])
 
+      let isFollowedByClosingParen = false
+      if (!shouldIndent) {
+        isFollowedByClosingParen = followedByClosingParen(path, options)
+      }
+      const isGroupedLastCallArg =
+        isCallArgument(path, {last: true}) &&
+        shouldGroupLastArg(path, options, {stackOffset: 1})
+
       const shouldBreak =
         options.respectBreak.indexOf('control') > -1 &&
         (!hasSameStartLine(n, n.block) ||
           (n.handler && !hasSameStartLine(n, n.handler)))
 
       return group(
-        shouldIndent ? concat([indent(content), softline]) : content,
+        shouldIndent
+          ? concat([indent(content), softline])
+          : concat([
+              content,
+              isFollowedByClosingParen
+                ? isFollowedByClosingParen.unlessParentBreaks
+                  ? ifBreak(
+                      '',
+                      isGroupedLastCallArg ? dedent(softline) : softline,
+                      {visibleType: 'visible'}
+                    )
+                  : softline
+                : '',
+            ]),
         {shouldBreak}
       )
     }
@@ -1940,6 +1948,25 @@ function printPathNoParens(path, options, print) {
     default:
       throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
+}
+
+function followedByClosingParen(path, options) {
+  let isFollowedByClosingParen = false
+  const isEnding = isEndingFunctionOrControl(path, options)
+  if (isEnding) {
+    const isEndingNode = path.getParentNode(isEnding.stackOffset - 1)
+    isFollowedByClosingParen =
+      pathNeedsParens(path, options, {
+        stackOffset: isEnding.stackOffset,
+      }) ||
+      (isPostfixBody(path, {stackOffset: isEnding.stackOffset}) &&
+        !shouldInlineCall(isEndingNode, options) &&
+        !isChainableCall(isEndingNode))
+    if (isEnding.ofCall && isFollowedByClosingParen) {
+      isFollowedByClosingParen = {unlessParentBreaks: true}
+    }
+  }
+  return isFollowedByClosingParen
 }
 
 function shouldInlineCall(node, options) {
