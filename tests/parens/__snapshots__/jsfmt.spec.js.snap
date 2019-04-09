@@ -498,7 +498,8 @@ a(
 (x = for a in b then c) if d
 
 (x = for a in b
-  c) if d
+  c
+) if d
 
 (x = a(for b in c then d)) if e
 
@@ -520,7 +521,8 @@ a(
 a(
   b
   (x = for c in d
-    e)
+    e
+  )
 ) if f
 
 `;

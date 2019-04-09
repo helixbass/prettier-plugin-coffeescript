@@ -1416,9 +1416,12 @@ function printPathNoParens(path, options, print) {
       parts.push(shouldBreak ? '' : ' then ')
       parts.push(body)
 
-      const indentedContent = concat([indent(concat(parts)), softline])
-      const unindentedContent = concat(parts)
-      const content = shouldIndent ? indentedContent : unindentedContent
+      const content = possiblyIndentedContent({
+        path,
+        options,
+        content: concat(parts),
+        shouldIndent,
+      })
 
       return group(content, {shouldBreak})
     }
