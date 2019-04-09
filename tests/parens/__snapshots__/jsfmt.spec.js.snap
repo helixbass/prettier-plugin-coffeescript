@@ -439,6 +439,429 @@ exports[`if-call-arg.coffee 1`] = `
 
 `;
 
+exports[`postfix-for-body-for.coffee 1`] = `
+(
+  for a in b
+    c
+) for d in e
+
+(for a in b then c) for d in e
+
+(a(for b in c then d)) for d in e
+
+a(
+  for b in c
+    d
+) for d in e
+
+(x = for a in b then c) for d in e
+
+(x = for a in b
+  c
+) for d in e
+
+(x = a(for b in c then d)) for e in f
+
+(x = a(
+  for b in c
+    d
+)) for e in f
+
+(a b, (for c in d then e)) for f in g
+
+(a b,
+  for c in d
+    e
+) for f in g
+
+(a b, x = (for c in d then e)) for f in g
+
+(a b,
+  x = for c in d
+    e
+) for f in g
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(
+  for a in b
+    c
+) for d in e
+
+(for a in b then c) for d in e
+
+a(for b in c then d) for d in e
+
+a(
+  for b in c
+    d
+) for d in e
+
+(x = for a in b then c) for d in e
+
+(x = for a in b
+  c
+) for d in e
+
+(x = a(for b in c then d)) for e in f
+
+(x = a(
+  for b in c
+    d
+)) for e in f
+
+a(b, for c in d then e) for f in g
+
+a(
+  b
+  for c in d
+    e
+) for f in g
+
+(a b, (x = for c in d then e)) for f in g
+
+a(
+  b
+  (x = for c in d
+    e
+  )
+) for f in g
+
+`;
+
+exports[`postfix-for-body-function.coffee 1`] = `
+(x ->
+  a
+) for b in c
+
+(y ->) for b in c
+
+a b for b in c
+
+(a b ->) for b in c
+
+(->) for b in c
+
+(->
+  a
+) for b in c
+
+(a = ->) for b in c
+
+(a = ->
+  c
+) for b in c
+
+(a = b ->) for b in c
+
+(a = b ->
+  c
+) for b in c
+
+(a do ->
+  b
+) for b in c
+
+(x = do ->
+  y
+) for b in c
+
+(do x = ->
+  y
+) for b in c
+
+(a do b = ->
+  c
+) for b in c
+
+(a b, do ->
+  c
+) for b in c
+
+(a e, do b = ->
+  c
+) for b in c
+
+(a e, ->
+  c
+) for b in c
+
+(a e, -> c) for b in c
+
+(a b = ->
+  c
+) for b in c
+
+(a e, b = ->
+  c
+) for b in c
+
+(test 'a', ->
+  b
+) for b in c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(x ->
+  a
+) for b in c
+
+(y ->) for b in c
+
+a b for b in c
+
+(a b ->) for b in c
+
+(->) for b in c
+
+(->
+  a
+) for b in c
+
+(a = ->) for b in c
+
+(a = ->
+  c
+) for b in c
+
+(a = b ->) for b in c
+
+(a = b ->
+  c
+) for b in c
+
+(a do ->
+  b
+) for b in c
+
+(x = do ->
+  y
+) for b in c
+
+(do x = ->
+  y
+) for b in c
+
+(a do b = ->
+  c
+) for b in c
+
+(a b, do ->
+  c
+) for b in c
+
+a(
+  e
+  do b = ->
+    c
+) for b in c
+
+(a e, ->
+  c
+) for b in c
+
+(a e, -> c) for b in c
+
+a(
+  (b = ->
+    c
+  )
+) for b in c
+
+a(
+  e
+  (b = ->
+    c
+  )
+) for b in c
+
+(test 'a', ->
+  b
+) for b in c
+
+`;
+
+exports[`postfix-for-body-if.coffee 1`] = `
+(
+  if a
+    b
+  else
+    c
+) for b in c
+
+(if a then b else c) for b in c
+
+(a if b then c) for b in c
+
+a(
+  if b
+    c
+) for b in c
+
+(x = if a then b else c) for b in c
+
+(x = if a
+  b
+else
+  c
+) for b in c
+
+(x = a if b then c) for b in c
+
+(x = a(
+  if b
+    c
+)) for b in c
+
+(a do if b then c else d) for b in c
+
+(a do if b
+  c
+else
+  d
+) for b in c
+
+(do a = if b then c else d) for b in c
+
+(do a =
+  if b
+    c
+  else
+    d
+) for b in c
+
+(a do b = if c then d else e) for b in c
+
+(a do b =
+  if c
+    d
+  else
+    e
+) for b in c
+
+(a g, do b = if c then d else e) for b in c
+
+(a g, do b =
+  if c
+    d
+  else
+    e
+) for b in c
+
+(a b, if c then d) for b in c
+
+(a b,
+  if c
+    d
+) for b in c
+
+(a b, x = if c then d) for b in c
+
+(a b,
+  x = if c
+    d
+) for b in c
+
+(a b, do if c then d else e) for b in c
+
+(a b, do if c
+  d
+else
+  e
+) for b in c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(
+  if a
+    b
+  else
+    c
+) for b in c
+
+(if a then b else c) for b in c
+
+(a if b then c) for b in c
+
+a(
+  if b
+    c
+) for b in c
+
+(x = if a then b else c) for b in c
+
+(x = if a
+  b
+else
+  c
+) for b in c
+
+(x = a if b then c) for b in c
+
+(x = a(
+  if b
+    c
+)) for b in c
+
+(a do (if b then c else d)) for b in c
+
+(a do (
+  if b
+    c
+  else
+    d
+)) for b in c
+
+(do a = if b then c else d) for b in c
+
+(do a = if b
+  c
+else
+  d
+) for b in c
+
+(a do b = if c then d else e) for b in c
+
+(a do b = if c
+  d
+else
+  e
+) for b in c
+
+(a g, do b = if c then d else e) for b in c
+
+a(
+  g
+  do b = if c
+    d
+  else
+    e
+) for b in c
+
+(a b, if c then d) for b in c
+
+(a b,
+  if c
+    d
+) for b in c
+
+(a b, (x = if c then d)) for b in c
+
+a(
+  b
+  (x = if c
+    d
+  )
+) for b in c
+
+(a b, do (if c then d else e)) for b in c
+
+a(
+  b
+  do (
+    if c
+      d
+    else
+      e
+  )
+) for b in c
+
+`;
+
 exports[`postfix-if-body-for.coffee 1`] = `
 (
   for a in b
@@ -1231,6 +1654,378 @@ a(
     d
   )
 ) if e
+
+`;
+
+exports[`postfix-while-body-switch.coffee 1`] = `
+(
+  switch a
+    when b
+      c
+) while d
+
+a(
+  switch b
+    when c then d
+) while e
+
+(x = switch a
+  when b
+    c
+) while d
+
+(x = a(
+  switch b
+    when c then d
+)) until e
+
+(a do switch b
+  when c
+    d
+) while e
+
+(do a =
+  switch b
+    when c
+      d
+) while e
+
+(a do b =
+  switch c
+    when d
+      e
+) while f
+
+(a g, do b =
+  switch c
+    when d
+      e
+) while f
+
+(a b,
+  switch c
+    when d then e
+) while f
+
+(a b,
+  x = switch c
+    when d then e
+) while f
+
+(a b, do switch c
+  when d
+    e
+) while f
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(
+  switch a
+    when b
+      c
+) while d
+
+a(
+  switch b
+    when c then d
+) while e
+
+(x = switch a
+  when b
+    c
+) while d
+
+(x = a(
+  switch b
+    when c then d
+)) until e
+
+(a do switch b
+  when c
+    d
+) while e
+
+(do a = switch b
+  when c
+    d
+) while e
+
+(a do b = switch c
+  when d
+    e
+) while f
+
+a(
+  g
+  do b = switch c
+    when d
+      e
+) while f
+
+a(
+  b
+  switch c
+    when d then e
+) while f
+
+a(
+  b
+  (x = switch c
+    when d then e
+  )
+) while f
+
+a(
+  b
+  do switch c
+    when d
+      e
+) while f
+
+`;
+
+exports[`postfix-while-body-try.coffee 1`] = `
+(
+  try
+    a
+  catch
+    d
+) while b
+
+(try a) while b
+
+(a try b) while c
+
+a(
+  try
+    b
+) while c
+
+(x = try a) while b
+
+(x =
+  try
+    a
+) while b
+
+(x = a try b) while d
+
+(x = a(
+  try
+    b
+)) while c
+
+(a do try b) while c
+
+(a do try
+  b
+) while c
+
+(do a = try b) while c
+
+(do a =
+  try
+    b
+) while c
+
+(a do b = try c) while d
+
+(a do b =
+  try
+    c
+) while d
+
+(a e, do b = try c) while d
+
+(a e, do b =
+  try
+    c
+) while d
+
+(a b, try c) while d
+
+(a b,
+  try
+    c
+) while d
+
+(a b, x = try c) while d
+
+(a b,
+  x = try
+    c
+) while d
+
+(a b, do try c) while d
+
+(a b, do try
+  c
+) while d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(
+  try
+    a
+  catch
+    d
+) while b
+
+(try a) while b
+
+(a try b) while c
+
+a(
+  try
+    b
+) while c
+
+(x = try a) while b
+
+(x = try
+  a
+) while b
+
+(x = a try b) while d
+
+(x = a(
+  try
+    b
+)) while c
+
+(a do try b) while c
+
+(a do try
+  b
+) while c
+
+(do a = try b) while c
+
+(do a = try
+  b
+) while c
+
+(a do b = try c) while d
+
+(a do b = try
+  c
+) while d
+
+(a e, do b = try c) while d
+
+a(
+  e
+  do b = try
+    c
+) while d
+
+(a b, try c) while d
+
+(a b,
+  try
+    c
+) while d
+
+(a b, (x = try c)) while d
+
+a(
+  b
+  (x = try
+    c
+  )
+) while d
+
+(a b, do try c) while d
+
+a(
+  b
+  do try
+    c
+) while d
+
+`;
+
+exports[`postfix-while-body-while.coffee 1`] = `
+(
+  while a
+    b
+) while d
+
+(while a then b) while d
+
+(a(until b then c)) while d
+
+a(
+  while b
+    c
+) while d
+
+(x = while a then b) while d
+
+(x = while a
+  b
+) while d
+
+(x = a(while b then c)) while d
+
+(x = a(
+  while b
+    c
+)) while d
+
+(a(b, while c then d)) while f
+
+(a b,
+  while c
+    d
+) while f
+
+(a(b, x = while c then d)) while e
+
+(a b,
+  x = while c
+    d
+) while e
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(
+  while a
+    b
+) while d
+
+(while a then b) while d
+
+a(until b then c) while d
+
+a(
+  while b
+    c
+) while d
+
+(x = while a then b) while d
+
+(x = while a
+  b
+) while d
+
+(x = a(while b then c)) while d
+
+(x = a(
+  while b
+    c
+)) while d
+
+a(b, while c then d) while f
+
+a(
+  b
+  while c
+    d
+) while f
+
+(a b, (x = while c then d)) while e
+
+a(
+  b
+  (x = while c
+    d
+  )
+) while e
 
 `;
 
