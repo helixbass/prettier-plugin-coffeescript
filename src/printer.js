@@ -353,6 +353,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'For':
+      if (isPostfixBody(path) && !node.postfix) {
+        return true
+      }
       switch (parent.type) {
         case 'CallExpression':
           return parent.callee === node || node.postfix
@@ -1172,7 +1175,11 @@ function printPathNoParens(path, options, print) {
         printArgumentsList(path, options, print),
       ])
 
-      if (isPostfixBody(path) && endsWithFunctionOrControl(n)) {
+      if (
+        isPostfixBody(path) &&
+        endsWithFunctionOrControl(n) &&
+        !callParensNecessary(path, options)
+      ) {
         if (
           shouldGroupLastArg(path, options) ||
           callArgumentsShouldntBreak(n, options)
@@ -3828,6 +3835,26 @@ function callParensNecessary(path, options, {stackOffset = 0} = {}) {
     node.callee &&
     node.callee.type === 'Identifier' &&
     (node.callee.name === 'get' || node.callee.name === 'set')
+  ) {
+    return true
+  }
+  // Currently there's an asymmetry between inline if and inline for/while as implicit call args:
+  // This is fine: a if c then d
+  // But these don't parse:
+  //   a for b in c then d
+  //   a while c then d
+  // So at this point (tried to start fixing this on my allow-implicit-call-for-while branch),
+  // always parenthesize calls with a for/while argument
+  // I guess technically this could result in unnecessary parenthesizing for a "breaking implicit call" eg
+  // a
+  //   b: c
+  //   for b in c then d
+  if (
+    node.arguments &&
+    node.arguments.filter(
+      arg =>
+        (arg.type === 'For' || arg.type === 'WhileStatement') && !arg.postfix
+    ).length
   ) {
     return true
   }
