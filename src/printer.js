@@ -107,6 +107,13 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       ) {
         return true
       }
+      if (
+        isPostfixBody(path, {stackOffset}) &&
+        endsWithFunctionOrControl(node)
+      ) {
+        // let "normal" calls parenthesize themselves (so that they can only add parens if they don't break)
+        return !!(shouldInlineCall(node, options) || isChainableCall(node))
+      }
       switch (parent.type) {
         case 'Range':
           return node.arguments && node.arguments.length > 0
@@ -124,6 +131,13 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
     // else fallthrough
     case 'UnaryExpression':
+      if (
+        node.prefix &&
+        isPostfixBody(path, {stackOffset}) &&
+        endsWithFunctionOrControl(node)
+      ) {
+        return true
+      }
       switch (parent.type) {
         case 'UnaryExpression':
           return (
@@ -139,11 +153,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
             return true
           }
           return !(
-            isDoFunc(node) &&
-            path.call(
-              funcPath => functionBodyWillBreak(funcPath, options),
-              'argument'
-            )
+            isDoFunc(node) && functionBodyWillBreak(node.argument, options)
           )
 
         case 'TaggedTemplateExpression':
@@ -254,7 +264,13 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         (parent.type === 'CallExpression' && node === parent.callee)
       )
     case 'AssignmentExpression':
-      if (isPostfixForBody(path)) {
+      if (isPostfixForBody(path, {stackOffset})) {
+        return true
+      }
+      if (
+        isPostfixBody(path, {stackOffset}) &&
+        endsWithFunctionOrControl(node)
+      ) {
         return true
       }
       if (
@@ -327,9 +343,6 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'JSXSpreadAttribute':
           return true
         case 'AssignmentExpression':
-          if (isPostfixBody(path, {stackOffset: 1})) {
-            return true
-          }
           if (node.postfix) {
             return {unlessParentBreaks: {visibleType: 'assignment'}}
           }
@@ -340,6 +353,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'For':
+      if (isPostfixBody(path) && !node.postfix) {
+        return true
+      }
       switch (parent.type) {
         case 'CallExpression':
           return parent.callee === node || node.postfix
@@ -366,6 +382,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'WhileStatement':
+      if (isPostfixBody(path) && !node.postfix) {
+        return true
+      }
       switch (parent.type) {
         case 'AssignmentExpression':
           if (node.postfix) {
@@ -391,6 +410,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'SwitchStatement':
+      if (isPostfixBody(path)) {
+        return true
+      }
       switch (parent.type) {
         case 'SpreadElement':
         case 'JSXSpreadAttribute':
@@ -400,7 +422,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
     case 'FunctionExpression':
     case 'ArrowFunctionExpression':
-      if (isPostfixForBody(path)) {
+      if (isPostfixBody(path)) {
         return true
       }
       switch (parent.type) {
@@ -455,6 +477,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
       }
     case 'TryStatement':
+      if (isPostfixBody(path)) {
+        return true
+      }
       switch (parent.type) {
         case 'NewExpression':
         case 'CallExpression':
@@ -496,6 +521,77 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   return false
 }
 
+function isControl(node) {
+  return (
+    isIf(node) ||
+    isFor(node) ||
+    isWhile(node) ||
+    node.type === 'SwitchStatement' ||
+    node.type === 'TryStatement'
+  )
+}
+
+function isFunctionOrControl(node) {
+  return isFunction(node) || isControl(node)
+}
+
+function endsWithFunctionOrControl(node, ret) {
+  if (!ret) {
+    ret = node.type === 'AssignmentExpression' ? {isAssignment: true} : true
+  }
+  switch (node.type) {
+    case 'CallExpression': {
+      if (!node.arguments.length) {
+        return false
+      }
+      const lastArg = getLast(node.arguments)
+      if (isFunctionOrControl(lastArg)) {
+        return {isCall: true}
+      }
+      return endsWithFunctionOrControl(lastArg, {isCall: true})
+    }
+    case 'AssignmentExpression':
+      if (isFunctionOrControl(node.right)) {
+        return ret
+      }
+      return endsWithFunctionOrControl(node.right, ret)
+    case 'UnaryExpression':
+      if (!node.prefix) {
+        return false
+      }
+      if (isFunctionOrControl(node.argument)) {
+        return ret
+      }
+      return endsWithFunctionOrControl(node.argument, ret)
+    default:
+      return false
+  }
+}
+
+function isEndingFunctionOrControl(path, options) {
+  let stackOffset = 0
+  let ofCall = false
+  let endsWith
+  while (
+    (endsWith = endsWithFunctionOrControl(path.getParentNode(stackOffset)))
+  ) {
+    stackOffset++
+    if (
+      endsWith.isAssignment &&
+      pathNeedsParens(path, options, {stackOffset})
+    ) {
+      return {stackOffset}
+    }
+    if (endsWith.isCall) {
+      ofCall = true
+    }
+  }
+  if (stackOffset === 0) {
+    return false
+  }
+  return {stackOffset, ofCall}
+}
+
 function isCondition(node, parent) {
   return (
     ((isIf(parent) || parent.type === 'WhileStatement') &&
@@ -518,6 +614,7 @@ function isAmbiguousRegex(node) {
 function genericPrint(path, options, print) {
   const node = path.getValue()
   const linesWithoutParens = printPathNoParens(path, options, print)
+  // dump({linesWithoutParens})
 
   if (!node || isEmpty(linesWithoutParens)) {
     return linesWithoutParens
@@ -1061,15 +1158,7 @@ function printPathNoParens(path, options, print) {
 
       const optional = printOptionalToken(path)
 
-      if (
-        (n.arguments.length === 1 &&
-          isTemplateOnItsOwnLine(
-            n.arguments[0],
-            options.originalText,
-            options
-          )) ||
-        (!isNew && isTestCall(n))
-      ) {
+      if (shouldInlineCall(n, options)) {
         return concat([
           isNew ? 'new ' : '',
           path.call(print, 'callee'),
@@ -1082,12 +1171,28 @@ function printPathNoParens(path, options, print) {
         return printMemberChain(path, options, print)
       }
 
-      return concat([
+      const content = concat([
         isNew ? 'new ' : '',
         path.call(print, 'callee'),
         optional,
         printArgumentsList(path, options, print),
       ])
+
+      if (
+        isPostfixBody(path) &&
+        endsWithFunctionOrControl(n) &&
+        !callParensNecessary(path, options)
+      ) {
+        if (
+          shouldGroupLastArg(path, options) ||
+          callArgumentsShouldntBreak(n, options)
+        ) {
+          return concat(['(', content, ')'])
+        }
+        return group(concat([ifBreak('', '('), content, ifBreak('', ')')]))
+      }
+
+      return content
     }
     case 'NumericLiteral':
       return util.printNumber(n.extra.raw)
@@ -1210,10 +1315,13 @@ function printPathNoParens(path, options, print) {
         )
       }
 
+      const content = possiblyIndentedContent({
+        path,
+        options,
+        content: concat(parts),
+        shouldIndent,
+      })
       const isChainedElseIf = parent.type === n.type && n === parent.alternate
-      const indentedContent = concat([indent(concat(parts)), softline])
-      const unindentedContent = concat(parts)
-      const content = shouldIndent ? indentedContent : unindentedContent
       if (isChainedElseIf) {
         return content
       }
@@ -1311,9 +1419,12 @@ function printPathNoParens(path, options, print) {
       parts.push(shouldBreak ? '' : ' then ')
       parts.push(body)
 
-      const indentedContent = concat([indent(concat(parts)), softline])
-      const unindentedContent = concat(parts)
-      const content = shouldIndent ? indentedContent : unindentedContent
+      const content = possiblyIndentedContent({
+        path,
+        options,
+        content: concat(parts),
+        shouldIndent,
+      })
 
       return group(content, {shouldBreak})
     }
@@ -1368,12 +1479,14 @@ function printPathNoParens(path, options, print) {
         ])
       )
 
-      return group(
-        shouldIndent
-          ? concat([indent(concat(parts)), softline])
-          : concat(parts),
-        {shouldBreak}
-      )
+      const content = possiblyIndentedContent({
+        path,
+        options,
+        content: concat(parts),
+        shouldIndent,
+      })
+
+      return group(content, {shouldBreak})
     }
     case 'BreakStatement':
       return 'break'
@@ -1422,7 +1535,7 @@ function printPathNoParens(path, options, print) {
           (n.handler && !hasSameStartLine(n, n.handler)))
 
       return group(
-        shouldIndent ? concat([indent(content), softline]) : content,
+        possiblyIndentedContent({path, options, content, shouldIndent}),
         {shouldBreak}
       )
     }
@@ -1589,9 +1702,12 @@ function printPathNoParens(path, options, print) {
         body.push(...caseBody)
       })
       parts.push(group(indent(concat([hardline, ...body]))))
-      const indentedContent = concat([indent(concat(parts)), softline])
-      const unindentedContent = concat(parts)
-      return shouldIndent ? indentedContent : unindentedContent
+      return possiblyIndentedContent({
+        path,
+        options,
+        content: concat(parts),
+        shouldIndent,
+      })
     }
     case 'JSXAttribute':
       parts.push(path.call(print, 'name'))
@@ -1817,6 +1933,60 @@ function printPathNoParens(path, options, print) {
   }
 }
 
+function possiblyIndentedContent({path, options, content, shouldIndent}) {
+  if (shouldIndent) {
+    return concat([indent(content), softline])
+  }
+  const isFollowedByClosingParen = followedByClosingParen(path, options)
+  const isGroupedLastCallArg =
+    isCallArgument(path, {last: true}) &&
+    shouldGroupLastArg(path, options, {stackOffset: 1})
+
+  return concat([
+    content,
+    isFollowedByClosingParen
+      ? isFollowedByClosingParen.unlessParentBreaks
+        ? ifBreak('', isGroupedLastCallArg ? dedent(softline) : softline, {
+            visibleType: 'visible',
+          })
+        : softline
+      : '',
+  ])
+}
+
+function followedByClosingParen(path, options) {
+  let isFollowedByClosingParen = false
+  const isEnding = isEndingFunctionOrControl(path, options)
+  if (isEnding) {
+    const isEndingNode = path.getParentNode(isEnding.stackOffset - 1)
+    isFollowedByClosingParen =
+      pathNeedsParens(path, options, {
+        stackOffset: isEnding.stackOffset,
+      }) ||
+      (isPostfixBody(path, {stackOffset: isEnding.stackOffset}) &&
+        !shouldInlineCall(isEndingNode, options) &&
+        !isChainableCall(isEndingNode))
+    if (isEnding.ofCall && isFollowedByClosingParen) {
+      isFollowedByClosingParen = {unlessParentBreaks: true}
+    }
+  }
+  return isFollowedByClosingParen
+}
+
+function shouldInlineCall(node, options) {
+  const isNew = node.type === 'NewExpression'
+
+  return (
+    (node.arguments.length === 1 &&
+      isTemplateOnItsOwnLine(
+        node.arguments[0],
+        options.originalText,
+        options
+      )) ||
+    (!isNew && isTestCall(node))
+  )
+}
+
 function closesOwnIndentWhenBreaking(path) {
   const node = path.getValue()
   switch (node.type) {
@@ -1898,18 +2068,15 @@ function shouldBreakIf(node, options) {
   )
 }
 
-function functionBodyWillBreak(path, options) {
-  const node = path.getValue()
+function functionBodyWillBreak(node, options) {
   if (node.body.length > 1) {
     return true
   }
 
-  return functionBodyShouldBreak(path, options)
+  return functionBodyShouldBreak(node, options)
 }
 
-function functionBodyShouldBreak(path, options) {
-  const node = path.getValue()
-
+function functionBodyShouldBreak(node, options) {
   const singleExpr = singleExpressionBlock(node.body)
 
   return (
@@ -1967,7 +2134,7 @@ function printFunction(path, options, print) {
     node.body,
     {withPath: true}
   )
-  const bodyShouldBreak = functionBodyShouldBreak(path, options)
+  const bodyShouldBreak = functionBodyShouldBreak(node, options)
   const shouldInlineBody =
     !bodyShouldBreak &&
     singleExpr &&
@@ -1975,11 +2142,7 @@ function printFunction(path, options, print) {
       isLinebreakingTemplateLiteral(singleExpr) ||
       singleExpr.type === 'ArrayExpression' ||
       (singleExpr.type === 'ObjectExpression' &&
-        path.call(
-          objectPath => objectRequiresBraces(objectPath, options),
-          'body',
-          ...singleExprPath
-        )) ||
+        objectRequiresBraces(singleExpr, options)) ||
       isFunction(singleExpr))
   const body = isEmptyBlock(node.body)
     ? ''
@@ -1989,11 +2152,23 @@ function printFunction(path, options, print) {
 
   // singleExpr.type === 'FunctionExpression' ||
   // grandparent.type === 'For'
-  const needsParens =
-    pathNeedsParens(path, options) ||
-    (parent.type === 'AssignmentExpression' &&
-      node === parent.right &&
-      pathNeedsParens(path, options, {stackOffset: 1}))
+  let isFollowedByClosingParen = pathNeedsParens(path, options)
+  if (!isFollowedByClosingParen) {
+    const isEnding = isEndingFunctionOrControl(path, options)
+    if (isEnding) {
+      const isEndingNode = path.getParentNode(isEnding.stackOffset - 1)
+      isFollowedByClosingParen =
+        pathNeedsParens(path, options, {
+          stackOffset: isEnding.stackOffset,
+        }) ||
+        (isPostfixBody(path, {stackOffset: isEnding.stackOffset}) &&
+          !shouldInlineCall(isEndingNode, options) &&
+          !isChainableCall(isEndingNode))
+      if (isEnding.ofCall && isFollowedByClosingParen) {
+        isFollowedByClosingParen = {unlessParentBreaks: true}
+      }
+    }
+  }
   const isChainedDoIife =
     isDo(parent) &&
     grandparent.type === 'MemberExpression' &&
@@ -2013,11 +2188,11 @@ function printFunction(path, options, print) {
       ? softline
       : isOnlyCallArgWithParens
       ? isOnlyCallArgWithParens.unlessParentBreaks
-        ? ifBreak('', softline, {visibleType: 'visible', offset: 1})
+        ? ifBreak('', softline, {visibleType: 'visible', offset: 0})
         : softline
-      : needsParens
-      ? needsParens.unlessParentBreaks
-        ? ifBreak('', softline, {visibleType: 'visible'})
+      : isFollowedByClosingParen
+      ? isFollowedByClosingParen.unlessParentBreaks
+        ? ifBreak('', softline, {visibleType: 'visible', offset: 0})
         : softline
       : '',
   ])
@@ -2082,7 +2257,7 @@ function printObject(path, print, options) {
 
   const shouldOmitBraces =
     shouldOmitObjectBraces(path, options) ||
-    (!objectRequiresBraces(path, options) &&
+    (!objectRequiresBraces(node, options) &&
       isCallArgument(path, {beforeTrailingFunction: true}))
   const shouldOmitBracesIfParentBreaks =
     !shouldOmitBraces &&
@@ -2346,11 +2521,10 @@ function isExplicitObject(node, options) {
   return options.originalText.charAt(options.locStart(node)) === '{'
 }
 
-function objectRequiresBraces(path, options, {stackOffset = 0} = {}) {
+function objectRequiresBraces(node, options) {
   if (options.noImplicit.indexOf('objectBraces') > -1) {
     return true
   }
-  const node = path.getParentNode(stackOffset - 1)
   if (node.type === 'ObjectPattern') {
     return true
   }
@@ -2518,7 +2692,7 @@ function shouldOmitObjectBraces(
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
 
-  if (objectRequiresBraces(path, options, {stackOffset})) {
+  if (objectRequiresBraces(node, options)) {
     return false
   }
 
@@ -2669,7 +2843,17 @@ function isRightmostInStatement(
             stackOffset: stackOffset + parentLevel,
           })))
     ) {
-      breakingParentCount++
+      if (
+        !(
+          isChainableCall(prevParent) &&
+          parent.type === 'MemberExpression' &&
+          grandparent.type === 'CallExpression' &&
+          parent === grandparent.callee &&
+          callArgumentsShouldntBreak(prevParent, options)
+        )
+      ) {
+        breakingParentCount++
+      }
       return {
         indent,
         trailingLine,
@@ -3659,6 +3843,26 @@ function callParensNecessary(path, options, {stackOffset = 0} = {}) {
   ) {
     return true
   }
+  // Currently there's an asymmetry between inline if and inline for/while as implicit call args:
+  // This is fine: a if c then d
+  // But these don't parse:
+  //   a for b in c then d
+  //   a while c then d
+  // So at this point (tried to start fixing this on my allow-implicit-call-for-while branch),
+  // always parenthesize calls with a for/while argument
+  // I guess technically this could result in unnecessary parenthesizing for a "breaking implicit call" eg
+  // a
+  //   b: c
+  //   for b in c then d
+  if (
+    node.arguments &&
+    node.arguments.filter(
+      arg =>
+        (arg.type === 'For' || arg.type === 'WhileStatement') && !arg.postfix
+    ).length
+  ) {
+    return true
+  }
   return false
 }
 
@@ -3689,6 +3893,20 @@ function callParensOptional(path, options, {stackOffset = 0} = {}) {
       node === parent.value &&
       parent === getLast(grandparent.properties) &&
       shouldOmitObjectBraces(path, options, {stackOffset: stackOffset + 2}))
+  )
+}
+
+function callArgumentsShouldntBreak(node, options) {
+  const args = node.arguments
+
+  return (
+    args.length === 1 &&
+    (isFunction(args[0]) ||
+      args[0].type === 'ArrayExpression' ||
+      (args[0].type === 'ObjectExpression' &&
+        objectRequiresBraces(args[0], options)) ||
+      isDo(args[0])) &&
+    !hasTrailingComment(args[0])
   )
 }
 
@@ -3759,18 +3977,8 @@ function printArgumentsList(path, options, print) {
   //   parensOptionalUnlessParentBreaks,
   // })
 
-  const shouldntBreak =
-    args.length === 1 &&
-    (isFunction(args[0]) ||
-      args[0].type === 'ArrayExpression' ||
-      (args[0].type === 'ObjectExpression' &&
-        path.call(
-          objectPath => objectRequiresBraces(objectPath, options),
-          'arguments',
-          '0'
-        )) ||
-      isDoFunc(args[0])) &&
-    !hasTrailingComment(args[0])
+  const shouldntBreak = callArgumentsShouldntBreak(node, options)
+
   const doesntHaveExplicitEndingBrace =
     shouldntBreak && (isFunction(args[0]) || isDoFunc(args[0]))
   if (
@@ -3784,11 +3992,7 @@ function printArgumentsList(path, options, print) {
   const firstArgIsObject =
     args.length >= 1 &&
     args[0].type === 'ObjectExpression' &&
-    !path.call(
-      objectPath => objectRequiresBraces(objectPath, options),
-      'arguments',
-      '0'
-    )
+    !objectRequiresBraces(args[0], options)
   const isRightSideOfAssignment =
     (parent.type === 'AssignmentExpression' && node === parent.right) ||
     ((parent.type === 'ObjectProperty' || parent.type === 'ClassProperty') &&
@@ -3831,7 +4035,10 @@ function printArgumentsList(path, options, print) {
           : ifBreak('(', openingImplicitSpace),
         {
           visibleType: 'visible',
-          offset: parensOptionalUnlessParentBreaks.breakingParentCount || 1,
+          offset:
+            parensOptionalUnlessParentBreaks.breakingParentCount != null
+              ? parensOptionalUnlessParentBreaks.breakingParentCount
+              : 1,
         }
       )
     : parensOptionalIfParentBreaks
@@ -3842,7 +4049,10 @@ function printArgumentsList(path, options, print) {
         '(',
         {
           visibleType: 'visible',
-          offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
+          offset:
+            parensOptionalIfParentBreaks.breakingParentCount != null
+              ? parensOptionalIfParentBreaks.breakingParentCount
+              : 1,
         }
       )
     : parensOptional
@@ -3855,12 +4065,18 @@ function printArgumentsList(path, options, print) {
     : parensOptionalUnlessParentBreaks
     ? ifBreak(')', parensUnnecessaryUnlessParentBreaks ? ' ' : ifBreak(')'), {
         visibleType: 'visible',
-        offset: parensOptionalUnlessParentBreaks.breakingParentCount || 1,
+        offset:
+          parensOptionalUnlessParentBreaks.breakingParentCount != null
+            ? parensOptionalUnlessParentBreaks.breakingParentCount
+            : 1,
       })
     : parensOptionalIfParentBreaks
     ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'), ')', {
         visibleType: 'visible',
-        offset: parensOptionalIfParentBreaks.breakingParentCount || 1,
+        offset:
+          parensOptionalIfParentBreaks.breakingParentCount != null
+            ? parensOptionalIfParentBreaks.breakingParentCount
+            : 1,
       })
     : parensOptional
     ? ifBreak(')')
@@ -3891,9 +4107,10 @@ function printArgumentsList(path, options, print) {
 
     let printedExpanded
     let i = 0
+    let lastArg
     path.each(argPath => {
       if (i === args.length - 1) {
-        const lastArg = argPath.getValue()
+        lastArg = argPath.getValue()
         const printedLastArg = printedArguments[i]
         printedExpanded = nonLastArgs.concat(
           (lastArg.type === 'ObjectExpression' &&
@@ -3917,7 +4134,7 @@ function printArgumentsList(path, options, print) {
       concat(nonLastArgs),
       group(util.getLast(printedExpanded), {
         shouldBreak: true,
-        visibleType: 'visible',
+        visibleType: lastArg.type === 'ObjectExpression' ? 'visible' : null,
       }),
       closingParen,
     ])
@@ -3951,10 +4168,11 @@ function printArgumentsList(path, options, print) {
           concat(printedArguments),
           doesntHaveExplicitEndingBrace && parensNecessary ? softline : '',
           closingParen,
-        ]),
-        {
-          visibleType: 'visible',
-        }
+        ])
+        // ,
+        //   {
+        //     visibleType: 'visible',
+        //   }
       )
     : group(
         concat([
@@ -3990,17 +4208,18 @@ function couldGroupArg(arg) {
   return false
 }
 
-function shouldGroupLastArg(path, options) {
-  const node = path.getValue()
-  const parent = path.getParentNode()
+function shouldGroupLastArg(path, options, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
   const args = node.arguments
   const isRightmost = isRightmostInStatement(path, options, {
+    stackOffset,
     ifParentBreaks: true,
   })
   if (!isRightmost) {
     return false
   }
-  if (isFirstCallInChain(path) && options.indentChain) {
+  if (isFirstCallInChain(path, {stackOffset}) && options.indentChain) {
     return false
   }
   const lastArg = util.getLast(args)
