@@ -2169,9 +2169,6 @@ function printFunction(path, options, print) {
       }
     }
   }
-  // (parent.type === 'AssignmentExpression' &&
-  //   node === parent.right &&
-  //   pathNeedsParens(path, options, {stackOffset: 1}))
   const isChainedDoIife =
     isDo(parent) &&
     grandparent.type === 'MemberExpression' &&
