@@ -1302,29 +1302,12 @@ function printPathNoParens(path, options, print) {
         )
       }
 
-      let isFollowedByClosingParen = false
-      if (!shouldIndent) {
-        isFollowedByClosingParen = followedByClosingParen(path, options)
-      }
-      const unindentedContent = concat(parts)
-      const indentedContent = concat([indent(unindentedContent), softline])
-      const isGroupedLastCallArg =
-        isCallArgument(path, {last: true}) &&
-        shouldGroupLastArg(path, options, {stackOffset: 1})
-      const content = shouldIndent
-        ? indentedContent
-        : concat([
-            unindentedContent,
-            isFollowedByClosingParen
-              ? isFollowedByClosingParen.unlessParentBreaks
-                ? ifBreak(
-                    '',
-                    isGroupedLastCallArg ? dedent(softline) : softline,
-                    {visibleType: 'visible'}
-                  )
-                : softline
-              : '',
-          ])
+      const content = possiblyIndentedContent({
+        path,
+        options,
+        content: concat(parts),
+        shouldIndent,
+      })
       const isChainedElseIf = parent.type === n.type && n === parent.alternate
       if (isChainedElseIf) {
         return content
@@ -1528,34 +1511,13 @@ function printPathNoParens(path, options, print) {
           : '',
       ])
 
-      let isFollowedByClosingParen = false
-      if (!shouldIndent) {
-        isFollowedByClosingParen = followedByClosingParen(path, options)
-      }
-      const isGroupedLastCallArg =
-        isCallArgument(path, {last: true}) &&
-        shouldGroupLastArg(path, options, {stackOffset: 1})
-
       const shouldBreak =
         options.respectBreak.indexOf('control') > -1 &&
         (!hasSameStartLine(n, n.block) ||
           (n.handler && !hasSameStartLine(n, n.handler)))
 
       return group(
-        shouldIndent
-          ? concat([indent(content), softline])
-          : concat([
-              content,
-              isFollowedByClosingParen
-                ? isFollowedByClosingParen.unlessParentBreaks
-                  ? ifBreak(
-                      '',
-                      isGroupedLastCallArg ? dedent(softline) : softline,
-                      {visibleType: 'visible'}
-                    )
-                  : softline
-                : '',
-            ]),
+        possiblyIndentedContent({path, options, content, shouldIndent}),
         {shouldBreak}
       )
     }
@@ -1948,6 +1910,27 @@ function printPathNoParens(path, options, print) {
     default:
       throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
+}
+
+function possiblyIndentedContent({path, options, content, shouldIndent}) {
+  if (shouldIndent) {
+    return concat([indent(content), softline])
+  }
+  const isFollowedByClosingParen = followedByClosingParen(path, options)
+  const isGroupedLastCallArg =
+    isCallArgument(path, {last: true}) &&
+    shouldGroupLastArg(path, options, {stackOffset: 1})
+
+  return concat([
+    content,
+    isFollowedByClosingParen
+      ? isFollowedByClosingParen.unlessParentBreaks
+        ? ifBreak('', isGroupedLastCallArg ? dedent(softline) : softline, {
+            visibleType: 'visible',
+          })
+        : softline
+      : '',
+  ])
 }
 
 function followedByClosingParen(path, options) {
