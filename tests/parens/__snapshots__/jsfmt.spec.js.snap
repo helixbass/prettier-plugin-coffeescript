@@ -755,7 +755,7 @@ a(
 (a b,
   if c
     d
-  ) if f
+) if f
 
 (a b, (x = if c then d)) if e
 

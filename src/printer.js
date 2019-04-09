@@ -1316,19 +1316,26 @@ function printPathNoParens(path, options, print) {
           }
         }
       }
-      const isChainedElseIf = parent.type === n.type && n === parent.alternate
       const unindentedContent = concat(parts)
       const indentedContent = concat([indent(unindentedContent), softline])
+      const isGroupedLastCallArg =
+        isCallArgument(path, {last: true}) &&
+        shouldGroupLastArg(path, options, {stackOffset: 1})
       const content = shouldIndent
         ? indentedContent
         : concat([
             unindentedContent,
             isFollowedByClosingParen
               ? isFollowedByClosingParen.unlessParentBreaks
-                ? ifBreak('', softline, {visibleType: 'visible'})
+                ? ifBreak(
+                    '',
+                    isGroupedLastCallArg ? dedent(softline) : softline,
+                    {visibleType: 'visible'}
+                  )
                 : softline
               : '',
           ])
+      const isChainedElseIf = parent.type === n.type && n === parent.alternate
       if (isChainedElseIf) {
         return content
       }
@@ -4150,17 +4157,18 @@ function couldGroupArg(arg) {
   return false
 }
 
-function shouldGroupLastArg(path, options) {
-  const node = path.getValue()
-  const parent = path.getParentNode()
+function shouldGroupLastArg(path, options, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const parent = path.getParentNode(stackOffset)
   const args = node.arguments
   const isRightmost = isRightmostInStatement(path, options, {
+    stackOffset,
     ifParentBreaks: true,
   })
   if (!isRightmost) {
     return false
   }
-  if (isFirstCallInChain(path) && options.indentChain) {
+  if (isFirstCallInChain(path, {stackOffset}) && options.indentChain) {
     return false
   }
   const lastArg = util.getLast(args)
