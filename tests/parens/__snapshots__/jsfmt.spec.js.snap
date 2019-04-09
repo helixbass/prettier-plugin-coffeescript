@@ -1205,7 +1205,8 @@ a(
 (x = while a then b) if d
 
 (x = while a
-  b) if d
+  b
+) if d
 
 (x = a(while b then c)) if d
 
@@ -1227,7 +1228,8 @@ a(
 a(
   b
   (x = while c
-    d)
+    d
+  )
 ) if e
 
 `;
