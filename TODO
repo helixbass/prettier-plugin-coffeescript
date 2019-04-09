@@ -1,13 +1,6 @@
 - how do elisions and breaking arrays interplay?
 - make comma option less naive (eg either omit or dedent comma if the arg has indentation eg breaking function or control)
 - where to draw the line with what to parenthesize when splatting - you can omit a lot of parens but it looks weird eg [(a if f)?.b ? []...]
-- don't need to parenthesize postfix for comprehensions (and probably other things?) when assignment breaks eg:
-  array2 =
-    (a + b for [a, b] from [[10, 20], [30, 40], [50, 60]] when a + b >= 70)
-  this is kind of similar to needing to preserve breaking in certain cases since there's a semantic difference eg a = b if null vs
-  a =
-    b if null
-  i guess you could achieve the same thing with parenthesization but seems nice to support this
 - revisit bracketSpacing logic
 - nicely break/indent interpolated expressions that will themselves break, eg chains are ugly
 - should it preserve tab character inside regexp?
@@ -21,7 +14,6 @@
 - comments:
   - get comment-only class body to print indented
   - line comment at end of switch case body is outdenting to the next when line
-- update to support flow() etc formatting
 - add arrays to respectBreak?
 - this:
   operatorToken = sourceCode.getFirstTokenBetween node.left, node.right, (
