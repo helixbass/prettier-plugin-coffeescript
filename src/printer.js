@@ -2843,17 +2843,7 @@ function isRightmostInStatement(
             stackOffset: stackOffset + parentLevel,
           })))
     ) {
-      if (
-        !(
-          isChainableCall(prevParent) &&
-          parent.type === 'MemberExpression' &&
-          grandparent.type === 'CallExpression' &&
-          parent === grandparent.callee &&
-          callArgumentsShouldntBreak(prevParent, options)
-        )
-      ) {
-        breakingParentCount++
-      }
+      breakingParentCount++
       return {
         indent,
         trailingLine,
@@ -3910,6 +3900,40 @@ function callArgumentsShouldntBreak(node, options) {
   )
 }
 
+const functionCompositionFunctionNames = new Set([
+  'pipe',
+  'pipeP',
+  'pipeK',
+  'compose',
+  'composeFlipped',
+  'composeP',
+  'composeK',
+  'flow',
+  'flowRight',
+  'flowMax',
+  'connect',
+  'createSelector',
+])
+const ordinaryMethodNames = new Set(['connect'])
+
+function isFunctionCompositionFunction(node) {
+  switch (node.type) {
+    case 'OptionalMemberExpression':
+    case 'MemberExpression': {
+      return (
+        isFunctionCompositionFunction(node.property) &&
+        !ordinaryMethodNames.has(node.property.name)
+      )
+    }
+    case 'Identifier': {
+      return functionCompositionFunctionNames.has(node.name)
+    }
+    case 'StringLiteral': {
+      return functionCompositionFunctionNames.has(node.value)
+    }
+  }
+}
+
 function printArgumentsList(path, options, print) {
   const node = path.getValue()
   const args = node.arguments
@@ -4025,6 +4049,8 @@ function printArgumentsList(path, options, print) {
     path.call(argPath => pathNeedsParens(argPath, options), 'arguments', '0')
       ? ''
       : ' '
+  const defaultParenOffset = shouldntBreak ? 0 : 1
+  const adjustBreakingParentCount = shouldntBreak ? -1 : 0
   const openingParen = parensUnnecessary
     ? openingImplicitSpace
     : parensOptionalUnlessParentBreaks
@@ -4037,8 +4063,9 @@ function printArgumentsList(path, options, print) {
           visibleType: 'visible',
           offset:
             parensOptionalUnlessParentBreaks.breakingParentCount != null
-              ? parensOptionalUnlessParentBreaks.breakingParentCount
-              : 1,
+              ? parensOptionalUnlessParentBreaks.breakingParentCount +
+                adjustBreakingParentCount
+              : defaultParenOffset,
         }
       )
     : parensOptionalIfParentBreaks
@@ -4051,8 +4078,9 @@ function printArgumentsList(path, options, print) {
           visibleType: 'visible',
           offset:
             parensOptionalIfParentBreaks.breakingParentCount != null
-              ? parensOptionalIfParentBreaks.breakingParentCount
-              : 1,
+              ? parensOptionalIfParentBreaks.breakingParentCount +
+                adjustBreakingParentCount
+              : defaultParenOffset,
         }
       )
     : parensOptional
@@ -4067,16 +4095,18 @@ function printArgumentsList(path, options, print) {
         visibleType: 'visible',
         offset:
           parensOptionalUnlessParentBreaks.breakingParentCount != null
-            ? parensOptionalUnlessParentBreaks.breakingParentCount
-            : 1,
+            ? parensOptionalUnlessParentBreaks.breakingParentCount +
+              adjustBreakingParentCount
+            : defaultParenOffset,
       })
     : parensOptionalIfParentBreaks
     ? ifBreak(parensUnnecessaryIfParentBreaks ? ' ' : ifBreak(')'), ')', {
         visibleType: 'visible',
         offset:
           parensOptionalIfParentBreaks.breakingParentCount != null
-            ? parensOptionalIfParentBreaks.breakingParentCount
-            : 1,
+            ? parensOptionalIfParentBreaks.breakingParentCount +
+              adjustBreakingParentCount
+            : defaultParenOffset,
       })
     : parensOptional
     ? ifBreak(')')
@@ -4094,9 +4124,12 @@ function printArgumentsList(path, options, print) {
           : softline,
         closingParen,
       ]),
-      // {shouldBreak: true, visibleType: 'visible'}
-      {shouldBreak: true}
+      {shouldBreak: true, visibleType: 'visible'}
     )
+  }
+
+  if (isFunctionCompositionFunction(node.callee) && args.length > 1) {
+    return allArgsBrokenOut()
   }
 
   const shouldGroupLast = shouldGroupLastArg(path, options)
