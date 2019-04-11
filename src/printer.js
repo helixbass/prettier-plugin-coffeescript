@@ -2227,17 +2227,7 @@ function printObject(path, print, options) {
       printed: print(childPath),
     })
   }, 'properties')
-  let separatorParts = []
-  const joinedProps = printedProps.map(prop => {
-    const result = concat(separatorParts.concat(group(prop.printed)))
-    separatorParts = [ifBreak('', ','), line]
-    if (isNextLineEmpty(options.originalText, prop.node, locEnd)) {
-      separatorParts.push(hardline)
-    }
-    return result
-  })
-
-  if (joinedProps.length === 0) {
+  if (printedProps.length === 0) {
     if (!hasDanglingComments(node)) {
       return concat(['{', '}'])
     }
@@ -2266,6 +2256,39 @@ function printObject(path, print, options) {
     !shouldOmitBraces &&
     !shouldOmitBracesIfParentBreaks &&
     shouldOmitObjectBraces(path, options, {unlessBreaks: true})
+
+  let separatorParts = []
+  const commaUnlessBracesOmitted = shouldOmitBracesIfParentBreaks
+    ? ifBreak('', ',', {visibleType: 'visible', offset: 1})
+    : shouldOmitBraces
+    ? ''
+    : shouldOmitBracesUnlessBreaks
+    ? ifBreak(',', '', {visibleType: 'visible'})
+    : ','
+
+  const joinedProps = printedProps.map((prop, propIndex) => {
+    const result = concat(separatorParts.concat(group(prop.printed)))
+    separatorParts = [
+      ifBreak(
+        options.comma === 'none'
+          ? ''
+          : options.comma === 'nonTrailing' &&
+            propIndex === printedProps.length - 1
+          ? ''
+          : commaUnlessBracesOmitted,
+        ','
+      ),
+      line,
+    ]
+    if (isNextLineEmpty(options.originalText, prop.node, locEnd)) {
+      separatorParts.push(hardline)
+    }
+    return result
+  })
+  if (options.comma === 'all') {
+    joinedProps.push(ifBreak(commaUnlessBracesOmitted, ''))
+  }
+
   let dontIndent = false
   let trailingLine = true
   if (shouldOmitBraces && !shouldOmitBraces.indent) {
@@ -2855,6 +2878,11 @@ function isRightmostInStatement(
             stackOffset: stackOffset + parentLevel,
           }) &&
             options.comma !== 'none') ||
+          (isObjectPropertyValue(path, {
+            stackOffset: stackOffset + parentLevel,
+            nonLast: true,
+          }) &&
+            options.comma !== 'none') ||
           (parent.type === 'ArrayExpression' &&
             options.comma !== 'none' &&
             (node !== getLast(parent.elements) || options.comma === 'all')),
@@ -2905,6 +2933,28 @@ function isRightmostInStatement(
         last: true,
       })
     ) {
+      if (options.comma === 'all') {
+        // const shouldOmitBraces =
+        //   shouldOmitObjectBraces(path, options) ||
+        //   (!objectRequiresBraces(node, options) &&
+        //     isCallArgument(path, {beforeTrailingFunction: true}))
+        // const shouldOmitBracesIfParentBreaks =
+        //   !shouldOmitBraces &&
+        //   shouldOmitObjectBraces(path, options, {ifParentBreaks: true})
+        // const shouldOmitBracesUnlessBreaks =
+        //   !shouldOmitBraces &&
+        //   !shouldOmitBracesIfParentBreaks &&
+        //   shouldOmitObjectBraces(path, options, {unlessBreaks: true})
+
+        // const commaUnlessBracesOmitted = shouldOmitBracesIfParentBreaks
+        //   ? ifBreak('', ',', {visibleType: 'visible', offset: 1})
+        //   : shouldOmitBraces
+        //   ? ''
+        //   : shouldOmitBracesUnlessBreaks
+        //   ? ifBreak(',', '', {visibleType: 'visible'})
+        //   : ','
+        isFollowedByComma = true
+      }
       breakingParentCount++
     } else if (
       parent.type === 'ObjectExpression' ||

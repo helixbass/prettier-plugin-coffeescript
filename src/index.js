@@ -102,7 +102,7 @@ const options = {
     category: 'Global',
     default: 'none',
     description:
-      'Include commas when breaking call args, function params or arrays',
+      'Include commas when breaking call args, function params, arrays or explicit objects',
   },
   respectBreak: {
     array: true,
