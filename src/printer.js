@@ -2214,6 +2214,21 @@ function isLinebreakingTemplateLiteral(node) {
   )
 }
 
+function _shouldOmitObjectBraces(path, options, {stackOffset = 0} = {}) {
+  const node = path.getParentNode(stackOffset - 1)
+  const shouldOmitBraces =
+    shouldOmitObjectBraces(path, options, {stackOffset}) ||
+    (!objectRequiresBraces(node, options) &&
+      isCallArgument(path, {
+        beforeTrailingFunction: true,
+        stackOffset,
+      }))
+  const shouldOmitBracesIfParentBreaks =
+    !shouldOmitBraces &&
+    shouldOmitObjectBraces(path, options, {ifParentBreaks: true, stackOffset})
+  return {shouldOmitBraces, shouldOmitBracesIfParentBreaks}
+}
+
 function printObject(path, print, options) {
   const node = path.getValue()
   const parent = path.getParentNode()
@@ -2245,13 +2260,10 @@ function printObject(path, print, options) {
     }
   }
 
-  const shouldOmitBraces =
-    shouldOmitObjectBraces(path, options) ||
-    (!objectRequiresBraces(node, options) &&
-      isCallArgument(path, {beforeTrailingFunction: true}))
-  const shouldOmitBracesIfParentBreaks =
-    !shouldOmitBraces &&
-    shouldOmitObjectBraces(path, options, {ifParentBreaks: true})
+  const {
+    shouldOmitBraces,
+    shouldOmitBracesIfParentBreaks,
+  } = _shouldOmitObjectBraces(path, options)
   const shouldOmitBracesUnlessBreaks =
     !shouldOmitBraces &&
     !shouldOmitBracesIfParentBreaks &&
@@ -2867,25 +2879,47 @@ function isRightmostInStatement(
           })))
     ) {
       breakingParentCount++
+      let isFollowedByComma = false
+      if (options.comma !== 'none') {
+        if (
+          isCallArgument(path, {
+            nonLast: true,
+            stackOffset: stackOffset + parentLevel,
+          })
+        ) {
+          console.log('CALL')
+          isFollowedByComma = true
+        } else if (
+          parent.type === 'ArrayExpression' &&
+          (node !== getLast(parent.elements) || options.comma === 'all')
+        ) {
+          console.log('ARRAY')
+          isFollowedByComma = true
+        } else if (
+          isObjectPropertyValue(path, {
+            stackOffset: stackOffset + parentLevel,
+            nonLast: true,
+          })
+        ) {
+          const objectStackOffset = stackOffset + parentLevel + 2
+          const {
+            shouldOmitBraces,
+            // shouldOmitBracesIfParentBreaks
+          } = _shouldOmitObjectBraces(path, options, {
+            stackOffset: objectStackOffset,
+          })
+          if (!shouldOmitBraces) {
+            console.log('OBJ')
+            isFollowedByComma = true
+          }
+        }
+      }
       return {
         indent,
         trailingLine,
         ifParentBreaks: true,
         breakingParentCount,
-        isFollowedByComma:
-          (isCallArgument(path, {
-            nonLast: true,
-            stackOffset: stackOffset + parentLevel,
-          }) &&
-            options.comma !== 'none') ||
-          (isObjectPropertyValue(path, {
-            stackOffset: stackOffset + parentLevel,
-            nonLast: true,
-          }) &&
-            options.comma !== 'none') ||
-          (parent.type === 'ArrayExpression' &&
-            options.comma !== 'none' &&
-            (node !== getLast(parent.elements) || options.comma === 'all')),
+        isFollowedByComma,
       }
     }
     if (parent.type === 'AssignmentExpression' || isBinaryish(parent)) {
@@ -2934,13 +2968,13 @@ function isRightmostInStatement(
       })
     ) {
       if (options.comma === 'all') {
-        // const shouldOmitBraces =
-        //   shouldOmitObjectBraces(path, options) ||
-        //   (!objectRequiresBraces(node, options) &&
-        //     isCallArgument(path, {beforeTrailingFunction: true}))
-        // const shouldOmitBracesIfParentBreaks =
-        //   !shouldOmitBraces &&
-        //   shouldOmitObjectBraces(path, options, {ifParentBreaks: true})
+        const objectStackOffset = stackOffset + parentLevel + 2
+        const {
+          shouldOmitBraces,
+          shouldOmitBracesIfParentBreaks,
+        } = _shouldOmitObjectBraces(path, options, {
+          stackOffset: objectStackOffset,
+        })
         // const shouldOmitBracesUnlessBreaks =
         //   !shouldOmitBraces &&
         //   !shouldOmitBracesIfParentBreaks &&
@@ -2953,7 +2987,17 @@ function isRightmostInStatement(
         //   : shouldOmitBracesUnlessBreaks
         //   ? ifBreak(',', '', {visibleType: 'visible'})
         //   : ','
-        isFollowedByComma = true
+        isFollowedByComma = shouldOmitBraces
+          ? false
+          : shouldOmitBracesIfParentBreaks
+          ? // {unlessParentBreaks: true}
+            false // I *think* we know that the parent breaks for any
+          : true
+        console.log({
+          shouldOmitBraces,
+          shouldOmitBracesIfParentBreaks,
+          isFollowedByComma,
+        })
       }
       breakingParentCount++
     } else if (
@@ -3813,15 +3857,19 @@ function callParensOptionalIfParentBreaks(
     return false
   }
 
-  let isRightmost
-  return (
-    (isRightmost = isRightmostInStatement(path, options, {
-      stackOffset,
-      ifParentBreaks: true,
-    })) &&
-    !isRightmost.isFollowedByComma &&
-    isRightmost
-  )
+  console.log('start')
+  const isRightmost = isRightmostInStatement(path, options, {
+    stackOffset,
+    ifParentBreaks: true,
+  })
+  console.log({isRightmost})
+  if (!isRightmost) {
+    return false
+  }
+  if (isRightmost.isFollowedByComma) {
+    return false
+  }
+  return isRightmost
 }
 
 function followedByComputedAccess(path, {stackOffset = 0} = {}) {
@@ -4044,12 +4092,12 @@ function printArgumentsList(path, options, print) {
     parensOptional = false
     parensOptionalUnlessParentBreaks = true
   }
-  // console.log({
-  //   parensOptional,
-  //   parensNecessary,
-  //   parensOptionalIfParentBreaks,
-  //   parensOptionalUnlessParentBreaks,
-  // })
+  console.log({
+    parensOptional,
+    parensNecessary,
+    parensOptionalIfParentBreaks,
+    parensOptionalUnlessParentBreaks,
+  })
 
   const shouldntBreak = callArgumentsShouldntBreak(node, options)
 

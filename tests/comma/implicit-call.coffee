@@ -7,4 +7,4 @@ f(aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeee
 
 aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeeeeeeee)
 
-(aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddddddddddddddd) ->
+(aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc), d = ddddddd(eeeeeeee)) ->
