@@ -1,0 +1,565 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`implicit-call.coffee 1`] = `
+# implicit calls
+[aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeeee)]
+
+f(aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeee))
+
+{a, aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee)}
+
+aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeeeeeeee)
+
+(aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc), d = ddddddd(eeeeeeee)) ->
+
+# Object that omits braces if parent breaks
+[a, {b: c(d), e: f(g)}, h]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+  h
+]
+
+[a, {b: c(d), e: f(g)}]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# implicit calls
+[
+  aaaaaaaaaaaaaaaaaaaa
+  bbbbbbbbbbbbbbbb ccccccccccccccccc
+  ddddddddd eeeeeeeeeeeeee
+]
+
+f(
+  aaaaaaaaaaaaaaaaaaaa
+  bbbbbbbbbbbbbbbb ccccccccccccccccc
+  ddddddddd eeeeeeeeeeeee
+)
+
+{
+  a
+  aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb ccccccccccccccccc
+  d: ddddddddd eeeeeeee
+}
+
+aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb ccccccccccccccccc
+d: ddddddddd eeeeeeeeeeeee
+
+(
+  aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc)
+  d = ddddddd(eeeeeeee)
+) ->
+
+# Object that omits braces if parent breaks
+[a, { b: c(d), e: f(g) }, h]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+,
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+,
+  h
+]
+
+[a, { b: c(d), e: f(g) }]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+,
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+]
+
+`;
+
+exports[`implicit-call.coffee 2`] = `
+# implicit calls
+[aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeeee)]
+
+f(aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeee))
+
+{a, aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee)}
+
+aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeeeeeeee)
+
+(aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc), d = ddddddd(eeeeeeee)) ->
+
+# Object that omits braces if parent breaks
+[a, {b: c(d), e: f(g)}, h]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+  h
+]
+
+[a, {b: c(d), e: f(g)}]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# implicit calls
+[
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  ddddddddd eeeeeeeeeeeeee
+]
+
+f(
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  ddddddddd eeeeeeeeeeeee
+)
+
+{
+  a,
+  aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  d: ddddddddd eeeeeeee
+}
+
+aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb ccccccccccccccccc
+d: ddddddddd eeeeeeeeeeeee
+
+(
+  aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  d = ddddddd(eeeeeeee)
+) ->
+
+# Object that omits braces if parent breaks
+[a, { b: c(d), e: f(g) }, h]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+,
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+,
+  h
+]
+
+[a, { b: c(d), e: f(g) }]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+,
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+]
+
+`;
+
+exports[`implicit-call.coffee 3`] = `
+# implicit calls
+[aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeeee)]
+
+f(aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeee))
+
+{a, aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee)}
+
+aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeeeeeeee)
+
+(aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc), d = ddddddd(eeeeeeee)) ->
+
+# Object that omits braces if parent breaks
+[a, {b: c(d), e: f(g)}, h]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+  h
+]
+
+[a, {b: c(d), e: f(g)}]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# implicit calls
+[
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  ddddddddd eeeeeeeeeeeeee,
+]
+
+f(
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  ddddddddd(eeeeeeeeeeeee),
+)
+
+{
+  a,
+  aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  d: ddddddddd(eeeeeeee),
+}
+
+aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb ccccccccccccccccc
+d: ddddddddd eeeeeeeeeeeee
+
+(
+  aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc),
+  d = ddddddd(eeeeeeee),
+) ->
+
+# Object that omits braces if parent breaks
+[a, { b: c(d), e: f(g) }, h]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+,
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg
+,
+  h,
+]
+
+[a, { b: c(d), e: f(g) }]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+,
+  bbbbbbb: ccccccccc dddddddddddd
+  eeeeeee: fffffffff gggggggggggg,
+]
+
+`;
+
+exports[`implicit-object.coffee 1`] = `
+# implicit objects
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, eeeeeeeeeeeeeeee, {gggggggg: hhhhhhh}]
+
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, eeeeeeeeeeeeeeee, {gggg: hhh, ii: jj}]
+
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, {eeeeeeeeee: ffff, gggg: hhh, ii: jj}]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# implicit objects
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeeeeeeeee
+,
+  gggggggg: hhhhhhh
+]
+
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeeeeeeeee
+,
+  gggg: hhh, ii: jj
+]
+
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeee: ffff, gggg: hhh, ii: jj
+]
+
+`;
+
+exports[`implicit-object.coffee 2`] = `
+# implicit objects
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, eeeeeeeeeeeeeeee, {gggggggg: hhhhhhh}]
+
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, eeeeeeeeeeeeeeee, {gggg: hhh, ii: jj}]
+
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, {eeeeeeeeee: ffff, gggg: hhh, ii: jj}]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# implicit objects
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeeeeeeeee
+,
+  gggggggg: hhhhhhh
+]
+
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeeeeeeeee
+,
+  gggg: hhh, ii: jj
+]
+
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeee: ffff, gggg: hhh, ii: jj
+]
+
+`;
+
+exports[`implicit-object.coffee 3`] = `
+# implicit objects
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, eeeeeeeeeeeeeeee, {gggggggg: hhhhhhh}]
+
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, eeeeeeeeeeeeeeee, {gggg: hhh, ii: jj}]
+
+[{aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd}, {eeeeeeeeee: ffff, gggg: hhh, ii: jj}]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# implicit objects
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeeeeeeeee
+,
+  gggggggg: hhhhhhh,
+]
+
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeeeeeeeee
+,
+  gggg: hhh, ii: jj,
+]
+
+[
+  aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
+,
+  eeeeeeeeee: ffff, gggg: hhh, ii: jj,
+]
+
+`;
+
+exports[`object.coffee 1`] = `
+a: b
+
+BREAK
+
+a: b
+c: d
+
+BREAK
+
+{a, b: c}
+
+{aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc, dddddddddd: eeee}
+
+{
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb:
+    ccccccccccccccc
+  dddddddddd:
+    eeee
+}
+
+({aaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc, ddddddddd: e}) ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a: b
+
+BREAK
+
+a: b
+c: d
+
+BREAK
+
+{ a, b: c }
+
+{
+  aaaaaaaaaaaaaaaaaaaa
+  bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc
+  dddddddddd: eeee
+}
+
+{
+  aaaaaaaaaaaaaaaaaaaa
+  bbbbbbbbbbbbbbbbbbbbbbb:
+    ccccccccccccccc
+  dddddddddd:
+    eeee
+}
+
+({
+  aaaaaaaaaaaaaaaaaaa
+  bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc
+  ddddddddd: e
+}) ->
+
+`;
+
+exports[`object.coffee 2`] = `
+a: b
+
+BREAK
+
+a: b
+c: d
+
+BREAK
+
+{a, b: c}
+
+{aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc, dddddddddd: eeee}
+
+{
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb:
+    ccccccccccccccc
+  dddddddddd:
+    eeee
+}
+
+({aaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc, ddddddddd: e}) ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a: b
+
+BREAK
+
+a: b
+c: d
+
+BREAK
+
+{ a, b: c }
+
+{
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc,
+  dddddddddd: eeee
+}
+
+{
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb:
+    ccccccccccccccc,
+  dddddddddd:
+    eeee
+}
+
+({
+  aaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc,
+  ddddddddd: e
+}) ->
+
+`;
+
+exports[`object.coffee 3`] = `
+a: b
+
+BREAK
+
+a: b
+c: d
+
+BREAK
+
+{a, b: c}
+
+{aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc, dddddddddd: eeee}
+
+{
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb:
+    ccccccccccccccc
+  dddddddddd:
+    eeee
+}
+
+({aaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc, ddddddddd: e}) ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a: b
+
+BREAK
+
+a: b
+c: d
+
+BREAK
+
+{ a, b: c }
+
+{
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc,
+  dddddddddd: eeee,
+}
+
+{
+  aaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb:
+    ccccccccccccccc,
+  dddddddddd:
+    eeee,
+}
+
+({
+  aaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc,
+  ddddddddd: e,
+}) ->
+
+`;
+
+exports[`params.coffee 1`] = `
+(a) ->
+
+(a, b) ->
+
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(a) ->
+
+(a, b) ->
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+) ->
+
+`;
+
+exports[`params.coffee 2`] = `
+(a) ->
+
+(a, b) ->
+
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(a) ->
+
+(a, b) ->
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+) ->
+
+`;
+
+exports[`params.coffee 3`] = `
+(a) ->
+
+(a, b) ->
+
+(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) ->
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(a,) ->
+
+(a, b,) ->
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+) ->
+
+`;
