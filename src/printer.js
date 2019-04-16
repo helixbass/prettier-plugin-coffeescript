@@ -3015,11 +3015,6 @@ function isRightmostInStatement(
           ? // {unlessParentBreaks: true}
             false // I *think* we know that the parent breaks for any
           : true
-        // console.log({
-        //   shouldOmitBraces,
-        //   shouldOmitBracesIfParentBreaks,
-        //   isFollowedByComma,
-        // })
       }
       breakingParentCount++
     } else if (
