@@ -54,7 +54,7 @@ d: ddddddddd eeeeeeeeeeeee
 
 (
   aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc)
-  d = ddddddd(eeeeeeee)
+  d = ddddddd eeeeeeee
 ) ->
 
 # Object that omits braces if parent breaks
@@ -134,7 +134,7 @@ d: ddddddddd eeeeeeeeeeeee
 
 (
   aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc),
-  d = ddddddd(eeeeeeee)
+  d = ddddddd eeeeeeee
 ) ->
 
 # Object that omits braces if parent breaks
@@ -194,7 +194,7 @@ aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee
 [
   aaaaaaaaaaaaaaaaaaaa,
   bbbbbbbbbbbbbbbb(ccccccccccccccccc),
-  ddddddddd eeeeeeeeeeeeee,
+  ddddddddd(eeeeeeeeeeeeee),
 ]
 
 f(

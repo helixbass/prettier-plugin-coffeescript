@@ -521,6 +521,13 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   return false
 }
 
+function isAssignment(node) {
+  return (
+    node &&
+    (node.type === 'AssignmentExpression' || node.type === 'AssignmentPattern')
+  )
+}
+
 function isControl(node) {
   return (
     isIf(node) ||
@@ -2108,7 +2115,9 @@ function printFunction(path, options, print) {
     hasDanglingComments(node, preParamsDanglingCommentFilter) ? ' ' : ''
   )
 
-  parts.push(group(printFunctionParams(path, print, options)))
+  parts.push(
+    group(printFunctionParams(path, print, options), {visibleType: 'visible'})
+  )
 
   const postParamsDanglingCommentFilter = comment =>
     getNextNonSpaceNonCommentCharacter(
@@ -2765,6 +2774,10 @@ function shouldOmitObjectBraces(
     return ifParentBreaks ? {indent: false} : false
   }
 
+  if (parent.type === 'AssignmentPattern') {
+    return false
+  }
+
   let isRightmost
   if (
     (isRightmost = isRightmostInStatement(path, options, {
@@ -2846,12 +2859,21 @@ function isRightmostInStatement(
         ((parent.body && parent.body.body.length) ||
           isBlockLevel(parent, grandparent))) ||
       parent.type === 'SequenceExpression' ||
-      (parent.type === 'ClassProperty' && node === parent.value) ||
+      (parent.type === 'ClassProperty' && prevParent === parent.value) ||
       (parent.type === 'MemberExpression' &&
         prevParent === parent.property &&
         parent.computed) ||
-      (parent.type === 'ArrayExpression' && node === getLast(parent.elements))
+      (parent.type === 'ArrayExpression' &&
+        node === getLast(parent.elements)) ||
+      (isFunction(parent) && prevParent === getLast(parent.params))
     ) {
+      if (
+        (parent.type === 'ArrayExpression' &&
+          node === getLast(parent.elements)) ||
+        (isFunction(parent) && prevParent === getLast(parent.params))
+      ) {
+        isFollowedByComma = options.comma === 'all'
+      }
       return {
         indent,
         trailingLine,
@@ -2924,11 +2946,11 @@ function isRightmostInStatement(
         isFollowedByComma,
       }
     }
-    if (parent.type === 'AssignmentExpression' || isBinaryish(parent)) {
+    if (isAssignment(parent) || isBinaryish(parent)) {
       if (prevParent !== parent.right) {
         return false
       }
-      if (parent.type !== 'AssignmentExpression') {
+      if (!isAssignment(parent)) {
         if (!setIndent) {
           indent = true
         }
