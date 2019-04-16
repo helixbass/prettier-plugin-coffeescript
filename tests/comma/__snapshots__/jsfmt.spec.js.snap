@@ -84,7 +84,7 @@ d: ddddddddd eeeeeeeeeeeee
 ]
 
 # Object that omits braces unless it breaks
-return  a: b(c), d: e f  if g
+return a: b(c), d: e f if g
 
 return {
   aaaaaaaaaaaaaaaaaa: bbbbbbbbb cccccccccc
@@ -177,7 +177,7 @@ d: ddddddddd eeeeeeeeeeeee
 ]
 
 # Object that omits braces unless it breaks
-return  a: b(c), d: e f  if g
+return a: b(c), d: e f if g
 
 return {
   aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc),
@@ -270,7 +270,7 @@ d: ddddddddd eeeeeeeeeeeee
 ]
 
 # Object that omits braces unless it breaks
-return  a: b(c), d: e f  if g
+return a: b(c), d: e f if g
 
 return {
   aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc),

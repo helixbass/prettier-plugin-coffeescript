@@ -2379,6 +2379,8 @@ function printObject(path, print, options) {
           visibleType: 'visible',
           offset: 1,
         })
+      : shouldOmitBracesUnlessBreaks
+      ? ifBreak(bracketSpacingLine, '')
       : bracketSpacingLine,
     concat(joinedProps),
   ])
@@ -2404,6 +2406,8 @@ function printObject(path, print, options) {
           : softline
         : shouldOmitBracesIfParentBreaks
         ? ifBreak('', line, {visibleType: 'visible', offset: 1})
+        : shouldOmitBracesUnlessBreaks
+        ? ifBreak(line, '')
         : line,
       shouldOmitBracesIfParentBreaks
         ? ifBreak('', '}', {visibleType: 'visible', offset: 1})
@@ -2508,7 +2512,9 @@ function printRegex(path, options, print) {
   const pattern = node.interpolatedPattern
     ? path.call(
         patternPath =>
-          printTemplateLiteral(patternPath, options, print, {omitQuotes: true}),
+          printTemplateLiteral(patternPath, options, print, {
+            omitQuotes: true,
+          }),
         'interpolatedPattern'
       )
     : node.originalPattern != null
