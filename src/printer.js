@@ -4567,7 +4567,7 @@ function printFunctionParams(path, print, options) {
 
   if (!(params && params.length)) {
     if (!hasDanglingComments(fun)) {
-      return ''
+      return options.emptyParamListParens ? '() ' : ''
     }
     return concat([
       '(',
