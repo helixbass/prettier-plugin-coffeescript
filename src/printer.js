@@ -3009,13 +3009,6 @@ function isRightmostInStatement(
           stackOffset: objectStackOffset,
         })
 
-        // const commaUnlessBracesOmitted = shouldOmitBracesIfParentBreaks
-        //   ? ifBreak('', ',', {visibleType: 'visible', offset: 1})
-        //   : shouldOmitBraces
-        //   ? ''
-        //   : shouldOmitBracesUnlessBreaks
-        //   ? ifBreak(',', '', {visibleType: 'visible'})
-        //   : ','
         isFollowedByComma = shouldOmitBraces
           ? false
           : shouldOmitBracesIfParentBreaks
