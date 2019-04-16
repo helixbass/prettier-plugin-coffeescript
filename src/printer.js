@@ -2235,7 +2235,15 @@ function _shouldOmitObjectBraces(path, options, {stackOffset = 0} = {}) {
   const shouldOmitBracesIfParentBreaks =
     !shouldOmitBraces &&
     shouldOmitObjectBraces(path, options, {ifParentBreaks: true, stackOffset})
-  return {shouldOmitBraces, shouldOmitBracesIfParentBreaks}
+  const shouldOmitBracesUnlessBreaks =
+    !shouldOmitBraces &&
+    !shouldOmitBracesIfParentBreaks &&
+    shouldOmitObjectBraces(path, options, {unlessBreaks: true, stackOffset})
+  return {
+    shouldOmitBraces,
+    shouldOmitBracesIfParentBreaks,
+    shouldOmitBracesUnlessBreaks,
+  }
 }
 
 function printObject(path, print, options) {
@@ -2272,11 +2280,8 @@ function printObject(path, print, options) {
   const {
     shouldOmitBraces,
     shouldOmitBracesIfParentBreaks,
+    shouldOmitBracesUnlessBreaks,
   } = _shouldOmitObjectBraces(path, options)
-  const shouldOmitBracesUnlessBreaks =
-    !shouldOmitBraces &&
-    !shouldOmitBracesIfParentBreaks &&
-    shouldOmitObjectBraces(path, options, {unlessBreaks: true})
 
   let separatorParts = []
   const commaUnlessBracesOmitted = shouldOmitBracesIfParentBreaks
@@ -2997,10 +3002,6 @@ function isRightmostInStatement(
         } = _shouldOmitObjectBraces(path, options, {
           stackOffset: objectStackOffset,
         })
-        // const shouldOmitBracesUnlessBreaks =
-        //   !shouldOmitBraces &&
-        //   !shouldOmitBracesIfParentBreaks &&
-        //   shouldOmitObjectBraces(path, options, {unlessBreaks: true})
 
         // const commaUnlessBracesOmitted = shouldOmitBracesIfParentBreaks
         //   ? ifBreak('', ',', {visibleType: 'visible', offset: 1})

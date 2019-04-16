@@ -29,6 +29,11 @@ aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee
   bbbbbbb: ccccccccc dddddddddddd
   eeeeeee: fffffffff gggggggggggg
 ]
+
+# Object that omits braces unless it breaks
+return {a: b(c), d: e(f)} if g
+
+return {aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc), dddddddddd: eeeeeee(ffffff)} if g
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # implicit calls
 [
@@ -78,6 +83,14 @@ d: ddddddddd eeeeeeeeeeeee
   eeeeeee: fffffffff gggggggggggg
 ]
 
+# Object that omits braces unless it breaks
+return  a: b(c), d: e f  if g
+
+return {
+  aaaaaaaaaaaaaaaaaa: bbbbbbbbb cccccccccc
+  dddddddddd: eeeeeee ffffff
+} if g
+
 `;
 
 exports[`implicit-call.coffee 2`] = `
@@ -109,6 +122,11 @@ aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee
   bbbbbbb: ccccccccc dddddddddddd
   eeeeeee: fffffffff gggggggggggg
 ]
+
+# Object that omits braces unless it breaks
+return {a: b(c), d: e(f)} if g
+
+return {aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc), dddddddddd: eeeeeee(ffffff)} if g
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # implicit calls
 [
@@ -158,6 +176,14 @@ d: ddddddddd eeeeeeeeeeeee
   eeeeeee: fffffffff gggggggggggg
 ]
 
+# Object that omits braces unless it breaks
+return  a: b(c), d: e f  if g
+
+return {
+  aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc),
+  dddddddddd: eeeeeee ffffff
+} if g
+
 `;
 
 exports[`implicit-call.coffee 3`] = `
@@ -189,6 +215,11 @@ aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee
   bbbbbbb: ccccccccc dddddddddddd
   eeeeeee: fffffffff gggggggggggg
 ]
+
+# Object that omits braces unless it breaks
+return {a: b(c), d: e(f)} if g
+
+return {aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc), dddddddddd: eeeeeee(ffffff)} if g
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # implicit calls
 [
@@ -237,6 +268,14 @@ d: ddddddddd eeeeeeeeeeeee
   bbbbbbb: ccccccccc dddddddddddd
   eeeeeee: fffffffff gggggggggggg,
 ]
+
+# Object that omits braces unless it breaks
+return  a: b(c), d: e f  if g
+
+return {
+  aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc),
+  dddddddddd: eeeeeee(ffffff),
+} if g
 
 `;
 

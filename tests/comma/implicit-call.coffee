@@ -26,3 +26,8 @@ aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb(ccccccccccccccccc), d: ddddddddd(eeeeeeee
   bbbbbbb: ccccccccc dddddddddddd
   eeeeeee: fffffffff gggggggggggg
 ]
+
+# Object that omits braces unless it breaks
+return {a: b(c), d: e(f)} if g
+
+return {aaaaaaaaaaaaaaaaaa: bbbbbbbbb(cccccccccc), dddddddddd: eeeeeee(ffffff)} if g
