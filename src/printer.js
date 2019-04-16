@@ -2896,6 +2896,7 @@ function isRightmostInStatement(
           parent.type === 'MemberExpression' &&
           grandparent.type === 'CallExpression' &&
           parent === grandparent.callee) ||
+        (isFunction(parent) && parent.params.indexOf(prevParent) > -1) ||
         (isFirstCallInChain(path, {
           stackOffset: stackOffset + parentLevel,
         }) &&
@@ -2910,12 +2911,9 @@ function isRightmostInStatement(
           isCallArgument(path, {
             nonLast: true,
             stackOffset: stackOffset + parentLevel,
-          })
-        ) {
-          isFollowedByComma = true
-        } else if (
-          parent.type === 'ArrayExpression' &&
-          (node !== getLast(parent.elements) || options.comma === 'all')
+          }) ||
+          parent.type === 'ArrayExpression' ||
+          (isFunction(parent) && parent.params.indexOf(prevParent) > -1)
         ) {
           isFollowedByComma = true
         } else if (

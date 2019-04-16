@@ -53,7 +53,7 @@ aaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbb ccccccccccccccccc
 d: ddddddddd eeeeeeeeeeeee
 
 (
-  aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb(ccccccccccccccccc)
+  aaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbb ccccccccccccccccc
   d = ddddddd eeeeeeee
 ) ->
 
