@@ -2849,6 +2849,7 @@ function isRightmostInStatement(
   let trailingLine
   let breakingParentCount = 0
   let isFollowedByComma = false
+  let trailingObjectProperty = false
   while ((parent = path.getParentNode(stackOffset + parentLevel))) {
     const grandparent = path.getParentNode(stackOffset + parentLevel + 1)
     if (
@@ -2873,15 +2874,15 @@ function isRightmostInStatement(
         prevParent === parent.property &&
         parent.computed) ||
       (parent.type === 'ArrayExpression' &&
-        node === getLast(parent.elements)) ||
+        prevParent === getLast(parent.elements)) ||
       (isFunction(parent) && prevParent === getLast(parent.params))
     ) {
       if (
         (parent.type === 'ArrayExpression' &&
-          node === getLast(parent.elements)) ||
+          prevParent === getLast(parent.elements)) ||
         (isFunction(parent) && prevParent === getLast(parent.params))
       ) {
-        isFollowedByComma = options.comma === 'all'
+        isFollowedByComma = options.comma === 'all' && !trailingObjectProperty
       }
       return {
         indent,
@@ -2998,6 +2999,7 @@ function isRightmostInStatement(
         last: true,
       })
     ) {
+      trailingObjectProperty = true
       if (options.comma === 'all') {
         const objectStackOffset = stackOffset + parentLevel + 2
         const {

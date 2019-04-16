@@ -74,7 +74,7 @@ d: ddddddddd eeeeeeeeeeeee
   h
 ]
 
-[a, { b: c(d), e: f(g) }]
+[a, { b: c(d), e: f g }]
 
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -167,7 +167,7 @@ d: ddddddddd eeeeeeeeeeeee
   h
 ]
 
-[a, { b: c(d), e: f(g) }]
+[a, { b: c(d), e: f g }]
 
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -260,7 +260,7 @@ d: ddddddddd eeeeeeeeeeeee
   h,
 ]
 
-[a, { b: c(d), e: f(g) }]
+[a, { b: c(d), e: f g }]
 
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
