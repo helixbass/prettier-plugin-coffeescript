@@ -4582,7 +4582,9 @@ function printFunctionParams(path, print, options) {
             ),
           ])
         ),
-    dontBreak ? '' : concat([options.comma === 'all' ? ',' : '', softline]),
+    dontBreak
+      ? ''
+      : concat([ifBreak(options.comma === 'all' ? ',' : ''), softline]),
     ') ',
   ])
 }
