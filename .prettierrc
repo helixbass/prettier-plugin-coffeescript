@@ -7,3 +7,4 @@ indentChain: false
 # respectBreak: ['object']
 # noImplicit: ['objectBraces', 'callParens']
 # respectExplicit: ['objectBraces', 'callParens']
+# emptyParamListParens: true

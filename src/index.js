@@ -175,6 +175,13 @@ const options = {
     default: [{value: ['control']}],
     description: 'Inline right sides of assignments',
   },
+  emptyParamListParens: {
+    type: 'boolean',
+    category: 'Common',
+    default: false,
+    description:
+      'Include an empty set of parens for an empty function parameter list.',
+  },
 }
 
 module.exports = {
