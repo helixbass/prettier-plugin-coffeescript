@@ -2390,7 +2390,7 @@ function printObject(path, print, options) {
       : shouldOmitBraces
       ? ''
       : shouldOmitBracesUnlessBreaks
-      ? ifBreak('{', '', {visibleType: 'visible'})
+      ? ifBreak('{', '')
       : '{',
     dontIndent === true
       ? concat(joinedProps)
@@ -2414,7 +2414,7 @@ function printObject(path, print, options) {
         : shouldOmitBraces
         ? ''
         : shouldOmitBracesUnlessBreaks
-        ? ifBreak('}', '', {visibleType: 'visible'})
+        ? ifBreak('}', '')
         : '}',
     ]),
   ])
