@@ -2512,9 +2512,7 @@ function printRegex(path, options, print) {
   const pattern = node.interpolatedPattern
     ? path.call(
         patternPath =>
-          printTemplateLiteral(patternPath, options, print, {
-            omitQuotes: true,
-          }),
+          printTemplateLiteral(patternPath, options, print, {omitQuotes: true}),
         'interpolatedPattern'
       )
     : node.originalPattern != null
