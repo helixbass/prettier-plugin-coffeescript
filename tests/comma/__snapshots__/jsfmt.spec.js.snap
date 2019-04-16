@@ -63,7 +63,7 @@ d: ddddddddd eeeeeeeeeeeee
 ) ->
 
 # Object that omits braces if parent breaks
-[a, { b: c(d), e: f(g) }, h]
+[a, { b: c(d), e: f g }, h]
 
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -156,7 +156,7 @@ d: ddddddddd eeeeeeeeeeeee
 ) ->
 
 # Object that omits braces if parent breaks
-[a, { b: c(d), e: f(g) }, h]
+[a, { b: c(d), e: f g }, h]
 
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -249,7 +249,7 @@ d: ddddddddd eeeeeeeeeeeee
 ) ->
 
 # Object that omits braces if parent breaks
-[a, { b: c(d), e: f(g) }, h]
+[a, { b: c(d), e: f g }, h]
 
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

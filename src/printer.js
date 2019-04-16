@@ -2850,6 +2850,13 @@ function isRightmostInStatement(
   let breakingParentCount = 0
   let isFollowedByComma = false
   let trailingObjectProperty = false
+  const nonIfParentBreaksReturnValue = () => ({
+    indent,
+    trailingLine,
+    isFollowedByIndentedBody: isFollowedByIndentedBody(node, parent),
+    isFollowedByComma,
+  })
+
   while ((parent = path.getParentNode(stackOffset + parentLevel))) {
     const grandparent = path.getParentNode(stackOffset + parentLevel + 1)
     if (
@@ -2884,12 +2891,7 @@ function isRightmostInStatement(
       ) {
         isFollowedByComma = options.comma === 'all' && !trailingObjectProperty
       }
-      return {
-        indent,
-        trailingLine,
-        isFollowedByIndentedBody: isFollowedByIndentedBody(node, parent),
-        isFollowedByComma,
-      }
+      return nonIfParentBreaksReturnValue()
     }
     if (
       ifParentBreaks &&
@@ -3000,15 +3002,15 @@ function isRightmostInStatement(
       })
     ) {
       trailingObjectProperty = true
-      if (options.comma === 'all') {
-        const objectStackOffset = stackOffset + parentLevel + 2
-        const {
-          shouldOmitBraces,
-          shouldOmitBracesIfParentBreaks,
-        } = _shouldOmitObjectBraces(path, options, {
-          stackOffset: objectStackOffset,
-        })
+      const objectStackOffset = stackOffset + parentLevel + 2
+      const {
+        shouldOmitBraces,
+        shouldOmitBracesIfParentBreaks,
+      } = _shouldOmitObjectBraces(path, options, {
+        stackOffset: objectStackOffset,
+      })
 
+      if (options.comma === 'all') {
         isFollowedByComma = shouldOmitBraces
           ? false
           : shouldOmitBracesIfParentBreaks
@@ -3017,6 +3019,9 @@ function isRightmostInStatement(
           : true
       }
       breakingParentCount++
+      if (!shouldOmitBraces) {
+        return nonIfParentBreaksReturnValue()
+      }
     } else if (
       parent.type === 'ObjectExpression' ||
       (parent.type === 'UnaryExpression' && parent.prefix) ||
