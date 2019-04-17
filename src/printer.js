@@ -852,21 +852,20 @@ function printPathNoParens(path, options, print) {
       const lastElem = util.getLast(n.elements)
       const needsForcedTrailingComma = lastElem === null
 
+      const {
+        printed: printedItems,
+        isLastElementAnImplicitObject,
+      } = printArrayItems(path, options, 'elements', print)
       parts.push(
         group(
           concat([
             '[',
-            indent(
-              concat([
-                softline,
-                printArrayItems(path, options, 'elements', print),
-              ])
-            ),
+            indent(concat([softline, printedItems])),
             needsForcedTrailingComma
               ? ','
               : options.comma !== 'all'
               ? ''
-              : ifBreak(',', ''),
+              : ifBreak(isLastElementAnImplicitObject ? '' : ',', ''),
             softline,
             ']',
           ]),
@@ -4060,18 +4059,29 @@ function printArgumentsList(path, options, print) {
     return concat(['(', ')'])
   }
 
-  const lastArgIndex = args.length - 1
+  const printedArgumentsPreConcat = []
   let separatorParts = []
-  const printedArguments = path.map((argPath, index) => {
-    const arg = argPath.getNode()
-    const isObject = isObjectish(arg)
-    const isLast = index === lastArgIndex
-    const nextIsNonFinalObject =
-      !isLast && isObjectish(args[index + 1]) && index !== lastArgIndex - 1
+  let isImplicitObject
+  let argIndex = 0
+  const lastArgIndex = args.length - 1
+  path.each(argPath => {
+    isImplicitObject = isImplicitObjectIfParentBreaks(argPath, options)
+    const isLast = argIndex === lastArgIndex
+    if (isImplicitObject && !isLast) {
+      if (separatorParts.length) {
+        separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
+      }
+    }
+    if (argIndex > 0) {
+      const prevPrintedArg = printedArgumentsPreConcat[argIndex - 1]
+      prevPrintedArg.push(concat(separatorParts))
+    }
+    printedArgumentsPreConcat[argIndex] = [print(argPath)]
+
     // const consecutiveIf = !isLast && isIf(arg) && isIf(args[index + 1])
     separatorParts = [
       ifBreak(
-        isObject || nextIsNonFinalObject // || consecutiveIf
+        isImplicitObject && !isLast // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
           ? ','
@@ -4080,16 +4090,22 @@ function printArgumentsList(path, options, print) {
       ),
       line,
     ]
-    const parts = []
-    parts.push(print(argPath))
-    if (index !== lastArgIndex) {
-      parts.push(concat(separatorParts))
-    } else if (index === lastArgIndex && options.comma === 'all') {
-      parts.push(ifBreak(','))
-    }
-
-    return concat(parts)
+    argIndex++
   }, 'arguments')
+  const isLastArgAnImplicitObject = isImplicitObject
+  const lastArgComma = isLastArgAnImplicitObject
+    ? ''
+    : options.comma !== 'all'
+    ? ''
+    : ifBreak(',')
+  const printedArguments = printedArgumentsPreConcat.map((parts, index) =>
+    index === printedArgumentsPreConcat.length - 1
+      ? concat([...parts, lastArgComma])
+      : concat(parts)
+  )
+  const printedArgumentsNoTrailingComma = printedArgumentsPreConcat.map(parts =>
+    concat(parts)
+  )
 
   const parent = path.getParentNode()
   let parensNecessary = callParensNecessary(path, options)
@@ -4262,7 +4278,7 @@ function printArgumentsList(path, options, print) {
     path.each(argPath => {
       if (i === args.length - 1) {
         lastArg = argPath.getValue()
-        const printedLastArg = printedArguments[i]
+        const printedLastArg = printedArgumentsNoTrailingComma[i]
         printedExpanded = nonLastArgs.concat(
           (lastArg.type === 'ObjectExpression' &&
             shouldOmitObjectBraces(argPath, options)) ||
@@ -4724,8 +4740,28 @@ function isIdentifierName(str) {
   return IDENTIFIER.test(str)
 }
 
-function isObjectish(node) {
-  return node.type === 'ObjectExpression' || node.type === 'ObjectPattern'
+// function isObjectish(node) {
+//   return (
+//     (node && node.type === 'ObjectExpression') || node.type === 'ObjectPattern'
+//   )
+// }
+
+function isImplicitObjectIfParentBreaks(path, options) {
+  const node = path.getValue()
+  if (!node) {
+    return false
+  }
+  if (node.type !== 'ObjectExpression') {
+    return false
+  }
+  const {
+    shouldOmitBraces,
+    shouldOmitBracesIfParentBreaks,
+  } = _shouldOmitObjectBraces(path, options)
+  if (!(shouldOmitBraces || shouldOmitBracesIfParentBreaks)) {
+    return false
+  }
+  return true
 }
 
 function printArrayItems(path, options, printPath, print) {
@@ -4736,10 +4772,11 @@ function printArrayItems(path, options, printPath, print) {
   const last = elements && elements.length && elements[elements.length - 1]
   const {locEnd} = options
   // let index = 0
+  let isImplicitObject
   path.each(childPath => {
     const child = childPath.getValue()
-    let isObject
-    if (child && (isObject = isObjectish(child))) {
+    isImplicitObject = isImplicitObjectIfParentBreaks(childPath, options)
+    if (isImplicitObject) {
       if (separatorParts.length) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
       }
@@ -4756,7 +4793,7 @@ function printArrayItems(path, options, printPath, print) {
     //   isIf(elements[index + 1])
     separatorParts = [
       ifBreak(
-        isObject // || consecutiveIf
+        isImplicitObject // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
           ? ','
@@ -4775,7 +4812,10 @@ function printArrayItems(path, options, printPath, print) {
     // index++
   }, printPath)
 
-  return concat(printedElements)
+  return {
+    printed: concat(printedElements),
+    isLastElementAnImplicitObject: isImplicitObject,
+  }
 }
 
 function rawText(node) {

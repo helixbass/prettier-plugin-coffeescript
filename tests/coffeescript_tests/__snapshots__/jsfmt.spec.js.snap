@@ -683,7 +683,6 @@ test 'array elisions nested destructuring', ->
     x: 2
   ,
     {}
-  ,
     [{}, {}, { z: 1, w: [1, 2, 4], p: 3, q: 4 }, {}, {}]
   ]
   [, d, , [, , { w }]] = aobj
