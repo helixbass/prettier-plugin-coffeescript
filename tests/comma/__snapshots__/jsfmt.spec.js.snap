@@ -1,5 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`call.coffee 1`] = `
+# breaking implicit should never have trailing comma
+
+f
+  a: b
+  c: d
+,
+  eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# breaking implicit should never have trailing comma
+
+f
+  a: b
+  c: d
+,
+  eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+
+`;
+
+exports[`call.coffee 2`] = `
+# breaking implicit should never have trailing comma
+
+f
+  a: b
+  c: d
+,
+  eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# breaking implicit should never have trailing comma
+
+f
+  a: b
+  c: d
+,
+  eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+
+`;
+
+exports[`call.coffee 3`] = `
+# breaking implicit should never have trailing comma
+
+f
+  a: b
+  c: d
+,
+  eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# breaking implicit should never have trailing comma
+
+f
+  a: b
+  c: d
+,
+  eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+
+`;
+
 exports[`implicit-call.coffee 1`] = `
 # implicit calls
 [aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeeee)]
@@ -266,7 +323,7 @@ d: ddddddddd eeeeeeeeeeeee
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ,
   bbbbbbb: ccccccccc dddddddddddd
-  eeeeeee: fffffffff gggggggggggg,
+  eeeeeee: fffffffff gggggggggggg
 ]
 
 # Object that omits braces unless it breaks
@@ -359,7 +416,7 @@ exports[`implicit-object.coffee 3`] = `
 ,
   eeeeeeeeeeeeeeee
 ,
-  gggggggg: hhhhhhh,
+  gggggggg: hhhhhhh
 ]
 
 [
@@ -367,13 +424,13 @@ exports[`implicit-object.coffee 3`] = `
 ,
   eeeeeeeeeeeeeeee
 ,
-  gggg: hhh, ii: jj,
+  gggg: hhh, ii: jj
 ]
 
 [
   aaaaaaaaaaaaaaa: bbbbbbbbbbbbb, cccc: ddddd
 ,
-  eeeeeeeeee: ffff, gggg: hhh, ii: jj,
+  eeeeeeeeee: ffff, gggg: hhh, ii: jj
 ]
 
 `;
@@ -546,6 +603,867 @@ BREAK
   bbbbbbbbbbbbbbbbbbbbbbb: ccccccccccccccc,
   ddddddddd: e,
 }) ->
+
+`;
+
+exports[`object-as-item.coffee 1`] = `
+[{a, b: c}, d: e, f: g, h]
+
+f({a, b: c}, d: e, f: g, h)
+
+{h, i: {a, b: c}, j: d: e, f: g}
+
+i: {a, b: c}, j: d: e, f: g
+
+i: {a, b: c}, j: h
+
+({a, b: c}, h) ->
+
+[
+  {a, b: c}
+  d: e, f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  {a, b: c}
+  d: e, f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+{
+  l
+  i: {a, b: c}
+  j: d: e, f: g
+  k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+{
+  l
+  i:
+    {a, b: c}
+  j:
+    d: e, f: g
+  k:
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+i: {a, b: c}
+j: d: e, f: g
+k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+(
+  {a, b: c}
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
+
+[
+  {a, b: c}
+  d: e
+  f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  {a, b: c}
+  d: e
+  f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+# trailing implicit object
+[{a, b: c}, d: e, f: g]
+
+f({a, b: c}, d: e, f: g)
+
+[
+  {a, b: c}
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+]
+
+f(
+  {a, b: c}
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+)
+
+{
+  l
+  h: {a, b: c}
+  i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+}
+
+h: {a, b: c}
+i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+# trailing explicit object
+[{a, b: c}]
+
+f({a, b: c})
+
+({a, b: c}) ->
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+]
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+)
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+)
+
+{
+  f
+  d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+}
+
+d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+) ->
+
+# non-trailing explicit object not adjacent to implicit object
+[{a, b: c}, d]
+
+f({a, b: c}, d)
+
+[{a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd]
+
+f({a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[{ a, b: c }, { d: e, f: g }, h]
+
+f { a, b: c }, { d: e, f: g }, h
+
+{ h, i: { a, b: c }, j: d: e, f: g }
+
+i: { a, b: c }
+j: d: e, f: g
+
+i: { a, b: c }
+j: h
+
+({ a, b: c }, h) ->
+
+[
+  { a, b: c }
+,
+  d: e, f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  { a, b: c }
+,
+  d: e, f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+{
+  l
+  i: { a, b: c }
+  j: d: e, f: g
+  k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+{
+  l
+  i: { a, b: c }
+  j:
+    d: e, f: g
+  k:
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+i: { a, b: c }
+j: d: e, f: g
+k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+(
+  { a, b: c }
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
+
+[
+  { a, b: c }
+,
+  d: e
+  f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  { a, b: c }
+,
+  d: e
+  f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+# trailing implicit object
+[{ a, b: c }, { d: e, f: g }]
+
+f { a, b: c }, d: e, f: g
+
+[
+  { a, b: c }
+,
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+]
+
+f(
+  { a, b: c }
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+)
+
+{
+  l
+  h: { a, b: c }
+  i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+}
+
+h: { a, b: c }
+i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+# trailing explicit object
+[{ a, b: c }]
+
+f { a, b: c }
+
+({ a, b: c }) ->
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+]
+
+f aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {
+  a
+  b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+}
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+)
+
+{
+  f
+  d:
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+}
+
+d:
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+) ->
+
+# non-trailing explicit object not adjacent to implicit object
+[{ a, b: c }, d]
+
+f { a, b: c }, d
+
+[
+  { a, b: c }
+  ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+]
+
+f(
+  { a, b: c }
+  ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+)
+
+`;
+
+exports[`object-as-item.coffee 2`] = `
+[{a, b: c}, d: e, f: g, h]
+
+f({a, b: c}, d: e, f: g, h)
+
+{h, i: {a, b: c}, j: d: e, f: g}
+
+i: {a, b: c}, j: d: e, f: g
+
+i: {a, b: c}, j: h
+
+({a, b: c}, h) ->
+
+[
+  {a, b: c}
+  d: e, f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  {a, b: c}
+  d: e, f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+{
+  l
+  i: {a, b: c}
+  j: d: e, f: g
+  k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+{
+  l
+  i:
+    {a, b: c}
+  j:
+    d: e, f: g
+  k:
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+i: {a, b: c}
+j: d: e, f: g
+k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+(
+  {a, b: c}
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
+
+[
+  {a, b: c}
+  d: e
+  f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  {a, b: c}
+  d: e
+  f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+# trailing implicit object
+[{a, b: c}, d: e, f: g]
+
+f({a, b: c}, d: e, f: g)
+
+[
+  {a, b: c}
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+]
+
+f(
+  {a, b: c}
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+)
+
+{
+  l
+  h: {a, b: c}
+  i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+}
+
+h: {a, b: c}
+i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+# trailing explicit object
+[{a, b: c}]
+
+f({a, b: c})
+
+({a, b: c}) ->
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+]
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+)
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+)
+
+{
+  f
+  d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+}
+
+d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+) ->
+
+# non-trailing explicit object not adjacent to implicit object
+[{a, b: c}, d]
+
+f({a, b: c}, d)
+
+[{a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd]
+
+f({a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[{ a, b: c }, { d: e, f: g }, h]
+
+f { a, b: c }, { d: e, f: g }, h
+
+{ h, i: { a, b: c }, j: d: e, f: g }
+
+i: { a, b: c }
+j: d: e, f: g
+
+i: { a, b: c }
+j: h
+
+({ a, b: c }, h) ->
+
+[
+  { a, b: c }
+,
+  d: e, f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  { a, b: c }
+,
+  d: e, f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+{
+  l,
+  i: { a, b: c },
+  j: d: e, f: g
+  k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+{
+  l,
+  i: { a, b: c },
+  j:
+    d: e, f: g
+  k:
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+i: { a, b: c }
+j: d: e, f: g
+k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+(
+  { a, b: c },
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
+
+[
+  { a, b: c }
+,
+  d: e
+  f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  { a, b: c }
+,
+  d: e
+  f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+# trailing implicit object
+[{ a, b: c }, { d: e, f: g }]
+
+f { a, b: c }, d: e, f: g
+
+[
+  { a, b: c }
+,
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+]
+
+f(
+  { a, b: c },
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+)
+
+{
+  l,
+  h: { a, b: c },
+  i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+}
+
+h: { a, b: c }
+i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+# trailing explicit object
+[{ a, b: c }]
+
+f { a, b: c }
+
+({ a, b: c }) ->
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+]
+
+f aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {
+  a,
+  b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+}
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+)
+
+{
+  f,
+  d:
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+}
+
+d:
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+) ->
+
+# non-trailing explicit object not adjacent to implicit object
+[{ a, b: c }, d]
+
+f { a, b: c }, d
+
+[
+  { a, b: c },
+  ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+]
+
+f(
+  { a, b: c },
+  ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+)
+
+`;
+
+exports[`object-as-item.coffee 3`] = `
+[{a, b: c}, d: e, f: g, h]
+
+f({a, b: c}, d: e, f: g, h)
+
+{h, i: {a, b: c}, j: d: e, f: g}
+
+i: {a, b: c}, j: d: e, f: g
+
+i: {a, b: c}, j: h
+
+({a, b: c}, h) ->
+
+[
+  {a, b: c}
+  d: e, f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  {a, b: c}
+  d: e, f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+{
+  l
+  i: {a, b: c}
+  j: d: e, f: g
+  k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+{
+  l
+  i:
+    {a, b: c}
+  j:
+    d: e, f: g
+  k:
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+i: {a, b: c}
+j: d: e, f: g
+k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+(
+  {a, b: c}
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
+
+[
+  {a, b: c}
+  d: e
+  f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+]
+
+f(
+  {a, b: c}
+  d: e
+  f: g
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+)
+
+# trailing implicit object
+[{a, b: c}, d: e, f: g]
+
+f({a, b: c}, d: e, f: g)
+
+[
+  {a, b: c}
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+]
+
+f(
+  {a, b: c}
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+)
+
+{
+  l
+  h: {a, b: c}
+  i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+}
+
+h: {a, b: c}
+i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+# trailing explicit object
+[{a, b: c}]
+
+f({a, b: c})
+
+({a, b: c}) ->
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+]
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+)
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+)
+
+{
+  f
+  d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+}
+
+d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+) ->
+
+# non-trailing explicit object not adjacent to implicit object
+[{a, b: c}, d]
+
+f({a, b: c}, d)
+
+[{a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd]
+
+f({a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[{ a, b: c }, { d: e, f: g }, h]
+
+f { a, b: c }, { d: e, f: g }, h
+
+{ h, i: { a, b: c }, j: d: e, f: g }
+
+i: { a, b: c }
+j: d: e, f: g
+
+i: { a, b: c }
+j: h
+
+({ a, b: c }, h) ->
+
+[
+  { a, b: c }
+,
+  d: e, f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+]
+
+f(
+  { a, b: c }
+,
+  d: e, f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+)
+
+{
+  l,
+  i: { a, b: c },
+  j: d: e, f: g
+  k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+}
+
+{
+  l,
+  i: { a, b: c },
+  j:
+    d: e, f: g
+  k:
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+}
+
+i: { a, b: c }
+j: d: e, f: g
+k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+(
+  { a, b: c },
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+) ->
+
+[
+  { a, b: c }
+,
+  d: e
+  f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+]
+
+f(
+  { a, b: c }
+,
+  d: e
+  f: g
+,
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+)
+
+# trailing implicit object
+[{ a, b: c }, { d: e, f: g }]
+
+f { a, b: c }, d: e, f: g
+
+[
+  { a, b: c }
+,
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+]
+
+f(
+  { a, b: c },
+  d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+)
+
+{
+  l,
+  h: { a, b: c },
+  i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+}
+
+h: { a, b: c }
+i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+# trailing explicit object
+[{ a, b: c }]
+
+f { a, b: c }
+
+({ a, b: c }) ->
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
+]
+
+f aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {
+  a,
+  b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc,
+}
+
+f(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
+)
+
+{
+  f,
+  d:
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
+}
+
+d:
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
+) ->
+
+# non-trailing explicit object not adjacent to implicit object
+[{ a, b: c }, d]
+
+f { a, b: c }, d
+
+[
+  { a, b: c },
+  ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd,
+]
+
+f(
+  { a, b: c },
+  ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd,
+)
 
 `;
 
