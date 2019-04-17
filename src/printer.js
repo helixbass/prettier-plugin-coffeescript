@@ -4093,19 +4093,6 @@ function printArgumentsList(path, options, print) {
     argIndex++
   }, 'arguments')
   const isLastArgAnImplicitObject = isImplicitObject
-  const lastArgComma = isLastArgAnImplicitObject
-    ? ''
-    : options.comma !== 'all'
-    ? ''
-    : ifBreak(',')
-  const printedArguments = printedArgumentsPreConcat.map((parts, index) =>
-    index === printedArgumentsPreConcat.length - 1
-      ? concat([...parts, lastArgComma])
-      : concat(parts)
-  )
-  const printedArgumentsNoTrailingComma = printedArgumentsPreConcat.map(parts =>
-    concat(parts)
-  )
 
   const parent = path.getParentNode()
   let parensNecessary = callParensNecessary(path, options)
@@ -4172,6 +4159,18 @@ function printArgumentsList(path, options, print) {
     unnecessary && parensOptionalIfParentBreaks
   const parensUnnecessaryUnlessParentBreaks =
     unnecessary && parensOptionalUnlessParentBreaks
+  const lastArgComma =
+    options.comma !== 'all' || isLastArgAnImplicitObject || parensUnnecessary
+      ? ''
+      : ifBreak(',')
+  const printedArguments = printedArgumentsPreConcat.map((parts, index) =>
+    index === printedArgumentsPreConcat.length - 1
+      ? concat([...parts, lastArgComma])
+      : concat(parts)
+  )
+  const printedArgumentsNoTrailingComma = printedArgumentsPreConcat.map(parts =>
+    concat(parts)
+  )
   // const nonFinalArgs = args.slice(0, args.length - 1)
   const shouldBreak = false
   // args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
