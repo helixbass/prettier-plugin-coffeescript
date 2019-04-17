@@ -611,6 +611,8 @@ exports[`object-as-item.coffee 1`] = `
 
 f({a, b: c}, d: e, f: g, h)
 
+({a, b: c}, h) ->
+
 [
   {a, b: c}
   d: e, f: g
@@ -622,6 +624,11 @@ f(
   d: e, f: g
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 )
+
+(
+  {a, b: c}
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
 
 [
   {a, b: c}
@@ -657,6 +664,8 @@ f(
 
 f({a, b: c})
 
+({a, b: c}) ->
+
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
@@ -672,6 +681,11 @@ f(
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
 )
 
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+) ->
+
 # non-trailing explicit object not adjacent to implicit object
 [{a, b: c}, d]
 
@@ -684,6 +698,8 @@ f({a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 [{ a, b: c }, { d: e, f: g }, h]
 
 f { a, b: c }, { d: e, f: g }, h
+
+({ a, b: c }, h) ->
 
 [
   { a, b: c }
@@ -700,6 +716,11 @@ f(
 ,
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 )
+
+(
+  { a, b: c }
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
 
 [
   { a, b: c }
@@ -740,6 +761,8 @@ f(
 
 f { a, b: c }
 
+({ a, b: c }) ->
+
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
@@ -754,6 +777,11 @@ f(
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
 )
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+) ->
 
 # non-trailing explicit object not adjacent to implicit object
 [{ a, b: c }, d]
@@ -777,6 +805,8 @@ exports[`object-as-item.coffee 2`] = `
 
 f({a, b: c}, d: e, f: g, h)
 
+({a, b: c}, h) ->
+
 [
   {a, b: c}
   d: e, f: g
@@ -788,6 +818,11 @@ f(
   d: e, f: g
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 )
+
+(
+  {a, b: c}
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
 
 [
   {a, b: c}
@@ -823,6 +858,8 @@ f(
 
 f({a, b: c})
 
+({a, b: c}) ->
+
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
@@ -838,6 +875,11 @@ f(
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
 )
 
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+) ->
+
 # non-trailing explicit object not adjacent to implicit object
 [{a, b: c}, d]
 
@@ -850,6 +892,8 @@ f({a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 [{ a, b: c }, { d: e, f: g }, h]
 
 f { a, b: c }, { d: e, f: g }, h
+
+({ a, b: c }, h) ->
 
 [
   { a, b: c }
@@ -866,6 +910,11 @@ f(
 ,
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 )
+
+(
+  { a, b: c },
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
 
 [
   { a, b: c }
@@ -906,6 +955,8 @@ f(
 
 f { a, b: c }
 
+({ a, b: c }) ->
+
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
@@ -920,6 +971,11 @@ f(
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
 )
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
+) ->
 
 # non-trailing explicit object not adjacent to implicit object
 [{ a, b: c }, d]
@@ -943,6 +999,8 @@ exports[`object-as-item.coffee 3`] = `
 
 f({a, b: c}, d: e, f: g, h)
 
+({a, b: c}, h) ->
+
 [
   {a, b: c}
   d: e, f: g
@@ -954,6 +1012,11 @@ f(
   d: e, f: g
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 )
+
+(
+  {a, b: c}
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
 
 [
   {a, b: c}
@@ -989,6 +1052,8 @@ f(
 
 f({a, b: c})
 
+({a, b: c}) ->
+
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
@@ -1004,6 +1069,11 @@ f(
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
 )
 
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+) ->
+
 # non-trailing explicit object not adjacent to implicit object
 [{a, b: c}, d]
 
@@ -1016,6 +1086,8 @@ f({a, b: c}, ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 [{ a, b: c }, { d: e, f: g }, h]
 
 f { a, b: c }, { d: e, f: g }, h
+
+({ a, b: c }, h) ->
 
 [
   { a, b: c }
@@ -1032,6 +1104,11 @@ f(
 ,
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
 )
+
+(
+  { a, b: c },
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+) ->
 
 [
   { a, b: c }
@@ -1072,6 +1149,8 @@ f(
 
 f { a, b: c }
 
+({ a, b: c }) ->
+
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
@@ -1086,6 +1165,11 @@ f(
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
 )
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
+) ->
 
 # non-trailing explicit object not adjacent to implicit object
 [{ a, b: c }, d]

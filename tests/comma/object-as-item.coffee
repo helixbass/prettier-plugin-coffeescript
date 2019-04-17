@@ -2,6 +2,8 @@
 
 f({a, b: c}, d: e, f: g, h)
 
+({a, b: c}, h) ->
+
 [
   {a, b: c}
   d: e, f: g
@@ -13,6 +15,11 @@ f(
   d: e, f: g
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 )
+
+(
+  {a, b: c}
+  hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+) ->
 
 [
   {a, b: c}
@@ -48,6 +55,8 @@ f(
 
 f({a, b: c})
 
+({a, b: c}) ->
+
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
@@ -62,6 +71,11 @@ f(
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
 )
+
+(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+) ->
 
 # non-trailing explicit object not adjacent to implicit object
 [{a, b: c}, d]
