@@ -2,6 +2,12 @@
 
 f({a, b: c}, d: e, f: g, h)
 
+{h, i: {a, b: c}, j: d: e, f: g}
+
+i: {a, b: c}, j: d: e, f: g
+
+i: {a, b: c}, j: h
+
 ({a, b: c}, h) ->
 
 [
@@ -15,6 +21,27 @@ f(
   d: e, f: g
   hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 )
+
+{
+  l
+  i: {a, b: c}
+  j: d: e, f: g
+  k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+{
+  l
+  i:
+    {a, b: c}
+  j:
+    d: e, f: g
+  k:
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+}
+
+i: {a, b: c}
+j: d: e, f: g
+k: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 
 (
   {a, b: c}
@@ -50,6 +77,15 @@ f(
   d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 )
 
+{
+  l
+  h: {a, b: c}
+  i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+}
+
+h: {a, b: c}
+i: d: e, f: gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
 # trailing explicit object
 [{a, b: c}]
 
@@ -71,6 +107,15 @@ f(
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
 )
+
+{
+  f
+  d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
+}
+
+d: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+e: {a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc}
 
 (
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaa,

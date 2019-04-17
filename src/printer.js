@@ -2291,14 +2291,23 @@ function printObject(path, print, options) {
     ? ifBreak(',', '', {visibleType: 'visible'})
     : ','
 
+  let isImplicitObject
   const joinedProps = printedProps.map((prop, propIndex) => {
     const result = concat(separatorParts.concat(group(prop.printed)))
+    isImplicitObject = path.call(
+      valuePath => isImplicitObjectIfParentBreaks(valuePath, options),
+      'properties',
+      propIndex,
+      'value'
+    )
     separatorParts = [
       ifBreak(
         options.comma === 'none'
           ? ''
           : options.comma === 'nonTrailing' &&
             propIndex === printedProps.length - 1
+          ? ''
+          : isImplicitObject
           ? ''
           : commaUnlessBracesOmitted,
         ','
@@ -2310,7 +2319,8 @@ function printObject(path, print, options) {
     }
     return result
   })
-  if (options.comma === 'all') {
+  const isLastValueAnImplicitObject = isImplicitObject
+  if (options.comma === 'all' && !isLastValueAnImplicitObject) {
     joinedProps.push(ifBreak(commaUnlessBracesOmitted, ''))
   }
 
