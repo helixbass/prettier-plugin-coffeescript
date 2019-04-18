@@ -345,6 +345,7 @@ promise.then(
   (result) =>
     f()
     return result
+,
   (err) =>
     f()
     return err

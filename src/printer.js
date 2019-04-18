@@ -4071,13 +4071,13 @@ function printArgumentsList(path, options, print) {
 
   const printedArgumentsPreConcat = []
   let separatorParts = []
-  let isImplicitObject
+  let dedentComma
   let argIndex = 0
   const lastArgIndex = args.length - 1
   path.each(argPath => {
-    isImplicitObject = isImplicitObjectIfParentBreaks(argPath, options)
+    dedentComma = shouldDedentComma(argPath, options)
     const isLast = argIndex === lastArgIndex
-    if (isImplicitObject && !isLast) {
+    if (dedentComma && !isLast) {
       if (separatorParts.length) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
       }
@@ -4091,7 +4091,7 @@ function printArgumentsList(path, options, print) {
     // const consecutiveIf = !isLast && isIf(arg) && isIf(args[index + 1])
     separatorParts = [
       ifBreak(
-        isImplicitObject && !isLast // || consecutiveIf
+        dedentComma && !isLast // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
           ? ','
@@ -4102,7 +4102,7 @@ function printArgumentsList(path, options, print) {
     ]
     argIndex++
   }, 'arguments')
-  const isLastArgAnImplicitObject = isImplicitObject
+  const lastElementWantsDedentedComma = dedentComma
 
   const parent = path.getParentNode()
   let parensNecessary = callParensNecessary(path, options)
@@ -4170,7 +4170,9 @@ function printArgumentsList(path, options, print) {
   const parensUnnecessaryUnlessParentBreaks =
     unnecessary && parensOptionalUnlessParentBreaks
   const lastArgComma =
-    options.comma !== 'all' || isLastArgAnImplicitObject || parensUnnecessary
+    options.comma !== 'all' ||
+    lastElementWantsDedentedComma ||
+    parensUnnecessary
       ? ''
       : ifBreak(',')
   const printedArguments = printedArgumentsPreConcat.map((parts, index) =>

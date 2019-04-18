@@ -438,12 +438,21 @@ exports[`implicit-object.coffee 3`] = `
 exports[`indented-body.coffee 1`] = `
 [-> b]
 
+a(-> b)
+
 [
   ->
     b
 ]
 
+a(
+  ->
+    b
+)
+
 [->]
+
+a(->)
 
 [
   a
@@ -451,6 +460,13 @@ exports[`indented-body.coffee 1`] = `
     b
   c
 ]
+
+a(
+  a
+  ->
+    b
+  c
+)
 
 [
   a
@@ -458,16 +474,30 @@ exports[`indented-body.coffee 1`] = `
 ,
   c
 ]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [-> b]
 
+a -> b
+
 [
   ->
     b
 ]
+
+a ->
+  b
 
 [->]
 
+a ->
+
 [
   a
 ,
@@ -477,6 +507,15 @@ exports[`indented-body.coffee 1`] = `
   c
 ]
 
+a(
+  a
+,
+  ->
+    b
+,
+  c
+)
+
 [
   a
 ,
@@ -484,18 +523,35 @@ exports[`indented-body.coffee 1`] = `
 ,
   c
 ]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c
+)
 
 `;
 
 exports[`indented-body.coffee 2`] = `
 [-> b]
 
+a(-> b)
+
 [
   ->
     b
 ]
 
+a(
+  ->
+    b
+)
+
 [->]
+
+a(->)
 
 [
   a
@@ -503,6 +559,13 @@ exports[`indented-body.coffee 2`] = `
     b
   c
 ]
+
+a(
+  a
+  ->
+    b
+  c
+)
 
 [
   a
@@ -510,16 +573,30 @@ exports[`indented-body.coffee 2`] = `
 ,
   c
 ]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [-> b]
 
+a -> b
+
 [
   ->
     b
 ]
+
+a ->
+  b
 
 [->]
 
+a ->
+
 [
   a
 ,
@@ -529,6 +606,15 @@ exports[`indented-body.coffee 2`] = `
   c
 ]
 
+a(
+  a
+,
+  ->
+    b
+,
+  c
+)
+
 [
   a
 ,
@@ -536,18 +622,35 @@ exports[`indented-body.coffee 2`] = `
 ,
   c
 ]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c
+)
 
 `;
 
 exports[`indented-body.coffee 3`] = `
 [-> b]
 
+a(-> b)
+
 [
   ->
     b
 ]
 
+a(
+  ->
+    b
+)
+
 [->]
+
+a(->)
 
 [
   a
@@ -555,6 +658,13 @@ exports[`indented-body.coffee 3`] = `
     b
   c
 ]
+
+a(
+  a
+  ->
+    b
+  c
+)
 
 [
   a
@@ -562,16 +672,30 @@ exports[`indented-body.coffee 3`] = `
 ,
   c
 ]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [-> b]
 
+a -> b
+
 [
   ->
     b
 ]
+
+a ->
+  b
 
 [->]
 
+a ->
+
 [
   a
 ,
@@ -581,6 +705,15 @@ exports[`indented-body.coffee 3`] = `
   c,
 ]
 
+a(
+  a
+,
+  ->
+    b
+,
+  c,
+)
+
 [
   a
 ,
@@ -588,6 +721,14 @@ exports[`indented-body.coffee 3`] = `
 ,
   c,
 ]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c,
+)
 
 `;
 
