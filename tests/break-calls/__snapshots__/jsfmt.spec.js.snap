@@ -75,13 +75,11 @@ deepCopyAndAsyncMapLeavesC
 someFunction = (url) ->
   get(url).then(
     (json) => dispatch success json
-  ,
     (error) => dispatch failed error
   )
 
 mapChargeItems = fp.flow(
   (l) => if l < 10 then l else 1
-,
   (l) => Immutable.Range(l).toMap()
 )
 

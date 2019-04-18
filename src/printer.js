@@ -553,7 +553,7 @@ function endsWithFunctionOrControl(node, ret) {
     return false
   }
   if (!ret) {
-    ret = node.type === 'AssignmentExpression' ? {isAssignment: true} : true
+    ret = isAssignment(node) ? {isAssignment: true} : true
   }
   switch (node.type) {
     case 'CallExpression': {
@@ -567,6 +567,7 @@ function endsWithFunctionOrControl(node, ret) {
       return endsWithFunctionOrControl(lastArg, {isCall: true})
     }
     case 'AssignmentExpression':
+    case 'AssignmentPattern':
       if (isFunctionOrControl(node.right)) {
         return ret
       }
@@ -3010,7 +3011,11 @@ function isRightmostInStatement(
       indent = false
       setIndent = true
       trailingLine = false
-      if (options.comma === 'all') {
+      if (
+        options.comma === 'all' &&
+        // !trailingObjectProperty &&
+        !endsWithFunctionOrControl(prevParent)
+      ) {
         isFollowedByComma = true
       }
       breakingParentCount++
@@ -3029,7 +3034,7 @@ function isRightmostInStatement(
         stackOffset: objectStackOffset,
       })
 
-      if (options.comma === 'all') {
+      if (options.comma === 'all' && !endsWithFunctionOrControl(prevParent)) {
         isFollowedByComma = shouldOmitBraces
           ? false
           : shouldOmitBracesIfParentBreaks
@@ -4119,22 +4124,7 @@ function printArgumentsList(path, options, print) {
     printedArguments[argIndex] = print(argPath)
 
     if (!isLast) {
-      separatorParts = [
-        ifBreak(
-          dedentFollowingComma
-            ? dedentFollowingComma.ifBreak
-              ? ifBreak(dedent(concat([line, ','])), '', {
-                  visibleType: 'itemWithComma',
-                })
-              : dedent(concat([line, ',']))
-            : options.comma !== 'none'
-            ? ','
-            : '',
-          ',',
-          {visibleType: 'visible'}
-        ),
-        dedentFollowingComma.ifBreak ? '' : line,
-      ]
+      separatorParts = getSeparatorParts({dedentFollowingComma, options})
       groupPreviousArgWithItsComma = dedentFollowingComma.ifBreak
     }
     argIndex++
@@ -4622,6 +4612,25 @@ function isDoFunc(node) {
   return isDo(node) && isFunction(node.argument)
 }
 
+function getSeparatorParts({dedentFollowingComma, options}) {
+  return [
+    ifBreak(
+      dedentFollowingComma
+        ? dedentFollowingComma.ifBreak
+          ? ifBreak(dedent(concat([line, ','])), '', {
+              visibleType: 'itemWithComma',
+            })
+          : dedent(concat([line, ',']))
+        : options.comma !== 'none'
+        ? ','
+        : '',
+      ',',
+      {visibleType: 'visible'}
+    ),
+    dedentFollowingComma && dedentFollowingComma.ifBreak ? '' : line,
+  ]
+}
+
 function printFunctionParams(path, print, options) {
   const fun = path.getValue()
   const {params} = fun
@@ -4655,6 +4664,7 @@ function printFunctionParams(path, print, options) {
   const printedParams = []
   let separatorParts = []
   let dedentComma
+  let groupPreviousParamWithItsComma = false
   path.each(paramPath => {
     const param = paramPath.getValue()
     ;({following: dedentComma} =
@@ -4665,20 +4675,26 @@ function printFunctionParams(path, print, options) {
               shouldDedentComma(defaultParamValuePath, options),
             'right'
           ))
-    printedParams.push(concat(separatorParts))
+    if (groupPreviousParamWithItsComma) {
+      const previousParam = printedParams.pop()
+      printedParams.push(
+        concat([
+          group(concat([previousParam, concat(separatorParts)]), {
+            visibleType: 'itemWithComma',
+          }),
+          line,
+        ])
+      )
+    } else {
+      printedParams.push(concat(separatorParts))
+    }
     printedParams.push(print(paramPath))
 
-    separatorParts = [
-      ifBreak(
-        dedentComma
-          ? dedent(concat([line, ',']))
-          : options.comma !== 'none'
-          ? ','
-          : '',
-        ','
-      ),
-      line,
-    ]
+    separatorParts = getSeparatorParts({
+      dedentFollowingComma: dedentComma,
+      options,
+    })
+    groupPreviousParamWithItsComma = dedentComma && dedentComma.ifBreak
   }, 'params')
 
   const lastParamWantsDedentedComma = dedentComma
@@ -4843,7 +4859,7 @@ function shouldDedentComma(path, options) {
   ) {
     return {
       preceding: node.params.length === 0 && !options.emptyParamListParens,
-      following: true,
+      following: isEmptyBlock(node.body) ? true : {ifBreak: true},
       // alwaysBreak: true
     }
   }
@@ -4861,7 +4877,11 @@ function shouldDedentComma(path, options) {
     }
   }
   if (endsWithFunctionOrControl(node)) {
-    return {preceding: false, following: {ifBreak: true}, alwaysBreak: true}
+    return {
+      preceding: false,
+      following: {ifBreak: true},
+      alwaysBreak: true,
+    }
   }
   return {preceding: false, following: false}
 }
@@ -4911,22 +4931,7 @@ function printArrayItems(path, options, printPath, print) {
     printedElements.push(print(childPath))
 
     if (!isLast) {
-      separatorParts = [
-        ifBreak(
-          dedentFollowingComma
-            ? dedentFollowingComma.ifBreak
-              ? ifBreak(dedent(concat([line, ','])), '', {
-                  visibleType: 'itemWithComma',
-                })
-              : dedent(concat([line, ',']))
-            : options.comma !== 'none'
-            ? ','
-            : '',
-          ',',
-          {visibleType: 'visible'}
-        ),
-        dedentFollowingComma.ifBreak ? '' : line,
-      ]
+      separatorParts = getSeparatorParts({dedentFollowingComma, options})
       if (!shouldBreakArray) {
         shouldBreakArray = child && isFunction(child)
       }
