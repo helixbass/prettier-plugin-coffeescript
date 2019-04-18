@@ -1011,6 +1011,561 @@ exports[`implicit-object.coffee 3`] = `
 
 `;
 
+exports[`indented-body-do.coffee 1`] = `
+[do -> b]
+
+a(do -> b)
+
+(a = do -> b) ->
+
+{c, a: do -> b}
+
+[
+  do ->
+    b
+]
+
+a(
+  do ->
+    b
+)
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a(do ->)
+
+(a = do ->) ->
+
+{c, a: do ->}
+
+[
+  a
+  do ->
+    b
+  c
+]
+
+a(
+  a
+  do ->
+    b
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[do -> b]
+
+a do -> b
+
+(a = do -> b) ->
+
+{ c, a: do -> b }
+
+[
+  do ->
+    b
+]
+
+a do ->
+  b
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a do ->
+
+(a = do ->) ->
+
+{ c, a: do -> }
+
+[
+  a
+  do ->
+    b
+,
+  c
+]
+
+a(
+  a
+  do ->
+    b
+,
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+,
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+
+`;
+
+exports[`indented-body-do.coffee 2`] = `
+[do -> b]
+
+a(do -> b)
+
+(a = do -> b) ->
+
+{c, a: do -> b}
+
+[
+  do ->
+    b
+]
+
+a(
+  do ->
+    b
+)
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a(do ->)
+
+(a = do ->) ->
+
+{c, a: do ->}
+
+[
+  a
+  do ->
+    b
+  c
+]
+
+a(
+  a
+  do ->
+    b
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[do -> b]
+
+a do -> b
+
+(a = do -> b) ->
+
+{ c, a: do -> b }
+
+[
+  do ->
+    b
+]
+
+a do ->
+  b
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c,
+  a: do ->
+    b
+}
+
+[do ->]
+
+a do ->
+
+(a = do ->) ->
+
+{ c, a: do -> }
+
+[
+  a,
+  do ->
+    b
+,
+  c
+]
+
+a(
+  a,
+  do ->
+    b
+,
+  c
+)
+
+(
+  a,
+  d = do ->
+    b
+,
+  c
+) ->
+
+{
+  a,
+  d: do ->
+    b
+  c
+}
+
+[
+  a,
+  do ->
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  do ->
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = do ->
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: do ->
+  c
+}
+
+`;
+
+exports[`indented-body-do.coffee 3`] = `
+[do -> b]
+
+a(do -> b)
+
+(a = do -> b) ->
+
+{c, a: do -> b}
+
+[
+  do ->
+    b
+]
+
+a(
+  do ->
+    b
+)
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a(do ->)
+
+(a = do ->) ->
+
+{c, a: do ->}
+
+[
+  a
+  do ->
+    b
+  c
+]
+
+a(
+  a
+  do ->
+    b
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[do -> b]
+
+a do -> b
+
+(a = do -> b) ->
+
+{ c, a: do -> b }
+
+[
+  do ->
+    b
+]
+
+a do ->
+  b
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c,
+  a: do ->
+    b
+}
+
+[do ->]
+
+a do ->
+
+(a = do ->) ->
+
+{ c, a: do -> }
+
+[
+  a,
+  do ->
+    b
+,
+  c,
+]
+
+a(
+  a,
+  do ->
+    b
+,
+  c,
+)
+
+(
+  a,
+  d = do ->
+    b
+,
+  c,
+) ->
+
+{
+  a,
+  d: do ->
+    b
+  c,
+}
+
+[
+  a,
+  do ->
+  c,
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  do ->
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = do ->
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: do ->
+  c,
+}
+
+`;
+
 exports[`indented-body-implicit-call.coffee 1`] = `
 [a -> b]
 
