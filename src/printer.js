@@ -854,7 +854,7 @@ function printPathNoParens(path, options, print) {
 
       const {
         printed: printedItems,
-        isLastElementAnImplicitObject,
+        lastElementWantsDedentedComma,
       } = printArrayItems(path, options, 'elements', print)
       parts.push(
         group(
@@ -865,7 +865,7 @@ function printPathNoParens(path, options, print) {
               ? ','
               : options.comma !== 'all'
               ? ''
-              : ifBreak(isLastElementAnImplicitObject ? '' : ',', ''),
+              : ifBreak(lastElementWantsDedentedComma ? '' : ',', ''),
             softline,
             ']',
           ]),
@@ -4773,6 +4773,20 @@ function isImplicitObjectIfParentBreaks(path, options) {
   return true
 }
 
+function shouldDedentComma(path, options) {
+  const node = path.getValue()
+  if (
+    isFunction(node)
+    // && !isEmptyBlock(node.body)
+  ) {
+    return true
+  }
+  if (isImplicitObjectIfParentBreaks(path, options)) {
+    return true
+  }
+  return false
+}
+
 function printArrayItems(path, options, printPath, print) {
   const printedElements = []
   let separatorParts = []
@@ -4781,11 +4795,11 @@ function printArrayItems(path, options, printPath, print) {
   const last = elements && elements.length && elements[elements.length - 1]
   const {locEnd} = options
   // let index = 0
-  let isImplicitObject
+  let dedentComma
   path.each(childPath => {
     const child = childPath.getValue()
-    isImplicitObject = isImplicitObjectIfParentBreaks(childPath, options)
-    if (isImplicitObject) {
+    dedentComma = shouldDedentComma(childPath, options)
+    if (dedentComma) {
       if (separatorParts.length) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
       }
@@ -4802,7 +4816,7 @@ function printArrayItems(path, options, printPath, print) {
     //   isIf(elements[index + 1])
     separatorParts = [
       ifBreak(
-        isImplicitObject // || consecutiveIf
+        dedentComma // || consecutiveIf
           ? dedent(concat([line, ',']))
           : options.comma !== 'none'
           ? ','
@@ -4823,7 +4837,7 @@ function printArrayItems(path, options, printPath, print) {
 
   return {
     printed: concat(printedElements),
-    isLastElementAnImplicitObject: isImplicitObject,
+    lastElementWantsDedentedComma: dedentComma,
   }
 }
 
