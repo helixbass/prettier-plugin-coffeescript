@@ -2291,23 +2291,21 @@ function printObject(path, print, options) {
     ? ifBreak(',', '', {visibleType: 'visible'})
     : ','
 
-  let isImplicitObject
+  let dedentComma
   const joinedProps = printedProps.map((prop, propIndex) => {
     const result = concat(separatorParts.concat(group(prop.printed)))
-    isImplicitObject = path.call(
-      valuePath => isImplicitObjectIfParentBreaks(valuePath, options),
+    dedentComma = path.call(
+      valuePath => shouldDedentComma(valuePath, options),
       'properties',
       propIndex,
       'value'
     )
     separatorParts = [
       ifBreak(
-        options.comma === 'none'
-          ? ''
-          : options.comma === 'nonTrailing' &&
-            propIndex === printedProps.length - 1
-          ? ''
-          : isImplicitObject
+        options.comma === 'none' ||
+          (options.comma === 'nonTrailing' &&
+            propIndex === printedProps.length - 1) ||
+          dedentComma
           ? ''
           : commaUnlessBracesOmitted,
         ','
@@ -2319,8 +2317,8 @@ function printObject(path, print, options) {
     }
     return result
   })
-  const isLastValueAnImplicitObject = isImplicitObject
-  if (options.comma === 'all' && !isLastValueAnImplicitObject) {
+  const lastValueWantsDedentedComma = dedentComma
+  if (options.comma === 'all' && !lastValueWantsDedentedComma) {
     joinedProps.push(ifBreak(commaUnlessBracesOmitted, ''))
   }
 

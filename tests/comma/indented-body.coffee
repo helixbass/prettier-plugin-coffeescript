@@ -4,6 +4,8 @@ a(-> b)
 
 (a = -> b) ->
 
+{c, a: -> b}
+
 [
   ->
     b
@@ -19,11 +21,19 @@ a(
     b
 ) ->
 
+{
+  c
+  a: ->
+    b
+}
+
 [->]
 
 a(->)
 
 (a = ->) ->
+
+{c, a: ->}
 
 [
   a
@@ -45,6 +55,13 @@ a(
     b
   c
 ) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
 
 [
   a
@@ -66,3 +83,9 @@ a(
 ,
   c
 ) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
