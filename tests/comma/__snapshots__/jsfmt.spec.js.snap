@@ -1608,6 +1608,513 @@ a(
 
 `;
 
+exports[`indented-body-class.coffee 1`] = `
+[class A]
+
+a(class A)
+
+(a = class A) ->
+
+{c, a: class A}
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[
+  a
+  class A
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[class A]
+
+a class A
+
+(a = class A) ->
+
+{ c, a: class A }
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+,
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+,
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+,
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[a, class A, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+
+`;
+
+exports[`indented-body-class.coffee 2`] = `
+[class A]
+
+a(class A)
+
+(a = class A) ->
+
+{c, a: class A}
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[
+  a
+  class A
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[class A]
+
+a class A
+
+(a = class A) ->
+
+{ c, a: class A }
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c,
+  a: class A
+    b: ->
+}
+
+[
+  a,
+  class A
+    b: ->
+,
+  d
+]
+
+a(
+  a,
+  class A
+    b: 2
+,
+  d
+)
+
+(
+  a,
+  d = class A
+    b: ->
+      1
+,
+  e
+) ->
+
+{
+  a,
+  d: class A
+    b: ->
+  c
+}
+
+[a, class A, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  class A
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = class A
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: class A
+  c
+}
+
+`;
+
+exports[`indented-body-class.coffee 3`] = `
+[class A]
+
+a(class A)
+
+(a = class A) ->
+
+{c, a: class A}
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[
+  a
+  class A
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[class A]
+
+a class A
+
+(a = class A) ->
+
+{ c, a: class A }
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c,
+  a: class A
+    b: ->
+}
+
+[
+  a,
+  class A
+    b: ->
+,
+  d,
+]
+
+a(
+  a,
+  class A
+    b: 2
+,
+  d,
+)
+
+(
+  a,
+  d = class A
+    b: ->
+      1
+,
+  e,
+) ->
+
+{
+  a,
+  d: class A
+    b: ->
+  c,
+}
+
+[a, class A, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  class A
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = class A
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: class A
+  c,
+}
+
+`;
+
 exports[`indented-body-do.coffee 1`] = `
 [do -> b]
 
@@ -3220,6 +3727,342 @@ a(
 {
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
   d: e ->
+  c,
+}
+
+`;
+
+exports[`indented-body-switch.coffee 1`] = `
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+,
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+,
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+,
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+
+`;
+
+exports[`indented-body-switch.coffee 2`] = `
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c,
+  a: switch b
+    when c then d
+}
+
+[
+  a,
+  switch b
+    when c then d
+,
+  e
+]
+
+a(
+  a,
+  switch b
+    when c
+      d
+,
+  e
+)
+
+(
+  a,
+  d = switch b
+    when c
+      e
+,
+  f
+) ->
+
+{
+  a,
+  d: switch b
+    when e then f
+  c
+}
+
+`;
+
+exports[`indented-body-switch.coffee 3`] = `
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c,
+  a: switch b
+    when c then d
+}
+
+[
+  a,
+  switch b
+    when c then d
+,
+  e,
+]
+
+a(
+  a,
+  switch b
+    when c
+      d
+,
+  e,
+)
+
+(
+  a,
+  d = switch b
+    when c
+      e
+,
+  f,
+) ->
+
+{
+  a,
+  d: switch b
+    when e then f
   c,
 }
 
