@@ -440,6 +440,8 @@ exports[`indented-body.coffee 1`] = `
 
 a(-> b)
 
+(a = -> b) ->
+
 [
   ->
     b
@@ -449,11 +451,18 @@ a(
   ->
     b
 )
+
+(
+  a = ->
+    b
+) ->
 
 [->]
 
 a(->)
 
+(a = ->) ->
+
 [
   a
   ->
@@ -467,6 +476,13 @@ a(
     b
   c
 )
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
 
 [
   a
@@ -481,10 +497,19 @@ a(
 ,
   c
 )
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [-> b]
 
 a -> b
+
+(a = -> b) ->
 
 [
   ->
@@ -494,9 +519,16 @@ a -> b
 a ->
   b
 
+(
+  a = ->
+    b
+) ->
+
 [->]
 
 a ->
+
+(a = ->) ->
 
 [
   a
@@ -515,6 +547,14 @@ a(
 ,
   c
 )
+
+(
+  a
+  d = ->
+    b
+,
+  c
+) ->
 
 [
   a
@@ -531,6 +571,13 @@ a(
 ,
   c
 )
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
 
 `;
 
@@ -539,6 +586,8 @@ exports[`indented-body.coffee 2`] = `
 
 a(-> b)
 
+(a = -> b) ->
+
 [
   ->
     b
@@ -548,11 +597,18 @@ a(
   ->
     b
 )
+
+(
+  a = ->
+    b
+) ->
 
 [->]
 
 a(->)
 
+(a = ->) ->
+
 [
   a
   ->
@@ -566,6 +622,13 @@ a(
     b
   c
 )
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
 
 [
   a
@@ -580,10 +643,19 @@ a(
 ,
   c
 )
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [-> b]
 
 a -> b
+
+(a = -> b) ->
 
 [
   ->
@@ -593,9 +665,16 @@ a -> b
 a ->
   b
 
+(
+  a = ->
+    b
+) ->
+
 [->]
 
 a ->
+
+(a = ->) ->
 
 [
   a
@@ -614,6 +693,14 @@ a(
 ,
   c
 )
+
+(
+  a,
+  d = ->
+    b
+,
+  c
+) ->
 
 [
   a
@@ -630,6 +717,13 @@ a(
 ,
   c
 )
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = ->
+,
+  c
+) ->
 
 `;
 
@@ -638,6 +732,8 @@ exports[`indented-body.coffee 3`] = `
 
 a(-> b)
 
+(a = -> b) ->
+
 [
   ->
     b
@@ -647,11 +743,18 @@ a(
   ->
     b
 )
+
+(
+  a = ->
+    b
+) ->
 
 [->]
 
 a(->)
 
+(a = ->) ->
+
 [
   a
   ->
@@ -665,6 +768,13 @@ a(
     b
   c
 )
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
 
 [
   a
@@ -679,10 +789,19 @@ a(
 ,
   c
 )
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [-> b]
 
 a -> b
+
+(a = -> b) ->
 
 [
   ->
@@ -692,9 +811,16 @@ a -> b
 a ->
   b
 
+(
+  a = ->
+    b
+) ->
+
 [->]
 
 a ->
+
+(a = ->) ->
 
 [
   a
@@ -713,6 +839,14 @@ a(
 ,
   c,
 )
+
+(
+  a,
+  d = ->
+    b
+,
+  c,
+) ->
 
 [
   a
@@ -729,6 +863,13 @@ a(
 ,
   c,
 )
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = ->
+,
+  c,
+) ->
 
 `;
 

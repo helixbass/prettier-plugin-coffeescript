@@ -2,6 +2,8 @@
 
 a(-> b)
 
+(a = -> b) ->
+
 [
   ->
     b
@@ -11,11 +13,18 @@ a(
   ->
     b
 )
+
+(
+  a = ->
+    b
+) ->
 
 [->]
 
 a(->)
 
+(a = ->) ->
+
 [
   a
   ->
@@ -29,6 +38,13 @@ a(
     b
   c
 )
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
 
 [
   a
@@ -43,3 +59,10 @@ a(
 ,
   c
 )
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->

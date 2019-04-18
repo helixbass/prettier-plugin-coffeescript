@@ -4613,25 +4613,50 @@ function printFunctionParams(path, print, options) {
     ])
   }
 
-  const printed = path.map(print, 'params')
   const dontBreak = params.length === 1 && params[0].type === 'ObjectPattern'
+  if (dontBreak) {
+    return concat(['(', join(', ', path.map(print, 'params')), ') '])
+  }
+
+  const printedParams = []
+  let separatorParts = []
+  let dedentComma
+  path.each(paramPath => {
+    const param = paramPath.getValue()
+    dedentComma =
+      param.type === 'AssignmentPattern' &&
+      paramPath.call(
+        defaultParamValuePath =>
+          shouldDedentComma(defaultParamValuePath, options),
+        'right'
+      )
+    printedParams.push(concat(separatorParts))
+    printedParams.push(print(paramPath))
+
+    separatorParts = [
+      ifBreak(
+        dedentComma
+          ? dedent(concat([line, ',']))
+          : options.comma !== 'none'
+          ? ','
+          : '',
+        ','
+      ),
+      line,
+    ]
+  }, 'params')
+
+  const lastParamWantsDedentedComma = dedentComma
 
   return concat([
     '(',
-    dontBreak
-      ? join(', ', printed)
-      : indent(
-          concat([
-            softline,
-            join(
-              concat([ifBreak(options.comma !== 'none' ? ',' : '', ','), line]),
-              printed
-            ),
-          ])
-        ),
-    dontBreak
-      ? ''
-      : concat([ifBreak(options.comma === 'all' ? ',' : ''), softline]),
+    indent(concat([softline, concat(printedParams)])),
+    concat([
+      options.comma !== 'all' || lastParamWantsDedentedComma
+        ? ''
+        : ifBreak(',', ''),
+      softline,
+    ]),
     ') ',
   ])
 }
