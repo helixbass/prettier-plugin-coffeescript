@@ -1,3 +1,12 @@
+<div align="center">
+<img alt="Prettier"
+  src="https://raw.githubusercontent.com/prettier/prettier-logo/master/images/prettier-icon-light.png">
+<img alt="CoffeeScript" height="180" width="180" hspace="25" vspace="15"
+  src="https://cdn.worldvectorlogo.com/logos/coffeescript.svg">
+</div>
+
+<h2 align="center">Prettier CoffeeScript Plugin</h2>
+
 ## Configuration
 
 The following formatting options are supported:
