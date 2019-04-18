@@ -57,6 +57,582 @@ f
 
 `;
 
+exports[`function.coffee 1`] = `
+[-> b]
+
+a(-> b)
+
+(a = -> b) ->
+
+{c, a: -> b}
+
+[
+  ->
+    b
+]
+
+a(
+  ->
+    b
+)
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a(->)
+
+(a = ->) ->
+
+{c, a: ->}
+
+[
+  a
+  ->
+    b
+  c
+]
+
+a(
+  a
+  ->
+    b
+  c
+)
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[-> b]
+
+a -> b
+
+(a = -> b) ->
+
+{ c, a: -> b }
+
+[
+  ->
+    b
+]
+
+a ->
+  b
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a ->
+
+(a = ->) ->
+
+{ c, a: -> }
+
+[
+  a
+,
+  ->
+    b
+,
+  c
+]
+
+a(
+  a
+,
+  ->
+    b
+,
+  c
+)
+
+(
+  a
+  d = ->
+    b
+,
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+,
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+
+`;
+
+exports[`function.coffee 2`] = `
+[-> b]
+
+a(-> b)
+
+(a = -> b) ->
+
+{c, a: -> b}
+
+[
+  ->
+    b
+]
+
+a(
+  ->
+    b
+)
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a(->)
+
+(a = ->) ->
+
+{c, a: ->}
+
+[
+  a
+  ->
+    b
+  c
+]
+
+a(
+  a
+  ->
+    b
+  c
+)
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[-> b]
+
+a -> b
+
+(a = -> b) ->
+
+{ c, a: -> b }
+
+[
+  ->
+    b
+]
+
+a ->
+  b
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c,
+  a: ->
+    b
+}
+
+[->]
+
+a ->
+
+(a = ->) ->
+
+{ c, a: -> }
+
+[
+  a
+,
+  ->
+    b
+,
+  c
+]
+
+a(
+  a
+,
+  ->
+    b
+,
+  c
+)
+
+(
+  a,
+  d = ->
+    b
+,
+  c
+) ->
+
+{
+  a,
+  d: ->
+    b
+  c
+}
+
+[
+  a
+,
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: ->
+  c
+}
+
+`;
+
+exports[`function.coffee 3`] = `
+[-> b]
+
+a(-> b)
+
+(a = -> b) ->
+
+{c, a: -> b}
+
+[
+  ->
+    b
+]
+
+a(
+  ->
+    b
+)
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a(->)
+
+(a = ->) ->
+
+{c, a: ->}
+
+[
+  a
+  ->
+    b
+  c
+]
+
+a(
+  a
+  ->
+    b
+  c
+)
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[-> b]
+
+a -> b
+
+(a = -> b) ->
+
+{ c, a: -> b }
+
+[
+  ->
+    b
+]
+
+a ->
+  b
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c,
+  a: ->
+    b
+}
+
+[->]
+
+a ->
+
+(a = ->) ->
+
+{ c, a: -> }
+
+[
+  a
+,
+  ->
+    b
+,
+  c,
+]
+
+a(
+  a
+,
+  ->
+    b
+,
+  c,
+)
+
+(
+  a,
+  d = ->
+    b
+,
+  c,
+) ->
+
+{
+  a,
+  d: ->
+    b
+  c,
+}
+
+[
+  a
+,
+  ->
+,
+  c,
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = ->
+,
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: ->
+  c,
+}
+
+`;
+
 exports[`implicit-call.coffee 1`] = `
 # implicit calls
 [aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeeee)]
@@ -432,582 +1008,6 @@ exports[`implicit-object.coffee 3`] = `
 ,
   eeeeeeeeee: ffff, gggg: hhh, ii: jj
 ]
-
-`;
-
-exports[`indented-body.coffee 1`] = `
-[-> b]
-
-a(-> b)
-
-(a = -> b) ->
-
-{c, a: -> b}
-
-[
-  ->
-    b
-]
-
-a(
-  ->
-    b
-)
-
-(
-  a = ->
-    b
-) ->
-
-{
-  c
-  a: ->
-    b
-}
-
-[->]
-
-a(->)
-
-(a = ->) ->
-
-{c, a: ->}
-
-[
-  a
-  ->
-    b
-  c
-]
-
-a(
-  a
-  ->
-    b
-  c
-)
-
-(
-  a
-  d = ->
-    b
-  c
-) ->
-
-{
-  a
-  d: ->
-    b
-  c
-}
-
-[
-  a
-  ->
-,
-  c
-]
-
-a(
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  ->
-,
-  c
-)
-
-(
-  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d = ->
-,
-  c
-) ->
-
-{
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d: ->
-  c
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[-> b]
-
-a -> b
-
-(a = -> b) ->
-
-{ c, a: -> b }
-
-[
-  ->
-    b
-]
-
-a ->
-  b
-
-(
-  a = ->
-    b
-) ->
-
-{
-  c
-  a: ->
-    b
-}
-
-[->]
-
-a ->
-
-(a = ->) ->
-
-{ c, a: -> }
-
-[
-  a
-,
-  ->
-    b
-,
-  c
-]
-
-a(
-  a
-,
-  ->
-    b
-,
-  c
-)
-
-(
-  a
-  d = ->
-    b
-,
-  c
-) ->
-
-{
-  a
-  d: ->
-    b
-  c
-}
-
-[
-  a
-,
-  ->
-,
-  c
-]
-
-a(
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-,
-  ->
-,
-  c
-)
-
-(
-  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d = ->
-,
-  c
-) ->
-
-{
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d: ->
-  c
-}
-
-`;
-
-exports[`indented-body.coffee 2`] = `
-[-> b]
-
-a(-> b)
-
-(a = -> b) ->
-
-{c, a: -> b}
-
-[
-  ->
-    b
-]
-
-a(
-  ->
-    b
-)
-
-(
-  a = ->
-    b
-) ->
-
-{
-  c
-  a: ->
-    b
-}
-
-[->]
-
-a(->)
-
-(a = ->) ->
-
-{c, a: ->}
-
-[
-  a
-  ->
-    b
-  c
-]
-
-a(
-  a
-  ->
-    b
-  c
-)
-
-(
-  a
-  d = ->
-    b
-  c
-) ->
-
-{
-  a
-  d: ->
-    b
-  c
-}
-
-[
-  a
-  ->
-,
-  c
-]
-
-a(
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  ->
-,
-  c
-)
-
-(
-  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d = ->
-,
-  c
-) ->
-
-{
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d: ->
-  c
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[-> b]
-
-a -> b
-
-(a = -> b) ->
-
-{ c, a: -> b }
-
-[
-  ->
-    b
-]
-
-a ->
-  b
-
-(
-  a = ->
-    b
-) ->
-
-{
-  c,
-  a: ->
-    b
-}
-
-[->]
-
-a ->
-
-(a = ->) ->
-
-{ c, a: -> }
-
-[
-  a
-,
-  ->
-    b
-,
-  c
-]
-
-a(
-  a
-,
-  ->
-    b
-,
-  c
-)
-
-(
-  a,
-  d = ->
-    b
-,
-  c
-) ->
-
-{
-  a,
-  d: ->
-    b
-  c
-}
-
-[
-  a
-,
-  ->
-,
-  c
-]
-
-a(
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-,
-  ->
-,
-  c
-)
-
-(
-  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
-  d = ->
-,
-  c
-) ->
-
-{
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
-  d: ->
-  c
-}
-
-`;
-
-exports[`indented-body.coffee 3`] = `
-[-> b]
-
-a(-> b)
-
-(a = -> b) ->
-
-{c, a: -> b}
-
-[
-  ->
-    b
-]
-
-a(
-  ->
-    b
-)
-
-(
-  a = ->
-    b
-) ->
-
-{
-  c
-  a: ->
-    b
-}
-
-[->]
-
-a(->)
-
-(a = ->) ->
-
-{c, a: ->}
-
-[
-  a
-  ->
-    b
-  c
-]
-
-a(
-  a
-  ->
-    b
-  c
-)
-
-(
-  a
-  d = ->
-    b
-  c
-) ->
-
-{
-  a
-  d: ->
-    b
-  c
-}
-
-[
-  a
-  ->
-,
-  c
-]
-
-a(
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  ->
-,
-  c
-)
-
-(
-  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d = ->
-,
-  c
-) ->
-
-{
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-  d: ->
-  c
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[-> b]
-
-a -> b
-
-(a = -> b) ->
-
-{ c, a: -> b }
-
-[
-  ->
-    b
-]
-
-a ->
-  b
-
-(
-  a = ->
-    b
-) ->
-
-{
-  c,
-  a: ->
-    b
-}
-
-[->]
-
-a ->
-
-(a = ->) ->
-
-{ c, a: -> }
-
-[
-  a
-,
-  ->
-    b
-,
-  c,
-]
-
-a(
-  a
-,
-  ->
-    b
-,
-  c,
-)
-
-(
-  a,
-  d = ->
-    b
-,
-  c,
-) ->
-
-{
-  a,
-  d: ->
-    b
-  c,
-}
-
-[
-  a
-,
-  ->
-,
-  c,
-]
-
-a(
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-,
-  ->
-,
-  c,
-)
-
-(
-  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
-  d = ->
-,
-  c,
-) ->
-
-{
-  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
-  d: ->
-  c,
-}
 
 `;
 

@@ -530,11 +530,12 @@ function isAssignment(node) {
 
 function isControl(node) {
   return (
-    isIf(node) ||
-    isFor(node) ||
-    isWhile(node) ||
-    node.type === 'SwitchStatement' ||
-    node.type === 'TryStatement'
+    node &&
+    (isIf(node) ||
+      isFor(node) ||
+      isWhile(node) ||
+      node.type === 'SwitchStatement' ||
+      node.type === 'TryStatement')
   )
 }
 
@@ -543,6 +544,9 @@ function isFunctionOrControl(node) {
 }
 
 function endsWithFunctionOrControl(node, ret) {
+  if (!node) {
+    return false
+  }
   if (!ret) {
     ret = node.type === 'AssignmentExpression' ? {isAssignment: true} : true
   }
@@ -2294,12 +2298,12 @@ function printObject(path, print, options) {
   let dedentComma
   const joinedProps = printedProps.map((prop, propIndex) => {
     const result = concat(separatorParts.concat(group(prop.printed)))
-    dedentComma = path.call(
+    ;({following: dedentComma} = path.call(
       valuePath => shouldDedentComma(valuePath, options),
       'properties',
       propIndex,
       'value'
-    )
+    ))
     separatorParts = [
       ifBreak(
         options.comma === 'none' ||
@@ -2896,7 +2900,10 @@ function isRightmostInStatement(
           prevParent === getLast(parent.elements)) ||
         (isFunction(parent) && prevParent === getLast(parent.params))
       ) {
-        isFollowedByComma = options.comma === 'all' && !trailingObjectProperty
+        isFollowedByComma =
+          options.comma === 'all' &&
+          !trailingObjectProperty &&
+          !endsWithFunctionOrControl(prevParent)
       }
       return nonIfParentBreaksReturnValue()
     }
@@ -2925,7 +2932,7 @@ function isRightmostInStatement(
     ) {
       breakingParentCount++
       let isFollowedByComma = false
-      if (options.comma !== 'none') {
+      if (options.comma !== 'none' && !endsWithFunctionOrControl(prevParent)) {
         if (
           isCallArgument(path, {
             nonLast: true,
@@ -4067,40 +4074,69 @@ function printArgumentsList(path, options, print) {
     return concat(['(', ')'])
   }
 
-  const printedArgumentsPreConcat = []
+  let printedArguments = []
   let separatorParts = []
-  let dedentComma
+  let dedentPrecedingComma
+  let dedentFollowingComma
   let argIndex = 0
   const lastArgIndex = args.length - 1
+  let groupPreviousArgWithItsComma = false
+  let shouldBreak = false
+  let alwaysBreak
   path.each(argPath => {
-    dedentComma = shouldDedentComma(argPath, options)
     const isLast = argIndex === lastArgIndex
-    if (dedentComma && !isLast) {
+    const arg = argPath.getValue()
+    ;({
+      preceding: dedentPrecedingComma,
+      following: dedentFollowingComma,
+      alwaysBreak,
+    } = shouldDedentComma(argPath, options))
+    if (!isLast && alwaysBreak) {
+      shouldBreak = true
+    }
+    if (dedentPrecedingComma && !(isLast && isObjectish(arg))) {
       if (separatorParts.length) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
       }
     }
     if (argIndex > 0) {
-      const prevPrintedArg = printedArgumentsPreConcat[argIndex - 1]
-      prevPrintedArg.push(concat(separatorParts))
+      const prevPrintedArg = printedArguments[argIndex - 1]
+      const argAndSeparator = concat([prevPrintedArg, concat(separatorParts)])
+      printedArguments[argIndex - 1] = groupPreviousArgWithItsComma
+        ? concat([
+            group(argAndSeparator, {
+              visibleType: 'itemWithComma',
+            }),
+            softline,
+          ])
+        : argAndSeparator
     }
-    printedArgumentsPreConcat[argIndex] = [print(argPath)]
+    printedArguments[argIndex] = print(argPath)
 
-    // const consecutiveIf = !isLast && isIf(arg) && isIf(args[index + 1])
-    separatorParts = [
-      ifBreak(
-        dedentComma && !isLast // || consecutiveIf
-          ? dedent(concat([line, ',']))
-          : options.comma !== 'none'
-          ? ','
-          : '',
-        ','
-      ),
-      line,
-    ]
+    if (!isLast) {
+      separatorParts = [
+        ifBreak(
+          dedentFollowingComma
+            ? dedentFollowingComma.ifBreak
+              ? ifBreak(dedent(concat([line, ','])), '', {
+                  visibleType: 'itemWithComma',
+                })
+              : dedent(concat([line, ',']))
+            : options.comma !== 'none'
+            ? ','
+            : '',
+          ',',
+          {visibleType: 'visible'}
+        ),
+        line,
+      ]
+      if (dedentFollowingComma.ifBreak) {
+        groupPreviousArgWithItsComma = true
+      }
+    }
     argIndex++
   }, 'arguments')
-  const lastElementWantsDedentedComma = dedentComma
+  const lastElementWantsDedentedComma = dedentFollowingComma
 
   const parent = path.getParentNode()
   let parensNecessary = callParensNecessary(path, options)
@@ -4173,16 +4209,13 @@ function printArgumentsList(path, options, print) {
     parensUnnecessary
       ? ''
       : ifBreak(',')
-  const printedArguments = printedArgumentsPreConcat.map((parts, index) =>
-    index === printedArgumentsPreConcat.length - 1
-      ? concat([...parts, lastArgComma])
-      : concat(parts)
-  )
-  const printedArgumentsNoTrailingComma = printedArgumentsPreConcat.map(parts =>
-    concat(parts)
+  const printedArgumentsNoTrailingComma = printedArguments
+  printedArguments = printedArguments.map((printedArg, index) =>
+    index === printedArguments.length - 1
+      ? concat([printedArg, lastArgComma])
+      : printedArg
   )
   // const nonFinalArgs = args.slice(0, args.length - 1)
-  const shouldBreak = false
   // args.length > 1 && nonFinalArgs.find(arg => arg.type === 'ObjectExpression')
   const closingLinebreakAnyway =
     parensUnnecessary && parent.type === 'JSXExpressionContainer'
@@ -4621,13 +4654,14 @@ function printFunctionParams(path, print, options) {
   let dedentComma
   path.each(paramPath => {
     const param = paramPath.getValue()
-    dedentComma =
-      param.type === 'AssignmentPattern' &&
-      paramPath.call(
-        defaultParamValuePath =>
-          shouldDedentComma(defaultParamValuePath, options),
-        'right'
-      )
+    ;({following: dedentComma} =
+      param.type !== 'AssignmentPattern'
+        ? {}
+        : paramPath.call(
+            defaultParamValuePath =>
+              shouldDedentComma(defaultParamValuePath, options),
+            'right'
+          ))
     printedParams.push(concat(separatorParts))
     printedParams.push(print(paramPath))
 
@@ -4774,11 +4808,11 @@ function isIdentifierName(str) {
   return IDENTIFIER.test(str)
 }
 
-// function isObjectish(node) {
-//   return (
-//     (node && node.type === 'ObjectExpression') || node.type === 'ObjectPattern'
-//   )
-// }
+function isObjectish(node) {
+  return (
+    (node && node.type === 'ObjectExpression') || node.type === 'ObjectPattern'
+  )
+}
 
 function isImplicitObjectIfParentBreaks(path, options) {
   const node = path.getValue()
@@ -4804,12 +4838,29 @@ function shouldDedentComma(path, options) {
     isFunction(node)
     // && !isEmptyBlock(node.body)
   ) {
-    return true
+    return {
+      preceding: node.params.length === 0 && !options.emptyParamListParens,
+      following: true,
+      // alwaysBreak: true
+    }
   }
   if (isImplicitObjectIfParentBreaks(path, options)) {
-    return true
+    return {preceding: true, following: true}
   }
-  return false
+  if (isClass(node)) {
+    return {preceding: false, following: {ifBreak: true}}
+  }
+  if (isControl(node) && !node.postfix) {
+    return {
+      preceding: false,
+      following: {ifBreak: true},
+      // alwaysBreak: true
+    }
+  }
+  if (endsWithFunctionOrControl(node)) {
+    return {preceding: false, following: {ifBreak: true}, alwaysBreak: true}
+  }
+  return {preceding: false, following: false}
 }
 
 function printArrayItems(path, options, printPath, print) {
@@ -4817,52 +4868,78 @@ function printArrayItems(path, options, printPath, print) {
   let separatorParts = []
   const node = path.getValue()
   const elements = node[printPath]
-  const last = elements && elements.length && elements[elements.length - 1]
   const {locEnd} = options
-  // let index = 0
-  let dedentComma
+  let dedentPrecedingComma
+  let dedentFollowingComma
+  let groupPreviousChildWithItsComma = false
+  let shouldBreakArray = false
+  let alwaysBreak
+  let childIndex = 0
+  const lastIndex = elements && elements.length && elements.length - 1
   path.each(childPath => {
     const child = childPath.getValue()
-    dedentComma = shouldDedentComma(childPath, options)
-    if (dedentComma) {
+    const isLast = childIndex === lastIndex
+    ;({
+      preceding: dedentPrecedingComma,
+      following: dedentFollowingComma,
+      alwaysBreak,
+    } = shouldDedentComma(childPath, options))
+    if (!isLast && alwaysBreak) {
+      shouldBreakArray = true
+    }
+    if (dedentPrecedingComma) {
       if (separatorParts.length) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
       }
     }
-    printedElements.push(concat(separatorParts))
+    if (groupPreviousChildWithItsComma) {
+      const previousChild = printedElements.pop()
+      printedElements.push(
+        concat([
+          group(concat([previousChild, concat(separatorParts)]), {
+            visibleType: 'itemWithComma',
+          }),
+          softline,
+        ])
+      )
+    } else {
+      printedElements.push(concat(separatorParts))
+    }
     printedElements.push(print(childPath))
 
-    const isLast = child === last
-    // const consecutiveIf =
-    //   child &&
-    //   !isLast &&
-    //   isIf(child) &&
-    //   elements[index + 1] &&
-    //   isIf(elements[index + 1])
-    separatorParts = [
-      ifBreak(
-        dedentComma // || consecutiveIf
-          ? dedent(concat([line, ',']))
-          : options.comma !== 'none'
-          ? ','
-          : '',
-        ','
-      ),
-      line,
-    ]
-    const shouldBreakArray = !isLast && child && isFunction(child)
-    if (shouldBreakArray) {
-      separatorParts.push(breakParent)
+    if (!isLast) {
+      separatorParts = [
+        ifBreak(
+          dedentFollowingComma
+            ? dedentFollowingComma.ifBreak
+              ? ifBreak(dedent(concat([line, ','])), '', {
+                  visibleType: 'itemWithComma',
+                })
+              : dedent(concat([line, ',']))
+            : options.comma !== 'none'
+            ? ','
+            : '',
+          ',',
+          {visibleType: 'visible'}
+        ),
+        line,
+      ]
+      if (!shouldBreakArray) {
+        shouldBreakArray = child && isFunction(child)
+      }
+      if (child && isNextLineEmpty(options.originalText, child, locEnd)) {
+        separatorParts.push(softline)
+      }
+      if (dedentFollowingComma.ifBreak) {
+        groupPreviousChildWithItsComma = true
+      }
     }
-    if (child && isNextLineEmpty(options.originalText, child, locEnd)) {
-      separatorParts.push(softline)
-    }
-    // index++
+    childIndex++
   }, printPath)
 
   return {
-    printed: concat(printedElements),
-    lastElementWantsDedentedComma: dedentComma,
+    printed: concat([...printedElements, shouldBreakArray ? breakParent : '']),
+    lastElementWantsDedentedComma: dedentFollowingComma,
   }
 }
 
