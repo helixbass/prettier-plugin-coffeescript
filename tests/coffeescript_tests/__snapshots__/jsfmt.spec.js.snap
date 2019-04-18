@@ -15078,6 +15078,7 @@ test 'Passing multiple functions without paren-wrapping is legal, and should com
   result = sum(
     ->
       7 + 9
+  ,
     ->
       1 + 3
   )
@@ -15094,6 +15095,7 @@ test 'Test more function passing:', ->
   result = sum(
     ->
       1 + 2
+  ,
     ->
       2 + 1
   )
@@ -20450,6 +20452,7 @@ test 'Implicit objects, functions and arrays', ->
       second(
         ->
           no
+      ,
         ->
           3
       )

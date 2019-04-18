@@ -10,6 +10,6 @@ before_install:
 - nvm alias default v10.10.0
 - nvm use v10.10.0
 install:
-- yarn install
+- rm yarn.lock && yarn install
 script:
 - yarn test

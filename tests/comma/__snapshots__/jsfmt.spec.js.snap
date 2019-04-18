@@ -57,6 +57,582 @@ f
 
 `;
 
+exports[`function.coffee 1`] = `
+[-> b]
+
+a(-> b)
+
+(a = -> b) ->
+
+{c, a: -> b}
+
+[
+  ->
+    b
+]
+
+a(
+  ->
+    b
+)
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a(->)
+
+(a = ->) ->
+
+{c, a: ->}
+
+[
+  a
+  ->
+    b
+  c
+]
+
+a(
+  a
+  ->
+    b
+  c
+)
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[-> b]
+
+a -> b
+
+(a = -> b) ->
+
+{ c, a: -> b }
+
+[
+  ->
+    b
+]
+
+a ->
+  b
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a ->
+
+(a = ->) ->
+
+{ c, a: -> }
+
+[
+  a
+,
+  ->
+    b
+,
+  c
+]
+
+a(
+  a
+,
+  ->
+    b
+,
+  c
+)
+
+(
+  a
+  d = ->
+    b
+,
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+,
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+
+`;
+
+exports[`function.coffee 2`] = `
+[-> b]
+
+a(-> b)
+
+(a = -> b) ->
+
+{c, a: -> b}
+
+[
+  ->
+    b
+]
+
+a(
+  ->
+    b
+)
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a(->)
+
+(a = ->) ->
+
+{c, a: ->}
+
+[
+  a
+  ->
+    b
+  c
+]
+
+a(
+  a
+  ->
+    b
+  c
+)
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[-> b]
+
+a -> b
+
+(a = -> b) ->
+
+{ c, a: -> b }
+
+[
+  ->
+    b
+]
+
+a ->
+  b
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c,
+  a: ->
+    b
+}
+
+[->]
+
+a ->
+
+(a = ->) ->
+
+{ c, a: -> }
+
+[
+  a
+,
+  ->
+    b
+,
+  c
+]
+
+a(
+  a
+,
+  ->
+    b
+,
+  c
+)
+
+(
+  a,
+  d = ->
+    b
+,
+  c
+) ->
+
+{
+  a,
+  d: ->
+    b
+  c
+}
+
+[
+  a
+,
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: ->
+  c
+}
+
+`;
+
+exports[`function.coffee 3`] = `
+[-> b]
+
+a(-> b)
+
+(a = -> b) ->
+
+{c, a: -> b}
+
+[
+  ->
+    b
+]
+
+a(
+  ->
+    b
+)
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c
+  a: ->
+    b
+}
+
+[->]
+
+a(->)
+
+(a = ->) ->
+
+{c, a: ->}
+
+[
+  a
+  ->
+    b
+  c
+]
+
+a(
+  a
+  ->
+    b
+  c
+)
+
+(
+  a
+  d = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: ->
+    b
+  c
+}
+
+[
+  a
+  ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[-> b]
+
+a -> b
+
+(a = -> b) ->
+
+{ c, a: -> b }
+
+[
+  ->
+    b
+]
+
+a ->
+  b
+
+(
+  a = ->
+    b
+) ->
+
+{
+  c,
+  a: ->
+    b
+}
+
+[->]
+
+a ->
+
+(a = ->) ->
+
+{ c, a: -> }
+
+[
+  a
+,
+  ->
+    b
+,
+  c,
+]
+
+a(
+  a
+,
+  ->
+    b
+,
+  c,
+)
+
+(
+  a,
+  d = ->
+    b
+,
+  c,
+) ->
+
+{
+  a,
+  d: ->
+    b
+  c,
+}
+
+[
+  a
+,
+  ->
+,
+  c,
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+,
+  ->
+,
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = ->
+,
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: ->
+  c,
+}
+
+`;
+
 exports[`implicit-call.coffee 1`] = `
 # implicit calls
 [aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbb(ccccccccccccccccc), ddddddddd(eeeeeeeeeeeeee)]
@@ -432,6 +1008,3564 @@ exports[`implicit-object.coffee 3`] = `
 ,
   eeeeeeeeee: ffff, gggg: hhh, ii: jj
 ]
+
+`;
+
+exports[`indented-body-assignment.coffee 1`] = `
+# TODO: this should be legal? See Coffeescript issue #5121
+# [a = -> b]
+
+a(c = -> b)
+
+(a = d = -> b) ->
+
+{c, a: d = -> b}
+
+[
+  d = ->
+    b
+]
+
+a(
+  d = ->
+    b
+)
+
+(
+  a = d = ->
+    b
+) ->
+
+{
+  c
+  a: d = ->
+    b
+}
+
+[d = ->]
+
+a(d = ->)
+
+(a = d = ->) ->
+
+{c, a: d = ->}
+
+[
+  a
+  d = ->
+    b
+  c
+]
+
+a(
+  a
+  d = ->
+    b
+  c
+)
+
+(
+  a
+  d = e = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: e = ->
+    b
+  c
+}
+
+[
+  a
+  b = ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = e = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: e = ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TODO: this should be legal? See Coffeescript issue #5121
+# [a = -> b]
+
+a(c = -> b)
+
+(a = (d = -> b)) ->
+
+{ c, a: (d = -> b) }
+
+[
+  (d = ->
+    b
+  )
+]
+
+a(
+  (d = ->
+    b
+  )
+)
+
+(
+  a = (d = ->
+    b
+  )
+) ->
+
+{
+  c
+  a:
+    (d = ->
+      b
+    )
+}
+
+[(d = ->)]
+
+a(d = ->)
+
+(a = (d = ->)) ->
+
+{ c, a: (d = ->) }
+
+[
+  a
+  (d = ->
+    b
+  )
+,
+  c
+]
+
+a(
+  a
+  (d = ->
+    b
+  )
+,
+  c
+)
+
+(
+  a
+  d = (e = ->
+    b
+  )
+,
+  c
+) ->
+
+{
+  a
+  d:
+    (e = ->
+      b
+    )
+  c
+}
+
+[
+  a
+  (b = ->)
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  (d = ->)
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = (e = ->)
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: (e = ->)
+  c
+}
+
+`;
+
+exports[`indented-body-assignment.coffee 2`] = `
+# TODO: this should be legal? See Coffeescript issue #5121
+# [a = -> b]
+
+a(c = -> b)
+
+(a = d = -> b) ->
+
+{c, a: d = -> b}
+
+[
+  d = ->
+    b
+]
+
+a(
+  d = ->
+    b
+)
+
+(
+  a = d = ->
+    b
+) ->
+
+{
+  c
+  a: d = ->
+    b
+}
+
+[d = ->]
+
+a(d = ->)
+
+(a = d = ->) ->
+
+{c, a: d = ->}
+
+[
+  a
+  d = ->
+    b
+  c
+]
+
+a(
+  a
+  d = ->
+    b
+  c
+)
+
+(
+  a
+  d = e = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: e = ->
+    b
+  c
+}
+
+[
+  a
+  b = ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = e = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: e = ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TODO: this should be legal? See Coffeescript issue #5121
+# [a = -> b]
+
+a(c = -> b)
+
+(a = (d = -> b)) ->
+
+{ c, a: (d = -> b) }
+
+[
+  (d = ->
+    b
+  )
+]
+
+a(
+  (d = ->
+    b
+  )
+)
+
+(
+  a = (d = ->
+    b
+  )
+) ->
+
+{
+  c,
+  a:
+    (d = ->
+      b
+    )
+}
+
+[(d = ->)]
+
+a(d = ->)
+
+(a = (d = ->)) ->
+
+{ c, a: (d = ->) }
+
+[
+  a,
+  (d = ->
+    b
+  )
+,
+  c
+]
+
+a(
+  a,
+  (d = ->
+    b
+  )
+,
+  c
+)
+
+(
+  a,
+  d = (e = ->
+    b
+  )
+,
+  c
+) ->
+
+{
+  a,
+  d:
+    (e = ->
+      b
+    )
+  c
+}
+
+[
+  a,
+  (b = ->)
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  (d = ->)
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = (e = ->)
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: (e = ->)
+  c
+}
+
+`;
+
+exports[`indented-body-assignment.coffee 3`] = `
+# TODO: this should be legal? See Coffeescript issue #5121
+# [a = -> b]
+
+a(c = -> b)
+
+(a = d = -> b) ->
+
+{c, a: d = -> b}
+
+[
+  d = ->
+    b
+]
+
+a(
+  d = ->
+    b
+)
+
+(
+  a = d = ->
+    b
+) ->
+
+{
+  c
+  a: d = ->
+    b
+}
+
+[d = ->]
+
+a(d = ->)
+
+(a = d = ->) ->
+
+{c, a: d = ->}
+
+[
+  a
+  d = ->
+    b
+  c
+]
+
+a(
+  a
+  d = ->
+    b
+  c
+)
+
+(
+  a
+  d = e = ->
+    b
+  c
+) ->
+
+{
+  a
+  d: e = ->
+    b
+  c
+}
+
+[
+  a
+  b = ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = e = ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: e = ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TODO: this should be legal? See Coffeescript issue #5121
+# [a = -> b]
+
+a(c = -> b)
+
+(a = (d = -> b)) ->
+
+{ c, a: (d = -> b) }
+
+[
+  (d = ->
+    b
+  )
+]
+
+a(
+  (d = ->
+    b
+  )
+)
+
+(
+  a = (d = ->
+    b
+  )
+) ->
+
+{
+  c,
+  a:
+    (d = ->
+      b
+    )
+}
+
+[(d = ->)]
+
+a(d = ->)
+
+(a = (d = ->)) ->
+
+{ c, a: (d = ->) }
+
+[
+  a,
+  (d = ->
+    b
+  )
+,
+  c,
+]
+
+a(
+  a,
+  (d = ->
+    b
+  )
+,
+  c,
+)
+
+(
+  a,
+  d = (e = ->
+    b
+  )
+,
+  c,
+) ->
+
+{
+  a,
+  d:
+    (e = ->
+      b
+    )
+  c,
+}
+
+[
+  a,
+  (b = ->)
+  c,
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  (d = ->)
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = (e = ->)
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: (e = ->)
+  c,
+}
+
+`;
+
+exports[`indented-body-class.coffee 1`] = `
+[class A]
+
+a(class A)
+
+(a = class A) ->
+
+{c, a: class A}
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[
+  a
+  class A
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[class A]
+
+a class A
+
+(a = class A) ->
+
+{ c, a: class A }
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+,
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+,
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+,
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[a, class A, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+
+`;
+
+exports[`indented-body-class.coffee 2`] = `
+[class A]
+
+a(class A)
+
+(a = class A) ->
+
+{c, a: class A}
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[
+  a
+  class A
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[class A]
+
+a class A
+
+(a = class A) ->
+
+{ c, a: class A }
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c,
+  a: class A
+    b: ->
+}
+
+[
+  a,
+  class A
+    b: ->
+,
+  d
+]
+
+a(
+  a,
+  class A
+    b: 2
+,
+  d
+)
+
+(
+  a,
+  d = class A
+    b: ->
+      1
+,
+  e
+) ->
+
+{
+  a,
+  d: class A
+    b: ->
+  c
+}
+
+[a, class A, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  class A
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = class A
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: class A
+  c
+}
+
+`;
+
+exports[`indented-body-class.coffee 3`] = `
+[class A]
+
+a(class A)
+
+(a = class A) ->
+
+{c, a: class A}
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c
+  a: class A
+    b: ->
+}
+
+[
+  a
+  class A
+    b: ->
+  d
+]
+
+a(
+  a
+  class A
+    b: 2
+  d
+)
+
+(
+  a
+  d = class A
+    b: ->
+      1
+  e
+) ->
+
+{
+  a
+  d: class A
+    b: ->
+  c
+}
+
+[
+  a
+  class A
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  class A
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = class A
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: class A
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[class A]
+
+a class A
+
+(a = class A) ->
+
+{ c, a: class A }
+
+[
+  class A
+    b: ->
+]
+
+a(
+  class A
+    b: ->
+)
+
+(
+  a = class A
+    b: ->
+) ->
+
+{
+  c,
+  a: class A
+    b: ->
+}
+
+[
+  a,
+  class A
+    b: ->
+,
+  d,
+]
+
+a(
+  a,
+  class A
+    b: 2
+,
+  d,
+)
+
+(
+  a,
+  d = class A
+    b: ->
+      1
+,
+  e,
+) ->
+
+{
+  a,
+  d: class A
+    b: ->
+  c,
+}
+
+[a, class A, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  class A
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = class A
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: class A
+  c,
+}
+
+`;
+
+exports[`indented-body-do.coffee 1`] = `
+[do -> b]
+
+a(do -> b)
+
+(a = do -> b) ->
+
+{c, a: do -> b}
+
+[
+  do ->
+    b
+]
+
+a(
+  do ->
+    b
+)
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a(do ->)
+
+(a = do ->) ->
+
+{c, a: do ->}
+
+[
+  a
+  do ->
+    b
+  c
+]
+
+a(
+  a
+  do ->
+    b
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[do -> b]
+
+a do -> b
+
+(a = do -> b) ->
+
+{ c, a: do -> b }
+
+[
+  do ->
+    b
+]
+
+a do ->
+  b
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a do ->
+
+(a = do ->) ->
+
+{ c, a: do -> }
+
+[
+  a
+  do ->
+    b
+,
+  c
+]
+
+a(
+  a
+  do ->
+    b
+,
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+,
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+
+`;
+
+exports[`indented-body-do.coffee 2`] = `
+[do -> b]
+
+a(do -> b)
+
+(a = do -> b) ->
+
+{c, a: do -> b}
+
+[
+  do ->
+    b
+]
+
+a(
+  do ->
+    b
+)
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a(do ->)
+
+(a = do ->) ->
+
+{c, a: do ->}
+
+[
+  a
+  do ->
+    b
+  c
+]
+
+a(
+  a
+  do ->
+    b
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[do -> b]
+
+a do -> b
+
+(a = do -> b) ->
+
+{ c, a: do -> b }
+
+[
+  do ->
+    b
+]
+
+a do ->
+  b
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c,
+  a: do ->
+    b
+}
+
+[do ->]
+
+a do ->
+
+(a = do ->) ->
+
+{ c, a: do -> }
+
+[
+  a,
+  do ->
+    b
+,
+  c
+]
+
+a(
+  a,
+  do ->
+    b
+,
+  c
+)
+
+(
+  a,
+  d = do ->
+    b
+,
+  c
+) ->
+
+{
+  a,
+  d: do ->
+    b
+  c
+}
+
+[
+  a,
+  do ->
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  do ->
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = do ->
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: do ->
+  c
+}
+
+`;
+
+exports[`indented-body-do.coffee 3`] = `
+[do -> b]
+
+a(do -> b)
+
+(a = do -> b) ->
+
+{c, a: do -> b}
+
+[
+  do ->
+    b
+]
+
+a(
+  do ->
+    b
+)
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c
+  a: do ->
+    b
+}
+
+[do ->]
+
+a(do ->)
+
+(a = do ->) ->
+
+{c, a: do ->}
+
+[
+  a
+  do ->
+    b
+  c
+]
+
+a(
+  a
+  do ->
+    b
+  c
+)
+
+(
+  a
+  d = do ->
+    b
+  c
+) ->
+
+{
+  a
+  d: do ->
+    b
+  c
+}
+
+[
+  a
+  do ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  do ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = do ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: do ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[do -> b]
+
+a do -> b
+
+(a = do -> b) ->
+
+{ c, a: do -> b }
+
+[
+  do ->
+    b
+]
+
+a do ->
+  b
+
+(
+  a = do ->
+    b
+) ->
+
+{
+  c,
+  a: do ->
+    b
+}
+
+[do ->]
+
+a do ->
+
+(a = do ->) ->
+
+{ c, a: do -> }
+
+[
+  a,
+  do ->
+    b
+,
+  c,
+]
+
+a(
+  a,
+  do ->
+    b
+,
+  c,
+)
+
+(
+  a,
+  d = do ->
+    b
+,
+  c,
+) ->
+
+{
+  a,
+  d: do ->
+    b
+  c,
+}
+
+[
+  a,
+  do ->
+  c,
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  do ->
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = do ->
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: do ->
+  c,
+}
+
+`;
+
+exports[`indented-body-if.coffee 1`] = `
+[if b then c]
+
+a(if b then c)
+
+(a = if b then c) ->
+
+{c, a: if b then c}
+
+[
+  if b
+    c
+]
+
+a(
+  if b
+    c
+)
+
+(
+  a = if b
+    c
+) ->
+
+{
+  c
+  a: if b
+    c
+}
+
+[
+  a
+  if b
+    c
+  d
+]
+
+a(
+  a
+  if b
+    c
+  d
+)
+
+(
+  a
+  d = if b
+    c
+  e
+) ->
+
+{
+  a
+  d: if b
+    e
+  c
+}
+
+[
+  a
+  if b then c
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  if d then e
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = if e then f
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: if e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[if b then c]
+
+a if b then c
+
+(a = if b then c) ->
+
+{ c, a: if b then c }
+
+[
+  if b
+    c
+]
+
+a(
+  if b
+    c
+)
+
+(
+  a = if b
+    c
+) ->
+
+{
+  c
+  a: if b
+    c
+}
+
+[
+  a
+  if b
+    c
+,
+  d
+]
+
+a(
+  a
+  if b
+    c
+,
+  d
+)
+
+(
+  a
+  d = if b
+    c
+,
+  e
+) ->
+
+{
+  a
+  d: if b
+    e
+  c
+}
+
+[a, (if b then c), d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  if d then e
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = if e then f
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: if e then f
+  c
+}
+
+`;
+
+exports[`indented-body-if.coffee 2`] = `
+[if b then c]
+
+a(if b then c)
+
+(a = if b then c) ->
+
+{c, a: if b then c}
+
+[
+  if b
+    c
+]
+
+a(
+  if b
+    c
+)
+
+(
+  a = if b
+    c
+) ->
+
+{
+  c
+  a: if b
+    c
+}
+
+[
+  a
+  if b
+    c
+  d
+]
+
+a(
+  a
+  if b
+    c
+  d
+)
+
+(
+  a
+  d = if b
+    c
+  e
+) ->
+
+{
+  a
+  d: if b
+    e
+  c
+}
+
+[
+  a
+  if b then c
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  if d then e
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = if e then f
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: if e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[if b then c]
+
+a if b then c
+
+(a = if b then c) ->
+
+{ c, a: if b then c }
+
+[
+  if b
+    c
+]
+
+a(
+  if b
+    c
+)
+
+(
+  a = if b
+    c
+) ->
+
+{
+  c,
+  a: if b
+    c
+}
+
+[
+  a,
+  if b
+    c
+,
+  d
+]
+
+a(
+  a,
+  if b
+    c
+,
+  d
+)
+
+(
+  a,
+  d = if b
+    c
+,
+  e
+) ->
+
+{
+  a,
+  d: if b
+    e
+  c
+}
+
+[a, (if b then c), d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  if d then e
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = if e then f
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: if e then f
+  c
+}
+
+`;
+
+exports[`indented-body-if.coffee 3`] = `
+[if b then c]
+
+a(if b then c)
+
+(a = if b then c) ->
+
+{c, a: if b then c}
+
+[
+  if b
+    c
+]
+
+a(
+  if b
+    c
+)
+
+(
+  a = if b
+    c
+) ->
+
+{
+  c
+  a: if b
+    c
+}
+
+[
+  a
+  if b
+    c
+  d
+]
+
+a(
+  a
+  if b
+    c
+  d
+)
+
+(
+  a
+  d = if b
+    c
+  e
+) ->
+
+{
+  a
+  d: if b
+    e
+  c
+}
+
+[
+  a
+  if b then c
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  if d then e
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = if e then f
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: if e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[if b then c]
+
+a if b then c
+
+(a = if b then c) ->
+
+{ c, a: if b then c }
+
+[
+  if b
+    c
+]
+
+a(
+  if b
+    c
+)
+
+(
+  a = if b
+    c
+) ->
+
+{
+  c,
+  a: if b
+    c
+}
+
+[
+  a,
+  if b
+    c
+,
+  d,
+]
+
+a(
+  a,
+  if b
+    c
+,
+  d,
+)
+
+(
+  a,
+  d = if b
+    c
+,
+  e,
+) ->
+
+{
+  a,
+  d: if b
+    e
+  c,
+}
+
+[a, (if b then c), d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  if d then e
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = if e then f
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: if e then f
+  c,
+}
+
+`;
+
+exports[`indented-body-implicit-call.coffee 1`] = `
+[a -> b]
+
+a(c -> b)
+
+(a = d -> b) ->
+
+{c, a: d -> b}
+
+[
+  d ->
+    b
+]
+
+a(
+  d ->
+    b
+)
+
+(
+  a = d ->
+    b
+) ->
+
+{
+  c
+  a: d ->
+    b
+}
+
+[d ->]
+
+a(d ->)
+
+(a = d ->) ->
+
+{c, a: d ->}
+
+[
+  a
+  d ->
+    b
+  c
+]
+
+a(
+  a
+  d ->
+    b
+  c
+)
+
+(
+  a
+  d = e ->
+    b
+  c
+) ->
+
+{
+  a
+  d: e ->
+    b
+  c
+}
+
+[
+  a
+  b ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = e ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: e ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[a -> b]
+
+a c -> b
+
+(a = d -> b) ->
+
+{ c, a: d -> b }
+
+[
+  d ->
+    b
+]
+
+a(
+  d ->
+    b
+)
+
+(
+  a = d ->
+    b
+) ->
+
+{
+  c
+  a: d ->
+    b
+}
+
+[d ->]
+
+a d ->
+
+(a = d ->) ->
+
+{ c, a: d -> }
+
+[
+  a
+  d ->
+    b
+,
+  c
+]
+
+a(
+  a
+  d ->
+    b
+,
+  c
+)
+
+(
+  a
+  d = e ->
+    b
+,
+  c
+) ->
+
+{
+  a
+  d: e ->
+    b
+  c
+}
+
+[
+  a
+  b ->
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d ->
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = e ->
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: e ->
+  c
+}
+
+`;
+
+exports[`indented-body-implicit-call.coffee 2`] = `
+[a -> b]
+
+a(c -> b)
+
+(a = d -> b) ->
+
+{c, a: d -> b}
+
+[
+  d ->
+    b
+]
+
+a(
+  d ->
+    b
+)
+
+(
+  a = d ->
+    b
+) ->
+
+{
+  c
+  a: d ->
+    b
+}
+
+[d ->]
+
+a(d ->)
+
+(a = d ->) ->
+
+{c, a: d ->}
+
+[
+  a
+  d ->
+    b
+  c
+]
+
+a(
+  a
+  d ->
+    b
+  c
+)
+
+(
+  a
+  d = e ->
+    b
+  c
+) ->
+
+{
+  a
+  d: e ->
+    b
+  c
+}
+
+[
+  a
+  b ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = e ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: e ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[a -> b]
+
+a c -> b
+
+(a = d -> b) ->
+
+{ c, a: d -> b }
+
+[
+  d ->
+    b
+]
+
+a(
+  d ->
+    b
+)
+
+(
+  a = d ->
+    b
+) ->
+
+{
+  c,
+  a: d ->
+    b
+}
+
+[d ->]
+
+a d ->
+
+(a = d ->) ->
+
+{ c, a: d -> }
+
+[
+  a,
+  d ->
+    b
+,
+  c
+]
+
+a(
+  a,
+  d ->
+    b
+,
+  c
+)
+
+(
+  a,
+  d = e ->
+    b
+,
+  c
+) ->
+
+{
+  a,
+  d: e ->
+    b
+  c
+}
+
+[
+  a,
+  b ->
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d ->
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = e ->
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: e ->
+  c
+}
+
+`;
+
+exports[`indented-body-implicit-call.coffee 3`] = `
+[a -> b]
+
+a(c -> b)
+
+(a = d -> b) ->
+
+{c, a: d -> b}
+
+[
+  d ->
+    b
+]
+
+a(
+  d ->
+    b
+)
+
+(
+  a = d ->
+    b
+) ->
+
+{
+  c
+  a: d ->
+    b
+}
+
+[d ->]
+
+a(d ->)
+
+(a = d ->) ->
+
+{c, a: d ->}
+
+[
+  a
+  d ->
+    b
+  c
+]
+
+a(
+  a
+  d ->
+    b
+  c
+)
+
+(
+  a
+  d = e ->
+    b
+  c
+) ->
+
+{
+  a
+  d: e ->
+    b
+  c
+}
+
+[
+  a
+  b ->
+,
+  c
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d ->
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = e ->
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: e ->
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[a -> b]
+
+a c -> b
+
+(a = d -> b) ->
+
+{ c, a: d -> b }
+
+[
+  d ->
+    b
+]
+
+a(
+  d ->
+    b
+)
+
+(
+  a = d ->
+    b
+) ->
+
+{
+  c,
+  a: d ->
+    b
+}
+
+[d ->]
+
+a d ->
+
+(a = d ->) ->
+
+{ c, a: d -> }
+
+[
+  a,
+  d ->
+    b
+,
+  c,
+]
+
+a(
+  a,
+  d ->
+    b
+,
+  c,
+)
+
+(
+  a,
+  d = e ->
+    b
+,
+  c,
+) ->
+
+{
+  a,
+  d: e ->
+    b
+  c,
+}
+
+[
+  a,
+  b ->
+  c,
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d ->
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = e ->
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: e ->
+  c,
+}
+
+`;
+
+exports[`indented-body-switch.coffee 1`] = `
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+,
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+,
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+,
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+
+`;
+
+exports[`indented-body-switch.coffee 2`] = `
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c,
+  a: switch b
+    when c then d
+}
+
+[
+  a,
+  switch b
+    when c then d
+,
+  e
+]
+
+a(
+  a,
+  switch b
+    when c
+      d
+,
+  e
+)
+
+(
+  a,
+  d = switch b
+    when c
+      e
+,
+  f
+) ->
+
+{
+  a,
+  d: switch b
+    when e then f
+  c
+}
+
+`;
+
+exports[`indented-body-switch.coffee 3`] = `
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c
+  a: switch b
+    when c then d
+}
+
+[
+  a
+  switch b
+    when c then d
+  e
+]
+
+a(
+  a
+  switch b
+    when c
+      d
+  e
+)
+
+(
+  a
+  d = switch b
+    when c
+      e
+  f
+) ->
+
+{
+  a
+  d: switch b
+    when e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[
+  switch b
+    when c
+      d
+]
+
+a(
+  switch b
+    when c then d
+)
+
+(
+  a = switch b
+    when c
+      d
+) ->
+
+{
+  c,
+  a: switch b
+    when c then d
+}
+
+[
+  a,
+  switch b
+    when c then d
+,
+  e,
+]
+
+a(
+  a,
+  switch b
+    when c
+      d
+,
+  e,
+)
+
+(
+  a,
+  d = switch b
+    when c
+      e
+,
+  f,
+) ->
+
+{
+  a,
+  d: switch b
+    when e then f
+  c,
+}
+
+`;
+
+exports[`indented-body-while.coffee 1`] = `
+[while b then c]
+
+a(until b then c)
+
+(a = while b then c) ->
+
+{c, a: while b then c}
+
+[
+  while b
+    c
+]
+
+a(
+  while b
+    c
+)
+
+(
+  a = while b
+    c
+) ->
+
+{
+  c
+  a: while b
+    c
+}
+
+[
+  a
+  while b
+    c
+  d
+]
+
+a(
+  a
+  while b
+    c
+  d
+)
+
+(
+  a
+  d = while b
+    c
+  e
+) ->
+
+{
+  a
+  d: while b
+    e
+  c
+}
+
+[
+  a
+  while b then c
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  while d then e
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = while e then f
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: while e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[while b then c]
+
+a(until b then c)
+
+(a = while b then c) ->
+
+{ c, a: (while b then c) }
+
+[
+  while b
+    c
+]
+
+a(
+  while b
+    c
+)
+
+(
+  a = while b
+    c
+) ->
+
+{
+  c
+  a: while b
+    c
+}
+
+[
+  a
+  while b
+    c
+,
+  d
+]
+
+a(
+  a
+  while b
+    c
+,
+  d
+)
+
+(
+  a
+  d = while b
+    c
+,
+  e
+) ->
+
+{
+  a
+  d: while b
+    e
+  c
+}
+
+[a, while b then c, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  while d then e
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = while e then f
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: (while e then f)
+  c
+}
+
+`;
+
+exports[`indented-body-while.coffee 2`] = `
+[while b then c]
+
+a(until b then c)
+
+(a = while b then c) ->
+
+{c, a: while b then c}
+
+[
+  while b
+    c
+]
+
+a(
+  while b
+    c
+)
+
+(
+  a = while b
+    c
+) ->
+
+{
+  c
+  a: while b
+    c
+}
+
+[
+  a
+  while b
+    c
+  d
+]
+
+a(
+  a
+  while b
+    c
+  d
+)
+
+(
+  a
+  d = while b
+    c
+  e
+) ->
+
+{
+  a
+  d: while b
+    e
+  c
+}
+
+[
+  a
+  while b then c
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  while d then e
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = while e then f
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: while e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[while b then c]
+
+a(until b then c)
+
+(a = while b then c) ->
+
+{ c, a: (while b then c) }
+
+[
+  while b
+    c
+]
+
+a(
+  while b
+    c
+)
+
+(
+  a = while b
+    c
+) ->
+
+{
+  c,
+  a: while b
+    c
+}
+
+[
+  a,
+  while b
+    c
+,
+  d
+]
+
+a(
+  a,
+  while b
+    c
+,
+  d
+)
+
+(
+  a,
+  d = while b
+    c
+,
+  e
+) ->
+
+{
+  a,
+  d: while b
+    e
+  c
+}
+
+[a, while b then c, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  while d then e
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = while e then f
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: (while e then f)
+  c
+}
+
+`;
+
+exports[`indented-body-while.coffee 3`] = `
+[while b then c]
+
+a(until b then c)
+
+(a = while b then c) ->
+
+{c, a: while b then c}
+
+[
+  while b
+    c
+]
+
+a(
+  while b
+    c
+)
+
+(
+  a = while b
+    c
+) ->
+
+{
+  c
+  a: while b
+    c
+}
+
+[
+  a
+  while b
+    c
+  d
+]
+
+a(
+  a
+  while b
+    c
+  d
+)
+
+(
+  a
+  d = while b
+    c
+  e
+) ->
+
+{
+  a
+  d: while b
+    e
+  c
+}
+
+[
+  a
+  while b then c
+,
+  d
+]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  while d then e
+,
+  c
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d = while e then f
+,
+  c
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  d: while e then f
+  c
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[while b then c]
+
+a(until b then c)
+
+(a = while b then c) ->
+
+{ c, a: (while b then c) }
+
+[
+  while b
+    c
+]
+
+a(
+  while b
+    c
+)
+
+(
+  a = while b
+    c
+) ->
+
+{
+  c,
+  a: while b
+    c
+}
+
+[
+  a,
+  while b
+    c
+,
+  d,
+]
+
+a(
+  a,
+  while b
+    c
+,
+  d,
+)
+
+(
+  a,
+  d = while b
+    c
+,
+  e,
+) ->
+
+{
+  a,
+  d: while b
+    e
+  c,
+}
+
+[a, while b then c, d]
+
+a(
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  while d then e
+  c,
+)
+
+(
+  a = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d = while e then f
+  c,
+) ->
+
+{
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  d: (while e then f)
+  c,
+}
 
 `;
 
