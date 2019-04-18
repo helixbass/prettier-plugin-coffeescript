@@ -336,6 +336,11 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
             return {unlessParentBreaks: true}
           }
           return parent.callee === node || node.postfix
+        case 'ArrayExpression':
+          if (node !== getLast(parent.elements)) {
+            return {unlessParentBreaks: true}
+          }
+          return false
         case 'BinaryExpression':
         case 'LogicalExpression':
           return true
@@ -4107,7 +4112,7 @@ function printArgumentsList(path, options, print) {
             group(argAndSeparator, {
               visibleType: 'itemWithComma',
             }),
-            softline,
+            line,
           ])
         : argAndSeparator
     }
@@ -4128,11 +4133,9 @@ function printArgumentsList(path, options, print) {
           ',',
           {visibleType: 'visible'}
         ),
-        line,
+        dedentFollowingComma.ifBreak ? '' : line,
       ]
-      if (dedentFollowingComma.ifBreak) {
-        groupPreviousArgWithItsComma = true
-      }
+      groupPreviousArgWithItsComma = dedentFollowingComma.ifBreak
     }
     argIndex++
   }, 'arguments')
@@ -4899,7 +4902,7 @@ function printArrayItems(path, options, printPath, print) {
           group(concat([previousChild, concat(separatorParts)]), {
             visibleType: 'itemWithComma',
           }),
-          softline,
+          line,
         ])
       )
     } else {
@@ -4922,7 +4925,7 @@ function printArrayItems(path, options, printPath, print) {
           ',',
           {visibleType: 'visible'}
         ),
-        line,
+        dedentFollowingComma.ifBreak ? '' : line,
       ]
       if (!shouldBreakArray) {
         shouldBreakArray = child && isFunction(child)
@@ -4930,9 +4933,7 @@ function printArrayItems(path, options, printPath, print) {
       if (child && isNextLineEmpty(options.originalText, child, locEnd)) {
         separatorParts.push(softline)
       }
-      if (dedentFollowingComma.ifBreak) {
-        groupPreviousChildWithItsComma = true
-      }
+      groupPreviousChildWithItsComma = dedentFollowingComma.ifBreak
     }
     childIndex++
   }, printPath)
