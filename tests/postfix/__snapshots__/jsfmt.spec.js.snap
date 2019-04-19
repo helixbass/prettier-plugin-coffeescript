@@ -19,6 +19,8 @@ aaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb while ccccccccccccccccccc
 
 aaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb for cccccccccccccccccccccccc in d
 
+aaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb for ccc in d when eeeeeeee(fffffffff)
+
 aaaaaaaaaaaaaaaaaaaaa = [bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] if c
 
 aaaaaaaaaaaaaaaaaaaaa = [bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] while c
@@ -57,6 +59,10 @@ aaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb while (
 (
   aaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ) for cccccccccccccccccccccccc in d
+
+(aaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) for ccc in d when (
+  eeeeeeee fffffffff
+)
 
 aaaaaaaaaaaaaaaaaaaaa = [
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
