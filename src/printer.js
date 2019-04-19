@@ -4876,7 +4876,7 @@ function shouldDedentComma(path, options) {
       // alwaysBreak: true
     }
   }
-  if (endsWithFunctionOrControl(node)) {
+  if (endsWithFunctionOrControl(node) && !pathNeedsParens(path, options)) {
     return {
       preceding: false,
       following: {ifBreak: true},
