@@ -265,7 +265,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       )
     case 'AssignmentExpression':
       if (isPostfixForBody(path, {stackOffset})) {
-        return true
+        return false // the For will add parens itself
       }
       if (
         isPostfixBody(path, {stackOffset}) &&
@@ -1267,13 +1267,39 @@ function printPathNoParens(path, options, print) {
       const test = dontBreakTest ? simpleTest : breakingTest
 
       if (n.postfix) {
-        const {path: singleExprPath} = singleExpressionBlock(n.consequent, {
-          withPath: true,
-        })
+        const {path: singleExprPath, expr: singleExpr} = singleExpressionBlock(
+          n.consequent,
+          {withPath: true}
+        )
+        const fullSingleExprPath = singleExprPath
+          ? ['consequent', ...singleExprPath]
+          : ['consequent']
+        const printedExpr = path.call(print, ...fullSingleExprPath)
+        const expr = singleExpr || n.consequent
+        const bodyIsBreakableAssignment =
+          expr.type === 'AssignmentExpression' &&
+          !path.call(
+            assignmentPath =>
+              dontBreakAssignment({
+                rightNode: expr.right,
+                node: expr,
+                rightName: 'right',
+                path: assignmentPath,
+                options,
+              }),
+            ...fullSingleExprPath
+          )
         parts.push(
-          singleExprPath
-            ? path.call(print, 'consequent', ...singleExprPath)
-            : path.call(print, 'consequent'),
+          bodyIsBreakableAssignment
+            ? group(
+                concat([
+                  ifBreak('('),
+                  indent(concat([softline, printedExpr])),
+                  softline,
+                  ifBreak(')'),
+                ])
+              )
+            : printedExpr,
           ' '
         )
         parts.push(keyword, test)
@@ -1396,13 +1422,42 @@ function printPathNoParens(path, options, print) {
       ])
 
       if (n.postfix) {
-        const {path: singleExprPath} = singleExpressionBlock(n.body, {
-          withPath: true,
-        })
+        const {path: singleExprPath, expr: singleExpr} = singleExpressionBlock(
+          n.body,
+          {withPath: true}
+        )
+        const fullSingleExprPath = singleExprPath
+          ? ['body', ...singleExprPath]
+          : ['body']
+        const printedExpr = path.call(print, ...fullSingleExprPath)
+        const expr = singleExpr || n.body
+        const bodyIsAssignment = expr.type === 'AssignmentExpression'
+        const bodyIsBreakableAssignment =
+          bodyIsAssignment &&
+          !path.call(
+            assignmentPath =>
+              dontBreakAssignment({
+                rightNode: expr.right,
+                node: expr,
+                rightName: 'right',
+                path: assignmentPath,
+                options,
+              }),
+            ...fullSingleExprPath
+          )
         parts.push(
-          singleExprPath
-            ? path.call(print, 'body', ...singleExprPath)
-            : path.call(print, 'body'),
+          bodyIsBreakableAssignment
+            ? group(
+                concat([
+                  '(',
+                  indent(concat([softline, printedExpr])),
+                  softline,
+                  ')',
+                ])
+              )
+            : bodyIsAssignment
+            ? concat(['(', printedExpr, ')'])
+            : printedExpr,
           ' '
         )
         parts.push(opening)
@@ -1467,7 +1522,37 @@ function printPathNoParens(path, options, print) {
       const opening = n.loop ? 'loop' : concat([keyword, test, guard])
 
       if (n.postfix) {
-        parts.push(path.call(print, 'body', 'body', 0), ' ')
+        const {path: singleExprPath, expr} = singleExpressionBlock(n.body, {
+          withPath: true,
+        })
+        const bodyExprPath = ['body', ...singleExprPath]
+        const printedBody = path.call(print, ...bodyExprPath)
+        const bodyIsBreakableAssignment =
+          expr.type === 'AssignmentExpression' &&
+          !path.call(
+            assignmentPath =>
+              dontBreakAssignment({
+                rightNode: expr.right,
+                node: expr,
+                rightName: 'right',
+                path: assignmentPath,
+                options,
+              }),
+            ...bodyExprPath
+          )
+        parts.push(
+          bodyIsBreakableAssignment
+            ? group(
+                concat([
+                  ifBreak('('),
+                  indent(concat([softline, printedBody])),
+                  softline,
+                  ifBreak(')'),
+                ])
+              )
+            : printedBody,
+          ' '
+        )
         parts.push(opening)
         return concat(parts)
       }
@@ -1947,7 +2032,9 @@ function printPathNoParens(path, options, print) {
 
 function isSimpleMemberExpression(node, parent) {
   return (
-    node.object.type === 'Identifier' &&
+    node.type === 'MemberExpression' &&
+    (node.object.type === 'Identifier' ||
+      node.object.type === 'ThisExpression') &&
     node.property.type === 'Identifier' &&
     parent.type !== 'MemberExpression'
   )
@@ -1995,6 +2082,9 @@ function followedByClosingParen(path, options) {
 
 function shouldInlineCall(node, options) {
   const isNew = node.type === 'NewExpression'
+  if (!(isNew || node.type === 'CallExpression')) {
+    return false
+  }
 
   return (
     (node.arguments.length === 1 &&
@@ -4492,18 +4582,8 @@ function printAssignmentRight(rightNode, printedRight, options, canBreak) {
   return nonbroken
 }
 
-function printAssignment(
-  leftNode,
-  printedLeft,
-  operator,
-  rightNode,
-  [path, print, rightName],
-  options,
-  {shouldBreak} = {}
-) {
-  const node = path.getValue()
-  const printedRight = path.call(print, rightName)
-  const dontBreak =
+function dontBreakAssignment({rightNode, node, rightName, path, options}) {
+  return (
     shouldInlineLogicalExpression(rightNode) ||
     rightNode.type === 'ArrayExpression' ||
     rightNode.type === 'TemplateLiteral' ||
@@ -4542,6 +4622,27 @@ function printAssignment(
       !isChainableCall(rightNode) &&
       (rightNode.callee.type === 'Identifier' ||
         rightNode.callee.type === 'MemberExpression'))
+  )
+}
+
+function printAssignment(
+  leftNode,
+  printedLeft,
+  operator,
+  rightNode,
+  [path, print, rightName],
+  options,
+  {shouldBreak} = {}
+) {
+  const node = path.getValue()
+  const printedRight = path.call(print, rightName)
+  const dontBreak = dontBreakAssignment({
+    rightNode,
+    node,
+    rightName,
+    path,
+    options,
+  })
 
   const printed = printAssignmentRight(
     rightNode,
