@@ -915,11 +915,7 @@ function printPathNoParens(path, options, print) {
     case 'MemberExpression': {
       const parent = path.getParentNode()
       const shouldInline =
-        n.computed ||
-        isThisLookup(n) ||
-        (n.object.type === 'Identifier' &&
-          n.property.type === 'Identifier' &&
-          parent.type !== 'MemberExpression')
+        n.computed || isThisLookup(n) || isSimpleMemberExpression(n, parent)
 
       const nonInlinedContent = concat([
         softline,
@@ -1947,6 +1943,14 @@ function printPathNoParens(path, options, print) {
     default:
       throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
+}
+
+function isSimpleMemberExpression(node, parent) {
+  return (
+    node.object.type === 'Identifier' &&
+    node.property.type === 'Identifier' &&
+    parent.type !== 'MemberExpression'
+  )
 }
 
 function possiblyIndentedContent({path, options, content, shouldIndent}) {
@@ -4523,18 +4527,19 @@ function printAssignment(
       rightNode.originalPattern.indexOf('\n') > -1) ||
     rightNode.type === 'NewExpression' ||
     (options.inlineAssignmentsTo.indexOf('control') > -1 &&
-      (rightNode.type === 'For' ||
-        rightNode.type === 'WhileStatement' ||
-        rightNode.type === 'ConditionalExpression' ||
-        rightNode.type === 'SwitchStatement' ||
-        rightNode.type === 'TryStatement') &&
+      isControl(rightNode) &&
       !rightNode.postfix) ||
     (rightNode.type === 'AssignmentExpression' &&
       node.type === 'AssignmentExpression') ||
-    (rightNode.type === 'MemberExpression' &&
-      rightNode.computed &&
-      rightNode.object.type === 'Identifier') ||
+    (options.indentChain &&
+      rightNode.type === 'MemberExpression' &&
+      !isSimpleMemberExpression(rightNode, node)) ||
+    // &&
+    // rightNode.computed &&
+    // rightNode.object.type === 'Identifier'
+    (options.indentChain && isChainableCall(rightNode)) ||
     (rightNode.type === 'CallExpression' &&
+      !isChainableCall(rightNode) &&
       (rightNode.callee.type === 'Identifier' ||
         rightNode.callee.type === 'MemberExpression'))
 
