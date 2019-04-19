@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`chain.coffee 1`] = `
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaa = bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff
+
+aaaaaaaaa: bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff
+
+aaaaaaaaa = bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa: bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa = bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa: bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaa = bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee
+  .fffffffffffffffffffffffff
+
+aaaaaaaaa: bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee
+  .fffffffffffffffffffffffff
+
+aaaaaaaaa = bbbbbbbb()
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa: bbbbbbbb()
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa = bbbbbbbb
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa: bbbbbbbb
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+`;
+
+exports[`chain.coffee 2`] = `
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaa = bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff
+
+aaaaaaaaa: bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff
+
+aaaaaaaaa = bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa: bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa = bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa: bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb[cccccccccccccccccc]
+
+aaaaaaaaa =
+  bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff
+
+aaaaaaaaa:
+  bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff
+
+aaaaaaaaa =
+  bbbbbbbb()
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa:
+  bbbbbbbb()
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa =
+  bbbbbbbb
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+aaaaaaaaa:
+  bbbbbbbb
+  .ccccccccc(-> d)
+  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+`;

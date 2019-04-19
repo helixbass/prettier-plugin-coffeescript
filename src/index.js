@@ -170,9 +170,21 @@ const options = {
         value: 'control',
         description: 'Inline right sides of assignments to control structures',
       },
+      // {
+      //   value: 'chain',
+      //   description:
+      //     'Inline right sides of assignments to member expressions/chains when indentChain: true',
+      // },
     ],
     category: 'Global',
-    default: [{value: ['control']}],
+    default: [
+      {
+        value: [
+          'control',
+          // , 'chain'
+        ],
+      },
+    ],
     description: 'Inline right sides of assignments',
   },
   emptyParamListParens: {
