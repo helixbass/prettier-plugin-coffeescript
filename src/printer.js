@@ -819,14 +819,26 @@ function printPathNoParens(path, options, print) {
           )
         const unsafeInline =
           n !== util.getLast(parent.properties) && isFunction(n.value) // TODO: anything else that could end in a function or implicit call?
-        const shouldBreak = respectBreak || unsafeInline
+        const leftNode = n.key
+        const rightNode = n.value
+        const rightName = 'value'
+        const shouldBreak =
+          (respectBreak &&
+            !dontBreakAssignment({
+              rightNode,
+              node: n,
+              rightName,
+              path,
+              options,
+            })) ||
+          unsafeInline
         parts.push(
           printAssignment(
-            n.key,
+            leftNode,
             printedLeft,
             ':',
-            n.value,
-            [path, print, 'value'],
+            rightNode,
+            [path, print, rightName],
             options,
             {shouldBreak}
           )
@@ -2386,7 +2398,6 @@ function printObject(path, print, options) {
     shouldOmitBracesUnlessBreaks,
   } = _shouldOmitObjectBraces(path, options)
 
-  let separatorParts = []
   const commaUnlessBracesOmitted = shouldOmitBracesIfParentBreaks
     ? ifBreak('', ',', {visibleType: 'visible', offset: 1})
     : shouldOmitBraces
@@ -2396,35 +2407,39 @@ function printObject(path, print, options) {
     : ','
 
   let dedentComma
-  const joinedProps = printedProps.map((prop, propIndex) => {
-    const result = concat(separatorParts.concat(group(prop.printed)))
+  const joinedProps = []
+  let propIndex = 0
+  const lastPropIndex = printedProps.length - 1
+  printedProps.forEach(prop => {
+    const isLast = propIndex === lastPropIndex
     ;({following: dedentComma} = path.call(
       valuePath => shouldDedentComma(valuePath, options),
       'properties',
       propIndex,
       'value'
     ))
-    separatorParts = [
-      ifBreak(
-        options.comma === 'none' ||
-          (options.comma === 'nonTrailing' &&
-            propIndex === printedProps.length - 1) ||
-          dedentComma
-          ? ''
-          : commaUnlessBracesOmitted,
-        ','
-      ),
-      line,
-    ]
-    if (isNextLineEmpty(options.originalText, prop.node, locEnd)) {
-      separatorParts.push(hardline)
+    const comma = ifBreak(
+      options.comma === 'none' ||
+        (options.comma === 'nonTrailing' && isLast) ||
+        dedentComma
+        ? ''
+        : ifBreak('', commaUnlessBracesOmitted, {
+            visibleType: 'itemWithComma',
+          }),
+      isLast ? '' : ',',
+      {visibleType: 'visible'}
+    )
+    joinedProps.push(
+      group(concat([prop.printed, comma]), {visibleType: 'itemWithComma'})
+    )
+    if (!isLast) {
+      joinedProps.push(line)
+      if (isNextLineEmpty(options.originalText, prop.node, locEnd)) {
+        joinedProps.push(hardline)
+      }
     }
-    return result
+    propIndex++
   })
-  const lastValueWantsDedentedComma = dedentComma
-  if (options.comma === 'all' && !lastValueWantsDedentedComma) {
-    joinedProps.push(ifBreak(commaUnlessBracesOmitted, ''))
-  }
 
   let dontIndent = false
   let trailingLine = true
@@ -4665,13 +4680,13 @@ function printAssignment(
   ) {
     return group(full, {shouldBreak: true, visibleType: 'assignment'})
   }
-  const tryAndBreakLeftOnly = !(
+  const shouldTryAndBreakLeftOnly = !(
     leftNode.type === 'Identifier' ||
     isStringLiteral(leftNode) ||
     leftNode.type === 'MemberExpression'
   )
   const singleGroup = group(full, {visibleType: 'assignment'})
-  if (!tryAndBreakLeftOnly) {
+  if (!shouldTryAndBreakLeftOnly) {
     return singleGroup
   }
 

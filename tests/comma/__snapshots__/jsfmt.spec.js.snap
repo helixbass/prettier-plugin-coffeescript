@@ -1369,7 +1369,7 @@ a(
   d:
     (e = ->
       b
-    ),
+    )
   c
 }
 
@@ -1521,7 +1521,7 @@ a(
   a:
     (d = ->
       b
-    ),
+    )
 }
 
 [(d = ->)]
@@ -1561,7 +1561,7 @@ a(
   d:
     (e = ->
       b
-    ),
+    )
   c,
 }
 
@@ -4649,7 +4649,7 @@ BREAK
 {
   aaaaaaaaaaaaaaaaaaaa,
   bbbbbbbbbbbbbbbbbbbbbbb:
-    ccccccccccccccc,
+    ccccccccccccccc
   dddddddddd:
     eeee
 }
@@ -4706,9 +4706,9 @@ BREAK
 {
   aaaaaaaaaaaaaaaaaaaa,
   bbbbbbbbbbbbbbbbbbbbbbb:
-    ccccccccccccccc,
+    ccccccccccccccc
   dddddddddd:
-    eeee,
+    eeee
 }
 
 ({
@@ -5263,7 +5263,7 @@ f(
 {
   f,
   d:
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc }
 }
 
@@ -5470,7 +5470,7 @@ f(
   j:
     d: e, f: g
   k:
-    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh,
+    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 }
 
 i: { a, b: c }
@@ -5550,7 +5550,7 @@ f(
 {
   f,
   d:
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   e: { a, b: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc },
 }
 
