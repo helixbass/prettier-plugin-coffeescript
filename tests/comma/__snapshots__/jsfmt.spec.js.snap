@@ -57,6 +57,138 @@ f
 
 `;
 
+exports[`elision.coffee 1`] = `
+[a, , , b]
+
+[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, , , bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]
+
+[, , ,]
+
+[, , , c]
+
+[, , , ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc]
+
+[, , , ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: d, ,]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[a, , , b]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  ,
+  ,
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+]
+
+[, , ,]
+
+[, , , c]
+
+[
+  ,
+  ,
+  ,
+  ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+]
+
+[
+  ,
+  ,
+  ,
+  ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: d
+,
+  ,
+]
+
+`;
+
+exports[`elision.coffee 2`] = `
+[a, , , b]
+
+[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, , , bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]
+
+[, , ,]
+
+[, , , c]
+
+[, , , ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc]
+
+[, , , ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: d, ,]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[a, , , b]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  ,
+  ,
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+]
+
+[, , ,]
+
+[, , , c]
+
+[
+  ,
+  ,
+  ,
+  ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+]
+
+[
+  ,
+  ,
+  ,
+  ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: d
+,
+  ,
+]
+
+`;
+
+exports[`elision.coffee 3`] = `
+[a, , , b]
+
+[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, , , bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]
+
+[, , ,]
+
+[, , , c]
+
+[, , , ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc]
+
+[, , , ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: d, ,]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[a, , , b]
+
+[
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  ,
+  ,
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+]
+
+[, , ,]
+
+[, , , c]
+
+[
+  ,
+  ,
+  ,
+  ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc,
+]
+
+[
+  ,
+  ,
+  ,
+  ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: d
+,
+  ,
+]
+
+`;
+
 exports[`function.coffee 1`] = `
 [-> b]
 
