@@ -4733,21 +4733,23 @@ function isDoFunc(node) {
   return isDo(node) && isFunction(node.argument)
 }
 
-function getSeparatorParts({dedentFollowingComma, options}) {
+function getSeparatorParts({dedentFollowingComma, options, isCommaRequired}) {
   return [
-    ifBreak(
-      dedentFollowingComma
-        ? dedentFollowingComma.ifBreak
-          ? ifBreak(dedent(concat([line, ','])), '', {
-              visibleType: 'itemWithComma',
-            })
-          : dedent(concat([line, ',']))
-        : options.comma !== 'none'
-        ? ','
-        : '',
-      ',',
-      {visibleType: 'visible'}
-    ),
+    isCommaRequired
+      ? ','
+      : ifBreak(
+          dedentFollowingComma
+            ? dedentFollowingComma.ifBreak
+              ? ifBreak(dedent(concat([line, ','])), '', {
+                  visibleType: 'itemWithComma',
+                })
+              : dedent(concat([line, ',']))
+            : options.comma !== 'none'
+            ? ','
+            : '',
+          ',',
+          {visibleType: 'visible'}
+        ),
     dedentFollowingComma && dedentFollowingComma.ifBreak ? '' : line,
   ]
 }
@@ -5052,8 +5054,13 @@ function printArrayItems(path, options, printPath, print) {
     }
     printedElements.push(print(childPath))
 
+    const isElision = child == null
     if (!isLast) {
-      separatorParts = getSeparatorParts({dedentFollowingComma, options})
+      separatorParts = getSeparatorParts({
+        dedentFollowingComma,
+        options,
+        isCommaRequired: isElision,
+      })
       if (!shouldBreakArray) {
         shouldBreakArray = child && isFunction(child)
       }
@@ -5063,7 +5070,7 @@ function printArrayItems(path, options, printPath, print) {
       groupPreviousChildWithItsComma = dedentFollowingComma.ifBreak
     }
     childIndex++
-    precedingIsElision = child == null
+    precedingIsElision = isElision
   }, printPath)
 
   return {

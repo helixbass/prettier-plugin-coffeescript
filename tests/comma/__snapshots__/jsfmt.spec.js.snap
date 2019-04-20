@@ -74,8 +74,8 @@ exports[`elision.coffee 1`] = `
 
 [
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-
+  ,
+  ,
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ]
 
@@ -84,16 +84,16 @@ exports[`elision.coffee 1`] = `
 [, , , c]
 
 [
-
-
-
+  ,
+  ,
+  ,
   ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ]
 
 [
-
-
-
+  ,
+  ,
+  ,
   ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: d
 ,
   ,
