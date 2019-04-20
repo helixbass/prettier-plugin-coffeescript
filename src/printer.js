@@ -296,12 +296,21 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         return false
       }
       return true
-    case 'ConditionalExpression':
+    case 'ConditionalExpression': {
       if (isPostfixBody(path)) {
         return true
       }
       if (isCondition(node, parent)) {
         return {unlessParentBreaks: true}
+      }
+      if (node.alternate) {
+        const isRightmost = isRightmostInStatement(path, options, {
+          stackOffset,
+          checkIfIsConsequent: true,
+        })
+        if (isRightmost && isRightmost.isConsequent) {
+          return {unlessParentBreaks: {visibleType: 'if'}}
+        }
       }
       switch (parent.type) {
         case 'TaggedTemplateExpression':
@@ -357,6 +366,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         default:
           return false
       }
+    }
     case 'For':
       if (isPostfixBody(path) && !node.postfix) {
         return true
@@ -1375,7 +1385,7 @@ function printPathNoParens(path, options, print) {
       if (isChainedElseIf) {
         return content
       }
-      return group(content, {shouldBreak})
+      return group(content, {shouldBreak, visibleType: 'if'})
     }
     case 'For': {
       const printedSource = path.call(print, 'source')
@@ -2736,19 +2746,19 @@ function trailingObjectIsntOptions(callee) {
   return false
 }
 
-function isPostfixIfConsequent(path, {stackOffset = 0} = {}) {
+function isIfConsequent(path, {stackOffset = 0, postfix} = {}) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
   const greatgrandparent = path.getParentNode(stackOffset + 2)
 
-  if (isIf(parent, {postfix: true}) && node === parent.consequent) {
+  if (isIf(parent, {postfix}) && node === parent.consequent) {
     return true
   }
 
   if (
     singleExpressionBlock(parent) &&
-    isIf(grandparent, {postfix: true}) &&
+    isIf(grandparent, {postfix}) &&
     parent === grandparent.consequent
   ) {
     return true
@@ -2757,13 +2767,17 @@ function isPostfixIfConsequent(path, {stackOffset = 0} = {}) {
   if (
     parent.type === 'ExpressionStatement' &&
     singleExpressionBlock(grandparent) &&
-    isIf(greatgrandparent, {postfix: true}) &&
+    isIf(greatgrandparent, {postfix}) &&
     grandparent === greatgrandparent.consequent
   ) {
     return true
   }
 
   return false
+}
+
+function isPostfixIfConsequent(path, {stackOffset = 0} = {}) {
+  return isIfConsequent(path, {stackOffset, postfix: true})
 }
 
 function isPostfixForBody(path, {stackOffset = 0} = {}) {
@@ -2964,7 +2978,7 @@ function isFollowedByIndentedBody(node, parent) {
 function isRightmostInStatement(
   path,
   options,
-  {stackOffset = 0, ifParentBreaks} = {}
+  {stackOffset = 0, ifParentBreaks, checkIfIsConsequent} = {}
 ) {
   const node = path.getParentNode(stackOffset - 1)
   let prevParent = node
@@ -2981,6 +2995,12 @@ function isRightmostInStatement(
     trailingLine,
     isFollowedByIndentedBody: isFollowedByIndentedBody(node, parent),
     isFollowedByComma,
+    isConsequent: checkIfIsConsequent
+      ? isIfConsequent(path, {
+          stackOffset: stackOffset + parentLevel,
+          postfix: false,
+        })
+      : null,
   })
 
   while ((parent = path.getParentNode(stackOffset + parentLevel))) {
@@ -3094,6 +3114,11 @@ function isRightmostInStatement(
           indent = true
         }
         if (
+          // avoid infinite recursion isRightmostInStatement() -> pathNeedsParens()
+          // trailingLine isn't necessary for that case (looks like it's only necessary
+          // to track when ifParentBreaks, so could clean up by only doing trailingLine
+          // calculations when ifParentBreaks instead?)
+          !checkIfIsConsequent &&
           pathNeedsParens(path, options, {
             stackOffset: stackOffset + parentLevel,
           })
@@ -3174,7 +3199,9 @@ function isIf(node, {postfix} = {}) {
   return (
     node &&
     (node.type === 'IfStatement' || node.type === 'ConditionalExpression') &&
-    (!postfix || node.postfix)
+    (postfix == null ||
+      (postfix && node.postfix) ||
+      (!postfix && !node.postfix))
   )
 }
 
@@ -4322,9 +4349,19 @@ function printArgumentsList(path, options, print) {
   const closingLinebreakAnyway =
     parensUnnecessary && parent.type === 'JSXExpressionContainer'
 
+  let tmpNeedsParens
   const openingImplicitSpace =
     args.length === 1 &&
-    path.call(argPath => pathNeedsParens(argPath, options), 'arguments', '0')
+    path.call(
+      argPath =>
+        (tmpNeedsParens = pathNeedsParens(argPath, options)) &&
+        !(
+          tmpNeedsParens.unlessParentBreaks &&
+          tmpNeedsParens.unlessParentBreaks.visibleType
+        ),
+      'arguments',
+      '0'
+    )
       ? ''
       : ' '
   const defaultParenOffset = shouldntBreak ? 0 : 1

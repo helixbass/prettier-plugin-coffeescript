@@ -9655,7 +9655,7 @@ test 'nested single-line conditionals', ->
   c = if false then undefined else if 0 then undefined else nonce
   eq nonce, c
 
-  d = if true then id if false then undefined else nonce
+  d = if true then id (if false then undefined else nonce)
   eq nonce, d
 
 test 'empty conditional bodies', ->
@@ -10109,7 +10109,7 @@ test '#2343: if / then / if / then / else', ->
     if a then if b then if c then d else if e then f else if g then h else i
 
   y = ->
-    if a then if b then if c then d else if e then f else if g then h else i
+    if a then if b then (if c then d else if e then f else if g then h else i)
 
   eq 4, s()
   eq 4, t()
@@ -10229,7 +10229,7 @@ test '#2343: if / then / if / then / else / else', ->
 
   y = ->
     if a
-      if b then if c then d else if e then f else if g then h else i else j
+      if b then (if c then d else if e then f else if g then h else i) else j
     else
       k
 
@@ -10331,7 +10331,8 @@ test '#2343: switch / when / then / if / then / else', ->
 
   y = ->
     switch
-      when a then if b then if c then d else if e then f else if g then h else i
+      when a
+        if b then (if c then d else if e then f else if g then h else i)
 
   eq 4, s()
   eq 4, t()
@@ -10439,7 +10440,7 @@ test '#2343: switch / when / then / if / then / else / else', ->
   y = ->
     switch
       when a
-        if b then if c then d else if e then f else if g then h else i
+        if b then (if c then d else if e then f else if g then h else i)
       else 0
 
   eq 4, s()
@@ -10570,7 +10571,7 @@ test '#2343: switch / when / then / if / then / else / else / else', ->
   y = ->
     switch
       when a
-        if b then if c then d else if e then f else if g then h else i else j
+        if b then (if c then d else if e then f else if g then h else i) else j
       else 0
 
   eq 4, s()
