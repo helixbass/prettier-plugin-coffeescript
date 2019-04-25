@@ -32,7 +32,7 @@ yarn:
 # yarn seems to occasionally get confused by Github dependencies, so I'd recommend clearing your lockfile first
 rm yarn.lock
 # then explicitly install the dependencies and the plugin
-yarn add --dev github:helixbass/coffeescript#63d127c github:helixbass/prettier#72ae1f97 prettier-plugin-coffeescript
+yarn add --dev github:helixbass/coffeescript#63d127c github:helixbass/prettier#9105f5f1 prettier-plugin-coffeescript
 ```
 
 npm:
@@ -41,7 +41,7 @@ npm:
 # npm also seems to occasionally get confused by Github dependencies, so I'd recommend clearing your lockfile first
 rm package-lock.json
 # then explicitly install the dependencies and the plugin
-npm install --save-dev github:helixbass/coffeescript#63d127c github:helixbass/prettier#72ae1f97 prettier-plugin-coffeescript
+npm install --save-dev github:helixbass/coffeescript#63d127c github:helixbass/prettier#9105f5f1 prettier-plugin-coffeescript
 ```
 
 ## Usage

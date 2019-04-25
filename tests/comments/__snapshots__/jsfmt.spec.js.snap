@@ -452,6 +452,23 @@ else if 15
 
 `;
 
+exports[`inline-leading-expression-statement.coffee 1`] = `
+do -> ### a ### b; c
+
+do -> ### a ### b ### d ###; c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+do ->
+  ### a ###
+  b
+  c
+
+do ->
+  ### a ###
+  b ### d ###
+  c
+
+`;
+
 exports[`issues.coffee 1`] = `
 # Does not need to break as it fits in 80 columns
 this.call(a, ### comment ### b)

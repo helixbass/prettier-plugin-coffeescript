@@ -726,8 +726,27 @@ function printPathNoParens(path, options, print) {
       }
 
       return concat(parts)
-    case 'ExpressionStatement':
-      return path.call(print, 'expression')
+    case 'ExpressionStatement': {
+      const printed = path.call(print, 'expression')
+      if (!expressionStatementHasInlineLeadingComment(n, options)) {
+        return printed
+      }
+
+      n.comments
+        .filter(comment => isInlineLeadingComment(comment, n, options))
+        .forEach(comment => {
+          parts.push(printCommentNode(comment))
+          comment.printed = true
+          parts.push(hardline)
+        })
+      const allComments = n.comments
+      n.comments = n.comments.filter(
+        comment => !isInlineLeadingComment(comment, n, options)
+      )
+      parts.push(comments.printComments(path, () => printed, options))
+      n.comments = allComments
+      return concat(parts)
+    }
     case 'AssignmentExpression':
       return printAssignment(
         n.left,
@@ -5236,9 +5255,7 @@ function shouldFlatten(parent, node) {
 // const clean = (ast, newObj) => {}
 const clean = () => {}
 
-function printComment(commentPath, options) {
-  const comment = commentPath.getValue()
-
+function printCommentNode(comment, options) {
   switch (comment.type) {
     case 'CommentBlock': {
       if (isJsDocComment(comment)) {
@@ -5263,6 +5280,10 @@ function printComment(commentPath, options) {
     default:
       throw new Error('Not a comment: ' + JSON.stringify(comment))
   }
+}
+
+function printComment(commentPath, options) {
+  return printCommentNode(commentPath.getValue(), options)
 }
 
 function isJsDocComment(comment) {
@@ -5336,11 +5357,36 @@ function hasDanglingComments(node, filter) {
   )
 }
 
-function willPrintOwnComments(path) {
+function isInlineLeadingComment(comment, node, options) {
+  return (
+    comment.leading &&
+    !util.hasNewlineInRange(
+      options.originalText,
+      options.locEnd(comment),
+      options.locStart(node)
+    )
+  )
+}
+
+function expressionStatementHasInlineLeadingComment(node, options) {
+  return (
+    node.comments &&
+    node.comments.some(comment =>
+      isInlineLeadingComment(comment, node, options)
+    )
+  )
+}
+
+function willPrintOwnComments(path, options) {
   const node = path.getValue()
   const parent = path.getParentNode()
 
-  return isClass(parent) && parent.superClass === node
+  return (
+    node &&
+    ((isClass(parent) && parent.superClass === node) ||
+      (node.type === 'ExpressionStatement' &&
+        expressionStatementHasInlineLeadingComment(node, options)))
+  )
 }
 
 module.exports = {
