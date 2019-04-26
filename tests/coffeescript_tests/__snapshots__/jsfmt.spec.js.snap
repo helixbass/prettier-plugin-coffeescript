@@ -15792,7 +15792,7 @@ test '#4473: variable scope in chained calls', ->
   eq d, 4
 
   obj
-    .foo({ f } = { f: 1 })
+    .foo({ f } = f: 1)
     .bar -> f = 5
   eq f, 5
 
