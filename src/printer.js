@@ -3134,7 +3134,11 @@ function isRightmostInStatement(
       if (prevParent !== parent.right) {
         return false
       }
-      if (!isAssignment(parent)) {
+      if (isAssignment(parent)) {
+        if (pathNeedsParens(path, options, {stackOffset: stackOffset + 1})) {
+          return nonIfParentBreaksReturnValue()
+        }
+      } else {
         if (!setIndent) {
           indent = true
         }
