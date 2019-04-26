@@ -303,15 +303,21 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       if (isCondition(node, parent)) {
         return {unlessParentBreaks: true}
       }
-      if (node.alternate) {
-        const isRightmost = isRightmostInStatement(path, options, {
-          stackOffset,
-          checkIfIsConsequent: true,
-        })
-        if (isRightmost && isRightmost.isConsequent) {
-          return {unlessParentBreaks: {visibleType: 'if'}}
-        }
+
+      const isRightmost = isRightmostInStatement(path, options, {
+        stackOffset,
+        checkIfIsConsequent: true,
+      })
+      if (
+        isRightmost &&
+        isRightmost.isConsequent &&
+        (node.alternate ||
+          (isRightmost.isConsequent.ifNode &&
+            isRightmost.isConsequent.ifNode.alternate))
+      ) {
+        return {unlessParentBreaks: {visibleType: 'if'}}
       }
+
       switch (parent.type) {
         case 'TaggedTemplateExpression':
         case 'Range':
@@ -2772,7 +2778,7 @@ function isIfConsequent(path, {stackOffset = 0, postfix} = {}) {
   const greatgrandparent = path.getParentNode(stackOffset + 2)
 
   if (isIf(parent, {postfix}) && node === parent.consequent) {
-    return true
+    return {ifNode: parent}
   }
 
   if (
@@ -2780,7 +2786,7 @@ function isIfConsequent(path, {stackOffset = 0, postfix} = {}) {
     isIf(grandparent, {postfix}) &&
     parent === grandparent.consequent
   ) {
-    return true
+    return {ifNode: grandparent}
   }
 
   if (
@@ -2789,7 +2795,7 @@ function isIfConsequent(path, {stackOffset = 0, postfix} = {}) {
     isIf(greatgrandparent, {postfix}) &&
     grandparent === greatgrandparent.consequent
   ) {
-    return true
+    return {ifNode: greatgrandparent}
   }
 
   return false
