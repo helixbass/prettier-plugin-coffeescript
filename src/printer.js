@@ -90,6 +90,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
   }
 
   switch (node.type) {
+    case 'OptionalCallExpression':
     case 'CallExpression': {
       let firstParentNotMemberExpression = parent
       let i = 0
@@ -145,6 +146,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
             (node.operator === '+' || node.operator === '-')
           )
 
+        case 'OptionalMemberExpression':
         case 'MemberExpression':
           if (parent.object !== node) {
             return false
@@ -159,6 +161,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'TaggedTemplateExpression':
           return true
         case 'NewExpression':
+        case 'OptionalCallExpression':
         case 'CallExpression':
           return parent.callee === node
 
@@ -174,6 +177,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
     case 'BinaryExpression':
     case 'LogicalExpression':
       switch (parent.type) {
+        case 'OptionalCallExpression':
         case 'CallExpression':
         case 'NewExpression':
           return parent.callee === node
@@ -184,6 +188,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'Range':
         case 'SpreadElement':
           return true
+        case 'OptionalMemberExpression':
         case 'MemberExpression':
           return parent.object === node
         case 'BinaryExpression':
@@ -239,6 +244,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'BinaryExpression':
         case 'LogicalExpression':
           return true
+        case 'OptionalMemberExpression':
         case 'MemberExpression':
           return node === parent.object
         default:
@@ -327,6 +333,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'SpreadElement':
           return true
 
+        case 'OptionalMemberExpression':
         case 'MemberExpression':
           return !(parent.property === node && parent.computed)
 
@@ -346,6 +353,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           }
           return false
         case 'NewExpression':
+        case 'OptionalCallExpression':
         case 'CallExpression':
           if (node !== parent.callee && node !== getLast(parent.arguments)) {
             return {unlessParentBreaks: true}
@@ -378,6 +386,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         return true
       }
       switch (parent.type) {
+        case 'OptionalCallExpression':
         case 'CallExpression':
           return parent.callee === node || node.postfix
         case 'AssignmentExpression':
@@ -395,6 +404,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           }
           return false
         case 'ReturnStatement':
+        case 'OptionalMemberExpression':
         case 'MemberExpression':
         case 'SpreadElement':
         case 'JSXSpreadAttribute':
@@ -448,9 +458,11 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
       switch (parent.type) {
         case 'TaggedTemplateExpression':
+        case 'OptionalMemberExpression':
         case 'MemberExpression':
           return true
         case 'NewExpression':
+        case 'OptionalCallExpression':
         case 'CallExpression':
           if (node === parent.callee) {
             return true
@@ -503,6 +515,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
       switch (parent.type) {
         case 'NewExpression':
+        case 'OptionalCallExpression':
         case 'CallExpression':
           return node === parent.callee
         case 'SpreadElement':
@@ -572,6 +585,7 @@ function endsWithFunctionOrControl(node, ret) {
     ret = isAssignment(node) ? {isAssignment: true} : true
   }
   switch (node.type) {
+    case 'OptionalCallExpression':
     case 'CallExpression': {
       if (!node.arguments.length) {
         return false
@@ -959,6 +973,7 @@ function printPathNoParens(path, options, print) {
     }
     case 'Identifier':
       return concat([n.name])
+    case 'OptionalMemberExpression':
     case 'MemberExpression': {
       const parent = path.getParentNode()
       const shouldInline =
@@ -1212,6 +1227,7 @@ function printPathNoParens(path, options, print) {
 
       return concat(parts)
     case 'NewExpression':
+    case 'OptionalCallExpression':
     case 'CallExpression': {
       const isNew = n.type === 'NewExpression'
 
@@ -2148,8 +2164,10 @@ function closesOwnIndentWhenBreaking(path) {
   const node = path.getValue()
   switch (node.type) {
     case 'ArrayExpression':
+    case 'OptionalCallExpression':
     case 'CallExpression':
       return true
+    case 'OptionalMemberExpression':
     case 'MemberExpression':
       return node.computed && node.property.type !== 'Range'
   }
