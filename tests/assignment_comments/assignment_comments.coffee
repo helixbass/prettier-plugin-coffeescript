@@ -37,18 +37,19 @@ fnString = # Comment
 fnString = # Comment
   'some' + 'long' + 'string'
 
-f = (
-  a =
-  #comment
-  b
-) => {}
+# TODO: reenable if https://github.com/jashkenas/coffeescript/pull/5081 gets merged
+# f = (
+#   a =
+#   #comment
+#   b
+# ) => {}
 
-f = (
-  a = #comment
-  b
-) => {}
+# f = (
+#   a = #comment
+#   b
+# ) => {}
 
-f = (
-  a =
-  b #comment
-) => {}
+# f = (
+#   a =
+#   b #comment
+# ) => {}
