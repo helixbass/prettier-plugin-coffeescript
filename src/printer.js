@@ -2109,8 +2109,15 @@ function printPathNoParens(path, options, print) {
       return join(literalline, n.value.raw.split(/\r?\n/g))
     case 'TemplateLiteral':
       return printTemplateLiteral(path, options, print)
-    case 'EmptyInterpolation':
-      return ''
+    case 'EmptyInterpolation': {
+      const requiresHardline =
+        n.comments && !n.comments.every(handleComments.isBlockComment)
+
+      return concat([
+        comments.printDanglingComments(path, options, /* sameIndent */ true),
+        requiresHardline ? breakParent : '',
+      ])
+    }
     case 'TaggedTemplateExpression':
       return concat([path.call(print, 'tag'), path.call(print, 'quasi')])
     default:

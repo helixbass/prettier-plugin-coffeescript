@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`jsx.coffee 1`] = `
+<div>{}</div>
+
+<div>{
+}</div>
+
+<div>{
+  # comment
+}</div>
+
+<div>{ ### here###}</div>
+
+<div>{
+  ### here ###
+  # comment
+}</div>
+
+<div>{
+  # comment
+  # another
+}</div>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<div>{}</div>
+
+<div>{}</div>
+
+<div>
+  {
+    # comment
+  }
+</div>
+
+<div>{### here###}</div>
+
+<div>
+  {
+    ### here ###
+    # comment
+  }
+</div>
+
+<div>
+  {
+    # comment
+    # another
+  }
+</div>
+
+`;
+
+exports[`string.coffee 1`] = `
+"#{}"
+
+"a#{}b"
+
+"#{
+  # comment
+}"
+
+"#{ ### here###}"
+
+"#{
+  ### here ###
+  # comment
+}"
+
+"#{
+  # comment
+  # another
+}"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"#{}"
+
+"a#{}b"
+
+"#{
+  # comment
+}"
+
+"#{### here###}"
+
+"#{
+  ### here ###
+  # comment
+}"
+
+"#{
+  # comment
+  # another
+}"
+
+`;
