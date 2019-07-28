@@ -898,7 +898,10 @@ function printPathNoParens(path, options, print) {
     }
     case 'ClassMethod':
       if (n.static) {
-        parts.push(n.staticClassName ? `${n.staticClassName}.` : '@')
+        parts.push(path.call(print, 'staticClassName'))
+        if (!isShorthandThis(n.staticClassName)) {
+          parts.push('.')
+        }
       }
 
       parts = parts.concat(printObjectMethod(path, options, print))
@@ -2076,6 +2079,28 @@ function printPathNoParens(path, options, print) {
       // return group(concat(parts))
       return concat(parts)
     }
+    case 'ClassPrototypeProperty': {
+      const leftParts = []
+      if (n.computed) {
+        leftParts.push('[', path.call(print, 'key'), ']')
+      } else {
+        leftParts.push(printPropertyKey(path, options, print))
+      }
+      const printedLeft = concat(leftParts)
+
+      parts.push(
+        printAssignment(
+          n.key,
+          printedLeft,
+          ':',
+          n.value,
+          [path, print, 'value'],
+          options
+        )
+      )
+
+      return concat(parts)
+    }
     case 'ClassDeclaration':
     case 'ClassExpression':
       parts.push(concat(printClass(path, options, print)))
@@ -2091,6 +2116,13 @@ function printPathNoParens(path, options, print) {
     default:
       throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
+}
+
+function isShorthandThis(node) {
+  if (!node) return false
+  if (node.type !== 'ThisExpression') return false
+  if (!node.shorthand) return false
+  return true
 }
 
 function isSimpleMemberExpression(node, parent) {
@@ -2257,7 +2289,8 @@ function functionBodyShouldBreak(node, options) {
   return (
     singleExpr &&
     (isIf(singleExpr, {postfix: true}) ||
-      (options.respectBreak.indexOf('functionBody') > -1 && node.body.indented))
+      (options.respectBreak.indexOf('functionBody') > -1 &&
+        node.hasIndentedBody))
   )
 }
 
