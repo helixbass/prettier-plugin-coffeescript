@@ -176,6 +176,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
     case 'BinaryExpression':
     case 'LogicalExpression':
+    case 'ChainedComparison':
       switch (parent.type) {
         case 'OptionalCallExpression':
         case 'CallExpression':
@@ -827,6 +828,18 @@ function printPathNoParens(path, options, print) {
       return group(
         concat([parts.length > 0 ? parts[0] : '', breaks ? indent(rest) : rest])
       )
+    }
+    case 'ChainedComparison': {
+      let index = 0
+      const lastIndex = n.operands.length - 1
+      path.each(operandPath => {
+        parts.push(print(operandPath))
+        if (index < lastIndex) {
+          parts.push(' ', n.operators[index], line)
+        }
+        index++
+      }, 'operands')
+      return group(concat(parts))
     }
     case 'AssignmentPattern':
       return concat([
