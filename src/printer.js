@@ -2,6 +2,7 @@
 
 const util = require('prettier/src/common/util')
 const comments = require('prettier/src/main/comments')
+const isIdentifierName = require('esutils').keyword.isIdentifierNameES5
 const {
   isNextLineEmpty,
   hasSameStartLine,
@@ -10,9 +11,6 @@ const {
 } = require('./util')
 const embed = require('./embed')
 const handleComments = require('./comments')
-const {
-  IDENTIFIER: LEADING_IDENTIFIER,
-} = require('coffeescript/lib/coffeescript/lexer')
 
 const {doc} = require('prettier')
 const docBuilders = doc.builders
@@ -5080,11 +5078,6 @@ function printPropertyKey(path, options, print) {
     return key.value
   }
   return path.call(print, 'key')
-}
-
-const IDENTIFIER = new RegExp(`${LEADING_IDENTIFIER.source}$`)
-function isIdentifierName(str) {
-  return IDENTIFIER.test(str)
 }
 
 function isObjectish(node) {
