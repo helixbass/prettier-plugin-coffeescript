@@ -3131,7 +3131,9 @@ function isRightmostInStatement(
         ((parent.body && parent.body.body.length) ||
           isBlockLevel(parent, grandparent))) ||
       parent.type === 'SequenceExpression' ||
-      (parent.type === 'ClassProperty' && prevParent === parent.value) ||
+      ((parent.type === 'ClassProperty' ||
+        parent.type === 'ClassPrototypeProperty') &&
+        prevParent === parent.value) ||
       (isMemberExpression(parent) &&
         prevParent === parent.property &&
         parent.computed) ||
