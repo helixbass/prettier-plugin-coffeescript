@@ -94,7 +94,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       let i = 0
       while (
         firstParentNotMemberExpression &&
-        firstParentNotMemberExpression.type === 'MemberExpression'
+        isMemberExpression(firstParentNotMemberExpression)
       ) {
         firstParentNotMemberExpression = path.getParentNode(++i + stackOffset)
       }
@@ -266,7 +266,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
     case 'NumericLiteral':
       return (
         (parent.type === 'TaggedTemplateExpression' && node === parent.tag) ||
-        (parent.type === 'CallExpression' && node === parent.callee)
+        (isCallExpression(parent) && node === parent.callee)
       )
     case 'AssignmentExpression':
       if (isPostfixForBody(path, {stackOffset})) {
@@ -292,7 +292,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       }
       if (
         node.operator !== '=' &&
-        ((parent.type === 'CallExpression' && node !== parent.callee) ||
+        ((isCallExpression(parent) && node !== parent.callee) ||
           (parent.type === 'WhileStatement' && node === parent.test))
       ) {
         return false
@@ -494,11 +494,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         (parent.type === 'BinaryExpression' &&
           parent.left === node &&
           node.superClass) ||
-        ((parent.type === 'CallExpression' ||
-          parent.type === 'NewExpression') &&
+        ((isCallExpression(parent) || parent.type === 'NewExpression') &&
           parent.callee === node) ||
         (isClass(parent) && parent.superClass === node) ||
-        (parent.type === 'MemberExpression' && parent.object === node) ||
+        (isMemberExpression(parent) && parent.object === node) ||
         (parent.type === 'UnaryExpression' && parent.operator === 'typeof')
       )
     case 'ObjectExpression':
@@ -544,7 +543,7 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       return (
         isAmbiguousRegex(node) &&
         !(
-          parent.type === 'CallExpression' &&
+          isCallExpression(parent) &&
           parent.arguments.length &&
           node === parent.arguments[0]
         )
@@ -1337,7 +1336,7 @@ function printPathNoParens(path, options, print) {
       )
       const keyword = n.inverted ? 'unless ' : 'if '
       const dontBreakTest =
-        n.test.type === 'CallExpression' ||
+        isCallExpression(n.test) ||
         (isDoFunc(n.test) && n.postfix) ||
         (n.test.type === 'BinaryExpression' &&
           n.test.right.type === 'ArrayExpression')
@@ -1592,7 +1591,7 @@ function printPathNoParens(path, options, print) {
         ]),
         {visibleType: 'visible'}
       )
-      const dontBreakTest = n.test.type === 'CallExpression'
+      const dontBreakTest = isCallExpression(n.test)
       const test = dontBreakTest ? simpleTest : breakingTest
       const guard = n.guard ? concat([' when ', path.call(print, 'guard')]) : ''
       const keyword = n.inverted ? 'until ' : 'while '
@@ -1749,7 +1748,7 @@ function printPathNoParens(path, options, print) {
           ]),
           {visibleType: 'visible'}
         )
-        const dontBreakDiscriminant = n.discriminant.type === 'CallExpression'
+        const dontBreakDiscriminant = isCallExpression(n.discriminant)
         const discriminant = dontBreakDiscriminant
           ? simpleDiscriminant
           : breakingDiscriminant
@@ -1925,7 +1924,7 @@ function printPathNoParens(path, options, print) {
         shouldInlineButStillClosingLinebreak ||
         n.expression.type === 'ArrayExpression' ||
         n.expression.type === 'ObjectExpression' ||
-        n.expression.type === 'CallExpression' ||
+        isCallExpression(n.expression) ||
         isFunction(n.expression) ||
         n.expression.type === 'JSXEmptyExpression' ||
         n.expression.type === 'TemplateLiteral' ||
@@ -2145,11 +2144,11 @@ function isShorthandThis(node) {
 
 function isSimpleMemberExpression(node, parent) {
   return (
-    node.type === 'MemberExpression' &&
+    isMemberExpression(node) &&
     (node.object.type === 'Identifier' ||
       node.object.type === 'ThisExpression') &&
     node.property.type === 'Identifier' &&
-    parent.type !== 'MemberExpression'
+    !isMemberExpression(parent)
   )
 }
 
@@ -2195,7 +2194,7 @@ function followedByClosingParen(path, options) {
 
 function shouldInlineCall(node, options) {
   const isNew = node.type === 'NewExpression'
-  if (!(isNew || node.type === 'CallExpression')) {
+  if (!(isNew || isCallExpression(node))) {
     return false
   }
 
@@ -2260,8 +2259,8 @@ function hasNakedLeftSide(node) {
     node.type === 'BinaryExpression' ||
     node.type === 'LogicalExpression' ||
     (node.type === 'UnaryExpression' && node.prefix) ||
-    node.type === 'CallExpression' ||
-    node.type === 'MemberExpression' ||
+    isCallExpression(node) ||
+    isMemberExpression(node) ||
     node.type === 'SequenceExpression' ||
     node.type === 'TaggedTemplateExpression' ||
     (node.type === 'UpdateExpression' && !node.prefix)
@@ -2399,10 +2398,10 @@ function printFunction(path, options, print) {
   }
   const isChainedDoIife =
     isDo(parent) &&
-    grandparent.type === 'MemberExpression' &&
+    isMemberExpression(grandparent) &&
     parent === grandparent.object
   const isOnlyCallArgWithParens =
-    parent.type === 'CallExpression' &&
+    isCallExpression(parent) &&
     parent.arguments.length === 1 &&
     node === parent.arguments[0] &&
     (callParensOptional(path, options, {stackOffset: 1})
@@ -2709,7 +2708,7 @@ function printTemplateLiteral(path, options, print, {omitQuotes} = {}) {
 
       if (
         (node.expressions[i].comments && node.expressions[i].comments.length) ||
-        node.expressions[i].type === 'MemberExpression' ||
+        isMemberExpression(node.expressions[i]) ||
         node.expressions[i].type === 'ConditionalExpression'
       ) {
         printed = concat([indent(concat([softline, printed])), softline])
@@ -2729,7 +2728,7 @@ function printTemplateLiteral(path, options, print, {omitQuotes} = {}) {
 }
 
 function isChainableCall(node) {
-  return node.type === 'CallExpression' && isMemberish(node.callee)
+  return isCallExpression(node) && isMemberExpression(node.callee)
 }
 
 function printRegex(path, options, print) {
@@ -2973,6 +2972,21 @@ function isTryBody(path, {stackOffset = 0} = {}) {
   return false
 }
 
+function isCallExpression(node) {
+  return (
+    node &&
+    (node.type === 'CallExpression' || node.type === 'OptionalCallExpression')
+  )
+}
+
+function isMemberExpression(node) {
+  return (
+    node &&
+    (node.type === 'MemberExpression' ||
+      node.type === 'OptionalMemberExpression')
+  )
+}
+
 function shouldOmitObjectBraces(
   path,
   options,
@@ -3002,7 +3016,7 @@ function shouldOmitObjectBraces(
   }
 
   if (
-    parent.type === 'CallExpression' &&
+    isCallExpression(parent) &&
     node !== parent.callee &&
     trailingObjectIsntOptions(parent.callee)
   ) {
@@ -3117,7 +3131,7 @@ function isRightmostInStatement(
           isBlockLevel(parent, grandparent))) ||
       parent.type === 'SequenceExpression' ||
       (parent.type === 'ClassProperty' && prevParent === parent.value) ||
-      (parent.type === 'MemberExpression' &&
+      (isMemberExpression(parent) &&
         prevParent === parent.property &&
         parent.computed) ||
       (parent.type === 'ArrayExpression' &&
@@ -3148,8 +3162,8 @@ function isRightmostInStatement(
         }) ||
         parent.type === 'ArrayExpression' ||
         (isChainableCall(prevParent) &&
-          parent.type === 'MemberExpression' &&
-          grandparent.type === 'CallExpression' &&
+          isMemberExpression(parent) &&
+          isCallExpression(grandparent) &&
           parent === grandparent.callee) ||
         (isFunction(parent) && parent.params.indexOf(prevParent) > -1) ||
         (isFirstCallInChain(path, {
@@ -3795,10 +3809,6 @@ function adjustClause(node, clause) {
   return indent(concat([line, clause]))
 }
 
-function isMemberish(node) {
-  return node.type === 'MemberExpression'
-}
-
 function printMemberChain(path, options, print) {
   const printedNodes = []
 
@@ -3806,8 +3816,8 @@ function printMemberChain(path, options, print) {
     const node = path.getValue()
 
     if (
-      node.type === 'CallExpression' &&
-      (isMemberish(node.callee) || node.callee.type === 'CallExpression')
+      isCallExpression(node) &&
+      (isMemberExpression(node.callee) || isCallExpression(node.callee))
     ) {
       printedNodes.unshift({
         node,
@@ -3822,7 +3832,7 @@ function printMemberChain(path, options, print) {
         ),
       })
       path.call(callee => rec(callee), 'callee')
-    } else if (isMemberish(node)) {
+    } else if (isMemberExpression(node)) {
       printedNodes.unshift({
         node,
         printed: comments.printComments(
@@ -3856,20 +3866,17 @@ function printMemberChain(path, options, print) {
   for (; i < printedNodes.length; ++i) {
     const printedNode = printedNodes[i]
     const {node} = printedNode
-    if (
-      node.type === 'CallExpression' ||
-      (node.type === 'MemberExpression' && node.computed)
-    ) {
+    if (isCallExpression(node) || (isMemberExpression(node) && node.computed)) {
       currentGroup.push(printedNode)
     } else {
       break
     }
   }
-  if (printedNodes[0].node.type !== 'CallExpression') {
+  if (!isCallExpression(printedNodes[0].node)) {
     for (; i + 1 < printedNodes.length; ++i) {
       if (
-        isMemberish(printedNodes[i].node) &&
-        isMemberish(printedNodes[i + 1].node)
+        isMemberExpression(printedNodes[i].node) &&
+        isMemberExpression(printedNodes[i + 1].node)
       ) {
         currentGroup.push(printedNodes[i])
       } else {
@@ -3884,7 +3891,7 @@ function printMemberChain(path, options, print) {
   for (; i < printedNodes.length; ++i) {
     const printedNode = printedNodes[i]
     const {node} = printedNode
-    if (hasSeenCallExpression && isMemberish(node)) {
+    if (hasSeenCallExpression && isMemberExpression(node)) {
       if (node.computed) {
         currentGroup.push(printedNode)
         continue
@@ -3895,7 +3902,7 @@ function printMemberChain(path, options, print) {
       hasSeenCallExpression = false
     }
 
-    if (node.type === 'CallExpression') {
+    if (isCallExpression(node)) {
       hasSeenCallExpression = true
     }
     currentGroup.push(printedNode)
@@ -3963,8 +3970,8 @@ function printMemberChain(path, options, print) {
     printIndentedGroup(groups.slice(shouldMerge ? 2 : 1)),
   ])
 
-  const callExpressions = printedNodes.filter(
-    tuple => tuple.node.type === 'CallExpression'
+  const callExpressions = printedNodes.filter(tuple =>
+    isCallExpression(tuple.node)
   )
   const callExpressionCount = callExpressions.length
 
@@ -4086,7 +4093,7 @@ function isCallArgument(
 
   if (
     !(
-      (parent.type === 'CallExpression' || parent.type === 'NewExpression') &&
+      (isCallExpression(parent) || parent.type === 'NewExpression') &&
       node !== parent.callee
     )
   ) {
@@ -4153,11 +4160,7 @@ function callParensOptionalIfParentBreaks(
 function followedByComputedAccess(path, {stackOffset = 0} = {}) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
-  return (
-    parent.type === 'MemberExpression' &&
-    parent.computed &&
-    node === parent.object
-  )
+  return isMemberExpression(parent) && parent.computed && node === parent.object
 }
 
 function isFirstCallInChain(path, {stackOffset = 0} = {}) {
@@ -4165,11 +4168,11 @@ function isFirstCallInChain(path, {stackOffset = 0} = {}) {
   const parent = path.getParentNode(stackOffset)
   const grandparent = path.getParentNode(stackOffset + 1)
   return (
-    node.type === 'CallExpression' &&
-    node.callee.type !== 'MemberExpression' &&
-    parent.type === 'MemberExpression' &&
+    isCallExpression(node) &&
+    !isMemberExpression(node.callee) &&
+    isMemberExpression(parent) &&
     node === parent.object &&
-    grandparent.type === 'CallExpression' &&
+    isCallExpression(grandparent) &&
     parent === grandparent.callee
   )
 }
@@ -4254,7 +4257,7 @@ function callParensOptional(path, options, {stackOffset = 0} = {}) {
     (parent.type === 'ConditionalExpression' &&
       (parent.consequent === node || parent.alternate === node)) ||
     (parent.type === 'For' && parent.postfix && parent.body === node) ||
-    (parent.type === 'CallExpression' && node === getLast(parent.arguments)) ||
+    (isCallExpression(parent) && node === getLast(parent.arguments)) ||
     (parent.type === 'ObjectProperty' &&
       node === parent.value &&
       parent === getLast(grandparent.properties) &&
@@ -4762,16 +4765,15 @@ function dontBreakAssignment({rightNode, node, rightName, path, options}) {
     (rightNode.type === 'AssignmentExpression' &&
       node.type === 'AssignmentExpression') ||
     (options.indentChain &&
-      rightNode.type === 'MemberExpression' &&
+      isMemberExpression(rightNode) &&
       !isSimpleMemberExpression(rightNode, node)) ||
     // &&
     // rightNode.computed &&
     // rightNode.object.type === 'Identifier'
     (options.indentChain && isChainableCall(rightNode)) ||
-    (rightNode.type === 'CallExpression' &&
+    (isCallExpression(rightNode) &&
       !isChainableCall(rightNode) &&
-      (rightNode.callee.type === 'Identifier' ||
-        rightNode.callee.type === 'MemberExpression'))
+      (rightNode.callee.type === 'Identifier' || isMemberExpression(rightNode)))
   )
 }
 
@@ -4806,7 +4808,7 @@ function printAssignment(
     shouldBreak ||
     (willBreak(printed) &&
       !(
-        rightNode.type === 'CallExpression' &&
+        isCallExpression(rightNode) &&
         path.call(
           rightPath => shouldGroupLastArg(rightPath, options),
           rightName
@@ -4818,7 +4820,7 @@ function printAssignment(
   const shouldTryAndBreakLeftOnly = !(
     leftNode.type === 'Identifier' ||
     isStringLiteral(leftNode) ||
-    leftNode.type === 'MemberExpression'
+    isMemberExpression(leftNode)
   )
   const singleGroup = group(full, {visibleType: 'assignment'})
   if (!shouldTryAndBreakLeftOnly) {
@@ -4980,7 +4982,7 @@ function printOptionalToken(path) {
 
 function isThisLookup(node, {shorthand} = {}) {
   return (
-    node.type === 'MemberExpression' &&
+    isMemberExpression(node) &&
     node.object.type === 'ThisExpression' &&
     (!shorthand || node.object.shorthand)
   )
@@ -4988,7 +4990,7 @@ function isThisLookup(node, {shorthand} = {}) {
 
 function isShorthandPrototypeLookup(node) {
   return (
-    node.type === 'MemberExpression' &&
+    isMemberExpression(node) &&
     node.shorthand &&
     !node.computed &&
     node.property.type === 'Identifier' &&

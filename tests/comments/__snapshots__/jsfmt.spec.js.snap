@@ -452,6 +452,17 @@ else if 15
 
 `;
 
+exports[`implicit-call-ending-condition.coffee 1`] = `
+if a b
+  # c
+  d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if a b
+  # c
+  d
+
+`;
+
 exports[`inline-leading-expression-statement.coffee 1`] = `
 do -> ### a ### b; c
 
