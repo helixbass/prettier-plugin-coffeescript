@@ -2733,7 +2733,8 @@ function isChainableCall(node) {
 
 function printRegex(path, options, print) {
   const node = path.getValue()
-  const delim = node.delimiter || '/'
+  const delim =
+    node.type === 'InterpolatedRegExpLiteral' ? '///' : node.delimiter || '/'
   const flags = node.flags
     .split('')
     .sort()
@@ -4859,7 +4860,10 @@ function printAssignment(
 }
 
 function isHeregex(node) {
-  return node.type === 'RegExpLiteral' && node.delimiter === '///'
+  return (
+    node.type === 'InterpolatedRegExpLiteral' ||
+    (node.type === 'RegExpLiteral' && node.delimiter === '///')
+  )
 }
 
 function isDo(node) {
