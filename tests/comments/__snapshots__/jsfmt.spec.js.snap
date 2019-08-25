@@ -396,59 +396,78 @@ else if 4
 # comment
 else
 
-if 5
-  # comment
+if (
+  5 # comment
+)
   true
 
-if 6
-  # comment
+if (
+  6 # comment
+)
   true
-else if 7
-  # comment
+else if (
+  7 # comment
+)
   true
+# comment
 else
-  # comment
   true
 
-if 8
-  # comment
-  # comment
+if (
+  8 # comment
+)# comment
+
   true
-else if 9
-  # comment
-  # comment
+else if (
+  9 # comment
+)# comment
+
   true
+# comment
+# comment
 else
-  # comment
-  # comment
   true
 
-if 10
-  ### comment ### # comment
+if (
+  10 ### comment ### # comment
+)
   true
-else if 11
-  ### comment ###
+else if 11 ### comment ###
   true
-else if 12
-  # comment ### comment ### # comment
+else if (
+  12 # comment ### comment ### # comment
+)
   true
-else if 13
-  ### comment ### ### comment ### # comment
+else if (
+  13 ### comment ### ### comment ### # comment
+)
   true
+### comment ###
 else
-  ### comment ###
   true
 
-if 14
-  # comment
-  ### comment ###
-  # comment
+if (
+  14 # comment
+)### comment ###
+# comment
+
   true
-else if 15
-  # comment
-  ### comment ###
-  ### comment ### # comment
+else if (
+  15 # comment # comment
+)### comment ###
+### comment ###
   true
+
+`;
+
+exports[`implicit-call-ending-condition.coffee 1`] = `
+if a b
+  # c
+  d
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if a b
+  # c
+  d
 
 `;
 

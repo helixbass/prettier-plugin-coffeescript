@@ -15256,13 +15256,13 @@ test 'Issue 4631: left and right spread dots with preceding space', ->
   eq(
     yes
     f(...a) is
-      f(...a) is
-      f(a...) is
-      f(a...) is
-      f(a...) is
-      f(...a) is
-      f(a...) is
-      f ...a
+    f(...a) is
+    f(a...) is
+    f(a...) is
+    f(a...) is
+    f(...a) is
+    f(a...) is
+    f(...a)
   )
 
 test 'Issue 894: Splatting against constructor-chained functions.', ->
@@ -21766,7 +21766,7 @@ test 'preserve references', ->
   a = b = c = 1
   # \`a == b <= c\` should become \`a === b && b <= c\`
   # (this test does not seem to test for this)
-  ok (a == b) <= c
+  ok a == b <= c
 
 test 'chained operations should evaluate each value only once', ->
   a = 0
