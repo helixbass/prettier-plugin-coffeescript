@@ -1899,6 +1899,11 @@ function printPathNoParens(path, options, print) {
       return concat(parts)
     case 'JSXIdentifier':
       return '' + n.name
+    case 'JSXNamespacedName':
+      return join(':', [
+        path.call(print, 'namespace'),
+        path.call(print, 'name'),
+      ])
     case 'JSXSpreadAttribute':
       return concat([
         '{',

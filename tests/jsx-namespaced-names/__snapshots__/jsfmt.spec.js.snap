@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`names.coffee 1`] = `
+<namespace:div />
+
+<namespace:div>{content}</namespace:div>
+
+<div namespace:attr />
+
+<div namespace:attr="value" />
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<namespace:div />
+
+<namespace:div>{content}</namespace:div>
+
+<div namespace:attr />
+
+<div namespace:attr="value" />
+
+`;
