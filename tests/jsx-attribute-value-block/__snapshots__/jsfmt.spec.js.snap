@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test.coffee 1`] = `
+<div a={
+  b
+  c
+} />
+
+<div>
+  {
+    a
+    b
+  }
+</div>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<div
+  a={
+    b
+    c
+  }
+/>
+
+<div>
+  {
+    a
+    b
+  }
+</div>
+
+`;
