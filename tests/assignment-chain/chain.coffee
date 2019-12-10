@@ -17,3 +17,6 @@ aaaaaaaaa: bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffff
 aaaaaaaaa = bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
 
 aaaaaaaaa: bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+
+a = b.c (d) ->
+  e

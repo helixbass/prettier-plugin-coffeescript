@@ -889,6 +889,7 @@ function printPathNoParens(path, options, print) {
               rightName,
               path,
               options,
+              print,
             })) ||
           unsafeInline
         parts.push(
@@ -1362,6 +1363,7 @@ function printPathNoParens(path, options, print) {
                 rightName: 'right',
                 path: assignmentPath,
                 options,
+                print,
               }),
             ...fullSingleExprPath
           )
@@ -1518,6 +1520,7 @@ function printPathNoParens(path, options, print) {
                 rightName: 'right',
                 path: assignmentPath,
                 options,
+                print,
               }),
             ...fullSingleExprPath
           )
@@ -1613,6 +1616,7 @@ function printPathNoParens(path, options, print) {
                 rightName: 'right',
                 path: assignmentPath,
                 options,
+                print,
               }),
             ...bodyExprPath
           )
@@ -3817,7 +3821,7 @@ function adjustClause(node, clause) {
   return indent(concat([line, clause]))
 }
 
-function printMemberChain(path, options, print) {
+function printMemberChain(path, options, print, returnIsExpanded) {
   const printedNodes = []
 
   function rec(path) {
@@ -3968,9 +3972,12 @@ function printMemberChain(path, options, print) {
     // flatGroups.slice(0, -1).some(node => hasTrailingComment(node.node)) ||
     (groups[cutoff] && hasLeadingComment(groups[cutoff][0].node))
 
+  let isExpanded = true
   if (groups.length <= cutoff && !hasComment) {
-    return group(oneLine)
+    isExpanded = false
+    if (!returnIsExpanded) return group(oneLine)
   }
+  if (returnIsExpanded) return isExpanded
 
   const expanded = concat([
     printGroup(groups[0]),
@@ -4743,7 +4750,14 @@ function printAssignmentRight(rightNode, printedRight, options, canBreak) {
   return nonbroken
 }
 
-function dontBreakAssignment({rightNode, node, rightName, path, options}) {
+function dontBreakAssignment({
+  rightNode,
+  node,
+  rightName,
+  path,
+  print,
+  options,
+}) {
   return (
     shouldInlineLogicalExpression(rightNode) ||
     rightNode.type === 'ArrayExpression' ||
@@ -4780,8 +4794,19 @@ function dontBreakAssignment({rightNode, node, rightName, path, options}) {
     // rightNode.object.type === 'Identifier'
     (options.indentChain && isChainableCall(rightNode)) ||
     (isCallExpression(rightNode) &&
-      !isChainableCall(rightNode) &&
-      (rightNode.callee.type === 'Identifier' || isMemberExpression(rightNode)))
+      (!isChainableCall(rightNode) ||
+        !path.call(
+          rightPath =>
+            printMemberChain(
+              rightPath,
+              options,
+              print,
+              /* returnIsExpanded */ true
+            ),
+          rightName
+        )) &&
+      (rightNode.callee.type === 'Identifier' ||
+        isMemberExpression(rightNode.callee)))
   )
 }
 
@@ -4802,6 +4827,7 @@ function printAssignment(
     rightName,
     path,
     options,
+    print,
   })
 
   const printed = printAssignmentRight(
