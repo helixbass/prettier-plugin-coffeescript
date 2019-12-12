@@ -65,11 +65,29 @@ npm run prettier -- path/to/file.coffee --write
 ```
 
 In practice, there are various ways to run Prettier:
-- most editors can be configured to run Prettier automatically
+- most editors can be configured to run Prettier automatically (see below for instructions for specific editors)
 - Prettier can be configured to run via a linter like ESLint
 - you can enforce the usage of Prettier by having it run automatically before committing code
 
 The "Usage" section of the [Prettier docs](https://prettier.io/docs/en/precommit.html) describes how to set these up
+
+#### Running in-editor
+
+Depending on your editor, there may or may not currently be a straightforward way to get Prettier running against `.coffee` files (e.g. using a Prettier editor plugin).
+
+If you're having trouble getting Prettier running in your editor (and it's not listed below), please [file an issue](https://github.com/helixbass/prettier-plugin-coffeescript/issues) and we'll try and help with support for your editor.
+
+#### VS Code
+
+To run Prettier from VS Code, first install the VS Code [Prettier extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
+
+Then add to your VS Code [`settings.json`](https://code.visualstudio.com/docs/getstarted/settings):
+
+```
+"[coffeescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
+```
 
 ## Configuration
 
