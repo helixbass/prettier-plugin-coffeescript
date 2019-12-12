@@ -1908,6 +1908,11 @@ function printPathNoParens(path, options, print) {
         path.call(print, 'namespace'),
         path.call(print, 'name'),
       ])
+    case 'JSXMemberExpression':
+      return join('.', [
+        path.call(print, 'object'),
+        path.call(print, 'property'),
+      ])
     case 'JSXSpreadAttribute':
       return concat([
         '{',
