@@ -4362,7 +4362,14 @@ function printArgumentsList(path, options, print) {
       shouldBreak = true
     }
     if (dedentPrecedingComma && !(isLast && isObjectish(arg))) {
-      if (separatorParts.length) {
+      if (
+        separatorParts.length &&
+        !(
+          separatorParts[0].type === 'if-break' &&
+          separatorParts[0].breakContents &&
+          separatorParts[0].breakContents.type === 'if-break'
+        )
+      ) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
       }
     }

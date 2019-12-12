@@ -1,5 +1,101 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`breaking-dedented.coffee 1`] = `
+flow((b -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll), -> 4444444444444)
+
+f((-> valllllllllllllllllllllllllllllllllllllllllllllllllllllll), -> 444444444444444444)
+
+f(
+  ->
+    val
+    2
+  -> 4
+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+flow(
+  b -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll
+  -> 4444444444444
+)
+
+f(
+  -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll
+  -> 444444444444444444
+)
+
+f(
+  ->
+    val
+    2
+,
+  -> 4
+)
+
+`;
+
+exports[`breaking-dedented.coffee 2`] = `
+flow((b -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll), -> 4444444444444)
+
+f((-> valllllllllllllllllllllllllllllllllllllllllllllllllllllll), -> 444444444444444444)
+
+f(
+  ->
+    val
+    2
+  -> 4
+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+flow(
+  b -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll
+  -> 4444444444444
+)
+
+f(
+  -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll
+  -> 444444444444444444
+)
+
+f(
+  ->
+    val
+    2
+,
+  -> 4
+)
+
+`;
+
+exports[`breaking-dedented.coffee 3`] = `
+flow((b -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll), -> 4444444444444)
+
+f((-> valllllllllllllllllllllllllllllllllllllllllllllllllllllll), -> 444444444444444444)
+
+f(
+  ->
+    val
+    2
+  -> 4
+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+flow(
+  b -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll
+  -> 4444444444444
+)
+
+f(
+  -> valllllllllllllllllllllllllllllllllllllllllllllllllllllll
+  -> 444444444444444444
+)
+
+f(
+  ->
+    val
+    2
+,
+  -> 4
+)
+
+`;
+
 exports[`call.coffee 1`] = `
 # breaking implicit should never have trailing comma
 
