@@ -20,9 +20,9 @@
     "node": ">= 6"
   },
   "dependencies": {
-    "coffeescript": "github:jashkenas/coffeescript#05d45e9b",
+    "coffeescript": "github:jashkenas/coffeescript#b2b2f978",
     "esutils": "^2.0.2",
-    "prettier": "github:helixbass/prettier#9105f5f1"
+    "prettier": "github:helixbass/prettier#b8818ebd"
   },
   "devDependencies": {
     "eslint": "^4.14.0",
