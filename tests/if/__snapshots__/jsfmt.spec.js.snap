@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`chain-condition.coffee 1`] = `
+if (
+  sourceCode
+    .getText()
+    .slice leftCurly.range[1], tokenAfterLeftCurly.range[0]
+    .trim()
+)
+  null
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if (
+  sourceCode
+    .getText()
+    .slice leftCurly.range[1], tokenAfterLeftCurly.range[0]
+    .trim()
+)
+  null
+
+`;
+
 exports[`dont-break-condition.coffee 1`] = `
 if a in [bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb, ccccccccccccccccccccccccccccccccccccc]
   d
