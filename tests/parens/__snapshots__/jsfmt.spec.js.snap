@@ -516,7 +516,7 @@ a(
     e
 ) for f in g
 
-(a b, (x = for c in d then e)) for f in g
+a(b, (x = for c in d then e)) for f in g
 
 a(
   b
@@ -598,15 +598,15 @@ a b for b in c
   b
 ) for b in c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(x ->
+x(->
   a
 ) for b in c
 
-(y ->) for b in c
+y(->) for b in c
 
 a b for b in c
 
-(a b ->) for b in c
+a(b ->) for b in c
 
 (->) for b in c
 
@@ -626,7 +626,7 @@ a b for b in c
   c
 ) for b in c
 
-(a do ->
+a(do ->
   b
 ) for b in c
 
@@ -638,11 +638,11 @@ a b for b in c
   y
 ) for b in c
 
-(a do b = ->
+a(do b = ->
   c
 ) for b in c
 
-(a b, do ->
+a(b, do ->
   c
 ) for b in c
 
@@ -652,11 +652,11 @@ a(
     c
 ) for b in c
 
-(a e, ->
+a(e, ->
   c
 ) for b in c
 
-(a e, -> c) for b in c
+a(e, -> c) for b in c
 
 a(
   (b = ->
@@ -775,7 +775,7 @@ else
 
 (if a then b else c) for b in c
 
-(a if b then c) for b in c
+a(if b then c) for b in c
 
 a(
   if b
@@ -797,9 +797,9 @@ else
     c
 )) for b in c
 
-(a do (if b then c else d)) for b in c
+a(do (if b then c else d)) for b in c
 
-(a do (
+a(do (
   if b
     c
   else
@@ -814,15 +814,15 @@ else
   d
 ) for b in c
 
-(a do b = if c then d else e) for b in c
+a(do b = if c then d else e) for b in c
 
-(a do b = if c
+a(do b = if c
   d
 else
   e
 ) for b in c
 
-(a g, do b = if c then d else e) for b in c
+a(g, do b = if c then d else e) for b in c
 
 a(
   g
@@ -832,14 +832,14 @@ a(
     e
 ) for b in c
 
-(a b, if c then d) for b in c
+a(b, if c then d) for b in c
 
-(a b,
+a(b,
   if c
     d
 ) for b in c
 
-(a b, (x = if c then d)) for b in c
+a(b, (x = if c then d)) for b in c
 
 a(
   b
@@ -848,7 +848,7 @@ a(
   )
 ) for b in c
 
-(a b, do (if c then d else e)) for b in c
+a(b, do (if c then d else e)) for b in c
 
 a(
   b
@@ -939,7 +939,7 @@ a(
     e
 ) if f
 
-(a b, (x = for c in d then e)) if f
+a(b, (x = for c in d then e)) if f
 
 a(
   b
@@ -1021,15 +1021,15 @@ a b if c
   b
 ) if c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(x ->
+x(->
   a
 ) if b
 
-(y ->) if b
+y(->) if b
 
 a b if c
 
-(a b ->) if c
+a(b ->) if c
 
 (->) if b
 
@@ -1049,7 +1049,7 @@ a b if c
   c
 ) if d
 
-(a do ->
+a(do ->
   b
 ) if c
 
@@ -1061,11 +1061,11 @@ a b if c
   y
 ) if z
 
-(a do b = ->
+a(do b = ->
   c
 ) if d
 
-(a b, do ->
+a(b, do ->
   c
 ) if d
 
@@ -1075,11 +1075,11 @@ a(
     c
 ) if d
 
-(a e, ->
+a(e, ->
   c
 ) if d
 
-(a e, -> c) if d
+a(e, -> c) if d
 
 a(
   (b = ->
@@ -1198,7 +1198,7 @@ else
 
 (if a then b else c) if d
 
-(a if b then c) if d
+a(if b then c) if d
 
 a(
   if b
@@ -1220,9 +1220,9 @@ else
     c
 )) if d
 
-(a do (if b then c else d)) if e
+a(do (if b then c else d)) if e
 
-(a do (
+a(do (
   if b
     c
   else
@@ -1237,15 +1237,15 @@ else
   d
 ) if e
 
-(a do b = if c then d else e) if f
+a(do b = if c then d else e) if f
 
-(a do b = if c
+a(do b = if c
   d
 else
   e
 ) if f
 
-(a g, do b = if c then d else e) if f
+a(g, do b = if c then d else e) if f
 
 a(
   g
@@ -1255,14 +1255,14 @@ a(
     e
 ) if f
 
-(a b, if c then d) if f
+a(b, if c then d) if f
 
-(a b,
+a(b,
   if c
     d
 ) if f
 
-(a b, (x = if c then d)) if e
+a(b, (x = if c then d)) if e
 
 a(
   b
@@ -1271,7 +1271,7 @@ a(
   )
 ) if e
 
-(a b, do (if c then d else e)) if f
+a(b, do (if c then d else e)) if f
 
 a(
   b
@@ -1366,7 +1366,7 @@ a(
     when c then d
 )) if e
 
-(a do switch b
+a(do switch b
   when c
     d
 ) if e
@@ -1376,7 +1376,7 @@ a(
     d
 ) if e
 
-(a do b = switch c
+a(do b = switch c
   when d
     e
 ) if f
@@ -1497,7 +1497,7 @@ a(
 
 (try a) if b
 
-(a try b) if c
+a(try b) if c
 
 a(
   try
@@ -1517,9 +1517,9 @@ a(
     b
 )) if c
 
-(a do try b) if c
+a(do try b) if c
 
-(a do try
+a(do try
   b
 ) if c
 
@@ -1529,13 +1529,13 @@ a(
   b
 ) if c
 
-(a do b = try c) if d
+a(do b = try c) if d
 
-(a do b = try
+a(do b = try
   c
 ) if d
 
-(a e, do b = try c) if d
+a(e, do b = try c) if d
 
 a(
   e
@@ -1543,14 +1543,14 @@ a(
     c
 ) if d
 
-(a b, try c) if d
+a(b, try c) if d
 
-(a b,
+a(b,
   try
     c
 ) if d
 
-(a b, (x = try c)) if d
+a(b, (x = try c)) if d
 
 a(
   b
@@ -1559,7 +1559,7 @@ a(
   )
 ) if d
 
-(a b, do try c) if d
+a(b, do try c) if d
 
 a(
   b
@@ -1646,7 +1646,7 @@ a(
     d
 ) if f
 
-(a b, (x = while c then d)) if e
+a(b, (x = while c then d)) if e
 
 a(
   b
@@ -1738,7 +1738,7 @@ a(
     when c then d
 )) until e
 
-(a do switch b
+a(do switch b
   when c
     d
 ) while e
@@ -1748,7 +1748,7 @@ a(
     d
 ) while e
 
-(a do b = switch c
+a(do b = switch c
   when d
     e
 ) while f
@@ -1869,7 +1869,7 @@ a(
 
 (try a) while b
 
-(a try b) while c
+a(try b) while c
 
 a(
   try
@@ -1889,9 +1889,9 @@ a(
     b
 )) while c
 
-(a do try b) while c
+a(do try b) while c
 
-(a do try
+a(do try
   b
 ) while c
 
@@ -1901,13 +1901,13 @@ a(
   b
 ) while c
 
-(a do b = try c) while d
+a(do b = try c) while d
 
-(a do b = try
+a(do b = try
   c
 ) while d
 
-(a e, do b = try c) while d
+a(e, do b = try c) while d
 
 a(
   e
@@ -1915,14 +1915,14 @@ a(
     c
 ) while d
 
-(a b, try c) while d
+a(b, try c) while d
 
-(a b,
+a(b,
   try
     c
 ) while d
 
-(a b, (x = try c)) while d
+a(b, (x = try c)) while d
 
 a(
   b
@@ -1931,7 +1931,7 @@ a(
   )
 ) while d
 
-(a b, do try c) while d
+a(b, do try c) while d
 
 a(
   b
@@ -2018,7 +2018,7 @@ a(
     d
 ) while f
 
-(a b, (x = while c then d)) while e
+a(b, (x = while c then d)) while e
 
 a(
   b
