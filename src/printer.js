@@ -3163,6 +3163,8 @@ function isRightmostInStatement(
       (parent.type === 'For' &&
         (prevParent === parent.source || prevParent === parent.guard)) ||
       (parent.type === 'WhileStatement' && prevParent === parent.test) ||
+      (parent.type === 'ExportNamedDeclaration' &&
+        prevParent === parent.declaration) ||
       (parent.type === 'ClassExpression' &&
         prevParent === parent.superClass &&
         ((parent.body && parent.body.body.length) ||
@@ -4491,13 +4493,15 @@ function printArgumentsList(path, options, print) {
     isPostfixIfConsequent(path) ||
     (parent.type === 'ReturnStatement' &&
       isPostfixIfConsequent(path, {stackOffset: 1}))
+  const isExportDefault = parent.type === 'ExportDefaultDeclaration'
 
   const unnecessary =
     shouldntBreak ||
     (firstArgIsObject &&
       !isRightSideOfAssignment &&
       !isFollowedByIndentedBody(node, parent) &&
-      !isPostfixIfBody)
+      !isPostfixIfBody &&
+      !isExportDefault)
 
   const parensUnnecessary = unnecessary && parensOptional
   const parensUnnecessaryIfParentBreaks =

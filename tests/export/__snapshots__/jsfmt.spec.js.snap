@@ -57,3 +57,85 @@ export {}
 export {} from '.'
 
 `;
+
+exports[`implicit.coffee 1`] = `
+export ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export default ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export d = f
+  a: 1
+  b: 2
+
+export default f
+  a: 1
+  b: 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export default ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export d = f(
+  a: 1
+  b: 2
+)
+
+export default f(
+  a: 1
+  b: 2
+)
+
+`;
+
+exports[`implicit.coffee 2`] = `
+export ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export default ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export d = f
+  a: 1
+  b: 2
+
+export default f
+  a: 1
+  b: 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export default ActionTypes =
+  A: null
+  B: null
+  C: null
+
+export d = f(
+  a: 1
+  b: 2
+)
+
+export default f(
+  a: 1
+  b: 2
+)
+
+`;
