@@ -857,13 +857,13 @@ function printPathNoParens(path, options, print) {
       const parent = path.getParentNode()
       if (n.shorthand) {
         parts.push(path.call(print, 'value'))
-        if (n.computed) {
+        if (shouldPrintComputedKeyBrackets(n)) {
           parts.unshift('[')
           parts.push(']')
         }
       } else {
         let printedLeft
-        if (n.computed) {
+        if (shouldPrintComputedKeyBrackets(n)) {
           printedLeft = concat(['[', path.call(print, 'key'), ']'])
         } else {
           printedLeft = printPropertyKey(path, options, print)
@@ -1201,8 +1201,8 @@ function printPathNoParens(path, options, print) {
 
       if (
         !hasContent &&
-        ((parent.type === 'WhileStatement' || parent.type === 'For') &&
-          n === parent.body)
+        (parent.type === 'WhileStatement' || parent.type === 'For') &&
+        n === parent.body
       ) {
         parts.push(indent(concat([hardline, ';'])))
       }
@@ -1344,10 +1344,10 @@ function printPathNoParens(path, options, print) {
       const test = dontBreakTest ? simpleTest : breakingTest
 
       if (n.postfix) {
-        const {path: singleExprPath, expr: singleExpr} = singleExpressionBlock(
-          n.consequent,
-          {withPath: true}
-        )
+        const {
+          path: singleExprPath,
+          expr: singleExpr,
+        } = singleExpressionBlock(n.consequent, {withPath: true})
         const fullSingleExprPath = singleExprPath
           ? ['consequent', ...singleExprPath]
           : ['consequent']
@@ -1500,10 +1500,10 @@ function printPathNoParens(path, options, print) {
       ])
 
       if (n.postfix) {
-        const {path: singleExprPath, expr: singleExpr} = singleExpressionBlock(
-          n.body,
-          {withPath: true}
-        )
+        const {
+          path: singleExprPath,
+          expr: singleExpr,
+        } = singleExpressionBlock(n.body, {withPath: true})
         const fullSingleExprPath = singleExprPath
           ? ['body', ...singleExprPath]
           : ['body']
@@ -1551,10 +1551,10 @@ function printPathNoParens(path, options, print) {
       }
       parts.push(opening)
 
-      const {expr: singleExpr, path: singleExprPath} = singleExpressionBlock(
-        n.body,
-        {withPath: true}
-      )
+      const {
+        expr: singleExpr,
+        path: singleExprPath,
+      } = singleExpressionBlock(n.body, {withPath: true})
       const shouldBreak =
         !singleExpr ||
         (options.respectBreak.indexOf('control') > -1 &&
@@ -2105,7 +2105,7 @@ function printPathNoParens(path, options, print) {
     }
     case 'ClassPrototypeProperty': {
       const leftParts = []
-      if (n.computed) {
+      if (shouldPrintComputedKeyBrackets(n)) {
         leftParts.push('[', path.call(print, 'key'), ']')
       } else {
         leftParts.push(printPropertyKey(path, options, print))
@@ -2147,6 +2147,10 @@ function printPathNoParens(path, options, print) {
     default:
       throw new Error('unknown type: ' + JSON.stringify(n.type))
   }
+}
+
+function shouldPrintComputedKeyBrackets(node) {
+  return node.computed && node.key.type !== 'TemplateLiteral'
 }
 
 function isShorthandThis(node) {
@@ -2371,10 +2375,10 @@ function printFunction(path, options, print) {
     node.bound || node.type === 'ArrowFunctionExpression' ? '=>' : '->'
   )
 
-  const {expr: singleExpr, path: singleExprPath} = singleExpressionBlock(
-    node.body,
-    {withPath: true}
-  )
+  const {
+    expr: singleExpr,
+    path: singleExprPath,
+  } = singleExpressionBlock(node.body, {withPath: true})
   const bodyShouldBreak = functionBodyShouldBreak(node, options)
   const shouldInlineBody =
     !bodyShouldBreak &&
@@ -3348,7 +3352,7 @@ function printObjectMethod(path, options, print) {
 
   const key = printPropertyKey(path, options, print)
 
-  if (objMethod.computed) {
+  if (shouldPrintComputedKeyBrackets(objMethod)) {
     parts.push('[', key, ']')
   } else {
     parts.push(key)
@@ -3941,10 +3945,10 @@ function printMemberChain(path, options, print, returnIsExpanded) {
   const shouldMerge =
     groups.length >= 2 &&
     // !groups[1][0].node.comments &&
-    (groups[0].length === 1 &&
-      (groups[0][0].node.type === 'ThisExpression' ||
-        (groups[0][0].node.type === 'Identifier' &&
-          isFactory(groups[0][0].node.name))))
+    groups[0].length === 1 &&
+    (groups[0][0].node.type === 'ThisExpression' ||
+      (groups[0][0].node.type === 'Identifier' &&
+        isFactory(groups[0][0].node.name)))
 
   function printGroup(printedGroup, {shouldBlockVisible} = {}) {
     const printed = concat(printedGroup.map(tuple => tuple.printed))
