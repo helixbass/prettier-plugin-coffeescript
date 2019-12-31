@@ -1012,6 +1012,20 @@ class Foo
 
 `;
 
+exports[`postfix-if-condition.coffee 1`] = `
+->
+  return if ( # handled by MemberExpression)
+    b
+  )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+->
+  return if (
+    # handled by MemberExpression)
+    b
+  )
+
+`;
+
 exports[`preserve-new-line-last.coffee 1`] = `
 f = ->
   a

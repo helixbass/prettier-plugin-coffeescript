@@ -154,6 +154,11 @@ function handleIfStatementComments(
     return true
   }
 
+  if (precedingNode === enclosingNode.consequent && enclosingNode.postfix) {
+    addLeadingComment(enclosingNode.test, comment)
+    return true
+  }
+
   return false
 }
 
