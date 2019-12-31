@@ -169,7 +169,7 @@ exports[`elision.coffee 1`] = `
 [a, , , b]
 
 [
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
   ,
   ,
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb

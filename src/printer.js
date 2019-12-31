@@ -5262,6 +5262,7 @@ function printArrayItems(path, options, printPath, print) {
   let childIndex = 0
   const lastIndex = elements && elements.length && elements.length - 1
   let precedingIsElision = false
+  let isFollowedByElision = false
   path.each(childPath => {
     const child = childPath.getValue()
     const isLast = childIndex === lastIndex
@@ -5273,6 +5274,7 @@ function printArrayItems(path, options, printPath, print) {
     if (!isLast && alwaysBreak) {
       shouldBreakArray = true
     }
+    isFollowedByElision = !isLast && elements[childIndex + 1] == null
     if (dedentPrecedingComma && !precedingIsElision) {
       if (separatorParts.length) {
         separatorParts[0] = ifBreak(dedent(concat([line, ','])), ',')
@@ -5298,7 +5300,8 @@ function printArrayItems(path, options, printPath, print) {
       separatorParts = getSeparatorParts({
         dedentFollowingComma,
         options,
-        isCommaRequired: isElision,
+        isCommaRequired:
+          isElision || (isFollowedByElision && !dedentFollowingComma),
       })
       if (!shouldBreakArray) {
         shouldBreakArray = child && isFunction(child)
