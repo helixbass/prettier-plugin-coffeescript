@@ -4849,11 +4849,15 @@ function dontBreakAssignment({
       node.type === 'AssignmentExpression') ||
     (options.indentChain &&
       isMemberExpression(rightNode) &&
-      !isSimpleMemberExpression(rightNode, node)) ||
+      !isSimpleMemberExpression(rightNode, node) &&
+      // here and below, avoid Coffeescript parsing chain as being applied to object rather than key
+      node.type !== 'ObjectProperty') ||
     // &&
     // rightNode.computed &&
     // rightNode.object.type === 'Identifier'
-    (options.indentChain && isChainableCall(rightNode)) ||
+    (options.indentChain &&
+      isChainableCall(rightNode) &&
+      node.type !== 'ObjectProperty') ||
     (isCallExpression(rightNode) &&
       (!isChainableCall(rightNode) ||
         !path.call(

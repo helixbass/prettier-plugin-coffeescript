@@ -13791,7 +13791,8 @@ test 'method call chaining inside objects', ->
   f = (x) -> c: 42
   result =
     a: f 1
-    b: f(a: 1).c
+    b:
+      f(a: 1).c
   eq 42, result.b
 
 test '#4568: refine sameLine implicit object tagging', ->

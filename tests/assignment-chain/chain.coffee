@@ -20,3 +20,7 @@ aaaaaaaaa: bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffff
 
 a = b.c (d) ->
   e
+
+ruleTester.run "#{ruleName}:strict", rule,
+  valid: [...alwaysValid].map(ruleOptionsMapperFactory strictOptions).map(parserOptionsMapper)
+  invalid: [...neverValid].map(ruleOptionsMapperFactory strictOptions).map parserOptionsMapper

@@ -23,6 +23,10 @@ aaaaaaaaa: bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffff
 
 a = b.c (d) ->
   e
+
+ruleTester.run "#{ruleName}:strict", rule,
+  valid: [...alwaysValid].map(ruleOptionsMapperFactory strictOptions).map(parserOptionsMapper)
+  invalid: [...neverValid].map(ruleOptionsMapperFactory strictOptions).map parserOptionsMapper
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
@@ -39,27 +43,39 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:
 aaaaaaaaa = bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee
   .fffffffffffffffffffffffff
 
-aaaaaaaaa: bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee
-  .fffffffffffffffffffffffff
+aaaaaaaaa:
+  bbbbbbbb().ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff
 
 aaaaaaaaa = bbbbbbbb()
   .ccccccccc(-> d)
   .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
 
-aaaaaaaaa: bbbbbbbb()
-  .ccccccccc(-> d)
-  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+aaaaaaaaa:
+  bbbbbbbb()
+    .ccccccccc(-> d)
+    .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
 
 aaaaaaaaa = bbbbbbbb
   .ccccccccc(-> d)
   .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
 
-aaaaaaaaa: bbbbbbbb
-  .ccccccccc(-> d)
-  .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
+aaaaaaaaa:
+  bbbbbbbb
+    .ccccccccc(-> d)
+    .eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffffffffff()
 
 a = b.c (d) ->
   e
+
+ruleTester.run "#{ruleName}:strict", rule,
+  valid:
+    [...alwaysValid]
+      .map(ruleOptionsMapperFactory strictOptions)
+      .map(parserOptionsMapper)
+  invalid:
+    [...neverValid]
+      .map(ruleOptionsMapperFactory strictOptions)
+      .map parserOptionsMapper
 
 `;
 
@@ -86,6 +102,10 @@ aaaaaaaaa: bbbbbbbb.ccccccccc(-> d).eeeeeeeeeeeeeeeeeeeeeeee.fffffffffffffffffff
 
 a = b.c (d) ->
   e
+
+ruleTester.run "#{ruleName}:strict", rule,
+  valid: [...alwaysValid].map(ruleOptionsMapperFactory strictOptions).map(parserOptionsMapper)
+  invalid: [...neverValid].map(ruleOptionsMapperFactory strictOptions).map parserOptionsMapper
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccc
@@ -127,5 +147,15 @@ aaaaaaaaa:
 
 a = b.c (d) ->
   e
+
+ruleTester.run "#{ruleName}:strict", rule,
+  valid:
+    [...alwaysValid]
+    .map(ruleOptionsMapperFactory strictOptions)
+    .map(parserOptionsMapper)
+  invalid:
+    [...neverValid]
+    .map(ruleOptionsMapperFactory strictOptions)
+    .map parserOptionsMapper
 
 `;
