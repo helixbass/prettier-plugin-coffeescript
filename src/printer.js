@@ -318,7 +318,8 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         isRightmost.isConsequent &&
         (node.alternate ||
           (isRightmost.isConsequent.ifNode &&
-            isRightmost.isConsequent.ifNode.alternate))
+            isRightmost.isConsequent.ifNode.alternate)) &&
+        parent.type !== 'ReturnStatement'
       ) {
         return {unlessParentBreaks: {visibleType: 'if'}}
       }
