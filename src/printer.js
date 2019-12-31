@@ -1160,17 +1160,15 @@ function printPathNoParens(path, options, print) {
       const hasDirectives = n.directives && n.directives.length > 0
 
       const parent = path.getParentNode()
-      if (
+      const needsSemicolon =
         !hasContent &&
-        !hasDirectives &&
-        !hasDanglingComments(n) &&
         (((parent.type === 'IfStatement' ||
           parent.type === 'ConditionalExpression') &&
           n === parent.consequent &&
           !parent.alternate) ||
           ((parent.type === 'WhileStatement' || parent.type === 'For') &&
             n === parent.body))
-      ) {
+      if (!hasDirectives && !hasDanglingComments(n) && needsSemicolon) {
         return indent(concat([hardline, ';']))
       }
 
@@ -1210,11 +1208,7 @@ function printPathNoParens(path, options, print) {
 
       parts.push(comments.printDanglingComments(path, options))
 
-      if (
-        !hasContent &&
-        (parent.type === 'WhileStatement' || parent.type === 'For') &&
-        n === parent.body
-      ) {
+      if (needsSemicolon) {
         parts.push(indent(concat([hardline, ';'])))
       }
       return concat(parts)
