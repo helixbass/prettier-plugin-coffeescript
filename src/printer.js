@@ -1287,6 +1287,8 @@ function printPathNoParens(path, options, print) {
     }
     case 'NumericLiteral':
       return util.printNumber(n.extra.raw)
+    case 'BigIntLiteral':
+      return n.extra.raw.toLowerCase()
     case 'BooleanLiteral':
       if (n.name) {
         return n.name
