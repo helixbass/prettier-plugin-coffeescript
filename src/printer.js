@@ -3332,6 +3332,8 @@ function isRightmostInStatement(
           : true
       }
       breakingParentCount++
+      indent = false
+      setIndent = true
       if (!shouldOmitBraces) {
         return nonIfParentBreaksReturnValue()
       }

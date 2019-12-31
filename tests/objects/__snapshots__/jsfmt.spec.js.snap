@@ -33,3 +33,30 @@ a: -> implicitCall arg
 c: d
 
 `;
+
+exports[`nested-return.coffee 1`] = `
+a = ->
+  return
+    children:
+      __ANY_KEY__: child
+
+a = ->
+  children:
+    __ANY_KEY__: child
+
+children:
+  __ANY_KEY__: child
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+a = ->
+  return
+    children:
+      __ANY_KEY__: child
+
+a = ->
+  children:
+    __ANY_KEY__: child
+
+children:
+  __ANY_KEY__: child
+
+`;
