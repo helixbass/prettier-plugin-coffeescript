@@ -288,6 +288,46 @@ d: e
 
 `;
 
+exports[`comprehension-as-binary-expression-side.coffee 1`] = `
+resolvedDependencies ? (get(dependencyName) props for dependencyName in dependencies)
+
+a or (b for b in c)
+
+(d if e) && (b if c)
+
+a + (b for b in c)
+
+a + (b if c)
+
+a + (x while y)
+
+not (b for b in c)
+
+not (b if c)
+
+not (x while y)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+resolvedDependencies ?
+  (get(dependencyName) props for dependencyName in dependencies)
+
+a or (b for b in c)
+
+(d if e) && (b if c)
+
+a + (b for b in c)
+
+a + (b if c)
+
+a + (x while y)
+
+not (b for b in c)
+
+not (b if c)
+
+not (x while y)
+
+`;
+
 exports[`conditional-computed-access.coffee 1`] = `
 a[if b then c]
 

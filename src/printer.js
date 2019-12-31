@@ -412,6 +412,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
         case 'MemberExpression':
         case 'SpreadElement':
         case 'JSXSpreadAttribute':
+        case 'UnaryExpression':
+        case 'BinaryExpression':
+        case 'LogicalExpression':
           return true
         default:
           return false
@@ -440,6 +443,9 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return false
         case 'SpreadElement':
         case 'JSXSpreadAttribute':
+        case 'UnaryExpression':
+        case 'BinaryExpression':
+        case 'LogicalExpression':
           return true
         default:
           return false
