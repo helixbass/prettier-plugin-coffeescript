@@ -2233,6 +2233,9 @@ function shouldInlineCall(node, options) {
 
 function closesOwnIndentWhenBreaking(path) {
   const node = path.getValue()
+  if (isChainableCall(node)) {
+    return false
+  }
   switch (node.type) {
     case 'ArrayExpression':
     case 'OptionalCallExpression':
