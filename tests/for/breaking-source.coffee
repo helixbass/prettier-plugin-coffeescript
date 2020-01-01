@@ -15,3 +15,12 @@ for pastFragment in a b by -1111111111111111111111111111111111111111111111111111
 
 for pastFragment in a b: c by -11111111111111111111111111111111111111111111111111
   b
+
+for element in @content.unwrapAll().extractElements o, includeInterpolationWrappers: yes, isJsx: yes
+  b
+
+for element in (
+  @content.extractElements o, ->
+    a
+)
+  b
