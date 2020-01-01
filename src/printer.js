@@ -4265,14 +4265,22 @@ function callParensNecessary(path, options, {stackOffset = 0} = {}) {
     return true
   }
 
-  if (isPostfixBodyCallWithIndentedBody(path, {stackOffset})) {
+  if (
+    isPostfixBodyCallWithIndentedBody(path, {
+      stackOffset,
+      shouldGroupLastArg: shouldGroupLastArg(path, options, {stackOffset}),
+    })
+  ) {
     return true
   }
 
   return false
 }
 
-function isPostfixBodyCallWithIndentedBody(path, {stackOffset = 0} = {}) {
+function isPostfixBodyCallWithIndentedBody(
+  path,
+  {stackOffset = 0, shouldGroupLastArg} = {}
+) {
   const node = path.getParentNode(stackOffset - 1)
   const parent = path.getParentNode(stackOffset)
 
@@ -4280,7 +4288,7 @@ function isPostfixBodyCallWithIndentedBody(path, {stackOffset = 0} = {}) {
     (isPostfixBody(path, {stackOffset}) ||
       (parent.type === 'ReturnStatement' &&
         isPostfixBody(path, {stackOffset: stackOffset + 1}))) &&
-    endsWithFunctionOrControl(node)
+    (endsWithFunctionOrControl(node) || shouldGroupLastArg)
   )
 }
 
@@ -4638,14 +4646,16 @@ function printArgumentsList(path, options, print) {
     let printedExpanded
     let i = 0
     let lastArg
+    let isLastArgImplicitObject
     path.each(argPath => {
       if (i === args.length - 1) {
         lastArg = argPath.getValue()
         const printedLastArg = printedArgumentsNoTrailingComma[i]
+        isLastArgImplicitObject =
+          lastArg.type === 'ObjectExpression' &&
+          shouldOmitObjectBraces(argPath, options)
         printedExpanded = nonLastArgs.concat(
-          (lastArg.type === 'ObjectExpression' &&
-            shouldOmitObjectBraces(argPath, options)) ||
-            shouldGroupLast.indent
+          isLastArgImplicitObject || shouldGroupLast.indent
             ? indent(concat([softline, printedLastArg]))
             : printedLastArg
         )
@@ -4662,10 +4672,16 @@ function printArgumentsList(path, options, print) {
     const breakLast = concat([
       openingParen,
       concat(nonLastArgs),
-      group(util.getLast(printedExpanded), {
-        shouldBreak: true,
-        visibleType: lastArg.type === 'ObjectExpression' ? 'visible' : null,
-      }),
+      group(
+        concat([
+          util.getLast(printedExpanded),
+          isLastArgImplicitObject && parensNecessary ? softline : '',
+        ]),
+        {
+          shouldBreak: true,
+          visibleType: lastArg.type === 'ObjectExpression' ? 'visible' : null,
+        }
+      ),
       closingParen,
     ])
     const somePrintedArgumentsWillBreak = printedArguments.some(willBreak)
