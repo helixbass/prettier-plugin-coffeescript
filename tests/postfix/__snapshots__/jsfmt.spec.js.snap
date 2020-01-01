@@ -78,6 +78,33 @@ aaaaaaaaaaaaaaaaaaaaa = [
 
 `;
 
+exports[`call-last-arg-implicit-object.coffee 1`] = `
+@token 'TERMINATOR', '\\n', offset: offset + outdentLength, length: 10000 unless tag() is 'TERMINATOR' or noNewlines
+
+@token 'TERMINATOR', '\\n', offset: offset + outdentLength, length: 1 unless tag() is 'TERMINATOR' or noNewlines
+
+@token 'TERMINATOR', '\\n', offset: offset + outdentLength, length: 10000 while b
+
+@token 'TERMINATOR', '\\n', offset: offset + outdentLength, length: 10000 for b in c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@token('TERMINATOR', '\\n',
+  offset: offset + outdentLength, length: 10000
+) unless tag() is 'TERMINATOR' or noNewlines
+
+@token('TERMINATOR', '\\n', offset: offset + outdentLength, length: 1) unless (
+  tag() is 'TERMINATOR' or noNewlines
+)
+
+@token('TERMINATOR', '\\n',
+  offset: offset + outdentLength, length: 10000
+) while b
+
+@token('TERMINATOR', '\\n',
+  offset: offset + outdentLength, length: 10000
+) for b in c
+
+`;
+
 exports[`return-indented-body.coffee 1`] = `
 return ((fixer) ->
   fixer.removeRange rangeToRemove
