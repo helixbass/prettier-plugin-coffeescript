@@ -22,26 +22,21 @@
 This plugin adds support for the [CoffeeScript](https://coffeescript.org) language to Prettier
 
 ## Install
-This plugin currently requires forked versions of CoffeeScript (but the necessary AST support is landing soon) and Prettier (in order to support things like implicit calls and objects, new Prettier primitives are required - [here's the PR](https://github.com/prettier/prettier/pull/4462))
+This plugin currently requires a forked version of Prettier (in order to support things like implicit calls and objects, new Prettier primitives are required - [here's the PR](https://github.com/prettier/prettier/pull/4462)) as well as CoffeeScript
+v2.5.0 or higher.
 
 So the best way to ensure that the required dependencies are available to the plugin is to explicitly install them in your project along with the plugin:
 
 yarn:
 
 ```bash
-# yarn seems to occasionally get confused by Github dependencies, so I'd recommend clearing your lockfile first
-rm yarn.lock
-# then explicitly install the dependencies and the plugin
-yarn add --dev github:jashkenas/coffeescript#05d45e9b github:helixbass/prettier#9105f5f1 prettier-plugin-coffeescript
+yarn add --dev coffeescript@^2.5.0 github:helixbass/prettier#b8818ebd prettier-plugin-coffeescript
 ```
 
 npm:
 
 ```bash
-# npm also seems to occasionally get confused by Github dependencies, so I'd recommend clearing your lockfile first
-rm package-lock.json
-# then explicitly install the dependencies and the plugin
-npm install --save-dev github:jashkenas/coffeescript#05d45e9b github:helixbass/prettier#9105f5f1 prettier-plugin-coffeescript
+npm install --save-dev coffeescript@^2.5.0 github:helixbass/prettier#b8818ebd prettier-plugin-coffeescript
 ```
 
 ## Usage
