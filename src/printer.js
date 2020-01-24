@@ -116,6 +116,11 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
       switch (parent.type) {
         case 'Range':
           return node.arguments && node.arguments.length > 0
+        case 'SpreadElement':
+          return (
+            grandparent.type === 'ObjectExpression' &&
+            node.type === 'OptionalCallExpression'
+          )
         default:
           return false
       }
@@ -560,8 +565,31 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           node === parent.arguments[0]
         )
       )
+    case 'MemberExpression':
+    case 'OptionalMemberExpression':
+      switch (parent.type) {
+        case 'SpreadElement':
+          return (
+            grandparent.type === 'ObjectExpression' &&
+            (node.type === 'OptionalMemberExpression' ||
+              containsPrototypeShorthand(node))
+          )
+        default:
+          return false
+      }
   }
 
+  return false
+}
+
+function containsPrototypeShorthand(node) {
+  let current = node
+  while (isMemberExpression(current)) {
+    if (current.shorthand) {
+      return true
+    }
+    current = current.object
+  }
   return false
 }
 

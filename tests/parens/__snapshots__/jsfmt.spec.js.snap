@@ -479,6 +479,59 @@ exports[`if-call-arg.coffee 1`] = `
 
 `;
 
+exports[`member-expression-spread.coffee 1`] = `
+export default class MyClass extends MyOtherClass
+  DEFAULTS: {
+    (@::DEFAULTS)...
+    a: 1
+    b: 1
+  }
+
+{(opts?.data?.root)..., (opts?.data)...}
+
+{
+  ...(a::b),
+  ...(a.b::c),
+  ...(a.b?.c),
+  ...(a().b?.c),
+  (a?())...,
+}
+
+f(a?.b...)
+f(a::b...)
+f(a?()...)
+
+[a?.b...]
+[a::b...]
+[a?()...]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export default class MyClass extends MyOtherClass
+  DEFAULTS: {
+    (@::DEFAULTS)...
+    a: 1
+    b: 1
+  }
+
+{ (opts?.data?.root)..., (opts?.data)... }
+
+{
+  ...(a::b)
+  ...(a.b::c)
+  ...(a.b?.c)
+  ...(a().b?.c)
+  (a?())...
+}
+
+f a?.b...
+f a::b...
+f a?()...
+
+[a?.b...]
+[a::b...]
+[a?()...]
+
+`;
+
 exports[`postfix-for-body-for.coffee 1`] = `
 (
   for a in b
