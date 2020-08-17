@@ -30,13 +30,13 @@ So the best way to ensure that the required dependencies are available to the pl
 yarn:
 
 ```bash
-yarn add --dev coffeescript@^2.5.0 github:helixbass/prettier#b8818ebd prettier-plugin-coffeescript
+yarn add --dev coffeescript@^2.5.0 github:helixbass/prettier#prettier-v2.1.0-dev.100-gitpkg prettier-plugin-coffeescript
 ```
 
 npm:
 
 ```bash
-npm install --save-dev coffeescript@^2.5.0 github:helixbass/prettier#b8818ebd prettier-plugin-coffeescript
+npm install --save-dev coffeescript@^2.5.0 github:helixbass/prettier#prettier-v2.1.0-dev.100-gitpkg prettier-plugin-coffeescript
 ```
 
 ## Usage
