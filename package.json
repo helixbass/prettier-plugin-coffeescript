@@ -22,7 +22,7 @@
   "dependencies": {
     "coffeescript": "^2.5.0",
     "esutils": "^2.0.2",
-    "prettier": "github:helixbass/prettier#b8818ebd"
+    "prettier": "github:helixbass/prettier#prettier-v2.1.0-dev.100-gitpkg"
   },
   "devDependencies": {
     "eslint": "^4.14.0",

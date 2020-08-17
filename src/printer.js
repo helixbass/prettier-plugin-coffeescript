@@ -1,16 +1,10 @@
 'use strict'
 
-const util = require('prettier/src/common/util')
-const comments = require('prettier/src/main/comments')
 const isIdentifierName = require('esutils').keyword.isIdentifierNameES5
-const {
-  isNextLineEmpty,
-  hasSameStartLine,
-  getNextNonSpaceNonCommentCharacter,
-  isFunction,
-} = require('./util')
+const util = require('./util')
 const embed = require('./embed')
 const handleComments = require('./comments')
+const comments = require('./comment-utils')
 
 const {doc} = require('prettier')
 const docBuilders = doc.builders
@@ -34,7 +28,14 @@ const {
 } = docBuilders
 const docUtils = doc.utils
 const {isEmpty, isLineNext, willBreak} = docUtils
-const {getLast, getPenultimate} = util
+const {
+  isNextLineEmpty,
+  hasSameStartLine,
+  getNextNonSpaceNonCommentCharacter,
+  isFunction,
+  getLast,
+  getPenultimate,
+} = util
 
 const sysUtil = require('util')
 
@@ -197,10 +198,10 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
           return parent.object === node
         case 'BinaryExpression':
         case 'LogicalExpression': {
-          const po = getCanonicalOperator(parent)
-          const pp = getPrecedence(po)
-          const no = getCanonicalOperator(node)
-          const np = getPrecedence(no)
+          const po = util.getCanonicalOperator(parent)
+          const pp = util.getPrecedence(po)
+          const no = util.getCanonicalOperator(node)
+          const np = util.getPrecedence(no)
 
           if (pp > np) {
             return true
@@ -214,12 +215,12 @@ function pathNeedsParens(path, options, {stackOffset = 0} = {}) {
             return true
           }
 
-          if (pp === np && !shouldFlatten(parent, node)) {
+          if (pp === np && !util.shouldFlatten(parent, node)) {
             return true
           }
 
           if (pp < np && no === '%') {
-            return !shouldFlatten(parent, node)
+            return !util.shouldFlatten(parent, node)
           }
 
           if (util.isBitwiseOperator(po)) {
@@ -758,11 +759,15 @@ function printPathNoParens(path, options, print) {
   switch (n.type) {
     case 'File':
       return path.call(print, 'program')
-    case 'Program':
+    case 'Program': {
+      const hasContents =
+        !n.body.every(({type}) => type === 'EmptyStatement') || n.comments
       if (n.directives) {
-        path.each(childPath => {
+        const directivesCount = n.directives.length
+        path.each((childPath, index) => {
           parts.push(print(childPath), hardline)
           if (
+            (index < directivesCount - 1 || hasContents) &&
             isNextLineEmpty(options.originalText, childPath.getValue(), locEnd)
           ) {
             parts.push(hardline)
@@ -770,7 +775,7 @@ function printPathNoParens(path, options, print) {
         }, 'directives')
       }
       parts.push(
-        path.call(bodyPath => {
+        path.call((bodyPath) => {
           return printStatementSequence(bodyPath, options, print)
         }, 'body')
       )
@@ -779,11 +784,12 @@ function printPathNoParens(path, options, print) {
         comments.printDanglingComments(path, options, /* sameIndent */ true)
       )
 
-      if (n.body.length || n.comments) {
+      if (hasContents) {
         parts.push(hardline)
       }
 
       return concat(parts)
+    }
     case 'ExpressionStatement': {
       const printed = path.call(print, 'expression')
       if (!expressionStatementHasInlineLeadingComment(n, options)) {
@@ -791,15 +797,15 @@ function printPathNoParens(path, options, print) {
       }
 
       n.comments
-        .filter(comment => isInlineLeadingComment(comment, n, options))
-        .forEach(comment => {
+        .filter((comment) => isInlineLeadingComment(comment, n, options))
+        .forEach((comment) => {
           parts.push(printCommentNode(comment))
           comment.printed = true
           parts.push(hardline)
         })
       const allComments = n.comments
       n.comments = n.comments.filter(
-        comment => !isInlineLeadingComment(comment, n, options)
+        (comment) => !isInlineLeadingComment(comment, n, options)
       )
       parts.push(comments.printComments(path, () => printed, options))
       n.comments = allComments
@@ -849,7 +855,7 @@ function printPathNoParens(path, options, print) {
         parent.type === 'ObjectProperty'
 
       const samePrecedenceSubExpression =
-        isBinaryish(n.left) && shouldFlatten(n, n.left)
+        isBinaryish(n.left) && util.shouldFlatten(n, n.left)
 
       if (
         shouldNotIndent ||
@@ -869,7 +875,7 @@ function printPathNoParens(path, options, print) {
     case 'ChainedComparison': {
       let index = 0
       const lastIndex = n.operands.length - 1
-      path.each(operandPath => {
+      path.each((operandPath) => {
         parts.push(print(operandPath))
         if (index < lastIndex) {
           parts.push(' ', n.operators[index], line)
@@ -1117,7 +1123,7 @@ function printPathNoParens(path, options, print) {
       const standalones = []
       const grouped = []
       if (n.specifiers && n.specifiers.length > 0) {
-        path.each(specifierPath => {
+        path.each((specifierPath) => {
           const value = specifierPath.getValue()
           if (
             value.type === 'ImportDefaultSpecifier' ||
@@ -1181,7 +1187,7 @@ function printPathNoParens(path, options, print) {
     case 'Import':
       return 'import'
     case 'BlockStatement': {
-      const naked = path.call(bodyPath => {
+      const naked = path.call((bodyPath) => {
         return printStatementSequence(bodyPath, options, print)
       }, 'body')
 
@@ -1216,7 +1222,7 @@ function printPathNoParens(path, options, print) {
       }
 
       if (hasDirectives) {
-        path.each(childPath => {
+        path.each((childPath) => {
           parts.push(indent(concat([hardline, print(childPath)])))
           if (
             isNextLineEmpty(options.originalText, childPath.getValue(), locEnd)
@@ -1388,7 +1394,7 @@ function printPathNoParens(path, options, print) {
         const bodyIsBreakableAssignment =
           expr.type === 'AssignmentExpression' &&
           !path.call(
-            assignmentPath =>
+            (assignmentPath) =>
               dontBreakAssignment({
                 rightNode: expr.right,
                 node: expr,
@@ -1438,7 +1444,7 @@ function printPathNoParens(path, options, print) {
         const commentOnOwnLine =
           (hasTrailingComment(n.consequent) &&
             n.consequent.comments.some(
-              comment =>
+              (comment) =>
                 comment.trailing && !handleComments.isBlockComment(comment)
             )) ||
           needsHardlineAfterDanglingComment(n)
@@ -1479,7 +1485,7 @@ function printPathNoParens(path, options, print) {
       const printedSource = path.call(print, 'source')
 
       const sourceClosesOwnIndentWhenBreaking = path.call(
-        sourcePath => closesOwnIndentWhenBreaking(sourcePath),
+        (sourcePath) => closesOwnIndentWhenBreaking(sourcePath),
         'source'
       )
       const source = sourceClosesOwnIndentWhenBreaking
@@ -1545,7 +1551,7 @@ function printPathNoParens(path, options, print) {
         const bodyIsBreakableAssignment =
           bodyIsAssignment &&
           !path.call(
-            assignmentPath =>
+            (assignmentPath) =>
               dontBreakAssignment({
                 rightNode: expr.right,
                 node: expr,
@@ -1641,7 +1647,7 @@ function printPathNoParens(path, options, print) {
         const bodyIsBreakableAssignment =
           expr.type === 'AssignmentExpression' &&
           !path.call(
-            assignmentPath =>
+            (assignmentPath) =>
               dontBreakAssignment({
                 rightNode: expr.right,
                 node: expr,
@@ -1814,7 +1820,7 @@ function printPathNoParens(path, options, print) {
                   !kase.consequent.length
                     ? ';'
                     : casePath.call(
-                        consequentPath =>
+                        (consequentPath) =>
                           printStatementSequence(
                             consequentPath,
                             options,
@@ -1834,7 +1840,7 @@ function printPathNoParens(path, options, print) {
             : '',
         ])
       }
-      path.map(casePath => {
+      path.map((casePath) => {
         currentGroupCasePath = casePath
         const kase = casePath.getValue()
         if (kase.comments && kase.comments.find(({leading}) => leading)) {
@@ -1962,7 +1968,7 @@ function printPathNoParens(path, options, print) {
           ((isIf(n.expression) && !n.expression.postfix) ||
             (isBinaryish(n.expression) &&
               !path.call(
-                rightPath => pathNeedsParens(rightPath, options),
+                (rightPath) => pathNeedsParens(rightPath, options),
                 'expression',
                 'right'
               ))))
@@ -2049,7 +2055,7 @@ function printPathNoParens(path, options, print) {
           concat([
             indent(
               concat(
-                path.map(attr => concat([line, print(attr)]), 'attributes')
+                path.map((attr) => concat([line, print(attr)]), 'attributes')
               )
             ),
             n.selfClosing ? line : bracketSameLine ? '>' : softline,
@@ -2095,7 +2101,7 @@ function printPathNoParens(path, options, print) {
           ? indent(
               concat([
                 hardline,
-                path.call(bodyPath => {
+                path.call((bodyPath) => {
                   return printStatementSequence(bodyPath, options, print)
                 }, 'body'),
               ])
@@ -2300,7 +2306,7 @@ function hasLeadingOwnLineComment(text, node, options) {
   const res =
     node.comments &&
     node.comments.some(
-      comment =>
+      (comment) =>
         comment.leading && util.hasNewline(text, options.locEnd(comment))
     )
   return res
@@ -2370,7 +2376,7 @@ function printFunction(path, options, print) {
   const parent = path.getParentNode()
   const grandparent = path.getParentNode(1)
 
-  const preParamsDanglingCommentFilter = comment =>
+  const preParamsDanglingCommentFilter = (comment) =>
     getNextNonSpaceNonCommentCharacter(
       options.originalText,
       comment,
@@ -2390,7 +2396,7 @@ function printFunction(path, options, print) {
     group(printFunctionParams(path, print, options), {visibleType: 'visible'})
   )
 
-  const postParamsDanglingCommentFilter = comment =>
+  const postParamsDanglingCommentFilter = (comment) =>
     getNextNonSpaceNonCommentCharacter(
       options.originalText,
       comment,
@@ -2541,7 +2547,7 @@ function printObject(path, print, options) {
   const grandparent = path.getParentNode(1)
   const {locEnd} = options
   const printedProps = []
-  path.each(childPath => {
+  path.each((childPath) => {
     const node = childPath.getValue()
     printedProps.push({
       node,
@@ -2584,10 +2590,10 @@ function printObject(path, print, options) {
   const joinedProps = []
   let propIndex = 0
   const lastPropIndex = printedProps.length - 1
-  printedProps.forEach(prop => {
+  printedProps.forEach((prop) => {
     const isLast = propIndex === lastPropIndex
     ;({following: dedentComma} = path.call(
-      valuePath => shouldDedentComma(valuePath, options),
+      (valuePath) => shouldDedentComma(valuePath, options),
       'properties',
       propIndex,
       'value'
@@ -2746,7 +2752,7 @@ function printTemplateLiteral(path, options, print, {omitQuotes} = {}) {
     : options.singleQuote &&
       node.quote === '"""' &&
       node.expressions.length === 0 &&
-      !node.quasis.find(quasi => /'''/.test(quasi.value.raw)) &&
+      !node.quasis.find((quasi) => /'''/.test(quasi.value.raw)) &&
       !(
         node.quasis.length &&
         /'$/.test(node.quasis[node.quasis.length - 1].value.raw)
@@ -2754,7 +2760,7 @@ function printTemplateLiteral(path, options, print, {omitQuotes} = {}) {
     ? "'''"
     : !options.singleQuote &&
       node.quote === "'''" &&
-      !node.quasis.find(quasi => /("""|#\{)/.test(quasi.value.raw)) &&
+      !node.quasis.find((quasi) => /("""|#\{)/.test(quasi.value.raw)) &&
       !(
         node.quasis.length &&
         /"$/.test(node.quasis[node.quasis.length - 1].value.raw)
@@ -2763,7 +2769,7 @@ function printTemplateLiteral(path, options, print, {omitQuotes} = {}) {
     : node.quote || '"'
   parts.push(quote)
 
-  path.each(childPath => {
+  path.each((childPath) => {
     const i = childPath.getName()
 
     parts.push(print(childPath))
@@ -2806,13 +2812,10 @@ function printRegex(path, options, print) {
   const node = path.getValue()
   const delim =
     node.type === 'InterpolatedRegExpLiteral' ? '///' : node.delimiter || '/'
-  const flags = node.flags
-    .split('')
-    .sort()
-    .join('')
+  const flags = node.flags.split('').sort().join('')
   const pattern = node.interpolatedPattern
     ? path.call(
-        patternPath =>
+        (patternPath) =>
           printTemplateLiteral(patternPath, options, print, {omitQuotes: true}),
         'interpolatedPattern'
       )
@@ -2862,7 +2865,7 @@ function isOnlyExpressionInFunctionBody(path) {
 }
 
 function templateLiteralHasNewLines(template) {
-  return template.quasis.some(quasi => quasi.value.raw.includes('\n'))
+  return template.quasis.some((quasi) => quasi.value.raw.includes('\n'))
 }
 
 function isTemplateOnItsOwnLine(n, text, {locStart}) {
@@ -3439,7 +3442,7 @@ function printClass(path, options, print) {
     parts.push(
       ' ',
       path.call(
-        superClass =>
+        (superClass) =>
           comments.printComments(superClass, () => printed, options),
         'superClass'
       )
@@ -3474,7 +3477,7 @@ function needsHardlineAfterDanglingComment(node) {
     return false
   }
   const lastDanglingComment = util.getLast(
-    node.comments.filter(comment => !comment.leading && !comment.trailing)
+    node.comments.filter((comment) => !comment.leading && !comment.trailing)
   )
   return (
     lastDanglingComment && !handleComments.isBlockComment(lastDanglingComment)
@@ -3502,7 +3505,7 @@ function printExportDeclaration(path, options, print) {
     if (
       decl.declaration.type === 'ObjectExpression' &&
       path.call(
-        declPath => shouldOmitObjectBraces(declPath, options),
+        (declPath) => shouldOmitObjectBraces(declPath, options),
         'declaration'
       )
     ) {
@@ -3515,7 +3518,7 @@ function printExportDeclaration(path, options, print) {
       const specifiers = []
       const defaultSpecifiers = []
       const namespaceSpecifiers = []
-      path.each(specifierPath => {
+      path.each((specifierPath) => {
         const specifierType = path.getValue().type
         if (specifierType === 'ExportSpecifier') {
           specifiers.push(print(specifierPath))
@@ -3626,7 +3629,7 @@ function printJSXElement(path, options, print) {
     ])
   }
 
-  n.children = n.children.map(child => {
+  n.children = n.children.map((child) => {
     if (isJSXWhitespaceExpression(child)) {
       return {type: 'JSXText', value: ' ', raw: ' '}
     }
@@ -3635,8 +3638,8 @@ function printJSXElement(path, options, print) {
 
   const containsTag = n.children.filter(isJSXNode).length > 0
   const containsMultipleExpressions =
-    n.children.filter(child => child.type === 'JSXExpressionContainer').length >
-    1
+    n.children.filter((child) => child.type === 'JSXExpressionContainer')
+      .length > 1
   const containsMultipleAttributes =
     n.type === 'JSXElement' && n.openingElement.attributes.length > 1
 
@@ -3652,7 +3655,7 @@ function printJSXElement(path, options, print) {
   const children = printJSXChildren(path, options, print, jsxWhitespace)
 
   const containsText =
-    n.children.filter(child => isMeaningfulJSXText(child)).length > 0
+    n.children.filter((child) => isMeaningfulJSXText(child)).length > 0
 
   for (let i = children.length - 2; i >= 0; i--) {
     const isPairOfEmptyStrings = children[i] === '' && children[i + 1] === ''
@@ -3909,7 +3912,7 @@ function printMemberChain(path, options, print, returnIsExpanded) {
           options
         ),
       })
-      path.call(callee => rec(callee), 'callee')
+      path.call((callee) => rec(callee), 'callee')
     } else if (isMemberExpression(node)) {
       printedNodes.unshift({
         node,
@@ -3919,7 +3922,7 @@ function printMemberChain(path, options, print, returnIsExpanded) {
           options
         ),
       })
-      path.call(object => rec(object), 'object')
+      path.call((object) => rec(object), 'object')
     } else {
       printedNodes.unshift({
         node,
@@ -3936,7 +3939,7 @@ function printMemberChain(path, options, print, returnIsExpanded) {
       printArgumentsList(path, options, print),
     ]),
   })
-  path.call(callee => rec(callee), 'callee')
+  path.call((callee) => rec(callee), 'callee')
 
   const groups = []
   let currentGroup = [printedNodes[0]]
@@ -4008,7 +4011,7 @@ function printMemberChain(path, options, print, returnIsExpanded) {
         isFactory(groups[0][0].node.name)))
 
   function printGroup(printedGroup, {shouldBlockVisible} = {}) {
-    const printed = concat(printedGroup.map(tuple => tuple.printed))
+    const printed = concat(printedGroup.map((tuple) => tuple.printed))
     return shouldBlockVisible ? blockVisible(printed) : printed
   }
 
@@ -4034,7 +4037,7 @@ function printMemberChain(path, options, print, returnIsExpanded) {
     .reduce((res, group) => res.concat(group), [])
 
   const hasComment =
-    flatGroups.slice(1, -1).some(node => hasLeadingComment(node.node)) ||
+    flatGroups.slice(1, -1).some((node) => hasLeadingComment(node.node)) ||
     // flatGroups.slice(0, -1).some(node => hasTrailingComment(node.node)) ||
     (groups[cutoff] && hasLeadingComment(groups[cutoff][0].node))
 
@@ -4051,7 +4054,7 @@ function printMemberChain(path, options, print, returnIsExpanded) {
     printIndentedGroup(groups.slice(shouldMerge ? 2 : 1)),
   ])
 
-  const callExpressions = printedNodes.filter(tuple =>
+  const callExpressions = printedNodes.filter((tuple) =>
     isCallExpression(tuple.node)
   )
   const callExpressionCount = callExpressions.length
@@ -4061,7 +4064,7 @@ function printMemberChain(path, options, print, returnIsExpanded) {
     callExpressionCount >= 3 ||
     (callExpressionCount === 2 &&
       callExpressions.some(({node}) =>
-        node.arguments.some(argument => isFunction(argument))
+        node.arguments.some((argument) => isFunction(argument))
       )) ||
     printedGroups.slice(0, -1).some(willBreak)
   ) {
@@ -4078,22 +4081,6 @@ function printMemberChain(path, options, print, returnIsExpanded) {
 //   return node.type === 'NumericLiteral'
 // }
 
-const operatorAliasMap = {
-  or: '||',
-  and: '&&',
-  '==': '===',
-  '!=': '!==',
-  is: '===',
-  isnt: '!==',
-}
-function getCanonicalOperator(node) {
-  const {operator} = node
-  if (operator === '?' && node.type === 'LogicalExpression') {
-    return '??'
-  }
-  return operatorAliasMap[operator] || operator
-}
-
 function isBinaryish(node) {
   return node.type === 'BinaryExpression' || node.type === 'LogicalExpression'
 }
@@ -4105,9 +4092,9 @@ function printBinaryishExpressions(path, print, options, isNested) {
   let flattenedBreaks = false
   let canBreak = false
   if (isBinaryish(node)) {
-    if (shouldFlatten(node, node.left)) {
+    if (util.shouldFlatten(node, node.left)) {
       parts = parts.concat(
-        path.call(left => {
+        path.call((left) => {
           const {parts: flattenedParts, breaks} = printBinaryishExpressions(
             left,
             print,
@@ -4289,7 +4276,7 @@ function callParensNecessary(path, options, {stackOffset = 0} = {}) {
   if (
     node.arguments &&
     node.arguments.filter(
-      arg =>
+      (arg) =>
         (arg.type === 'For' || arg.type === 'WhileStatement') && !arg.postfix
     ).length
   ) {
@@ -4440,7 +4427,7 @@ function printArgumentsList(path, options, print) {
   let groupPreviousArgWithItsComma = false
   let shouldBreak = false
   let alwaysBreak
-  path.each(argPath => {
+  path.each((argPath) => {
     const isLast = argIndex === lastArgIndex
     const arg = argPath.getValue()
     ;({
@@ -4573,7 +4560,7 @@ function printArgumentsList(path, options, print) {
   const openingImplicitSpace =
     args.length === 1 &&
     path.call(
-      argPath =>
+      (argPath) =>
         (tmpNeedsParens = pathNeedsParens(argPath, options)) &&
         !(
           tmpNeedsParens.unlessParentBreaks &&
@@ -4678,7 +4665,7 @@ function printArgumentsList(path, options, print) {
     let i = 0
     let lastArg
     let isLastArgImplicitObject
-    path.each(argPath => {
+    path.each((argPath) => {
       if (i === args.length - 1) {
         lastArg = argPath.getValue()
         const printedLastArg = printedArgumentsNoTrailingComma[i]
@@ -4885,7 +4872,7 @@ function dontBreakAssignment({
     rightNode.type === 'ObjectPattern' ||
     (rightNode.type === 'ObjectExpression' &&
       !path.call(
-        rightPath =>
+        (rightPath) =>
           shouldOmitObjectBraces(rightPath, options, {ifParentBreaks: true}),
         rightName
       )) ||
@@ -4913,7 +4900,7 @@ function dontBreakAssignment({
     (isCallExpression(rightNode) &&
       (!isChainableCall(rightNode) ||
         !path.call(
-          rightPath =>
+          (rightPath) =>
             printMemberChain(
               rightPath,
               options,
@@ -4961,7 +4948,7 @@ function printAssignment(
       !(
         isCallExpression(rightNode) &&
         path.call(
-          rightPath => shouldGroupLastArg(rightPath, options),
+          (rightPath) => shouldGroupLastArg(rightPath, options),
           rightName
         )
       ))
@@ -4981,7 +4968,7 @@ function printAssignment(
   let printedLeftUngrouped
   if (leftNode.type === 'ObjectPattern') {
     printedLeftUngrouped = path.call(
-      leftPath => printObject(leftPath, print, options),
+      (leftPath) => printObject(leftPath, print, options),
       'left'
     )
     if (!printedLeftUngrouped.content) {
@@ -5059,7 +5046,7 @@ function printFunctionParams(path, print, options) {
         path,
         options,
         /* sameIndent */ true,
-        comment =>
+        (comment) =>
           getNextNonSpaceNonCommentCharacter(
             options.originalText,
             comment,
@@ -5079,13 +5066,13 @@ function printFunctionParams(path, print, options) {
   let separatorParts = []
   let dedentComma
   let groupPreviousParamWithItsComma = false
-  path.each(paramPath => {
+  path.each((paramPath) => {
     const param = paramPath.getValue()
     ;({following: dedentComma} =
       param.type !== 'AssignmentPattern'
         ? {}
         : paramPath.call(
-            defaultParamValuePath =>
+            (defaultParamValuePath) =>
               shouldDedentComma(defaultParamValuePath, options),
             'right'
           ))
@@ -5194,7 +5181,7 @@ function printStatementSequence(path, options, print) {
   // const bodyNode = path.getNode()
   const text = options.originalText
 
-  path.map(stmtPath => {
+  path.map((stmtPath) => {
     const stmt = stmtPath.getValue()
 
     if (!stmt) {
@@ -5310,7 +5297,7 @@ function printArrayItems(path, options, printPath, print) {
   const lastIndex = elements && elements.length && elements.length - 1
   let precedingIsElision = false
   let isFollowedByElision = false
-  path.each(childPath => {
+  path.each((childPath) => {
     const child = childPath.getValue()
     const isLast = childIndex === lastIndex
     ;({
@@ -5433,58 +5420,6 @@ function printString(raw, options, isDirectiveLiteral) {
   return util.makeString(rawContent, enclosingQuote, false)
 }
 
-const PRECEDENCE = {}
-;[
-  ['??'],
-  ['||'],
-  ['&&'],
-  ['|'],
-  ['^'],
-  ['&'],
-  ['===', '!=='],
-  ['<', '>', '<=', '>=', 'in', 'instanceof', 'of'],
-  ['>>', '<<', '>>>'],
-  ['+', '-'],
-  ['*', '/', '%'],
-  ['**'],
-].forEach((tier, i) => {
-  tier.forEach(op => {
-    PRECEDENCE[op] = i
-  })
-})
-
-function getPrecedence(op) {
-  return PRECEDENCE[op]
-}
-
-function isEqualityOperator(op) {
-  return op === '===' || op === '!=='
-}
-
-function shouldFlatten(parent, node) {
-  const parentOp = getCanonicalOperator(parent)
-  const nodeOp = getCanonicalOperator(node)
-  if (isEqualityOperator(parentOp) && isEqualityOperator(nodeOp)) {
-    return true
-  }
-  return util.shouldFlatten(parentOp, nodeOp)
-}
-// function shouldFlatten(parentOp, nodeOp) {
-//   parentOp = getCanonicalOperator(parentOp)
-//   nodeOp = getCanonicalOperator(nodeOp)
-//   // console.log({
-//   //   parentOp,
-//   //   nodeOp,
-//   //   parentPrec: getPrecedence(parentOp),
-//   //   nodePrec: getPrecedence(nodeOp),
-//   // })
-//   if (getPrecedence(nodeOp) !== getPrecedence(parentOp)) {
-//     return false
-//   }
-
-//   return true
-// }
-
 // const clean = (ast, newObj) => {}
 const clean = () => {}
 
@@ -5571,18 +5506,18 @@ function canAttachComment(node) {
 }
 
 function hasLeadingComment(node) {
-  return node.comments && node.comments.some(comment => comment.leading)
+  return node.comments && node.comments.some((comment) => comment.leading)
 }
 
 function hasTrailingComment(node) {
-  return node.comments && node.comments.some(comment => comment.trailing)
+  return node.comments && node.comments.some((comment) => comment.trailing)
 }
 
 function hasDanglingComments(node, filter) {
   return (
     node.comments &&
     node.comments.some(
-      comment =>
+      (comment) =>
         !comment.leading &&
         !comment.trailing &&
         (filter ? filter(comment) : true)
@@ -5604,7 +5539,7 @@ function isInlineLeadingComment(comment, node, options) {
 function expressionStatementHasInlineLeadingComment(node, options) {
   return (
     node.comments &&
-    node.comments.some(comment =>
+    node.comments.some((comment) =>
       isInlineLeadingComment(comment, node, options)
     )
   )

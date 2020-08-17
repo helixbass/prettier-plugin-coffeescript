@@ -1,11 +1,11 @@
 'use strict'
 
-const sharedUtil = require('prettier/src/common/util-shared')
 const {getNextNonSpaceNonCommentCharacter, isFunction} = require('./util')
-
-const addLeadingComment = sharedUtil.addLeadingComment
-const addTrailingComment = sharedUtil.addTrailingComment
-const addDanglingComment = sharedUtil.addDanglingComment
+const {
+  addLeadingComment,
+  addTrailingComment,
+  addDanglingComment,
+} = require('./comment-utils')
 
 function handleOwnLineComment(comment, text, options, ast, isLastComment) {
   const precedingNode = comment.precedingNode
@@ -190,7 +190,7 @@ function handleTryStatementComments(enclosingNode, followingNode, comment) {
 }
 
 function addBlockStatementFirstComment(node, comment) {
-  const body = node.body.filter(n => n.type !== 'EmptyStatement')
+  const body = node.body.filter((n) => n.type !== 'EmptyStatement')
   if (body.length === 0) {
     addDanglingComment(node, comment)
   } else {

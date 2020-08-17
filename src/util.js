@@ -1,6 +1,12 @@
 'use strict'
 
-const {hasNewline, skipNewline} = require('prettier/src/common/util')
+const {
+  hasNewline,
+  skipNewline,
+  hasNewlineInRange,
+  makeString,
+  isPreviousLineEmpty,
+} = require('prettier').util
 
 function skip(chars) {
   return (text, index, opts) => {
@@ -134,10 +140,179 @@ function isFunction(node) {
   )
 }
 
+const getLast = (arr) => arr[arr.length - 1]
+const getPenultimate = (arr) => arr[arr.length - 2]
+
+const equalityOperators = {
+  '==': true,
+  '!=': true,
+  '===': true,
+  '!==': true,
+}
+const multiplicativeOperators = {
+  '*': true,
+  '/': true,
+  '%': true,
+}
+const bitshiftOperators = {
+  '>>': true,
+  '>>>': true,
+  '<<': true,
+}
+
+function isBitwiseOperator(operator) {
+  return (
+    !!bitshiftOperators[operator] ||
+    operator === '|' ||
+    operator === '^' ||
+    operator === '&'
+  )
+}
+
+function printNumber(rawNumber) {
+  return (
+    rawNumber
+      .toLowerCase()
+      // Remove unnecessary plus and zeroes from scientific notation.
+      .replace(/^([+-]?[\d.]+e)(?:\+|(-))?0*(\d)/, '$1$2$3')
+      // Remove unnecessary scientific notation (1e0).
+      .replace(/^([+-]?[\d.]+)e[+-]?0+$/, '$1')
+      // Make sure numbers always start with a digit.
+      .replace(/^([+-])?\./, '$10.')
+      // Remove extraneous trailing decimal zeroes.
+      .replace(/(\.\d+?)0+(?=e|$)/, '$1')
+      // Remove trailing dot.
+      .replace(/\.(?=e|$)/, '')
+  )
+}
+
+const PRECEDENCE = {}
+;[
+  ['??'],
+  ['||'],
+  ['&&'],
+  ['|'],
+  ['^'],
+  ['&'],
+  ['===', '!=='],
+  ['<', '>', '<=', '>=', 'in', 'instanceof', 'of'],
+  ['>>', '<<', '>>>'],
+  ['+', '-'],
+  ['*', '/', '%'],
+  ['**'],
+].forEach((tier, i) => {
+  tier.forEach((op) => {
+    PRECEDENCE[op] = i
+  })
+})
+
+function getPrecedence(op) {
+  return PRECEDENCE[op]
+}
+
+function getCanonicalOperator(node) {
+  const {operator} = node
+  if (operator === '?' && node.type === 'LogicalExpression') {
+    return '??'
+  }
+  return operatorAliasMap[operator] || operator
+}
+
+function shouldFlattenJs(parentOp, nodeOp) {
+  if (getPrecedence(nodeOp) !== getPrecedence(parentOp)) {
+    return false
+  }
+
+  // ** is right-associative
+  // x ** y ** z --> x ** (y ** z)
+  if (parentOp === '**') {
+    return false
+  }
+
+  // x == y == z --> (x == y) == z
+  if (equalityOperators[parentOp] && equalityOperators[nodeOp]) {
+    return false
+  }
+
+  // x * y % z --> (x * y) % z
+  if (
+    (nodeOp === '%' && multiplicativeOperators[parentOp]) ||
+    (parentOp === '%' && multiplicativeOperators[nodeOp])
+  ) {
+    return false
+  }
+
+  // x * y / z --> (x * y) / z
+  // x / y * z --> (x / y) * z
+  if (
+    nodeOp !== parentOp &&
+    multiplicativeOperators[nodeOp] &&
+    multiplicativeOperators[parentOp]
+  ) {
+    return false
+  }
+
+  // x << y << z --> (x << y) << z
+  if (bitshiftOperators[parentOp] && bitshiftOperators[nodeOp]) {
+    return false
+  }
+
+  return true
+}
+
+function isEqualityOperator(op) {
+  return op === '===' || op === '!=='
+}
+
+const operatorAliasMap = {
+  or: '||',
+  and: '&&',
+  '==': '===',
+  '!=': '!==',
+  is: '===',
+  isnt: '!==',
+}
+function shouldFlatten(parent, node) {
+  const parentOp = getCanonicalOperator(parent)
+  const nodeOp = getCanonicalOperator(node)
+  if (isEqualityOperator(parentOp) && isEqualityOperator(nodeOp)) {
+    return true
+  }
+  return shouldFlattenJs(parentOp, nodeOp)
+}
+// function shouldFlatten(parentOp, nodeOp) {
+//   parentOp = getCanonicalOperator(parentOp)
+//   nodeOp = getCanonicalOperator(nodeOp)
+//   // console.log({
+//   //   parentOp,
+//   //   nodeOp,
+//   //   parentPrec: getPrecedence(parentOp),
+//   //   nodePrec: getPrecedence(nodeOp),
+//   // })
+//   if (getPrecedence(nodeOp) !== getPrecedence(parentOp)) {
+//     return false
+//   }
+
+//   return true
+// }
+
 module.exports = {
   isNextLineEmpty,
   hasSameStartLine,
   getNextNonSpaceNonCommentCharacter,
   getNextNonSpaceNonCommentCharacterIndexWithStartIndex,
   isFunction,
+  hasNewline,
+  skipNewline,
+  getLast,
+  getPenultimate,
+  isBitwiseOperator,
+  hasNewlineInRange,
+  printNumber,
+  makeString,
+  shouldFlatten,
+  getCanonicalOperator,
+  skipSpaces,
+  isPreviousLineEmpty,
+  getPrecedence,
 }

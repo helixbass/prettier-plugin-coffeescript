@@ -15,7 +15,7 @@ function run_spec(dirname, parsers, options) {
     throw new Error(`No parsers were specified for ${dirname}`)
   }
 
-  fs.readdirSync(dirname).forEach(filename => {
+  fs.readdirSync(dirname).forEach((filename) => {
     const path = dirname + '/' + filename
     if (
       extname(filename) !== '.snap' &&
@@ -33,7 +33,7 @@ function run_spec(dirname, parsers, options) {
         )
       })
 
-      parsers.slice(1).forEach(parserName => {
+      parsers.slice(1).forEach((parserName) => {
         test(`${filename} - ${parserName}-verify`, () => {
           const verifyOptions = Object.assign(mergedOptions, {
             parser: parserName,
