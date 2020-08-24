@@ -36,7 +36,9 @@
   "scripts": {
     "lint": "jest -c jest.eslint.config.js",
     "test": "jest",
-    "prettier": "prettier --plugin=. --parser=coffeescript"
+    "prettier": "prettier --plugin=. --parser=coffeescript",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint"
   },
   "jest": {
     "projects": [
