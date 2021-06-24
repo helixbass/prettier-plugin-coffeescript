@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`await-call.coffee 1`] = `
+f = ->
+  history = await SearchHistory.find({
+    where: q
+    limit: 10000
+    skip: 0
+    sort: 'createdAt ASC'
+  })
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = ->
+  history = await SearchHistory.find
+    where: q
+    limit: 10000
+    skip: 0
+    sort: 'createdAt ASC'
+
+`;
+
 exports[`binaryish.coffee 1`] = `
 computedDescriptionLines = (showConfirm && descriptionLinesConfirming) || (focused && !loading && descriptionLinesFocused) || descriptionLines
 
