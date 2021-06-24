@@ -4850,6 +4850,24 @@ function printAssignmentRight(rightNode, printedRight, options, canBreak) {
   return nonbroken
 }
 
+function dontBreakAssignmentToCallExpression(
+  node,
+  basePath,
+  pathNames,
+  options,
+  print
+) {
+  return (
+    (!isChainableCall(node) ||
+      !basePath.call(
+        (path) =>
+          printMemberChain(path, options, print, /* returnIsExpanded */ true),
+        ...pathNames
+      )) &&
+    (node.callee.type === 'Identifier' || isMemberExpression(node.callee))
+  )
+}
+
 function dontBreakAssignment({
   rightNode,
   node,
@@ -4898,35 +4916,22 @@ function dontBreakAssignment({
       isChainableCall(rightNode) &&
       node.type !== 'ObjectProperty') ||
     (isCallExpression(rightNode) &&
-      (!isChainableCall(rightNode) ||
-        !path.call(
-          (rightPath) =>
-            printMemberChain(
-              rightPath,
-              options,
-              print,
-              /* returnIsExpanded */ true
-            ),
-          rightName
-        )) &&
-      (rightNode.callee.type === 'Identifier' ||
-        isMemberExpression(rightNode.callee))) ||
+      dontBreakAssignmentToCallExpression(
+        rightNode,
+        path,
+        [rightName],
+        options,
+        print
+      )) ||
     (rightNode.type === 'AwaitExpression' &&
       isCallExpression(rightNode.argument) &&
-      (!isChainableCall(rightNode.argument) ||
-        !path.call(
-          (rightPath) =>
-            printMemberChain(
-              rightPath,
-              options,
-              print,
-              /* returnIsExpanded */ true
-            ),
-          rightName,
-          'argument'
-        )) &&
-      (rightNode.argument.callee.type === 'Identifier' ||
-        isMemberExpression(rightNode.argument.callee)))
+      dontBreakAssignmentToCallExpression(
+        rightNode.argument,
+        path,
+        [rightName, 'argument'],
+        options,
+        print
+      ))
   )
 }
 
