@@ -1,0 +1,48 @@
+{
+  "name": "prettier-plugin-coffeescript",
+  "version": "0.1.6-dev.1",
+  "description": "Prettier Coffeescript Plugin",
+  "main": "src",
+  "repository": "https://github.com/helixbass/prettier-plugin-coffeescript",
+  "authors": [
+    "Julian Rosse <@helixbass>"
+  ],
+  "license": "MIT",
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "coffeescript",
+    "prettier",
+    "prettier-plugin"
+  ],
+  "engines": {
+    "node": ">= 6"
+  },
+  "dependencies": {
+    "coffeescript": "^2.5.0",
+    "esutils": "^2.0.2",
+    "prettier": "github:helixbass/prettier#prettier-v2.1.0-dev.100-gitpkg"
+  },
+  "devDependencies": {
+    "eslint": "^4.14.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jest": "^21.5.0",
+    "eslint-plugin-prettier": "^2.4.0",
+    "jest": "^21.1.0",
+    "jest-runner-eslint": "^0.3.0"
+  },
+  "scripts": {
+    "lint": "jest -c jest.eslint.config.js",
+    "test": "jest",
+    "prettier": "prettier --plugin=. --parser=coffeescript",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint"
+  },
+  "jest": {
+    "projects": [
+      "<rootDir>/jest.*.config.js"
+    ]
+  }
+}
