@@ -4910,7 +4910,23 @@ function dontBreakAssignment({
           rightName
         )) &&
       (rightNode.callee.type === 'Identifier' ||
-        isMemberExpression(rightNode.callee)))
+        isMemberExpression(rightNode.callee))) ||
+    (rightNode.type === 'AwaitExpression' &&
+      isCallExpression(rightNode.argument) &&
+      (!isChainableCall(rightNode.argument) ||
+        !path.call(
+          (rightPath) =>
+            printMemberChain(
+              rightPath,
+              options,
+              print,
+              /* returnIsExpanded */ true
+            ),
+          rightName,
+          'argument'
+        )) &&
+      (rightNode.argument.callee.type === 'Identifier' ||
+        isMemberExpression(rightNode.argument.callee)))
   )
 }
 
